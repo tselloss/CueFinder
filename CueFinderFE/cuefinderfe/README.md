@@ -68,3 +68,27 @@ This section has moved here: [https://facebook.github.io/create-react-app/docs/d
 ### `npm run build` fails to minify
 
 This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+
+---
+
+## Backend contract (for .NET Core 8)
+
+The sample UI uses an in-memory shim in `src/api/cueService.js`. Replace it with HTTP calls to your .NET backend. Expected endpoints:
+
+- GET /api/cues -> returns array of cues
+	- Item: { id: int, make: string, model: string, price: number, description: string, condition: string, location: string, image?: string }
+- GET /api/cues/{id} -> returns a single cue
+- POST /api/cues -> creates a new cue
+	- Request body: { make, model, price, description, condition, location, image? }
+	- Response: created item with id
+
+Tip: Keep CORS enabled on your .NET API while developing so the React dev server (localhost:3000) can call it.
+
+---
+
+Styling notes: login background
+
+The login/register page uses `public/login-bg.jpg` as a hero background. Add a southwest-style pool cue photo to that path for best results. Suggested free image sources: Unsplash or Pexels (search "pool cue wood" or "billiard cue").
+
+- Recommended sizes: 1600x2400 (portrait) for mobile and 1920x1080 for desktop; using a single high-res image works because CSS `background-size: cover` crops responsively.
+- If you don't add `public/login-bg.jpg`, the page will fallback to a subtle gradient and decorative circles.
