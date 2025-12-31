@@ -60,3 +60,39 @@ export async function verifySmsCode(phone, code) {
   }
   return new Promise((res, rej) => setTimeout(() => rej(new Error('Invalid code')), 120));
 }
+
+export async function updateUserProfile(userId, profileData) {
+  // Find and update user in the in-memory store
+  const user = users.find((u) => u.id === userId);
+  if (!user) {
+    return new Promise((res, rej) => 
+      setTimeout(() => rej(new Error('User not found')), 100)
+    );
+  }
+
+  // Update user fields
+  if (profileData.name) user.name = profileData.name;
+  if (profileData.email) user.email = profileData.email;
+  if (profileData.phone) user.phone = profileData.phone;
+  if (profileData.location) user.location = profileData.location;
+  if (profileData.address) user.address = { ...user.address, ...profileData.address };
+
+  // Update current user if this is the logged-in user
+  if (current && current.id === userId) {
+    current = { 
+      id: user.id, 
+      username: user.username, 
+      role: user.role, 
+      name: user.name,
+      email: user.email,
+      phone: user.phone,
+      location: user.location,
+      address: user.address,
+    };
+  }
+
+  return new Promise((res) => 
+    setTimeout(() => res({ success: true, user }), 150)
+  );
+}
+

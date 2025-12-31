@@ -35,8 +35,24 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
+  const updateUser = async (profileData) => {
+    // Update user in context with new profile data
+    const updatedUser = { ...user, ...profileData };
+    setUser(updatedUser);
+    
+    // Call API to persist the changes to backend
+    try {
+      await authService.updateUserProfile(user.id, profileData);
+    } catch (err) {
+      console.error('Failed to update profile on backend:', err);
+      // Still update local state, but log the error
+    }
+    
+    return updatedUser;
+  };
+
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, sendSms, verifySms }}>
+    <AuthContext.Provider value={{ user, login, logout, register, sendSms, verifySms, updateUser }}>
       {children}
     </AuthContext.Provider>
   );

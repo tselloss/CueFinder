@@ -5,6 +5,7 @@ import CueDetail from './components/CueDetail';
 import CueForm from './components/CueForm';
 import AdminPage from './components/AdminPage';
 import LoginPage from './components/LoginPage';
+import UserProfile from './components/UserProfile';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 
@@ -45,6 +46,7 @@ function AppInner() {
             <div className="logo">CueFinder</div>
             <div className="account">
               <div className="muted">Signed in as {user.name} ({user.role})</div>
+              <button className="btn small" onClick={() => setView({ name: 'profile' })}>My Profile</button>
               {user.role === 'admin' && <button className="btn small" onClick={() => setView({ name: 'admin' })}>Admin</button>}
               <button className="btn small" onClick={logout}>Sign out</button>
             </div>
@@ -75,6 +77,10 @@ function AppInner() {
 
         {view.name === 'form' && (
           <CueForm onCancel={handleBack} onSave={handleSave} />
+        )}
+
+        {view.name === 'profile' && (
+          <UserProfile onBack={handleBack} />
         )}
 
         {view.name === 'admin' && (
