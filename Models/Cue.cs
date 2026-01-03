@@ -33,7 +33,7 @@ namespace CueFinder.Models
         /// <summary>
         /// Type of cue (break cue, jump cue, playing cue, etc.)
         /// </summary>
-        public string CueType { get; set; } = "playing";
+        public string CueType { get; set; };
 
         /// <summary>
         /// Cue weight in ounces
@@ -68,7 +68,7 @@ namespace CueFinder.Models
         /// <summary>
         /// Condition of the cue (mint, excellent, good, fair, poor)
         /// </summary>
-        public string Condition { get; set; } = "good";
+        public string Condition { get; set; } = string.Empty;
 
         /// <summary>
         /// Location where cue is located/available
