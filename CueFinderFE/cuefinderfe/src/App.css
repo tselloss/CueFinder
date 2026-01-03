@@ -38,6 +38,9 @@
   flex-direction: column;
   gap: 16px;
   color: #e2e8f0;
+  max-width: 50%;
+  margin: 0 auto;
+  width: 100%;
 }
 
 .cue-detail .detail-card { 
@@ -50,8 +53,8 @@
 
 .cue-detail .image { 
   width: 100%; 
-  max-width: 300px;
-  height: 300px; 
+  max-width: 500px;
+  height: 500px; 
   background: #1e293b; 
   background-size: cover; 
   border-radius: 6px;
@@ -60,19 +63,19 @@
 
 .cue-detail .price { 
   color: #f97316; 
-  font-size: 1.5rem; 
+  font-size: 2rem; 
   font-weight: 700;
 }
 
 .cue-detail h2 { 
   color: #e2e8f0; 
-  font-size: clamp(1.3rem, 5vw, 1.8rem); 
+  font-size: clamp(1.5rem, 6vw, 2rem); 
   margin-bottom: 8px;
 }
 
 .cue-detail p { 
   color: #cbd5e1; 
-  font-size: 0.95rem; 
+  font-size: 1rem; 
   line-height: 1.6; 
   margin: 6px 0;
 }
@@ -97,7 +100,7 @@
 .carousel-container { 
   position: relative; 
   width: 100%; 
-  max-width: 320px;
+  max-width: 500px;
   aspect-ratio: 1/1;
   background: #1e293b; 
   border-radius: 8px; 
@@ -182,8 +185,8 @@
   }
   
   .cue-detail .image {
-    max-width: 280px;
-    height: 280px;
+    max-width: 450px;
+    height: 450px;
     flex-shrink: 0;
   }
 }
@@ -411,7 +414,7 @@
 
 /* Cards grid - Large card layout for clear photo visibility */
 .App-main { 
-  padding: 16px 12px;
+  padding: 12px 10px;
   flex: 1; 
   max-width: 2000px; 
   margin: 0 auto; 
@@ -432,7 +435,7 @@
 .cards-grid { 
   display: grid; 
   grid-template-columns: 1fr; 
-  gap: 12px; 
+  gap: 10px; 
   padding: 0;
   width: 100%;
   box-sizing: border-box;
@@ -462,7 +465,35 @@
 /* Tablet: 2 columns */
 @media (min-width: 640px) {
   .App-main { 
-    padding: 18px 14px;
+    padding: 14px 10px;
+  }
+  
+  .cards-grid { 
+    gap: 10px;
+  }
+  
+  .cards-grid[data-item-count="1"] { grid-template-columns: 1fr; }
+  .cards-grid[data-item-count="2"] { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cards-grid[data-item-count="3"],
+  .cards-grid[data-item-count="4"] { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+  .cards-grid[data-item-count="5"],
+  .cards-grid[data-item-count="6"],
+  .cards-grid[data-item-count="7"],
+  .cards-grid[data-item-count="8"],
+  .cards-grid[data-item-count="9"],
+  .cards-grid[data-item-count="10"],
+  .cards-grid[data-item-count="11"],
+  .cards-grid[data-item-count="12"],
+  .cards-grid[data-item-count="13"],
+  .cards-grid[data-item-count="14"],
+  .cards-grid[data-item-count="15"] { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+}
+
+/* Desktop: 4 columns */
+@media (min-width: 1024px) {
+  .App-main { 
+    padding: 20px 16px;
+    max-width: 1600px;
   }
   
   .cards-grid { 
@@ -472,7 +503,7 @@
   .cards-grid[data-item-count="1"] { grid-template-columns: 1fr; }
   .cards-grid[data-item-count="2"] { grid-template-columns: repeat(2, 1fr); gap: 14px; }
   .cards-grid[data-item-count="3"],
-  .cards-grid[data-item-count="4"] { grid-template-columns: repeat(2, 1fr); gap: 14px; }
+  .cards-grid[data-item-count="4"] { grid-template-columns: repeat(4, 1fr); gap: 14px; }
   .cards-grid[data-item-count="5"],
   .cards-grid[data-item-count="6"],
   .cards-grid[data-item-count="7"],
@@ -483,42 +514,30 @@
   .cards-grid[data-item-count="12"],
   .cards-grid[data-item-count="13"],
   .cards-grid[data-item-count="14"],
-  .cards-grid[data-item-count="15"] { grid-template-columns: repeat(2, 1fr); gap: 14px; }
-}
-
-/* Desktop: 2-3 columns */
-@media (min-width: 1024px) {
-  .App-main { 
-    padding: 28px 20px;
-    max-width: 1400px;
-  }
-  
-  .cards-grid { 
-    gap: 20px;
-  }
-  
-  .cards-grid[data-item-count="1"] { grid-template-columns: 1fr; }
-  .cards-grid[data-item-count="2"] { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .cards-grid[data-item-count="3"],
-  .cards-grid[data-item-count="4"] { grid-template-columns: repeat(2, 1fr); gap: 20px; }
-  .cards-grid[data-item-count="5"],
-  .cards-grid[data-item-count="6"],
-  .cards-grid[data-item-count="7"],
-  .cards-grid[data-item-count="8"],
-  .cards-grid[data-item-count="9"],
-  .cards-grid[data-item-count="10"],
-  .cards-grid[data-item-count="11"],
-  .cards-grid[data-item-count="12"],
-  .cards-grid[data-item-count="13"],
-  .cards-grid[data-item-count="14"],
-  .cards-grid[data-item-count="15"] { grid-template-columns: repeat(3, 1fr); gap: 24px; }
+  .cards-grid[data-item-count="15"] { grid-template-columns: repeat(4, 1fr); gap: 14px; }
 }
 
 @media (min-width: 1400px) {
   .App-main { 
-    padding: 28px 40px;
+    padding: 20px 32px;
     max-width: 2000px;
   }
+  
+  .cards-grid { 
+    gap: 14px;
+  }
+  
+  .cards-grid[data-item-count="5"],
+  .cards-grid[data-item-count="6"],
+  .cards-grid[data-item-count="7"],
+  .cards-grid[data-item-count="8"],
+  .cards-grid[data-item-count="9"],
+  .cards-grid[data-item-count="10"],
+  .cards-grid[data-item-count="11"],
+  .cards-grid[data-item-count="12"],
+  .cards-grid[data-item-count="13"],
+  .cards-grid[data-item-count="14"],
+  .cards-grid[data-item-count="15"] { grid-template-columns: repeat(4, 1fr); gap: 14px; }
 }
 
 .cue-card { 
@@ -574,17 +593,17 @@
 }
 
 .card-body { 
-  padding: 10px 12px; 
+  padding: 6px 8px; 
   display: flex; 
   flex-direction: column; 
-  gap: 3px; 
+  gap: 1px; 
   flex: 1; 
   background: #ffffff;
 }
 
 .card-title { 
   font-weight: 700; 
-  font-size: 0.9rem; 
+  font-size: 0.75rem; 
   color: #0f172a; 
   line-height: 1.2; 
   overflow: hidden; 
@@ -594,7 +613,7 @@
 
 .card-sub { 
   color: #64748b; 
-  font-size: 0.8rem; 
+  font-size: 0.65rem; 
   overflow: hidden; 
   text-overflow: ellipsis; 
   white-space: nowrap;
@@ -602,7 +621,7 @@
 
 .card-location { 
   color: #94a3b8; 
-  font-size: 0.75rem; 
+  font-size: 0.6rem; 
   overflow: hidden; 
   text-overflow: ellipsis; 
   white-space: nowrap;
@@ -612,8 +631,8 @@
   display: flex; 
   justify-content: flex-end; 
   align-items: center; 
-  gap: 6px; 
-  padding: 8px 12px; 
+  gap: 4px; 
+  padding: 4px 8px; 
   background: #ffffff; 
   border-top: 1px solid #e5e7eb;
 }
@@ -621,7 +640,7 @@
 .card-footer .price { 
   color: #f97316; 
   font-weight: 700; 
-  font-size: 1rem;
+  font-size: 0.85rem;
 }
 
 /* List view styles */
