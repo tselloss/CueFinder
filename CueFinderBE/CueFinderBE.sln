@@ -1,0 +1,61 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.10.35027.167
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinderBE", "CueFinderBE.csproj", "{841AD6F7-D271-43CF-B98B-1A5741DACCEB}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Common", "CueFinder.Common\CueFinder.Common.csproj", "{02CDE6BF-1AF0-46C6-927D-C7AF996D13EA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Auth", "CueFinder.Auth\CueFinder.Auth.csproj", "{908E6E46-F5CD-4C9A-A429-2514924DF4E0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.User", "CueFinder.User\CueFinder.User.csproj", "{3567AE56-5D29-459D-8590-6FF77F89F852}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Cues", "CueFinder.Cues\CueFinder.Cues.csproj", "{91EE4EB1-E759-4CAC-A70D-DD90498F7A7C}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Rating", "CueFinder.Rating\CueFinder.Rating.csproj", "{640F8DCC-A62F-4783-B252-3089D5D5D504}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Data", "CueFinder.Data\CueFinder.Data.csproj", "{3631679A-A01C-4281-A5F2-3356C9E6F1D1}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{841AD6F7-D271-43CF-B98B-1A5741DACCEB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{841AD6F7-D271-43CF-B98B-1A5741DACCEB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{841AD6F7-D271-43CF-B98B-1A5741DACCEB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{841AD6F7-D271-43CF-B98B-1A5741DACCEB}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02CDE6BF-1AF0-46C6-927D-C7AF996D13EA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02CDE6BF-1AF0-46C6-927D-C7AF996D13EA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02CDE6BF-1AF0-46C6-927D-C7AF996D13EA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02CDE6BF-1AF0-46C6-927D-C7AF996D13EA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{908E6E46-F5CD-4C9A-A429-2514924DF4E0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{908E6E46-F5CD-4C9A-A429-2514924DF4E0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{908E6E46-F5CD-4C9A-A429-2514924DF4E0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{908E6E46-F5CD-4C9A-A429-2514924DF4E0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3567AE56-5D29-459D-8590-6FF77F89F852}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3567AE56-5D29-459D-8590-6FF77F89F852}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3567AE56-5D29-459D-8590-6FF77F89F852}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3567AE56-5D29-459D-8590-6FF77F89F852}.Release|Any CPU.Build.0 = Release|Any CPU
+		{91EE4EB1-E759-4CAC-A70D-DD90498F7A7C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91EE4EB1-E759-4CAC-A70D-DD90498F7A7C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91EE4EB1-E759-4CAC-A70D-DD90498F7A7C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91EE4EB1-E759-4CAC-A70D-DD90498F7A7C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{640F8DCC-A62F-4783-B252-3089D5D5D504}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{640F8DCC-A62F-4783-B252-3089D5D5D504}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{640F8DCC-A62F-4783-B252-3089D5D5D504}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{640F8DCC-A62F-4783-B252-3089D5D5D504}.Release|Any CPU.Build.0 = Release|Any CPU
+		{3631679A-A01C-4281-A5F2-3356C9E6F1D1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{3631679A-A01C-4281-A5F2-3356C9E6F1D1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{3631679A-A01C-4281-A5F2-3356C9E6F1D1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{3631679A-A01C-4281-A5F2-3356C9E6F1D1}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {50ADDDDF-C3D8-41DA-A1C2-A83864BFC928}
+	EndGlobalSection
+EndGlobal
