@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,25 +8,14 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Compile Remove="obj/**/*.cs" />
-  </ItemGroup>
-
-  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
     <PackageReference Include="Swashbuckle.AspNetCore" Version="6.4.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.0" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="8.0.1" />
-    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="7.1.2" />
-    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="7.1.2" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="CueFinder.Common\CueFinder.Common.csproj" />
-    <ProjectReference Include="CueFinder.Auth\CueFinder.Auth.csproj" />
-    <ProjectReference Include="CueFinder.User\CueFinder.User.csproj" />
-    <ProjectReference Include="CueFinder.Cues\CueFinder.Cues.csproj" />
-    <ProjectReference Include="CueFinder.Rating\CueFinder.Rating.csproj" />
-    <ProjectReference Include="CueFinder.Data\CueFinder.Data.csproj" />
+    <ProjectReference Include="..\CueFinder.Auth\CueFinder.Auth.csproj" />
   </ItemGroup>
 
 </Project>
