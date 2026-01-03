@@ -1,9 +1,4 @@
-using CueFinder.Data.Extensions;
-using CueFinder.Common.Extensions;
 using CueFinder.Auth.Extensions;
-using CueFinder.User.Extensions;
-using CueFinder.Cues.Extensions;
-using CueFinder.Rating.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -12,13 +7,8 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// Register module services in order of dependencies
-builder.Services.AddCommonServices();
-builder.Services.AddDataServices(builder.Configuration);
-builder.Services.AddAuthServices(builder.Configuration);
-builder.Services.AddUserServices(builder.Configuration);
-builder.Services.AddCueServices(builder.Configuration);
-builder.Services.AddRatingServices(builder.Configuration);
+// Register module services
+builder.Services.AddAuthServices();
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");

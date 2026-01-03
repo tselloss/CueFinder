@@ -1,0 +1,311 @@
+using Microsoft.EntityFrameworkCore;
+using CueFinder.Database.Models;
+
+namespace CueFinder.Database.Context
+{
+    /// <summary>
+    /// Entity Framework Core Database Context for CueFinder application
+    /// </summary>
+    public class CueFinderDbContext : DbContext
+    {
+        public CueFinderDbContext(DbContextOptions<CueFinderDbContext> options) : base(options)
+        {
+        }
+
+        // DbSets for all entities
+        public DbSet<User> Users { get; set; } = null!;
+        public DbSet<Cue> Cues { get; set; } = null!;
+        public DbSet<CueImage> CueImages { get; set; } = null!;
+        public DbSet<Rating> Ratings { get; set; } = null!;
+        public DbSet<Message> Messages { get; set; } = null!;
+        public DbSet<SavedCue> SavedCues { get; set; } = null!;
+        public DbSet<Transaction> Transactions { get; set; } = null!;
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            base.OnModelCreating(modelBuilder);
+
+            // User entity configuration
+            modelBuilder.Entity<User>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasIndex(e => e.Username)
+                    .IsUnique()
+                    .HasDatabaseName("IX_User_Username");
+
+                entity.HasIndex(e => e.Email)
+                    .IsUnique()
+                    .HasDatabaseName("IX_User_Email");
+
+                entity.Property(e => e.Username)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.PasswordHash)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Name)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Phone)
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.Role)
+                    .HasMaxLength(50)
+                    .HasDefaultValueSql("'user'");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAddOrUpdate();
+            });
+
+            // Cue entity configuration
+            modelBuilder.Entity<Cue>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PostedCues)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.Images)
+                    .WithOne(i => i.Cue)
+                    .HasForeignKey(i => i.CueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.Ratings)
+                    .WithOne(r => r.Cue)
+                    .HasForeignKey(r => r.CueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.SavedByUsers)
+                    .WithOne(s => s.Cue)
+                    .HasForeignKey(s => s.CueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Brand)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Price)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.CueType)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Condition)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Location)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_Cue_UserId");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_Cue_IsSold");
+
+                entity.HasIndex(e => new { e.Brand, e.CueType })
+                    .HasDatabaseName("IX_Cue_Brand_Type");
+            });
+
+            // CueImage entity configuration
+            modelBuilder.Entity<CueImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.AltText)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.CueId)
+                    .HasDatabaseName("IX_CueImage_CueId");
+            });
+
+            // Rating entity configuration
+            modelBuilder.Entity<Rating>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Cue)
+                    .WithMany(c => c.Ratings)
+                    .HasForeignKey(e => e.CueId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.RatedByUser)
+                    .WithMany(u => u.RatingsGiven)
+                    .HasForeignKey(e => e.RatedByUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.SellerUser)
+                    .WithMany(u => u.RatingsReceived)
+                    .HasForeignKey(e => e.SellerUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.RatingValue)
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.Category)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => new { e.CueId, e.RatedByUserId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_Rating_Unique_User_Cue");
+            });
+
+            // Message entity configuration
+            modelBuilder.Entity<Message>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Sender)
+                    .WithMany(u => u.SentMessages)
+                    .HasForeignKey(e => e.SenderId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Recipient)
+                    .WithMany(u => u.ReceivedMessages)
+                    .HasForeignKey(e => e.RecipientId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Cue)
+                    .WithMany()
+                    .HasForeignKey(e => e.CueId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.Property(e => e.Subject)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Content)
+                    .IsRequired()
+                    .HasMaxLength(4000);
+
+                entity.Property(e => e.MessageType)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => new { e.SenderId, e.RecipientId })
+                    .HasDatabaseName("IX_Message_Sender_Recipient");
+
+                entity.HasIndex(e => e.IsRead)
+                    .HasDatabaseName("IX_Message_IsRead");
+            });
+
+            // SavedCue entity configuration
+            modelBuilder.Entity<SavedCue>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.SavedCues)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.Cue)
+                    .WithMany(c => c.SavedByUsers)
+                    .HasForeignKey(e => e.CueId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.SavedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => new { e.UserId, e.CueId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_SavedCue_Unique_User_Cue");
+            });
+
+            // Transaction entity configuration
+            modelBuilder.Entity<Transaction>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Cue)
+                    .WithMany()
+                    .HasForeignKey(e => e.CueId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Seller)
+                    .WithMany()
+                    .HasForeignKey(e => e.SellerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Buyer)
+                    .WithMany()
+                    .HasForeignKey(e => e.BuyerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.SalePrice)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.ShippingCost)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.ShippingMethod)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.PaymentMethod)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.TransactionNumber)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.TransactionNumber)
+                    .IsUnique()
+                    .HasDatabaseName("IX_Transaction_Number");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_Transaction_Status");
+            });
+        }
+    }
+}
