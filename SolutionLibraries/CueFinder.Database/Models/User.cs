@@ -80,16 +80,29 @@ namespace CueFinder.Database.Models
         public string? Country { get; set; }
 
         /// <summary>
-        /// Whether the user's email is verified
+        /// General location (City/Area) - for display purposes
         /// </summary>
-        public bool IsEmailVerified { get; set; } = false;
+        public string? Location { get; set; }
 
-        /// <summary>
-        /// Whether the account is active
-        /// </summary>
-        public bool IsActive { get; set; } = true;
+    /// <summary>
+    /// Whether the user's email is verified
+    /// </summary>
+    public bool IsEmailVerified { get; set; } = false;
 
-        /// <summary>
+    /// <summary>
+    /// Whether the user's phone is verified
+    /// </summary>
+    public bool IsPhoneVerified { get; set; } = false;
+
+    /// <summary>
+    /// Phone verification timestamp
+    /// </summary>
+    public DateTime? PhoneVerifiedAt { get; set; }
+
+    /// <summary>
+    /// Whether the account is active
+    /// </summary>
+    public bool IsActive { get; set; } = true;        /// <summary>
         /// Account creation timestamp
         /// </summary>
         public DateTime CreatedAt { get; set; }
@@ -134,5 +147,10 @@ namespace CueFinder.Database.Models
         /// Saved/Favorited cues by this user
         /// </summary>
         public virtual ICollection<SavedCue>? SavedCues { get; set; }
+
+        /// <summary>
+        /// Phone verification tokens for this user
+        /// </summary>
+        public virtual ICollection<PhoneVerificationToken>? PhoneVerificationTokens { get; set; }
     }
 }

@@ -81,6 +81,16 @@ namespace CueFinder.Models
         public bool IsEmailVerified { get; set; } = false;
 
         /// <summary>
+        /// Whether the user's phone number is verified
+        /// </summary>
+        public bool IsPhoneVerified { get; set; } = false;
+
+        /// <summary>
+        /// Timestamp when phone was verified
+        /// </summary>
+        public DateTime? PhoneVerifiedAt { get; set; }
+
+        /// <summary>
         /// Whether the account is active
         /// </summary>
         public bool IsActive { get; set; } = true;
@@ -130,5 +140,10 @@ namespace CueFinder.Models
         /// Saved/Favorited cues by this user
         /// </summary>
         public virtual ICollection<SavedCue>? SavedCues { get; set; }
+
+        /// <summary>
+        /// Phone verification tokens for this user
+        /// </summary>
+        public virtual ICollection<PhoneVerificationToken>? PhoneVerificationTokens { get; set; }
     }
 }

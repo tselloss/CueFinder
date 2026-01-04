@@ -22,12 +22,20 @@ export function AuthProvider({ children }) {
     return u;
   };
 
-  const sendSms = async (phone) => {
-    return authService.sendSmsCode(phone);
+  const sendSms = async (phoneNumber, method = 'SMS') => {
+    return authService.sendPhoneVerification(phoneNumber, method);
   };
 
-  const verifySms = async (phone, code) => {
-    return authService.verifySmsCode(phone, code);
+  const verifySms = async (verificationToken, code) => {
+    return authService.verifyPhoneCode(verificationToken, code);
+  };
+
+  const resendVerification = async (token) => {
+    return authService.resendPhoneVerification(token);
+  };
+
+  const getVerificationStatus = async (token) => {
+    return authService.getPhoneVerificationStatus(token);
   };
 
   const logout = async () => {
@@ -52,7 +60,17 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, logout, register, sendSms, verifySms, updateUser }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      login, 
+      logout, 
+      register, 
+      sendSms, 
+      verifySms, 
+      resendVerification,
+      getVerificationStatus,
+      updateUser 
+    }}>
       {children}
     </AuthContext.Provider>
   );

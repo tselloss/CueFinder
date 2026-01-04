@@ -12,6 +12,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState({ street: '', city: '', state: '', postalCode: '', country: '' });
   const [codeSent, setCodeSent] = useState(false);
+  const [verificationToken, setVerificationToken] = useState('');
   const [code, setCode] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -22,23 +23,31 @@ export default function LoginPage() {
     setLoading(true);
     try {
       if (isRegister) {
-        // start SMS flow: send code first if not sent
+        // Step 1: Register the user first
         if (!codeSent) {
           if (!phone) throw new Error('Please provide mobile phone for verification');
-          await sendSms(phone);
+          
+          // Register user account
+          await register(username, password, name, phone, email, address);
+          
+          // Step 2: Now send SMS verification code
+          const response = await sendSms(phone, 'SMS');
+          setVerificationToken(response.token);
           setCodeSent(true);
           setLoading(false);
           return;
         }
 
-        // verify code
+        // Step 3: Verify the code
         if (codeSent && !code) throw new Error('Enter verification code');
-        await verifySms(phone, code);
-
-  // finally register the user with phone/address saved in this demo
-  await register(username, password, name, phone, email, address);
-        // attach phone/address to the user in-memory (demo)
-        // note: in a real backend you'd include phone/address in registration request
+        const result = await verifySms(verificationToken, code);
+        
+        if (result.verified) {
+          // Phone verified successfully - user is fully registered and verified
+          setError(null);
+        } else {
+          throw new Error('Verification failed');
+        }
       } else {
         await login(username, password);
       }
@@ -131,15 +140,20 @@ export default function LoginPage() {
 
                 <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <Button variant="primary" type="submit" disabled={loading}>{isRegister ? (codeSent ? 'Verify & Create' : 'Register') : 'Sign in'}</Button>{' '}
-                    <Button variant="outline-secondary" onClick={()=>{ setIsRegister(s=>!s); setCodeSent(false); setCode(''); }}>{isRegister ? 'Back to login' : 'Register'}</Button>
+                    <Button variant="primary" type="submit" disabled={loading}>
+                      {isRegister ? (codeSent ? 'Verify & Complete' : 'Create Account') : 'Sign in'}
+                    </Button>{' '}
+                    <Button variant="outline-secondary" onClick={()=>{ setIsRegister(s=>!s); setCodeSent(false); setCode(''); setVerificationToken(''); }}>
+                      {isRegister ? 'Back to login' : 'Register'}
+                    </Button>
                   </div>
                 </div>
 
                 {isRegister && codeSent && (
                   <div className="verify-box">
-                    <Form.Control className="verify-input" value={code} onChange={(e)=>setCode(e.target.value)} placeholder="1234" />
-                    <Button onClick={async ()=>{ try{ await verifySms(phone, code); setError(null); } catch(e){ setError(e.message) } }}>Verify</Button>
+                    <p className="text-success mb-2">✓ Check your phone for a 4-digit code</p>
+                    <Form.Control className="verify-input" value={code} onChange={(e)=>setCode(e.target.value)} placeholder="1234" maxLength={4} />
+                    <Button onClick={async ()=>{ try{ const result = await verifySms(verificationToken, code); if (result.verified) { setError(null); } else { setError('Invalid code'); } } catch(e){ setError(e.message) } }}>Verify</Button>
                   </div>
                 )}
               </Form>

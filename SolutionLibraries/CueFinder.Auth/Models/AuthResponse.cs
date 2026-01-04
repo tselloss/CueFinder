@@ -35,14 +35,39 @@ namespace CueFinder.Auth.Models
         /// </summary>
         public string Phone { get; set; } = string.Empty;
 
-        /// <summary>
-        /// User's role (admin, user, etc.)
-        /// </summary>
-        public string Role { get; set; } = "user";
+    /// <summary>
+    /// User's role (admin, user, etc.)
+    /// </summary>
+    public string Role { get; set; } = "user";
 
-        /// <summary>
-        /// Token expiration time in seconds
-        /// </summary>
-        public int ExpiresIn { get; set; }
-    }
+    /// <summary>
+    /// Token expiration time in seconds
+    /// </summary>
+    public int ExpiresIn { get; set; }
+
+    /// <summary>
+    /// Street address
+    /// </summary>
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// City
+    /// </summary>
+    public string? City { get; set; }
+
+    /// <summary>
+    /// State or Province
+    /// </summary>
+    public string? State { get; set; }
+
+    /// <summary>
+    /// ZIP or Postal code
+    /// </summary>
+    public string? ZipCode { get; set; }
+
+    /// <summary>
+    /// Country
+    /// </summary>
+    public string? Country { get; set; }
+}
 }

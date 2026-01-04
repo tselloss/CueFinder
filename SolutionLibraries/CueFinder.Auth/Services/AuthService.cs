@@ -169,7 +169,7 @@ namespace CueFinder.Auth.Services
         /// <summary>
         /// Update user profile
         /// </summary>
-        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone)
+        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country)
         {
             // Simulate async operation
             await Task.Delay(100);
@@ -203,6 +203,9 @@ namespace CueFinder.Auth.Services
             {
                 user.Phone = phone;
             }
+
+            // Note: In-memory service doesn't store address fields
+            // These parameters are accepted to match interface but not persisted
 
             user.UpdatedAt = DateTime.UtcNow;
 

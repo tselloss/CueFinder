@@ -24,6 +24,11 @@ export async function login(username, password) {
       email: data.email,
       phone: data.phone,
       role: data.role,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      country: data.country,
     };
 
     return currentUser;
@@ -45,6 +50,11 @@ export async function register(username, password, name, phone, email, addressOb
       name,
       email,
       phone,
+      address: addressObj?.street,
+      city: addressObj?.city,
+      state: addressObj?.state,
+      zipCode: addressObj?.postalCode,
+      country: addressObj?.country,
     });
 
     // Store token and user info
@@ -56,6 +66,11 @@ export async function register(username, password, name, phone, email, addressOb
       email: data.email,
       phone: data.phone,
       role: data.role,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      country: data.country,
     };
 
     return currentUser;
@@ -137,26 +152,56 @@ export async function updateUserProfile(userId, profileData) {
 }
 
 /**
- * Send SMS code for phone verification
+ * Send phone verification code via SMS/Viber
  */
-export async function sendSmsCode(phone) {
+export async function sendPhoneVerification(phoneNumber, method = 'Viber') {
   try {
-    const data = await post(API_ENDPOINTS.AUTH.SEND_SMS, { phone });
+    const data = await post(API_ENDPOINTS.AUTH.PHONE_SEND_VERIFICATION, { 
+      phoneNumber, 
+      method 
+    });
     return data;
   } catch (error) {
-    throw new Error('Failed to send SMS code');
+    throw new Error(error.message || 'Failed to send verification code');
   }
 }
 
 /**
- * Verify SMS code for phone verification
+ * Verify phone with 4-digit code
  */
-export async function verifySmsCode(phone, code) {
+export async function verifyPhoneCode(token, code) {
   try {
-    const data = await post(API_ENDPOINTS.AUTH.VERIFY_SMS, { phone, code });
+    const data = await post(API_ENDPOINTS.AUTH.PHONE_VERIFY_CODE, { 
+      token, 
+      code 
+    });
     return data;
   } catch (error) {
-    throw new Error('Failed to verify SMS code');
+    throw new Error(error.message || 'Failed to verify code');
+  }
+}
+
+/**
+ * Resend phone verification code
+ */
+export async function resendPhoneVerification(token) {
+  try {
+    const data = await post(API_ENDPOINTS.AUTH.PHONE_RESEND, { token });
+    return data;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to resend verification code');
+  }
+}
+
+/**
+ * Get phone verification status
+ */
+export async function getPhoneVerificationStatus(token) {
+  try {
+    const data = await get(API_ENDPOINTS.AUTH.PHONE_STATUS(token));
+    return data;
+  } catch (error) {
+    throw new Error(error.message || 'Failed to get verification status');
   }
 }
 

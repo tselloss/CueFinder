@@ -85,6 +85,11 @@ namespace CueFinder.Auth.Services
                     Email = user.Email,
                     Phone = user.Phone,
                     Role = user.Role,
+                    Address = user.Address,
+                    City = user.City,
+                    State = user.State,
+                    ZipCode = user.ZipCode,
+                    Country = user.Country,
                     ExpiresIn = expiresIn
                 };
             }
@@ -139,22 +144,25 @@ namespace CueFinder.Auth.Services
                 // Hash password
                 var passwordHash = HashPassword(request.Password);
 
-                // Create new user
-                var newUser = new User
-                {
-                    Username = request.Username,
-                    PasswordHash = passwordHash,
-                    Name = request.Name,
-                    Email = request.Email ?? string.Empty,
-                    Phone = request.Phone ?? string.Empty,
-                    Role = "user",
-                    IsActive = true,
-                    IsEmailVerified = false,
-                    CreatedAt = DateTime.UtcNow,
-                    UpdatedAt = DateTime.UtcNow
-                };
-
-                // Save to database
+            // Create new user
+            var newUser = new User
+            {
+                Username = request.Username,
+                PasswordHash = passwordHash,
+                Name = request.Name,
+                Email = request.Email ?? string.Empty,
+                Phone = request.Phone ?? string.Empty,
+                Address = request.Address,
+                City = request.City,
+                State = request.State,
+                ZipCode = request.ZipCode,
+                Country = request.Country,
+                Role = "user",
+                IsActive = true,
+                IsEmailVerified = false,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };                // Save to database
                 var createdUser = await _userService.CreateUserAsync(newUser);
 
                 _logger.LogInformation("User registered successfully - UserId: {UserId}, Username: {Username}", 
@@ -173,6 +181,11 @@ namespace CueFinder.Auth.Services
                     Email = createdUser.Email,
                     Phone = createdUser.Phone,
                     Role = createdUser.Role,
+                    Address = createdUser.Address,
+                    City = createdUser.City,
+                    State = createdUser.State,
+                    ZipCode = createdUser.ZipCode,
+                    Country = createdUser.Country,
                     ExpiresIn = expiresIn
                 };
             }
@@ -222,7 +235,7 @@ namespace CueFinder.Auth.Services
         /// <summary>
         /// Update user profile
         /// </summary>
-        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone)
+        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country)
         {
             try
             {
@@ -259,6 +272,36 @@ namespace CueFinder.Auth.Services
                 if (!string.IsNullOrWhiteSpace(phone))
                 {
                     user.Phone = phone;
+                }
+
+                if (!string.IsNullOrWhiteSpace(location))
+                {
+                    user.Location = location;
+                }
+
+                if (!string.IsNullOrWhiteSpace(address))
+                {
+                    user.Address = address;
+                }
+
+                if (!string.IsNullOrWhiteSpace(city))
+                {
+                    user.City = city;
+                }
+
+                if (!string.IsNullOrWhiteSpace(state))
+                {
+                    user.State = state;
+                }
+
+                if (!string.IsNullOrWhiteSpace(zipCode))
+                {
+                    user.ZipCode = zipCode;
+                }
+
+                if (!string.IsNullOrWhiteSpace(country))
+                {
+                    user.Country = country;
                 }
 
                 user.UpdatedAt = DateTime.UtcNow;

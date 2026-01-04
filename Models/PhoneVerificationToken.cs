@@ -76,17 +76,20 @@ namespace CueFinder.Database.Models
         /// </summary>
         public int AttemptCount { get; set; } = 0;
 
-        /// <summary>
-        /// Maximum allowed attempts
-        /// </summary>
-        public int MaxAttempts { get; set; } = 3;
+    /// <summary>
+    /// Maximum allowed attempts
+    /// </summary>
+    public int MaxAttempts { get; set; } = 3;
 
-        /// <summary>
-        /// Navigation property to User
-        /// </summary>
-        public virtual User? User { get; set; }
+    /// <summary>
+    /// Timestamp when verification was last resent
+    /// </summary>
+    public DateTime? LastResentAt { get; set; }
 
-        /// <summary>
+    /// <summary>
+    /// Navigation property to User
+    /// </summary>
+    public virtual User? User { get; set; }        /// <summary>
         /// Check if token is expired
         /// </summary>
         public bool IsExpired() => DateTime.UtcNow > ExpiresAt;

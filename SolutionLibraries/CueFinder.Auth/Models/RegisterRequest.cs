@@ -25,9 +25,34 @@ namespace CueFinder.Auth.Models
         /// </summary>
         public string Email { get; set; } = string.Empty;
 
-        /// <summary>
-        /// User's phone number
-        /// </summary>
-        public string Phone { get; set; } = string.Empty;
-    }
+    /// <summary>
+    /// User's phone number
+    /// </summary>
+    public string Phone { get; set; } = string.Empty;
+
+    /// <summary>
+    /// Street address
+    /// </summary>
+    public string? Address { get; set; }
+
+    /// <summary>
+    /// City
+    /// </summary>
+    public string? City { get; set; }
+
+    /// <summary>
+    /// State or Province
+    /// </summary>
+    public string? State { get; set; }
+
+    /// <summary>
+    /// ZIP or Postal code
+    /// </summary>
+    public string? ZipCode { get; set; }
+
+    /// <summary>
+    /// Country
+    /// </summary>
+    public string? Country { get; set; }
+}
 }

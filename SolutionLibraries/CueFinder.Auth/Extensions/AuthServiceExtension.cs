@@ -15,6 +15,10 @@ namespace CueFinder.Auth.Extensions
             // Register DatabaseAuthService instead of mock AuthService
             services.AddScoped<IAuthService, DatabaseAuthService>();
             services.AddScoped<ITokenService, TokenService>();
+            
+            // Register SMS and Phone Verification services
+            services.AddHttpClient<ISmsService, SmsService>(); // This registers both ISmsService and HttpClient
+            services.AddScoped<IPhoneVerificationService, PhoneVerificationService>();
 
             // Configure JWT Authentication
             var jwtSettings = configuration.GetSection("JwtSettings");
