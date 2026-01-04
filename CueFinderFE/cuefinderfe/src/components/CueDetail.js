@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
 import * as cueService from '../api/cueService';
 
-export default function CueDetail({ id, onBack }) {
+export default function CueDetail({ onBack }) {
+  const { id } = useParams();
   const [cue, setCue] = useState(null);
   const [imageIndex, setImageIndex] = useState(0);
 
