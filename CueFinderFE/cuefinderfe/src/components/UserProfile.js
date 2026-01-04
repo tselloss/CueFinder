@@ -17,13 +17,32 @@ export default function UserProfile({ onBack }) {
     phone: user?.phone || '',
     location: user?.location || '',
     address: {
-      street: user?.address?.street || '',
-      city: user?.address?.city || '',
-      state: user?.address?.state || '',
-      postalCode: user?.address?.postalCode || '',
-      country: user?.address?.country || '',
+      street: user?.address || '',
+      city: user?.city || '',
+      state: user?.state || '',
+      postalCode: user?.zipCode || '',
+      country: user?.country || '',
     },
   });
+
+  // Sync profile state with user data when user changes
+  useEffect(() => {
+    if (user) {
+      setProfile({
+        name: user.name || '',
+        email: user.email || '',
+        phone: user.phone || '',
+        location: user.location || '',
+        address: {
+          street: user.address || '',
+          city: user.city || '',
+          state: user.state || '',
+          postalCode: user.zipCode || '',
+          country: user.country || '',
+        },
+      });
+    }
+  }, [user]);
 
   // Load user's cues on mount
   useEffect(() => {

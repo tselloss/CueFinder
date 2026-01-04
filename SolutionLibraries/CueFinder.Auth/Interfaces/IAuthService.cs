@@ -36,8 +36,14 @@ namespace CueFinder.Auth.Interfaces
         /// <param name="name">Updated display name</param>
         /// <param name="email">Updated email</param>
         /// <param name="phone">Updated phone number</param>
+        /// <param name="location">Updated location</param>
+        /// <param name="address">Updated street address</param>
+        /// <param name="city">Updated city</param>
+        /// <param name="state">Updated state/province</param>
+        /// <param name="zipCode">Updated ZIP/postal code</param>
+        /// <param name="country">Updated country</param>
         /// <returns>Updated user profile</returns>
-        Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone);
+        Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country);
 
         /// <summary>
         /// Verify if a user exists

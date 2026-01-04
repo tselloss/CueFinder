@@ -15,8 +15,12 @@ export const API_ENDPOINTS = {
     GET_USER: (id) => `${API_BASE_URL}/auth/${id}`,
     UPDATE_PROFILE: `${API_BASE_URL}/auth/me`,
     VERIFY_TOKEN: `${API_BASE_URL}/auth/verify`,
-    SEND_SMS: `${API_BASE_URL}/auth/send-sms`,
-    VERIFY_SMS: `${API_BASE_URL}/auth/verify-sms`,
+    // Phone verification endpoints
+    PHONE_SEND_VERIFICATION: `${API_BASE_URL}/auth/phone/send-verification`,
+    PHONE_VERIFY_CODE: `${API_BASE_URL}/auth/phone/verify-code`,
+    PHONE_VERIFY_LINK: (token) => `${API_BASE_URL}/auth/phone/verify-link/${token}`,
+    PHONE_RESEND: `${API_BASE_URL}/auth/phone/resend`,
+    PHONE_STATUS: (token) => `${API_BASE_URL}/auth/phone/status/${token}`,
   },
   // Cue endpoints
   CUES: {

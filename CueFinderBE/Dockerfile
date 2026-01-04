@@ -7,8 +7,8 @@ WORKDIR /src
 
 # Copy project files
 COPY ["CueFinderBE/CueFinderBE.csproj", "CueFinderBE/"]
-COPY ["CueFinder.Auth/CueFinder.Auth.csproj", "CueFinder.Auth/"]
-COPY ["CueFinder.Database/CueFinder.Database.csproj", "CueFinder.Database/"]
+COPY ["SolutionLibraries/CueFinder.Auth/CueFinder.Auth.csproj", "SolutionLibraries/CueFinder.Auth/"]
+COPY ["SolutionLibraries/CueFinder.Database/CueFinder.Database.csproj", "SolutionLibraries/CueFinder.Database/"]
 
 # Restore dependencies
 RUN dotnet restore "CueFinderBE/CueFinderBE.csproj"

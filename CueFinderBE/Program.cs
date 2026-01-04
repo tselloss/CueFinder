@@ -24,10 +24,15 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(corsOrigins["Frontend"] ?? "http://localhost:3000")
+        policy.WithOrigins(
+                corsOrigins["Frontend"] ?? "http://localhost:3000",
+                "http://localhost:3000",
+                "http://127.0.0.1:3000"
+            )
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowCredentials()
+            .SetIsOriginAllowedToAllowWildcardSubdomains();
     });
 });
 
@@ -43,8 +48,9 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.UseHttpsRedirection();
+// CORS must be before UseHttpsRedirection
 app.UseCors("AllowFrontend");
+app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();
 

@@ -43,6 +43,16 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__DefaultConnection=Host=cuefinder-postgres;Port=5432;Database=cuefinder;Username=postgres;Password=admin;SslMode=Disable;
+      - BASE_URL=http://localhost:5000
+      - FRONTEND_URL=http://localhost:3000
+      - Sms__Provider=Mock
+      - Sms__ApiUrl=
+      - Sms__ApiKey=
+      - Sms__SenderId=CueFinder
+      - JwtSettings__SecretKey=your-super-secret-jwt-key-change-this-in-production-must-be-at-least-32-characters
+      - JwtSettings__Issuer=CueFinder
+      - JwtSettings__Audience=CueFinderUsers
+      - JwtSettings__ExpirationMinutes=60
     ports:
       - "5000:5000"
     depends_on:
@@ -58,6 +68,7 @@ services:
       dockerfile: Dockerfile
     container_name: cuefinder-frontend
     environment:
+      - REACT_APP_API_URL=http://localhost:5000/api
       - NEXT_PUBLIC_API_URL=http://localhost:5000
     ports:
       - "3000:3000"

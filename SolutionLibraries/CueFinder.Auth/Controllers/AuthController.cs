@@ -178,7 +178,13 @@ namespace CueFinder.Auth.Controllers
                     userId,
                     request.Name ?? string.Empty,
                     request.Email ?? string.Empty,
-                    request.Phone ?? string.Empty
+                    request.Phone ?? string.Empty,
+                    request.Location ?? string.Empty,
+                    request.Address ?? string.Empty,
+                    request.City ?? string.Empty,
+                    request.State ?? string.Empty,
+                    request.ZipCode ?? string.Empty,
+                    request.Country ?? string.Empty
                 );
 
                 if (profile == null)

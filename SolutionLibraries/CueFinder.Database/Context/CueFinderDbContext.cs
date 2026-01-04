@@ -20,6 +20,7 @@ namespace CueFinder.Database.Context
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
         public DbSet<Transaction> Transactions { get; set; } = null!;
+        public DbSet<PhoneVerificationToken> PhoneVerificationTokens { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -305,6 +306,54 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.Status)
                     .HasDatabaseName("IX_Transaction_Status");
+            });
+
+            // PhoneVerificationToken entity configuration
+            modelBuilder.Entity<PhoneVerificationToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany(u => u.PhoneVerificationTokens)
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.PhoneNumber)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                entity.Property(e => e.Token)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.MagicLinkToken)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.VerificationCode)
+                    .IsRequired()
+                    .HasMaxLength(6);
+
+                entity.Property(e => e.VerificationMethod)
+                    .HasMaxLength(50)
+                    .HasDefaultValue("SMS");
+
+                entity.Property(e => e.IpAddress)
+                    .HasMaxLength(45);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.Token)
+                    .IsUnique()
+                    .HasDatabaseName("IX_PhoneVerification_Token");
+
+                entity.HasIndex(e => e.MagicLinkToken)
+                    .IsUnique()
+                    .HasDatabaseName("IX_PhoneVerification_MagicLinkToken");
+
+                entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
+                    .HasDatabaseName("IX_PhoneVerification_User_Status");
             });
         }
     }

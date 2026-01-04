@@ -221,6 +221,90 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("Messages");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.PhoneVerificationToken", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AttemptCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("character varying(45)");
+
+                    b.Property<bool>("IsUsed")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsVerified")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("LastResentAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("MagicLinkToken")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("MaxAttempts")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PhoneNumber")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<string>("Token")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("VerificationCode")
+                        .IsRequired()
+                        .HasMaxLength(6)
+                        .HasColumnType("character varying(6)");
+
+                    b.Property<string>("VerificationMethod")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("SMS");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("MagicLinkToken")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PhoneVerification_MagicLinkToken");
+
+                    b.HasIndex("Token")
+                        .IsUnique()
+                        .HasDatabaseName("IX_PhoneVerification_Token");
+
+                    b.HasIndex("UserId", "IsUsed", "ExpiresAt")
+                        .HasDatabaseName("IX_PhoneVerification_User_Status");
+
+                    b.ToTable("PhoneVerificationTokens");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Rating", b =>
                 {
                     b.Property<int>("Id")
@@ -421,8 +505,14 @@ namespace CueFinder.Database.Migrations
                     b.Property<bool>("IsEmailVerified")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsPhoneVerified")
+                        .HasColumnType("boolean");
+
                     b.Property<DateTime?>("LastLoginAt")
                         .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Location")
+                        .HasColumnType("text");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -438,6 +528,9 @@ namespace CueFinder.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("PhoneVerifiedAt")
+                        .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("text");
@@ -532,6 +625,17 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("Sender");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.PhoneVerificationToken", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany("PhoneVerificationTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Rating", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.Cue", "Cue")
@@ -616,6 +720,8 @@ namespace CueFinder.Database.Migrations
 
             modelBuilder.Entity("CueFinder.Database.Models.User", b =>
                 {
+                    b.Navigation("PhoneVerificationTokens");
+
                     b.Navigation("PostedCues");
 
                     b.Navigation("RatingsGiven");

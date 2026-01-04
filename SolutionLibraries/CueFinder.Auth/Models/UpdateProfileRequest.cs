@@ -19,5 +19,35 @@ namespace CueFinder.Auth.Models
         /// Updated phone number
         /// </summary>
         public string? Phone { get; set; }
+
+        /// <summary>
+        /// Updated location (general area)
+        /// </summary>
+        public string? Location { get; set; }
+
+        /// <summary>
+        /// Updated street address
+        /// </summary>
+        public string? Address { get; set; }
+
+        /// <summary>
+        /// Updated city
+        /// </summary>
+        public string? City { get; set; }
+
+        /// <summary>
+        /// Updated state or province
+        /// </summary>
+        public string? State { get; set; }
+
+        /// <summary>
+        /// Updated ZIP or postal code
+        /// </summary>
+        public string? ZipCode { get; set; }
+
+        /// <summary>
+        /// Updated country
+        /// </summary>
+        public string? Country { get; set; }
     }
 }
