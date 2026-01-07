@@ -86,19 +86,30 @@ export function AuthProvider({ children }) {
   };
 
   const updateUser = async (profileData) => {
-    // Update user in context with new profile data
-    const updatedUser = { ...user, ...profileData };
-    setUser(updatedUser);
-    
-    // Call API to persist the changes to backend
     try {
-      await authService.updateUserProfile(user.id, profileData);
+      // Call API to persist the changes to backend first
+      const updatedProfile = await authService.updateUserProfile(user.id, profileData);
+      
+      // Update user in context with the response from backend
+      const updatedUser = { 
+        ...user, 
+        name: updatedProfile.name || profileData.name,
+        email: updatedProfile.email || profileData.email,
+        phone: updatedProfile.phone || profileData.phone,
+        location: updatedProfile.location || profileData.location,
+        address: updatedProfile.address || profileData.address,
+        city: updatedProfile.city || profileData.city,
+        state: updatedProfile.state || profileData.state,
+        zipCode: updatedProfile.zipCode || profileData.zipCode,
+        country: updatedProfile.country || profileData.country,
+      };
+      setUser(updatedUser);
+      
+      return updatedUser;
     } catch (err) {
       console.error('Failed to update profile on backend:', err);
-      // Still update local state, but log the error
+      throw err; // Re-throw to let the UI handle the error
     }
-    
-    return updatedUser;
   };
 
   return (

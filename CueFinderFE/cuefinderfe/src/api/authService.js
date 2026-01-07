@@ -184,12 +184,24 @@ export async function updateUserProfile(userId, profileData) {
 
     // Update local current user
     if (currentUser && currentUser.id === userId) {
-      currentUser = { ...currentUser, ...data };
+      currentUser = { 
+        ...currentUser, 
+        name: data.name,
+        email: data.email,
+        phone: data.phone,
+        location: data.location,
+        address: data.address,
+        city: data.city,
+        state: data.state,
+        zipCode: data.zipCode,
+        country: data.country,
+      };
     }
 
     return data;
   } catch (error) {
-    throw new Error('Failed to update user profile');
+    console.error('Update profile error:', error);
+    throw new Error(error.message || 'Failed to update user profile');
   }
 }
 
