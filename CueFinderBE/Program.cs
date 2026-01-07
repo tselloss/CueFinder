@@ -2,13 +2,16 @@ using CueFinder.Auth.Extensions;
 using CueFinder.Database.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Cues.Controllers;
+using CueFinder.CueCases.Extensions;
+using CueFinder.CueCases.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-// Include controllers from all assemblies (main + CueFinder.Cues)
+// Include controllers from all assemblies (main + CueFinder.Cues + CueFinder.CueCases)
 builder.Services.AddControllers()
-    .AddApplicationPart(typeof(CuesController).Assembly);
+    .AddApplicationPart(typeof(CuesController).Assembly)
+    .AddApplicationPart(typeof(CueCasesController).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -22,6 +25,7 @@ builder.Services.AddDatabaseServices(connectionString);
 // Register module services
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
+builder.Services.AddCueCasesServices();
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");

@@ -16,6 +16,8 @@ namespace CueFinder.Database.Context
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Cue> Cues { get; set; } = null!;
         public DbSet<CueImage> CueImages { get; set; } = null!;
+        public DbSet<CueCase> CueCases { get; set; } = null!;
+        public DbSet<CueCaseImage> CueCaseImages { get; set; } = null!;
         public DbSet<Rating> Ratings { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
@@ -360,6 +362,110 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
                     .HasDatabaseName("IX_PhoneVerification_User_Status");
+            });
+
+            // CueCase entity configuration
+            modelBuilder.Entity<CueCase>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Brand)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Price)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.CaseCapacity)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.CaseOpening)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.CaseType)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Color)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.CaseMaterial)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.OuterDimensions)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.PocketSpace)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.HandleExtensionSpace)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CaseWeight)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Condition)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Location)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_CueCase_UserId");
+
+                entity.HasIndex(e => e.Price)
+                    .HasDatabaseName("IX_CueCase_Price");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_CueCase_CreatedAt");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_CueCase_IsSold");
+            });
+
+            // CueCaseImage entity configuration
+            modelBuilder.Entity<CueCaseImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasOne(e => e.CueCase)
+                    .WithMany(c => c.Images)
+                    .HasForeignKey(e => e.CueCaseId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.CueCaseId)
+                    .HasDatabaseName("IX_CueCaseImage_CueCaseId");
+
+                entity.HasIndex(e => new { e.CueCaseId, e.IsPrimary })
+                    .HasDatabaseName("IX_CueCaseImage_Primary");
             });
         }
     }
