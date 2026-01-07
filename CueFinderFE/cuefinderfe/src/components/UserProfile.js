@@ -59,6 +59,8 @@ export default function UserProfile({ onBack }) {
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
+    setMessage(null); // Clear any previous messages
+    
     try {
       // Flatten the address object to match backend expectations
       await updateUser({
@@ -78,9 +80,25 @@ export default function UserProfile({ onBack }) {
     } catch (err) {
       console.error('Profile update error:', err);
       setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
+
+  // If no user, show loading or redirect
+  if (!user) {
+    return (
+      <div className="user-profile">
+        <div className="profile-header">
+          <button className="btn" onClick={onBack}>← Back</button>
+          <h2>My Profile</h2>
+        </div>
+        <div style={{ padding: '20px', textAlign: 'center' }}>
+          Loading profile...
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="user-profile">

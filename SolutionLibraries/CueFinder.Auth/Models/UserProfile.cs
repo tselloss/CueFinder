@@ -36,6 +36,36 @@ namespace CueFinder.Auth.Models
         public string Role { get; set; } = "user";
 
         /// <summary>
+        /// User's location (city/general area)
+        /// </summary>
+        public string? Location { get; set; }
+
+        /// <summary>
+        /// User's street address
+        /// </summary>
+        public string? Address { get; set; }
+
+        /// <summary>
+        /// User's city
+        /// </summary>
+        public string? City { get; set; }
+
+        /// <summary>
+        /// User's state or province
+        /// </summary>
+        public string? State { get; set; }
+
+        /// <summary>
+        /// User's ZIP or postal code
+        /// </summary>
+        public string? ZipCode { get; set; }
+
+        /// <summary>
+        /// User's country
+        /// </summary>
+        public string? Country { get; set; }
+
+        /// <summary>
         /// Account creation date
         /// </summary>
         public DateTime CreatedAt { get; set; }

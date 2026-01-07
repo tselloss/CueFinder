@@ -221,6 +221,12 @@ namespace CueFinder.Auth.Services
                     Email = user.Email,
                     Phone = user.Phone,
                     Role = user.Role,
+                    Location = user.Location,
+                    Address = user.Address,
+                    City = user.City,
+                    State = user.State,
+                    ZipCode = user.ZipCode,
+                    Country = user.Country,
                     CreatedAt = user.CreatedAt,
                     UpdatedAt = user.UpdatedAt
                 };
@@ -319,6 +325,12 @@ namespace CueFinder.Auth.Services
                     Email = updatedUser.Email,
                     Phone = updatedUser.Phone,
                     Role = updatedUser.Role,
+                    Location = updatedUser.Location,
+                    Address = updatedUser.Address,
+                    City = updatedUser.City,
+                    State = updatedUser.State,
+                    ZipCode = updatedUser.ZipCode,
+                    Country = updatedUser.Country,
                     CreatedAt = updatedUser.CreatedAt,
                     UpdatedAt = updatedUser.UpdatedAt
                 };
