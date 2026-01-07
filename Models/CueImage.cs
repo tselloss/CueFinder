@@ -44,5 +44,15 @@ namespace CueFinder.Models
         /// Image upload timestamp
         /// </summary>
         public DateTime UploadedAt { get; set; }
+
+        /// <summary>
+        /// Base64 encoded image data (for production storage without file system)
+        /// </summary>
+        public string? ImageData { get; set; }
+
+        /// <summary>
+        /// MIME type of the image (e.g., "image/jpeg", "image/png")
+        /// </summary>
+        public string? ContentType { get; set; }
     }
 }

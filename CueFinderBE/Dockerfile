@@ -9,6 +9,7 @@ WORKDIR /src
 COPY ["CueFinderBE/CueFinderBE.csproj", "CueFinderBE/"]
 COPY ["SolutionLibraries/CueFinder.Auth/CueFinder.Auth.csproj", "SolutionLibraries/CueFinder.Auth/"]
 COPY ["SolutionLibraries/CueFinder.Database/CueFinder.Database.csproj", "SolutionLibraries/CueFinder.Database/"]
+COPY ["SolutionLibraries/CueFinder.Cues/CueFinder.Cues/CueFinder.Cues.csproj", "SolutionLibraries/CueFinder.Cues/CueFinder.Cues/"]
 
 # Restore dependencies
 RUN dotnet restore "CueFinderBE/CueFinderBE.csproj"

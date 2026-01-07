@@ -15,6 +15,7 @@ export const API_ENDPOINTS = {
     GET_USER: (id) => `${API_BASE_URL}/auth/${id}`,
     UPDATE_PROFILE: `${API_BASE_URL}/auth/me`,
     VERIFY_TOKEN: `${API_BASE_URL}/auth/verify`,
+    EXTERNAL_LOGIN: `${API_BASE_URL}/auth/external`,
     // Phone verification endpoints
     PHONE_SEND_VERIFICATION: `${API_BASE_URL}/auth/phone/send-verification`,
     PHONE_VERIFY_CODE: `${API_BASE_URL}/auth/phone/verify-code`,

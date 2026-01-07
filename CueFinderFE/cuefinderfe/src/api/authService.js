@@ -6,6 +6,9 @@
 import { API_ENDPOINTS } from '../config/apiConfig';
 import { post, get, put, setToken, getToken, clearAuth } from '../utils/httpClient';
 
+// Export getToken and clearAuth for use in AuthContext
+export { getToken, clearAuth };
+
 let currentUser = null;
 
 /**
@@ -71,6 +74,45 @@ export async function register(username, password, name, phone, email, addressOb
       state: data.state,
       zipCode: data.zipCode,
       country: data.country,
+    };
+
+    return currentUser;
+  } catch (error) {
+    currentUser = null;
+    clearAuth();
+    throw error;
+  }
+}
+
+/**
+ * External OAuth login (Google, Apple)
+ */
+export async function externalLogin(provider, idToken, email, name, pictureUrl) {
+  try {
+    const data = await post(API_ENDPOINTS.AUTH.EXTERNAL_LOGIN, {
+      provider: provider, // 'Google' or 'Apple'
+      idToken: idToken,
+      email: email,
+      name: name,
+      pictureUrl: pictureUrl
+    });
+
+    // Store token and user info
+    setToken(data.accessToken);
+    currentUser = {
+      id: data.userId,
+      username: data.username,
+      name: data.name,
+      email: data.email,
+      phone: data.phone,
+      role: data.role,
+      address: data.address,
+      city: data.city,
+      state: data.state,
+      zipCode: data.zipCode,
+      country: data.country,
+      externalProvider: data.externalProvider,
+      externalProviderId: data.externalProviderId,
     };
 
     return currentUser;

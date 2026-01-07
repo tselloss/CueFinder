@@ -51,5 +51,12 @@ namespace CueFinder.Auth.Interfaces
         /// <param name="userId">User ID</param>
         /// <returns>True if user exists</returns>
         Task<bool> UserExistsAsync(int userId);
+
+        /// <summary>
+        /// Authenticate user via external OAuth provider (Google, Apple)
+        /// </summary>
+        /// <param name="request">External authentication request with provider and token</param>
+        /// <returns>Authentication response with JWT token</returns>
+        Task<AuthResponse> ExternalLoginAsync(ExternalAuthRequest request);
     }
 }

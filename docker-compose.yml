@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   postgres:
     image: postgres:15
@@ -55,6 +53,8 @@ services:
       - JwtSettings__ExpirationMinutes=60
     ports:
       - "5000:5000"
+    volumes:
+      - backend_uploads:/app/wwwroot/uploads
     depends_on:
       postgres:
         condition: service_healthy
@@ -86,4 +86,6 @@ volumes:
   postgres_data:
     driver: local
   pgadmin_data:
+    driver: local
+  backend_uploads:
     driver: local

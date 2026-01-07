@@ -1,0 +1,51 @@
+# Development docker-compose with hot-reload (no rebuild needed!)
+# Usage: docker compose -f docker-compose.dev.yml up -d
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: cuefinder-postgres
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+      POSTGRES_DB: cuefinder
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuefinder"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - cuefinder-network
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: cuefinder-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@cuefinder.com
+      PGADMIN_DEFAULT_PASSWORD: admin
+    ports:
+      - "5050:80"
+    depends_on:
+      - postgres
+    networks:
+      - cuefinder-network
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+
+  # Backend runs locally with dotnet watch (hot reload)
+  # Run manually: cd CueFinderBE && dotnet watch run
+
+  # Frontend runs locally with npm start (hot reload)  
+  # Run manually: cd CueFinderFE/cuefinderfe && npm start
+
+networks:
+  cuefinder-network:
+    driver: bridge
+
+volumes:
+  postgres_data:
+  pgadmin_data:

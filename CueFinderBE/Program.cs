@@ -1,10 +1,14 @@
 using CueFinder.Auth.Extensions;
 using CueFinder.Database.Extensions;
+using CueFinder.Cues.Extensions;
+using CueFinder.Cues.Controllers;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-builder.Services.AddControllers();
+// Include controllers from all assemblies (main + CueFinder.Cues)
+builder.Services.AddControllers()
+    .AddApplicationPart(typeof(CuesController).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -17,6 +21,7 @@ builder.Services.AddDatabaseServices(connectionString);
 
 // Register module services
 builder.Services.AddAuthServices(builder.Configuration);
+builder.Services.AddCueServices();
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");
@@ -50,6 +55,10 @@ if (app.Environment.IsDevelopment())
 
 // CORS must be before UseHttpsRedirection
 app.UseCors("AllowFrontend");
+
+// Enable static files for serving uploaded images
+app.UseStaticFiles();
+
 app.UseHttpsRedirection();
 app.UseAuthentication();
 app.UseAuthorization();

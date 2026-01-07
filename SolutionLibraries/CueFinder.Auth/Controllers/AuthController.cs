@@ -234,5 +234,42 @@ namespace CueFinder.Auth.Controllers
                 return StatusCode(500, new { message = "An error occurred while verifying token" });
             }
         }
+
+        /// <summary>
+        /// External OAuth login (Google, Apple)
+        /// </summary>
+        [HttpPost("external")]
+        [ProducesResponseType(typeof(AuthResponse), StatusCodes.Status200OK)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status400BadRequest)]
+        [ProducesResponseType(typeof(ProblemDetails), StatusCodes.Status401Unauthorized)]
+        public async Task<IActionResult> ExternalLogin([FromBody] ExternalAuthRequest request)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(request.IdToken))
+                {
+                    return BadRequest(new { message = "ID token is required" });
+                }
+
+                if (string.IsNullOrWhiteSpace(request.Email))
+                {
+                    return BadRequest(new { message = "Email is required" });
+                }
+
+                var response = await _authService.ExternalLoginAsync(request);
+                _logger.LogInformation("User {Email} logged in via {Provider}", request.Email, request.Provider);
+                return Ok(response);
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning("External login failed: {Message}", ex.Message);
+                return StatusCode(StatusCodes.Status401Unauthorized, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "External login error for provider {Provider}", request.Provider);
+                return StatusCode(500, new { message = "An error occurred during external login" });
+            }
+        }
     }
 }
