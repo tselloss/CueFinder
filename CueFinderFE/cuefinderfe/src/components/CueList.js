@@ -1,4 +1,5 @@
 import React from 'react';
+import './CueList.css';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -31,7 +32,7 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
           {filtered.map((c) => (
             <div key={c.id} className="cue-card" onClick={() => onSelect(c.id)}>
               <div className="card-media" style={{backgroundImage: `url(${getImageUrl(c.images)})`}}>
-                {c.is_sold ? <span className="sold-badge">SOLD</span> : (c.condition && <span className="cond-badge">{c.condition}</span>)}
+                {(c.isSold || c.is_sold) ? <span className="sold-badge">SOLD</span> : (c.condition && <span className="cond-badge">{c.condition}</span>)}
               </div>
               <div className="card-body">
                 <div className="card-title">{c.title || c.brand}</div>
@@ -49,7 +50,7 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
           {filtered.map((c) => (
             <div key={c.id} className="list-item" onClick={() => onSelect(c.id)}>
               <div className="list-item-image" style={{backgroundImage: `url(${getImageUrl(c.images)})`}}>
-                {c.is_sold ? <span className="sold-badge">SOLD</span> : (c.condition && <span className="cond-badge">{c.condition}</span>)}
+                {(c.isSold || c.is_sold) ? <span className="sold-badge">SOLD</span> : (c.condition && <span className="cond-badge">{c.condition}</span>)}
               </div>
               <div className="list-item-content">
                 <div className="list-item-title">{c.title || c.brand}</div>
