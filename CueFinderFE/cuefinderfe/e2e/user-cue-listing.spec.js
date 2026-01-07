@@ -2,7 +2,20 @@
  * Playwright End-to-End Test: User Registration and Add Cue Listing
  * 
  * This test covers the complete workflow:
- * 1. Register a new user
+ * 1    // Fill registration form
+    await page.locator('input[name="username"]').fill(testUser.username);
+    console.log(`  - Username: ${testUser.username}`);
+    
+    await page.locator('input[name="name"]').fill(testUser.name);
+    console.log(`  - Name: ${testUser.name}`);
+    
+    await page.locator('input[name="email"]').fill(testUser.email);
+    console.log(`  - Email: ${testUser.email}`);
+    
+    await page.locator('input[name="phone"]').fill(testUser.phone);
+    console.log(`  - Phone: ${testUser.phone}`);
+    
+    await page.locator('input[name="password"]').fill(testUser.password);ew user
  * 2. Login with credentials
  * 3. Navigate to profile
  * 4. Add a new cue listing with images
@@ -110,8 +123,8 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     await page.goto('http://localhost:3000');
     await page.waitForTimeout(1000);
     
-    // Verify home page loaded
-    await expect(page.locator('text=CueFinder')).toBeVisible({ timeout: 10000 });
+    // Verify home page loaded - look for the main heading in header
+    await expect(page.getByRole('heading', { name: '🎱 CueFinder' }).first()).toBeVisible({ timeout: 10000 });
     console.log('✓ Application loaded successfully\n');
 
     // ===== STEP 2: REGISTER NEW USER =====
@@ -123,23 +136,23 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     await page.waitForTimeout(500);
     
     // Verify registration form is visible
-    await expect(page.locator('h3:has-text("Create account")')).toBeVisible();
+    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible();
     console.log('  - Registration form opened');
 
     // Fill registration form
-    await page.locator('input[id="username"]').fill(testUser.username);
+    await page.getByPlaceholder('Enter username').fill(testUser.username);
     console.log(`  - Username: ${testUser.username}`);
     
-    await page.locator('input[id="name"]').fill(testUser.name);
+    await page.getByPlaceholder('Your name').fill(testUser.name);
     console.log(`  - Name: ${testUser.name}`);
     
-    await page.locator('input[id="email"]').fill(testUser.email);
+    await page.getByPlaceholder('you@example.com').fill(testUser.email);
     console.log(`  - Email: ${testUser.email}`);
     
-    await page.locator('input[id="phone"]').fill(testUser.phone);
+    await page.getByPlaceholder('e.g. +15551234567').fill(testUser.phone);
     console.log(`  - Phone: ${testUser.phone}`);
     
-    await page.locator('input[id="password"], input[type="password"]').first().fill(testUser.password);
+    await page.getByPlaceholder('Password').fill(testUser.password);
     console.log(`  - Password: ********`);
 
     // Submit registration
@@ -170,8 +183,8 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
         console.log('  - Using social login (google_user)');
       } else {
         // Try to login with the registered credentials
-        await page.locator('input[id="username"]').fill(testUser.username);
-        await page.locator('input[id="password"], input[type="password"]').first().fill(testUser.password);
+        await page.getByPlaceholder('Enter username').fill(testUser.username);
+        await page.getByPlaceholder('Password').fill(testUser.password);
         await page.locator('button[type="submit"]').click();
         await page.waitForTimeout(2000);
       }
@@ -428,12 +441,12 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     await page.waitForTimeout(500);
 
     // Wait for the login form to be visible
-    await expect(page.locator('h3:has-text("Sign in")')).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 10000 });
 
     // Fill in admin credentials
-    await page.locator('#username').fill('admin');
-    await page.locator('#password').fill('Admin123!');
-    
+    await page.getByPlaceholder('Enter username').fill('admin');
+    await page.getByPlaceholder('Password').fill('Admin123!');
+
     // Submit login
     await page.locator('button[type="submit"]:has-text("Sign in")').click();
     await page.waitForTimeout(2000);

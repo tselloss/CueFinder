@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
-import { Routes, Route, useNavigate, Navigate } from 'react-router-dom';
-import './App.css';
+import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
+import { Box, Button, Header, Heading, Text, TextInput, Select, Footer } from 'grommet';
+import { Add, Search, User, Logout, UserAdmin, Menu } from 'grommet-icons';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
@@ -16,8 +17,23 @@ function AppInner() {
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingCue, setEditingCue] = useState(null);
+  const [category, setCategory] = useState('all'); // 'all', 'cues', 'cases'
+  const [condition, setCondition] = useState('all');
+  const [sortBy, setSortBy] = useState('newest');
+  const [sidebarOpen, setSidebarOpen] = useState(false); // Hidden by default
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Check if we're on the home page (listings page)
+  const isHomePage = location.pathname === '/';
+  
+  // Debug logging
+  useEffect(() => {
+    console.log('Current path:', location.pathname);
+    console.log('Is home page:', isHomePage);
+  }, [location.pathname, isHomePage]);
 
   useEffect(() => {
     async function load() {
@@ -43,6 +59,7 @@ function AppInner() {
       navigate('/login');
       return;
     }
+    setEditingCue(null); // Ensure we're creating a new listing, not editing
     setShowAddModal(true);
   };
 
@@ -50,6 +67,7 @@ function AppInner() {
   // The modal handles the API call internally, we just need to close it and refresh
   const handleModalSave = async () => {
     setShowAddModal(false);
+    setEditingCue(null); // Clear the editing state
     // Refresh the cues list
     try {
       const updatedCues = await cueService.getCues();
@@ -61,6 +79,7 @@ function AppInner() {
 
   const handleCloseModal = () => {
     setShowAddModal(false);
+    setEditingCue(null); // Clear the editing state when closing
   };
 
   const handleLogout = async () => {
@@ -75,84 +94,728 @@ function AppInner() {
   }, [user]);
 
   return (
-    <div className="App">
-      <header className="App-header hero">
-        <div className="hero-inner">
-          <div className="hero-top">
-            <div className="logo">CueFinder</div>
-            <div className="account">
-              {user ? (
-                <>
-                  <div className="muted">Signed in as {user.name} ({user.role})</div>
-                  <button className="btn small" onClick={() => navigate('/profile')}>My Profile</button>
-                  {user.role === 'admin' && <button className="btn small" onClick={() => navigate('/admin')}>Admin</button>}
-                  <button className="btn small" onClick={handleLogout}>Sign out</button>
-                </>
-              ) : (
-                <>
-                  <button className="btn small primary" onClick={() => navigate('/login')}>Sign In</button>
-                  <button className="btn small" onClick={() => navigate('/register')}>Register</button>
-                </>
+    <Box fill background="background" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <Header 
+        background="background-front" 
+        pad={{ horizontal: "medium", vertical: "small" }}
+        elevation="medium"
+        style={{
+          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+          borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
+          flexWrap: 'wrap'
+        }}
+      >
+        <Box direction="row" align="center" gap="small">
+          {/* Menu Toggle Button - Only on home page */}
+          {isHomePage && (
+            <Button
+              icon={<Menu size="20px" color="white" />}
+              onClick={() => setSidebarOpen(!sidebarOpen)}
+              tip={sidebarOpen ? "Hide Categories" : "Show Categories"}
+              style={{
+                background: 'rgba(255, 255, 255, 0.15)',
+                border: '2px solid rgba(255, 255, 255, 0.3)',
+                borderRadius: '10px',
+                padding: '8px',
+                transition: 'all 0.3s ease'
+              }}
+              hoverIndicator={{ background: 'rgba(255, 255, 255, 0.25)' }}
+            />
+          )}
+          
+          <Heading level="2" margin="none" color="text-strong" style={{ fontWeight: 700, letterSpacing: '-0.5px', fontSize: 'clamp(18px, 4vw, 24px)' }}>
+            🎱 CueFinder
+          </Heading>
+        </Box>
+        <Box direction="row" align="center" gap="medium" wrap style={{ flexShrink: 0 }}>
+          {user ? (
+            <>
+              {/* User Info Display */}
+              <Box 
+                direction="row"
+                align="center"
+                gap="xsmall"
+                background="background-back"
+                pad={{ horizontal: 'small', vertical: 'xsmall' }}
+                round="8px"
+                style={{
+                  border: '2px solid rgba(59, 130, 246, 0.5)',
+                  backdropFilter: 'blur(10px)'
+                }}
+              >
+                <Text size="medium" style={{ fontSize: '20px' }}>
+                  {user.avatar || '👤'}
+                </Text>
+                <Box>
+                  <Text size="small" color="text-strong" weight={700}>
+                    {user.name}
+                  </Text>
+                  {user.role === 'admin' && (
+                    <Text size="xsmall" color="brand" weight={600} style={{ lineHeight: '1' }}>
+                      Administrator
+                    </Text>
+                  )}
+                </Box>
+              </Box>
+
+              {/* Action Buttons */}
+              <Button 
+                icon={<User color="white" size="18px" />} 
+                label={<Text size="small" color="white" weight={600}>Profile</Text>}
+                onClick={() => navigate('/profile')} 
+                style={{ 
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
+                }}
+                hoverIndicator={{ 
+                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                }}
+              />
+              {user.role === 'admin' && (
+                <Button 
+                  icon={<UserAdmin color="white" size="18px" />} 
+                  label={<Text size="small" color="white" weight={600}>Admin</Text>}
+                  onClick={() => navigate('/admin')} 
+                  style={{ 
+                    background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)'
+                  }}
+                  hoverIndicator={{
+                    background: 'linear-gradient(135deg, #db2777 0%, #be185d 100%)'
+                  }}
+                />
               )}
-            </div>
-          </div>
+              <Button 
+                icon={<Logout color="white" size="18px" />} 
+                label={<Text size="small" color="white" weight={600}>Logout</Text>}
+                onClick={handleLogout} 
+                style={{ 
+                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '8px 14px',
+                  transition: 'all 0.3s ease',
+                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
+                }}
+                hoverIndicator={{ 
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
+                }}
+              />
+            </>
+          ) : (
+            <>
+              <Button 
+                primary 
+                label={<Text size="xsmall" weight={700} color="white">Sign In</Text>}
+                onClick={() => navigate('/login')} 
+                style={{ 
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  borderRadius: '8px',
+                  padding: '8px 16px',
+                  fontWeight: 700,
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+                  border: 'none',
+                  transition: 'all 0.3s ease'
+                }}
+              />
+              <Button 
+                label={<Text size="xsmall" color="text-strong" weight={600}>Register</Text>}
+                onClick={() => navigate('/register')} 
+                style={{ 
+                  background: 'rgba(59, 130, 246, 0.2)',
+                  border: '2px solid rgba(59, 130, 246, 0.5)',
+                  borderRadius: '8px',
+                  padding: '6px 12px',
+                  transition: 'all 0.3s ease',
+                  backdropFilter: 'blur(10px)'
+                }}
+              />
+            </>
+          )}
+        </Box>
+      </Header>
 
-          <div className="hero-content">
-            <h1>Billiard Cue Marketplace</h1>
-            <p className="subtitle">Buy and sell premium billiard cues from players around the world</p>
+      {/* Hero Section with Search Bar - Only show on home page */}
+      {isHomePage && (
+        <Box 
+          background="background-back" 
+          pad={{ vertical: "large", horizontal: "medium" }} 
+          align="center"
+          style={{ 
+            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
+            paddingTop: '60px',
+            paddingBottom: '80px',
+            marginBottom: '40px',
+            position: 'relative',
+            zIndex: 10,
+            borderBottom: '1px solid rgba(59, 130, 246, 0.3)'
+          }}
+        >
+          <Box width="100%" style={{ maxWidth: '900px' }} gap="large" align="center">
+            {/* Hero Text */}
+            <Box align="center" gap="small" pad={{ horizontal: 'small' }}>
+              <Heading 
+                level="1" 
+                margin="none" 
+                textAlign="center" 
+                color="text-strong"
+                style={{ 
+                  fontSize: 'clamp(32px, 5vw, 48px)', 
+                  fontWeight: 700,
+                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
+                }}
+              >
+                Find Your Perfect Cue
+              </Heading>
+              <Text size="medium" textAlign="center" color="text-weak" style={{ fontSize: 'clamp(14px, 2.5vw, 18px)' }}>
+                Browse premium billiard cues and cases from sellers worldwide
+              </Text>
+            </Box>
 
-            <div className="search-row">
-              <input className="search-input" placeholder="Search cues, brands..." value={search} onChange={(e)=>setSearch(e.target.value)} />
-              <select className="filter"> <option>All Conditions</option> <option>Like New</option> <option>Used</option> </select>
-              <select className="sort"> <option>Newest First</option> <option>Lowest Price</option> <option>Highest Price</option> </select>
-              {user && <button className="btn primary" onClick={handleAdd}>Add Cue</button>}
-              {/* Debug: Show button state */}
-              {console.log('Rendering Add Cue button?', !!user)}
-            </div>
-          </div>
-        </div>
-      </header>
+            {/* Search Bar - Directly Below Hero Text */}
+            <Box 
+              width="100%"
+              align="center"
+              pad={{ horizontal: 'small' }}
+            >
+              {/* Main Search Input - Prominent and Simple */}
+              <Box 
+                direction="column" 
+                gap="medium" 
+                align="center"
+                width="100%"
+                style={{ maxWidth: '800px' }}
+              >
+                {/* Primary Search Box with Angular Design */}
+                <Box 
+                  direction="row" 
+                  align="center"
+                  background="background-front"
+                  pad={{ horizontal: 'medium', vertical: 'small' }}
+                  round="medium"
+                  elevation="large"
+                  style={{ 
+                    width: '100%',
+                    minHeight: '60px',
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
+                    border: '2px solid rgba(59, 130, 246, 0.4)',
+                    transition: 'all 0.3s ease',
+                    position: 'relative',
+                    zIndex: 20
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(59, 130, 246, 0.3)';
+                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.6)';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
+                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
+                  }}
+                >
+                  <Search size="24px" color="#3b82f6" style={{ flexShrink: 0, marginRight: '12px' }} />
+                  <Box flex={{ grow: 1 }}>
+                    <TextInput
+                      placeholder="Search for cues, brands, or locations..."
+                      value={search}
+                      onChange={(e) => setSearch(e.target.value)}
+                      plain
+                      style={{
+                        fontSize: '17px',
+                        fontWeight: 400,
+                        border: 'none',
+                        background: 'transparent',
+                        padding: '8px 0',
+                        color: '#f1f5f9',
+                        outline: 'none'
+                      }}
+                      onKeyPress={(e) => {
+                        if (e.key === 'Enter') {
+                          // Trigger search on Enter key
+                          console.log('Search triggered:', search);
+                        }
+                      }}
+                    />
+                  </Box>
+                  {search && (
+                    <Button
+                      plain
+                      icon={<Text size="large" style={{ lineHeight: 1, color: '#94a3b8' }}>×</Text>}
+                      onClick={() => setSearch('')}
+                      style={{
+                        padding: '4px',
+                        marginLeft: '8px',
+                        marginRight: '8px',
+                        minWidth: 'auto',
+                        opacity: 0.6
+                      }}
+                      hoverIndicator={{ opacity: 1 }}
+                    />
+                  )}
+                  <Button 
+                    primary 
+                    label={<Text weight={700} size="medium" color="white">Search</Text>}
+                    onClick={() => console.log('Search clicked:', search)}
+                    style={{ 
+                      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                      borderRadius: '8px',
+                      padding: '12px 32px',
+                      border: 'none',
+                      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
+                      whiteSpace: 'nowrap',
+                      flexShrink: 0,
+                      transition: 'all 0.2s ease'
+                    }}
+                    hoverIndicator={false}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.transform = 'translateY(-1px)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
+                    }}
+                  />
+                </Box>
 
-      <main className="App-main">
-        <Routes>
-          <Route path="/" element={
-            <CueList cues={cues} onSelect={handleSelect} onAdd={handleAdd} query={search} viewMode={viewMode} setViewMode={setViewMode} />
-          } />
-          
-          <Route path="/login" element={
-            user ? <Navigate to="/" /> : <LoginPage />
-          } />
-          
-          <Route path="/register" element={
-            user ? <Navigate to="/" /> : <LoginPage />
-          } />
-          
-          <Route path="/oauth-callback" element={<OAuthCallback />} />
-          
-          <Route path="/cue/:id" element={
-            user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
-          } />
-          
-          <Route path="/profile" element={
-            user ? <UserProfile onBack={handleBack} /> : <Navigate to="/login" />
-          } />
-          
-          <Route path="/admin" element={
-            user && user.role === 'admin' ? <AdminPage onBack={handleBack} /> : <Navigate to="/" />
-          } />
-        </Routes>
-      </main>
+                {/* Secondary Filters - Compact Design */}
+                <Box 
+                  direction="row" 
+                  gap="small" 
+                  wrap
+                  align="center"
+                  justify="center"
+                  width="100%"
+                >
+                  <Box direction="row" align="center" gap="xsmall">
+                    <Text size="small" color="text-weak" weight={500}>Filter by:</Text>
+                  </Box>
+                  <Select
+                    options={['All Conditions', 'Like New', 'Used', 'Fair']}
+                    value={condition === 'all' ? 'All Conditions' : condition}
+                    onChange={({ option }) => setCondition(option === 'All Conditions' ? 'all' : option)}
+                    size="small"
+                    style={{ 
+                      minWidth: '130px',
+                      background: 'rgba(30, 41, 59, 0.5)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '8px',
+                      backdropFilter: 'blur(10px)',
+                      padding: '4px 12px'
+                    }}
+                  />
+                  <Select
+                    options={['Newest First', 'Lowest Price', 'Highest Price']}
+                    value={sortBy === 'newest' ? 'Newest First' : sortBy === 'price_asc' ? 'Lowest Price' : 'Highest Price'}
+                    onChange={({ option }) => {
+                      if (option === 'Newest First') setSortBy('newest');
+                      else if (option === 'Lowest Price') setSortBy('price_asc');
+                      else setSortBy('price_desc');
+                    }}
+                    size="small"
+                    style={{ 
+                      minWidth: '130px',
+                      background: 'rgba(30, 41, 59, 0.5)',
+                      border: '1px solid rgba(59, 130, 246, 0.3)',
+                      borderRadius: '8px',
+                      backdropFilter: 'blur(10px)',
+                      padding: '4px 12px'
+                    }}
+                  />
+                  {user && (
+                    <Button 
+                      icon={<Add size="16px" />} 
+                      label={<Text weight={600} size="small" color="white">New Listing</Text>}
+                      onClick={handleAdd}
+                      style={{ 
+                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
+                        border: 'none',
+                        borderRadius: '8px',
+                        padding: '8px 18px',
+                        backdropFilter: 'blur(10px)',
+                        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)',
+                        transition: 'all 0.2s ease'
+                      }}
+                      hoverIndicator={false}
+                      onMouseEnter={(e) => {
+                        e.currentTarget.style.transform = 'translateY(-1px)';
+                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.currentTarget.style.transform = 'translateY(0)';
+                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(34, 197, 94, 0.3)';
+                      }}
+                    />
+                  )}
+                </Box>
 
-      <footer className="App-footer">Built with React — connect to /api/cues on your .NET backend</footer>
+                {/* Search Tips - Hidden by default, shown on focus */}
+                {search.length > 0 && (
+                  <Box 
+                    background="rgba(30, 41, 59, 0.8)" 
+                    pad="small" 
+                    round="small"
+                    style={{ 
+                      backdropFilter: 'blur(10px)',
+                      border: '1px solid rgba(59, 130, 246, 0.2)'
+                    }}
+                  >
+                    <Text size="xsmall" color="text-weak">
+                      💡 Tip: Press Enter to search or use filters to refine results
+                    </Text>
+                  </Box>
+                )}
+              </Box>
+            </Box>
+          </Box>
+        </Box>
+      )}
+
+      {/* Main Content Area with Sidebar */}
+      <Box flex="grow" background="background" style={{ flexGrow: 1 }}>
+        <Box direction="row" fill>
+          {/* Modern Collapsible Sidebar - Only on home page */}
+          {isHomePage && sidebarOpen && (
+            <Box 
+              width="300px" 
+              background="background-front" 
+              pad="medium"
+              gap="medium"
+              elevation="xlarge"
+              style={{ 
+                borderRight: '1px solid rgba(59, 130, 246, 0.2)',
+                height: 'fit-content',
+                position: window.innerWidth <= 768 ? 'fixed' : 'sticky',
+                top: window.innerWidth <= 768 ? '0' : '20px',
+                left: window.innerWidth <= 768 ? '0' : '20px',
+                zIndex: window.innerWidth <= 768 ? 100 : 1,
+                maxHeight: window.innerWidth <= 768 ? '100vh' : 'calc(100vh - 40px)',
+                overflowY: 'auto',
+                overflowX: 'hidden',
+                borderRadius: window.innerWidth <= 768 ? '0' : '16px',
+                backdropFilter: 'blur(20px)',
+                background: 'rgba(15, 23, 42, 0.8)',
+                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 1px rgba(59, 130, 246, 0.3)',
+                animation: 'slideIn 0.3s ease-out',
+                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+              }}
+            >
+              {/* Sidebar Header */}
+              <Box 
+                direction="row" 
+                justify="between" 
+                align="center"
+                pad={{ bottom: 'small' }}
+                border={{ side: 'bottom', color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
+              >
+                <Box direction="row" gap="small" align="center">
+                  <Box 
+                    background="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
+                    pad="xsmall"
+                    round="small"
+                    style={{ 
+                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
+                    }}
+                  >
+                    <Text size="medium" style={{ lineHeight: '1' }}>📋</Text>
+                  </Box>
+                  <Heading level="3" margin="none" style={{ 
+                    fontSize: '18px', 
+                    fontWeight: 700,
+                    color: '#f1f5f9',
+                    letterSpacing: '-0.02em'
+                  }}>
+                    Categories
+                  </Heading>
+                </Box>
+              </Box>
+              
+              {/* Category Buttons */}
+              <Box gap="xsmall" margin={{ top: 'small' }}>
+                <Button
+                  fill="horizontal"
+                  onClick={() => setCategory('all')}
+                  style={{
+                    background: category === 'all' 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                      : 'rgba(30, 41, 59, 0.5)',
+                    color: category === 'all' ? 'white' : '#cbd5e1',
+                    border: category === 'all' 
+                      ? '2px solid transparent' 
+                      : '2px solid rgba(51, 65, 85, 0.5)',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    transform: category === 'all' ? 'translateX(4px)' : 'translateX(0)',
+                    boxShadow: category === 'all' 
+                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+                      : 'none'
+                  }}
+                  hoverIndicator={{
+                    background: category === 'all' 
+                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      : 'rgba(30, 41, 59, 0.8)'
+                  }}
+                >
+                  <Box direction="row" gap="medium" align="center">
+                    <Text size="xlarge" style={{ lineHeight: '1' }}>🎱</Text>
+                    <Box>
+                      <Text weight={category === 'all' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
+                        All Items
+                      </Text>
+                      {category === 'all' && (
+                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
+                          Browse everything
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+                
+                <Button
+                  fill="horizontal"
+                  onClick={() => setCategory('cues')}
+                  style={{
+                    background: category === 'cues' 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                      : 'rgba(30, 41, 59, 0.5)',
+                    color: category === 'cues' ? 'white' : '#cbd5e1',
+                    border: category === 'cues' 
+                      ? '2px solid transparent' 
+                      : '2px solid rgba(51, 65, 85, 0.5)',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    transform: category === 'cues' ? 'translateX(4px)' : 'translateX(0)',
+                    boxShadow: category === 'cues' 
+                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+                      : 'none'
+                  }}
+                  hoverIndicator={{
+                    background: category === 'cues' 
+                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      : 'rgba(30, 41, 59, 0.8)'
+                  }}
+                >
+                  <Box direction="row" gap="medium" align="center">
+                    <Text size="xlarge" style={{ lineHeight: '1' }}>🎯</Text>
+                    <Box>
+                      <Text weight={category === 'cues' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
+                        Cues
+                      </Text>
+                      {category === 'cues' && (
+                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
+                          Pool & snooker cues
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+                
+                <Button
+                  fill="horizontal"
+                  onClick={() => setCategory('cases')}
+                  style={{
+                    background: category === 'cases' 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                      : 'rgba(30, 41, 59, 0.5)',
+                    color: category === 'cases' ? 'white' : '#cbd5e1',
+                    border: category === 'cases' 
+                      ? '2px solid transparent' 
+                      : '2px solid rgba(51, 65, 85, 0.5)',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    transform: category === 'cases' ? 'translateX(4px)' : 'translateX(0)',
+                    boxShadow: category === 'cases' 
+                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+                      : 'none'
+                  }}
+                  hoverIndicator={{
+                    background: category === 'cases' 
+                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      : 'rgba(30, 41, 59, 0.8)'
+                  }}
+                >
+                  <Box direction="row" gap="medium" align="center">
+                    <Text size="xlarge" style={{ lineHeight: '1' }}>💼</Text>
+                    <Box>
+                      <Text weight={category === 'cases' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
+                        Cases
+                      </Text>
+                      {category === 'cases' && (
+                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
+                          Protective cases
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+              </Box>
+
+              {/* Filters Section */}
+              <Box 
+                margin={{ top: 'medium' }}
+                pad={{ top: 'medium' }}
+                border={{ side: 'top', color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
+                gap="small"
+              >
+                <Box direction="row" gap="small" align="center">
+                  <Box 
+                    background="rgba(59, 130, 246, 0.2)"
+                    pad="xsmall"
+                    round="small"
+                  >
+                    <Text size="small" style={{ lineHeight: '1' }}>🔍</Text>
+                  </Box>
+                  <Heading level="4" margin="none" style={{ 
+                    fontSize: '14px', 
+                    fontWeight: 600,
+                    color: '#cbd5e1',
+                    letterSpacing: '0.05em',
+                    textTransform: 'uppercase'
+                  }}>
+                    Filters
+                  </Heading>
+                </Box>
+                <Box 
+                  background="rgba(30, 41, 59, 0.5)"
+                  pad="medium"
+                  round="8px"
+                  border={{ color: 'rgba(51, 65, 85, 0.5)', size: '1px' }}
+                >
+                  <Text size="small" color="#94a3b8" style={{ fontStyle: 'italic' }}>
+                    🎨 Price range & advanced filters coming soon...
+                  </Text>
+                </Box>
+              </Box>
+
+              {/* Pro Tip Section */}
+              <Box 
+                background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)"
+                pad="medium"
+                round="12px"
+                border={{ color: 'rgba(59, 130, 246, 0.3)', size: '1px' }}
+                margin={{ top: 'small' }}
+              >
+                <Box direction="row" gap="small" align="start">
+                  <Text size="medium">💡</Text>
+                  <Box>
+                    <Text size="small" weight={600} color="#f1f5f9" style={{ lineHeight: '1.4' }}>
+                      Pro Tip
+                    </Text>
+                    <Text size="xsmall" color="#94a3b8" style={{ lineHeight: '1.5' }}>
+                      Use the search bar above to find specific brands or models quickly!
+                    </Text>
+                  </Box>
+                </Box>
+              </Box>
+            </Box>
+          )}
+
+          {/* Main Content */}
+          <Box 
+            flex 
+            pad={{ horizontal: 'medium', vertical: 'none' }} 
+            style={{ 
+              maxWidth: sidebarOpen ? '100%' : '1400px', 
+              width: '100%',
+              margin: sidebarOpen ? '0' : '0 auto'
+            }}
+          >
+            <Routes>
+              <Route path="/" element={
+                <CueList 
+                  cues={cues} 
+                  onSelect={handleSelect} 
+                  onAdd={handleAdd} 
+                  query={search} 
+                  viewMode={viewMode} 
+                  setViewMode={setViewMode}
+                  category={category}
+                  condition={condition}
+                  sortBy={sortBy}
+                />
+              } />
+              
+              <Route path="/login" element={
+                user ? <Navigate to="/" /> : <LoginPage />
+              } />
+              
+              <Route path="/register" element={
+                user ? <Navigate to="/" /> : <LoginPage />
+              } />
+              
+              <Route path="/oauth-callback" element={<OAuthCallback />} />
+              
+              <Route path="/cue/:id" element={
+                user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              
+              <Route path="/profile" element={
+                user ? <UserProfile onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              
+              <Route path="/admin" element={
+                user && user.role === 'admin' ? <AdminPage onBack={handleBack} /> : <Navigate to="/" />
+              } />
+            </Routes>
+          </Box>
+        </Box>
+      </Box>
+
+      <Footer 
+        background="background-front" 
+        pad="large" 
+        justify="center" 
+        border={{ side: 'top', color: 'border', size: 'small' }}
+        style={{
+          boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)'
+        }}
+      >
+        <Box align="center" gap="small">
+          <Text size="medium" weight={600} color="text">
+            🎱 CueFinder
+          </Text>
+          <Text size="small" color="text-weak" textAlign="center">
+            Your Premium Billiard Cue Marketplace
+          </Text>
+          <Box direction="row" gap="medium" margin={{ top: 'small' }}>
+            <Text size="small" color="text-weak">© 2026 CueFinder</Text>
+            <Text size="small" color="text-weak">•</Text>
+            <Text size="small" color="brand" weight={500} style={{ cursor: 'pointer' }}>
+              Privacy Policy
+            </Text>
+            <Text size="small" color="text-weak">•</Text>
+            <Text size="small" color="brand" weight={500} style={{ cursor: 'pointer' }}>
+              Terms of Service
+            </Text>
+          </Box>
+        </Box>
+      </Footer>
 
       {/* Add Cue Modal */}
       {showAddModal && (
         <CueFormModal
+          cue={editingCue}
           onClose={handleCloseModal}
           onSave={handleModalSave}
         />
       )}
-    </div>
+    </Box>
   );
 }
 

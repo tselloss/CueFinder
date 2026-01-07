@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { useLocation } from 'react-router-dom';
-import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
+import { useLocation, useNavigate } from 'react-router-dom';
+import { Box, Card, CardBody, Form, FormField, TextInput, Button, Heading, Text } from 'grommet';
+import { User, Lock, Mail, Phone, Location, MapLocation } from 'grommet-icons';
 
 export default function LoginPage() {
-  const { login, register, sendSms, verifySms, externalLogin } = useAuth();
+  const { login, register, sendSms, verifySms } = useAuth();
   const location = useLocation();
+  const navigate = useNavigate();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -56,11 +58,18 @@ export default function LoginPage() {
         if (result.verified) {
           // Phone verified successfully - user is fully registered and verified
           setError(null);
+          // Navigate to home after successful verification
+          const from = location.state?.from?.pathname || '/';
+          navigate(from, { replace: true });
         } else {
           throw new Error('Verification failed');
         }
       } else {
+        // Login (not registration)
         await login(username, password);
+        // Navigate to intended page or home after successful login
+        const from = location.state?.from?.pathname || '/';
+        navigate(from, { replace: true });
       }
     } catch (err) {
       setError(err.message || 'Login failed');
@@ -68,179 +77,256 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const socialGoogle = async () => {
-    setError(null);
-    setLoading(true);
-    
-    try {
-      const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
-      
-      if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
-        throw new Error('Google OAuth not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in .env.local');
-      }
-
-      // Open Google OAuth popup
-      const width = 500;
-      const height = 600;
-      const left = window.screen.width / 2 - width / 2;
-      const top = window.screen.height / 2 - height / 2;
-      
-      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
-        `client_id=${clientId}` +
-        `&redirect_uri=${encodeURIComponent(window.location.origin + '/oauth-callback')}` +
-        `&response_type=token id_token` +
-        `&scope=openid email profile` +
-        `&nonce=${Date.now()}`;
-      
-      const popup = window.open(
-        googleOAuthUrl,
-        'Google Sign-In',
-        `width=${width},height=${height},left=${left},top=${top}`
-      );
-
-      // Listen for OAuth callback
-      window.addEventListener('message', async (event) => {
-        if (event.origin !== window.location.origin) return;
-        
-        if (event.data.type === 'oauth-success' && event.data.provider === 'google') {
-          try {
-            await externalLogin(
-              'Google',
-              event.data.idToken,
-              event.data.email,
-              event.data.name,
-              event.data.picture
-            );
-            if (popup && !popup.closed) popup.close();
-          } catch (error) {
-            setError('Google sign-in failed: ' + (error.message || 'Unknown error'));
-            setLoading(false);
-          }
-        }
-      }, { once: true });
-
-      // Check if popup was blocked
-      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
-        throw new Error('Popup blocked. Please allow popups for this site.');
-      }
-    } catch (err) {
-      setError(err.message || 'Google sign-in failed');
-      setLoading(false);
-    }
-  };
-
-  const socialApple = async () => {
-    setError(null);
-    setLoading(true);
-    try {
-      // For demo purposes without Apple OAuth setup:
-      // Create a mock Apple user
-      const mockAppleEmail = `apple_${Date.now()}@icloud.com`;
-      await externalLogin(
-        'Apple',
-        'mock_apple_token_' + Date.now(),
-        mockAppleEmail,
-        'Apple User',
-        null
-      );
-      setLoading(false);
-    } catch (err) {
-      setError('Apple sign-in failed');
-      setLoading(false);
-    }
-  };
-
-  const bg = process.env.PUBLIC_URL + '/BilliardCueBackground.png';
-  const fallback = process.env.PUBLIC_URL + '/login-bg-fallback.svg';
-
   return (
-    <div className="auth-hero" style={{backgroundImage: `linear-gradient(180deg, rgba(5,10,20,0.45), rgba(5,10,20,0.25)), url(${bg}), url(${fallback})`}}>
-      <Container style={{maxWidth:480}}>
-        <Row className="justify-content-center">
-          <Col>
-            <Card className="auth-card">
-              <Card.Body>
-              <h3 className="mb-3">{isRegister ? 'Create account' : 'Sign in'}</h3>
-              {error && <Alert variant="danger">{error}</Alert>}
-              {/* OAuth buttons hidden for now
-              <div className="social-row">
-                <Button className="social-btn social-apple" onClick={socialApple}><img src={process.env.PUBLIC_URL + '/apple-icon.svg'} alt="Apple"/> Continue with Apple</Button>
-                <Button className="social-btn social-google" onClick={socialGoogle}><img src={process.env.PUBLIC_URL + '/google-icon.svg'} alt="Google"/> Continue with Google</Button>
-              </div>
-              */}
+    <Box 
+      fill 
+      align="center" 
+      justify="center" 
+      background="background"
+      pad="large"
+    >
+      <Card 
+        width="large" 
+        background="background-front" 
+        elevation="large"
+        round="medium"
+        style={{ maxWidth: '500px', border: '1px solid rgba(51, 65, 85, 0.3)' }}
+      >
+        <CardBody pad="large">
+          <Box align="center" margin={{ bottom: 'large' }}>
+            <Heading 
+              level="2" 
+              margin={{ bottom: 'xsmall' }} 
+              color="text-strong"
+              style={{ fontSize: '32px', fontWeight: 700 }}
+            >
+              {isRegister ? '🎱 Create Account' : '🎱 Sign In'}
+            </Heading>
+            <Text color="text-weak" size="medium">
+              {isRegister ? 'Join the CueFinder community' : 'Welcome back to CueFinder'}
+            </Text>
+          </Box>
+          
+          {error && (
+            <Box 
+              background="status-error" 
+              pad="medium" 
+              margin={{ bottom: 'medium' }}
+              round="medium"
+              border={{ color: 'status-critical', size: 'small' }}
+            >
+              <Text color="white" weight={500}>⚠️ {error}</Text>
+            </Box>
+          )}
 
-              <Form onSubmit={submit}>
-                <Form.Group className="mb-3" controlId="username">
-                  <Form.Label>Username</Form.Label>
-                  <Form.Control value={username} onChange={(e)=>setUsername(e.target.value)} placeholder="Enter username" />
-                </Form.Group>
+          <Form onSubmit={submit} validate="submit">
+            <FormField label="Username" name="username" required>
+              <TextInput
+                id="username"
+                name="username"
+                icon={<User size="18px" />}
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="Enter username"
+              />
+            </FormField>
 
-                {isRegister && (
-                  <>
-                    <Form.Group className="mb-3" controlId="name">
-                      <Form.Label>Display name</Form.Label>
-                      <Form.Control value={name} onChange={(e)=>setName(e.target.value)} placeholder="Your name" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="email">
-                      <Form.Label>Email</Form.Label>
-                      <Form.Control value={email} onChange={(e)=>setEmail(e.target.value)} placeholder="you@example.com" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="phone">
-                      <Form.Label>Mobile phone</Form.Label>
-                      <Form.Control value={phone} onChange={(e)=>setPhone(e.target.value)} placeholder="e.g. +15551234567" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="street">
-                      <Form.Label>Street address</Form.Label>
-                      <Form.Control value={address.street} onChange={(e)=>setAddress(a=>({...a, street: e.target.value}))} placeholder="123 Main st" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="city">
-                      <Form.Label>City</Form.Label>
-                      <Form.Control value={address.city} onChange={(e)=>setAddress(a=>({...a, city: e.target.value}))} placeholder="City" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="state">
-                      <Form.Label>State / Province</Form.Label>
-                      <Form.Control value={address.state} onChange={(e)=>setAddress(a=>({...a, state: e.target.value}))} placeholder="State / Province" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="postal">
-                      <Form.Label>Postal code</Form.Label>
-                      <Form.Control value={address.postalCode} onChange={(e)=>setAddress(a=>({...a, postalCode: e.target.value}))} placeholder="Postal code" />
-                    </Form.Group>
-                    <Form.Group className="mb-3" controlId="country">
-                      <Form.Label>Country</Form.Label>
-                      <Form.Control value={address.country} onChange={(e)=>setAddress(a=>({...a, country: e.target.value}))} placeholder="Country" />
-                    </Form.Group>
-                  </>
-                )}
+            {isRegister && (
+              <>
+                <FormField label="Display name" name="name" required>
+                  <TextInput
+                    id="name"
+                    name="name"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    placeholder="Your name"
+                    required
+                  />
+                </FormField>
+                
+                <FormField label="Email" name="email" required>
+                  <TextInput
+                    id="email"
+                    name="email"
+                    icon={<Mail />}
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    placeholder="you@example.com"
+                    required
+                  />
+                </FormField>
+                
+                <FormField label="Mobile phone" name="phone" required>
+                  <TextInput
+                    id="phone"
+                    name="phone"
+                    icon={<Phone />}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                    placeholder="e.g. +15551234567"
+                    required
+                  />
+                </FormField>
+                
+                <FormField label="Street address" name="street">
+                  <TextInput
+                    id="street"
+                    name="street"
+                    icon={<Location />}
+                    value={address.street}
+                    onChange={(e) => setAddress(a => ({ ...a, street: e.target.value }))}
+                    placeholder="123 Main st"
+                  />
+                </FormField>
+                
+                <Box direction="row" gap="small">
+                  <FormField label="City" name="city" flex>
+                    <TextInput
+                      id="city"
+                      name="city"
+                      value={address.city}
+                      onChange={(e) => setAddress(a => ({ ...a, city: e.target.value }))}
+                      placeholder="City"
+                    />
+                  </FormField>
+                  
+                  <FormField label="State / Province" name="state" flex>
+                    <TextInput
+                      id="state"
+                      name="state"
+                      value={address.state}
+                      onChange={(e) => setAddress(a => ({ ...a, state: e.target.value }))}
+                      placeholder="State"
+                    />
+                  </FormField>
+                </Box>
+                
+                <Box direction="row" gap="small">
+                  <FormField label="Postal code" name="postalCode" flex>
+                    <TextInput
+                      id="postalCode"
+                      name="postalCode"
+                      value={address.postalCode}
+                      onChange={(e) => setAddress(a => ({ ...a, postalCode: e.target.value }))}
+                      placeholder="Postal code"
+                    />
+                  </FormField>
+                  
+                  <FormField label="Country" name="country" flex>
+                    <TextInput
+                      id="country"
+                      name="country"
+                      icon={<MapLocation />}
+                      value={address.country}
+                      onChange={(e) => setAddress(a => ({ ...a, country: e.target.value }))}
+                      placeholder="Country"
+                    />
+                  </FormField>
+                </Box>
+              </>
+            )}
 
-                <Form.Group className="mb-3" controlId="password">
-                  <Form.Label>Password</Form.Label>
-                  <Form.Control type="password" value={password} onChange={(e)=>setPassword(e.target.value)} placeholder="Password" />
-                </Form.Group>
+            <FormField label="Password" name="password" required>
+              <TextInput
+                id="password"
+                name="password"
+                icon={<Lock />}
+                type="password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="Password"
+              />
+            </FormField>
 
-                <div className="d-flex justify-content-between align-items-center">
-                  <div>
-                    <Button variant="primary" type="submit" disabled={loading}>
-                      {isRegister ? (codeSent ? 'Verify & Complete' : 'Create Account') : 'Sign in'}
-                    </Button>{' '}
-                    <Button variant="outline-secondary" onClick={()=>{ setIsRegister(s=>!s); setCodeSent(false); setCode(''); setVerificationToken(''); }}>
-                      {isRegister ? 'Back to login' : 'Register'}
-                    </Button>
-                  </div>
-                </div>
+            {isRegister && codeSent && (
+              <Box 
+                background="accent-1" 
+                pad="medium" 
+                margin={{ top: 'medium' }}
+                round="small"
+                gap="small"
+              >
+                <Text color="white" weight="bold">✓ Check your phone for a 4-digit code</Text>
+                <FormField name="code">
+                  <TextInput
+                    id="code"
+                    name="code"
+                    value={code}
+                    onChange={(e) => setCode(e.target.value)}
+                    placeholder="1234"
+                    maxLength={4}
+                  />
+                </FormField>
+                <Button 
+                  label="Verify Code"
+                  onClick={async () => {
+                    try {
+                      const result = await verifySms(verificationToken, code);
+                      if (result.verified) {
+                        setError(null);
+                      } else {
+                        setError('Invalid code');
+                      }
+                    } catch (e) {
+                      setError(e.message);
+                    }
+                  }}
+                  secondary
+                />
+              </Box>
+            )}
 
-                {isRegister && codeSent && (
-                  <div className="verify-box">
-                    <p className="text-success mb-2">✓ Check your phone for a 4-digit code</p>
-                    <Form.Control className="verify-input" value={code} onChange={(e)=>setCode(e.target.value)} placeholder="1234" maxLength={4} />
-                    <Button onClick={async ()=>{ try{ const result = await verifySms(verificationToken, code); if (result.verified) { setError(null); } else { setError('Invalid code'); } } catch(e){ setError(e.message) } }}>Verify</Button>
-                  </div>
-                )}
-              </Form>
-            </Card.Body>
-            </Card>
-          </Col>
-        </Row>
-      </Container>
-    </div>
+            <Box 
+              direction="row" 
+              gap="medium" 
+              margin={{ top: 'large' }}
+              justify="between"
+            >
+              <Button
+                type="submit"
+                primary
+                label={
+                  <Text weight={600}>
+                    {isRegister ? (codeSent ? 'Verify & Complete' : 'Create Account') : 'Sign In'}
+                  </Text>
+                }
+                disabled={loading}
+                fill="horizontal"
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  padding: '14px 24px',
+                  borderRadius: '8px',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+                  border: 'none'
+                }}
+              />
+            </Box>
+            
+            <Box 
+              align="center" 
+              margin={{ top: 'medium' }}
+              pad={{ top: 'medium' }}
+              border={{ side: 'top', color: 'border', size: 'small' }}
+            >
+              <Button
+                plain
+                label={
+                  <Text size="small" color="brand" weight={500}>
+                    {isRegister ? '← Back to Sign In' : "Don't have an account? Register →"}
+                  </Text>
+                }
+                onClick={() => {
+                  setIsRegister(s => !s);
+                  setCodeSent(false);
+                  setCode('');
+                  setVerificationToken('');
+                }}
+              />
+            </Box>
+          </Form>
+        </CardBody>
+      </Card>
+    </Box>
   );
 }
