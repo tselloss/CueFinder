@@ -1,11 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import * as cueService from '../api/cueService';
 import { useAuth } from '../auth/AuthContext';
+import MyCues from './MyCues';
 
 export default function UserProfile({ onBack }) {
   const { user, updateUser } = useAuth();
-  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'myClues'
-  const [userCues, setUserCues] = useState([]);
+  const [activeTab, setActiveTab] = useState('profile'); // 'profile' or 'myListings'
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
@@ -44,27 +43,6 @@ export default function UserProfile({ onBack }) {
     }
   }, [user]);
 
-  // Load user's cues on mount
-  useEffect(() => {
-    if (activeTab === 'myClues') {
-      loadUserCues();
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [activeTab]);
-
-  const loadUserCues = async () => {
-    setLoading(true);
-    try {
-      const cues = await cueService.getCues();
-      // Filter cues for current user (assuming seller_name matches user name)
-      const userCuesList = cues.filter(c => c.seller_name === user?.name);
-      setUserCues(userCuesList);
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to load your cues' });
-    }
-    setLoading(false);
-  };
-
   const handleProfileChange = (e) => {
     const { name, value } = e.target;
     if (name.startsWith('address.')) {
@@ -99,26 +77,6 @@ export default function UserProfile({ onBack }) {
     setLoading(false);
   };
 
-  const handleDeleteCue = async (cueId) => {
-    if (!window.confirm('Are you sure you want to delete this cue?')) return;
-    
-    setLoading(true);
-    try {
-      await cueService.deleteCue(cueId);
-      setUserCues(userCues.filter(c => c.id !== cueId));
-      setMessage({ type: 'success', text: 'Cue deleted successfully!' });
-      setTimeout(() => setMessage(null), 3000);
-    } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to delete cue' });
-    }
-    setLoading(false);
-  };
-
-  const handleEditCue = (cueId) => {
-    // TODO: Navigate to edit cue page or open edit modal
-    console.log('Edit cue:', cueId);
-  };
-
   return (
     <div className="user-profile">
       <div className="profile-header">
@@ -142,10 +100,10 @@ export default function UserProfile({ onBack }) {
           Profile Settings
         </button>
         <button
-          className={`tab-btn ${activeTab === 'myClues' ? 'active' : ''}`}
-          onClick={() => setActiveTab('myClues')}
+          className={`tab-btn ${activeTab === 'myListings' ? 'active' : ''}`}
+          onClick={() => setActiveTab('myListings')}
         >
-          My Cues ({userCues.length})
+          My Listings
         </button>
       </div>
 
@@ -326,56 +284,10 @@ export default function UserProfile({ onBack }) {
         </div>
       )}
 
-      {/* My Cues Tab */}
-      {activeTab === 'myClues' && (
+      {/* My Listings Tab */}
+      {activeTab === 'myListings' && (
         <div className="profile-content">
-          {loading && <p className="loading">Loading your cues...</p>}
-          
-          {!loading && userCues.length === 0 ? (
-            <div className="empty-state">
-              <p>You haven't posted any cues yet.</p>
-              <p className="muted">Start by adding your first billiard cue to the marketplace!</p>
-            </div>
-          ) : (
-            <div className="my-cues-list">
-              {userCues.map(cue => (
-                <div key={cue.id} className="my-cue-item">
-                  <div className="cue-thumbnail">
-                    {cue.images && cue.images[0] && (
-                      <img src={cue.images[0]} alt={cue.title} />
-                    )}
-                  </div>
-                  
-                  <div className="cue-info">
-                    <h4>{cue.title || cue.brand}</h4>
-                    <p className="cue-brand">{cue.brand}</p>
-                    <div className="cue-details">
-                      <span className="price">${(cue.price || 0).toFixed(2)}</span>
-                      <span className={`status ${cue.is_sold ? 'sold' : 'available'}`}>
-                        {cue.is_sold ? 'SOLD' : 'AVAILABLE'}
-                      </span>
-                      {cue.condition && <span className="condition">{cue.condition}</span>}
-                    </div>
-                  </div>
-
-                  <div className="cue-actions">
-                    <button
-                      className="btn small"
-                      onClick={() => handleEditCue(cue.id)}
-                    >
-                      Edit
-                    </button>
-                    <button
-                      className="btn small danger"
-                      onClick={() => handleDeleteCue(cue.id)}
-                    >
-                      Delete
-                    </button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
+          <MyCues />
         </div>
       )}
     </div>

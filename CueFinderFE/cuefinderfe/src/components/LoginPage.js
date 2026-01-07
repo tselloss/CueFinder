@@ -1,9 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { useLocation } from 'react-router-dom';
 import { Card, Form, Button, Alert, Container, Row, Col } from 'react-bootstrap';
 
 export default function LoginPage() {
-  const { login, register, sendSms, verifySms } = useAuth();
+  const { login, register, sendSms, verifySms, externalLogin } = useAuth();
+  const location = useLocation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -16,6 +18,15 @@ export default function LoginPage() {
   const [code, setCode] = useState('');
   const [error, setError] = useState(null);
   const [loading, setLoading] = useState(false);
+
+  // Auto-switch to register mode if on /register route
+  useEffect(() => {
+    if (location.pathname === '/register') {
+      setIsRegister(true);
+    } else {
+      setIsRegister(false);
+    }
+  }, [location]);
 
   const submit = async (e) => {
     e.preventDefault();
@@ -57,20 +68,86 @@ export default function LoginPage() {
     setLoading(false);
   };
 
-  const socialApple = async () => {
-    setError(null);
-    setLoading(true);
-    try { await register('admin','admin','Administrator'); } catch(err) { /* ignore if exists */ }
-    try { await login('admin','admin'); } catch(e) { setError('Social sign-in failed'); }
-    setLoading(false);
-  };
-
   const socialGoogle = async () => {
     setError(null);
     setLoading(true);
-    try { await register('google_user','googlepass','Google User'); } catch(err) { /* ignore */ }
-    try { await login('google_user','googlepass'); } catch(e) { setError('Social sign-in failed'); }
-    setLoading(false);
+    
+    try {
+      const clientId = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+      
+      if (!clientId || clientId === 'YOUR_GOOGLE_CLIENT_ID') {
+        throw new Error('Google OAuth not configured. Please set REACT_APP_GOOGLE_CLIENT_ID in .env.local');
+      }
+
+      // Open Google OAuth popup
+      const width = 500;
+      const height = 600;
+      const left = window.screen.width / 2 - width / 2;
+      const top = window.screen.height / 2 - height / 2;
+      
+      const googleOAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
+        `client_id=${clientId}` +
+        `&redirect_uri=${encodeURIComponent(window.location.origin + '/oauth-callback')}` +
+        `&response_type=token id_token` +
+        `&scope=openid email profile` +
+        `&nonce=${Date.now()}`;
+      
+      const popup = window.open(
+        googleOAuthUrl,
+        'Google Sign-In',
+        `width=${width},height=${height},left=${left},top=${top}`
+      );
+
+      // Listen for OAuth callback
+      window.addEventListener('message', async (event) => {
+        if (event.origin !== window.location.origin) return;
+        
+        if (event.data.type === 'oauth-success' && event.data.provider === 'google') {
+          try {
+            await externalLogin(
+              'Google',
+              event.data.idToken,
+              event.data.email,
+              event.data.name,
+              event.data.picture
+            );
+            if (popup && !popup.closed) popup.close();
+          } catch (error) {
+            setError('Google sign-in failed: ' + (error.message || 'Unknown error'));
+            setLoading(false);
+          }
+        }
+      }, { once: true });
+
+      // Check if popup was blocked
+      if (!popup || popup.closed || typeof popup.closed === 'undefined') {
+        throw new Error('Popup blocked. Please allow popups for this site.');
+      }
+    } catch (err) {
+      setError(err.message || 'Google sign-in failed');
+      setLoading(false);
+    }
+  };
+
+  const socialApple = async () => {
+    setError(null);
+    setLoading(true);
+    try {
+      // For demo purposes without Apple OAuth setup:
+      // Create a mock Apple user
+      const mockAppleEmail = `apple_${Date.now()}@icloud.com`;
+      await externalLogin(
+        'Apple',
+        'mock_apple_token_' + Date.now(),
+        mockAppleEmail,
+        'Apple User',
+        null
+      );
+      setLoading(false);
+    } catch (err) {
+      setError('Apple sign-in failed');
+      setLoading(false);
+    }
   };
 
   const bg = process.env.PUBLIC_URL + '/BilliardCueBackground.png';
@@ -85,10 +162,12 @@ export default function LoginPage() {
               <Card.Body>
               <h3 className="mb-3">{isRegister ? 'Create account' : 'Sign in'}</h3>
               {error && <Alert variant="danger">{error}</Alert>}
+              {/* OAuth buttons hidden for now
               <div className="social-row">
                 <Button className="social-btn social-apple" onClick={socialApple}><img src={process.env.PUBLIC_URL + '/apple-icon.svg'} alt="Apple"/> Continue with Apple</Button>
                 <Button className="social-btn social-google" onClick={socialGoogle}><img src={process.env.PUBLIC_URL + '/google-icon.svg'} alt="Google"/> Continue with Google</Button>
               </div>
+              */}
 
               <Form onSubmit={submit}>
                 <Form.Group className="mb-3" controlId="username">
@@ -157,9 +236,6 @@ export default function LoginPage() {
                   </div>
                 )}
               </Form>
-
-              <hr />
-              <div className="text-muted small">Try <strong>admin/admin</strong> to auto-create an admin account, or create a new user.</div>
             </Card.Body>
             </Card>
           </Col>

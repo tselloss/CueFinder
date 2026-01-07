@@ -100,6 +100,21 @@ namespace CueFinder.Database.Models
     public DateTime? PhoneVerifiedAt { get; set; }
 
     /// <summary>
+    /// Whether the account is verified (email or phone)
+    /// </summary>
+    public bool IsVerified { get; set; } = false;
+
+    /// <summary>
+    /// External OAuth provider (Google, Apple, etc.)
+    /// </summary>
+    public string? ExternalProvider { get; set; }
+
+    /// <summary>
+    /// External provider's user ID
+    /// </summary>
+    public string? ExternalProviderId { get; set; }
+
+    /// <summary>
     /// Whether the account is active
     /// </summary>
     public bool IsActive { get; set; } = true;        /// <summary>

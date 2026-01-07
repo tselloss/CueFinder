@@ -57,18 +57,19 @@ namespace CueFinder.Models
                     };
                 }
 
-                // Generate unique filename
-                var fileName = GenerateUniqueFileName(request.File.FileName);
-                var filePath = Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath, fileName);
-
-                // Ensure directory exists
-                Directory.CreateDirectory(Path.GetDirectoryName(filePath)!);
-
-                // Save the file
+                // Save image file to disk
+                var fileName = $"{request.CueId}_{Guid.NewGuid()}{Path.GetExtension(request.File.FileName)}";
+                var uploadsFolder = Path.Combine(_webHostEnvironment.WebRootPath, "uploads", "cues");
+                Directory.CreateDirectory(uploadsFolder);
+                var filePath = Path.Combine(uploadsFolder, fileName);
+                
                 using (var stream = new FileStream(filePath, FileMode.Create))
                 {
                     await request.File.CopyToAsync(stream);
                 }
+
+                var imageUrl = $"/uploads/cues/{fileName}";
+                var contentType = request.File.ContentType;
 
                 // If set as primary, remove primary flag from other images
                 if (request.IsPrimary)
@@ -83,11 +84,12 @@ namespace CueFinder.Models
                     }
                 }
 
-                // Create CueImage record in database
+                // Create CueImage record in database with file path
                 var cueImage = new CueImage
                 {
                     CueId = request.CueId,
-                    ImageUrl = GetImageUrl(fileName),
+                    ImageUrl = imageUrl,
+                    ContentType = contentType,
                     AltText = request.AltText ?? $"Cue image {request.DisplayOrder}",
                     DisplayOrder = request.DisplayOrder,
                     IsPrimary = request.IsPrimary,
@@ -105,7 +107,7 @@ namespace CueFinder.Models
                     ImageId = cueImage.Id,
                     ImageUrl = cueImage.ImageUrl,
                     FileSize = request.File.Length,
-                    MimeType = request.File.ContentType,
+                    MimeType = contentType,
                     UploadedAt = cueImage.UploadedAt
                 };
             }

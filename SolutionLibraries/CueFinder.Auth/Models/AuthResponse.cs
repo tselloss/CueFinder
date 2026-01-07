@@ -69,5 +69,15 @@ namespace CueFinder.Auth.Models
     /// Country
     /// </summary>
     public string? Country { get; set; }
+
+    /// <summary>
+    /// External authentication provider (Google, Apple, etc.)
+    /// </summary>
+    public string? ExternalProvider { get; set; }
+
+    /// <summary>
+    /// External provider user ID
+    /// </summary>
+    public string? ExternalProviderId { get; set; }
 }
 }

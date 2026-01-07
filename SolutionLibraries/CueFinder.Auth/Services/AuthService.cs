@@ -233,6 +233,61 @@ namespace CueFinder.Auth.Services
         }
 
         /// <summary>
+        /// Authenticate user via external OAuth provider (Google, Apple)
+        /// </summary>
+        public async Task<AuthResponse> ExternalLoginAsync(ExternalAuthRequest request)
+        {
+            // Simulate async operation
+            await Task.Delay(100);
+
+            // In production, verify the idToken with the provider's API
+            // For now, we'll create/login the user based on email
+
+            if (string.IsNullOrEmpty(request.Email))
+            {
+                throw new UnauthorizedAccessException("Email is required for external authentication");
+            }
+
+            // Check if user already exists
+            var user = Users.FirstOrDefault(u => u.Email == request.Email);
+
+            if (user == null)
+            {
+                // Create new user from OAuth data
+                user = new UserData
+                {
+                    Id = _nextUserId++,
+                    Username = request.Email.Split('@')[0] + "_" + request.Provider.ToString().ToLower(),
+                    Password = Guid.NewGuid().ToString(), // Random password since OAuth user
+                    Name = request.Name ?? request.Email.Split('@')[0],
+                    Email = request.Email,
+                    Phone = string.Empty,
+                    Role = "user",
+                    CreatedAt = DateTime.UtcNow,
+                    UpdatedAt = DateTime.UtcNow
+                };
+                Users.Add(user);
+            }
+
+            var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role);
+            var expiresIn = _tokenService.GetTokenExpirationSeconds();
+
+            return new AuthResponse
+            {
+                AccessToken = token,
+                UserId = user.Id,
+                Username = user.Username,
+                Name = user.Name,
+                Email = user.Email,
+                Phone = user.Phone,
+                Role = user.Role,
+                ExpiresIn = expiresIn,
+                ExternalProvider = request.Provider.ToString(),
+                ExternalProviderId = request.Email // Using email as provider ID for simplicity
+            };
+        }
+
+        /// <summary>
         /// Internal user data model
         /// </summary>
         private class UserData

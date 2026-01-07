@@ -141,14 +141,20 @@ namespace CueFinder.Database.Context
                 entity.HasKey(e => e.Id);
 
                 entity.Property(e => e.ImageUrl)
-                    .IsRequired()
-                    .HasMaxLength(500);
+                    .IsRequired();
 
                 entity.Property(e => e.AltText)
                     .HasMaxLength(200);
 
                 entity.Property(e => e.UploadedAt)
                     .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                // Base64 image data for production storage
+                entity.Property(e => e.ImageData)
+                    .HasColumnType("text");
+
+                entity.Property(e => e.ContentType)
+                    .HasMaxLength(100);
 
                 entity.HasIndex(e => e.CueId)
                     .HasDatabaseName("IX_CueImage_CueId");

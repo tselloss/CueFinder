@@ -387,5 +387,92 @@ namespace CueFinder.Auth.Services
                 return false;
             }
         }
+
+        /// <summary>
+        /// Authenticate user via external OAuth provider (Google, Apple)
+        /// </summary>
+        public async Task<AuthResponse> ExternalLoginAsync(ExternalAuthRequest request)
+        {
+            try
+            {
+                _logger.LogInformation("External login attempt for provider: {Provider}, email: {Email}", 
+                    request.Provider, request.Email);
+
+                if (string.IsNullOrEmpty(request.Email))
+                {
+                    throw new ArgumentException("Email is required for external authentication");
+                }
+
+                // Try to find existing user by email
+                User? user = await _userService.GetByEmailAsync(request.Email);
+
+                if (user == null)
+                {
+                    // Create new user for first-time external login
+                    _logger.LogInformation("Creating new user for external login: {Email}", request.Email);
+
+                    user = new User
+                    {
+                        Username = request.Email.Split('@')[0] + "_" + Guid.NewGuid().ToString().Substring(0, 8),
+                        Email = request.Email,
+                        Name = request.Name ?? request.Email.Split('@')[0],
+                        PasswordHash = HashPassword(Guid.NewGuid().ToString()), // Random password for OAuth users
+                        Role = "user",
+                        IsActive = true,
+                        IsVerified = true, // Auto-verify OAuth users
+                        CreatedAt = DateTime.UtcNow,
+                        LastLoginAt = DateTime.UtcNow,
+                        ExternalProvider = request.Provider.ToString(),
+                        ExternalProviderId = request.IdToken
+                    };
+
+                    user = await _userService.CreateUserAsync(user);
+                    _logger.LogInformation("New user created: {UserId}", user.Id);
+                }
+                else
+                {
+                    // Update existing user's external provider info if not set
+                    if (string.IsNullOrEmpty(user.ExternalProvider))
+                    {
+                        user.ExternalProvider = request.Provider.ToString();
+                        user.ExternalProviderId = request.IdToken;
+                    }
+
+                    // Update last login timestamp
+                    user.LastLoginAt = DateTime.UtcNow;
+                    await _userService.UpdateUserAsync(user);
+                }
+
+                // Generate token
+                var token = _tokenService.GenerateToken(user.Id, user.Username, user.Role);
+                var expiresIn = _tokenService.GetTokenExpirationSeconds();
+
+                _logger.LogInformation("User {UserId} logged in successfully via {Provider}", user.Id, request.Provider);
+
+                return new AuthResponse
+                {
+                    AccessToken = token,
+                    UserId = user.Id,
+                    Username = user.Username,
+                    Name = user.Name,
+                    Email = user.Email,
+                    Phone = user.Phone,
+                    Role = user.Role,
+                    Address = user.Address,
+                    City = user.City,
+                    State = user.State,
+                    ZipCode = user.ZipCode,
+                    Country = user.Country,
+                    ExpiresIn = expiresIn,
+                    ExternalProvider = user.ExternalProvider,
+                    ExternalProviderId = user.ExternalProviderId
+                };
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error during external login");
+                throw;
+            }
+        }
     }
 }
