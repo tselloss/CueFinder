@@ -64,7 +64,7 @@ public class CueService : ICueService
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == cueId && !c.IsSold);
+            .FirstOrDefaultAsync(c => c.Id == cueId); // Show all cues including sold ones
 
         if (cue == null)
             return null;
