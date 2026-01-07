@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Layer, Box, Button, Heading, Form, FormField, TextInput, TextArea, Select } from 'grommet';
 import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
 import * as cueService from '../api/cueService';
+import * as cueCaseService from '../api/cueCaseService';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -17,18 +18,30 @@ const getImageUrl = (img) => {
 };
 
 export default function CueFormModal({ cue, onClose, onSave }) {
+  const [productType, setProductType] = useState('cue'); // 'cue' or 'case'
   const [formData, setFormData] = useState({
     title: '',
     brand: '',
     price: '',
     condition: 'Excellent',
     description: '',
+    // Cue-specific fields
     weight: '',
     length: '',
     tipSize: '',
     shaftMaterial: '',
     buttMaterial: '',
-    location: ''
+    location: '',
+    // Case-specific fields
+    caseCapacity: '1x1',
+    caseOpening: 'Butterfly',
+    caseType: 'Soft',
+    color: '',
+    caseMaterial: '',
+    outerDimensions: '',
+    pocketSpace: '',
+    handleExtensionSpace: '',
+    caseWeight: ''
   });
   const [images, setImages] = useState([]);
   const [imagePreviews, setImagePreviews] = useState([]);
@@ -37,18 +50,30 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
   useEffect(() => {
     if (cue) {
+      setProductType(cue.productType || 'cue');
       setFormData({
         title: cue.title || '',
         brand: cue.brand || '',
         price: cue.price || '',
         condition: cue.condition || 'Excellent',
         description: cue.description || '',
+        // Cue fields
         weight: cue.weight || '',
         length: cue.length || '',
         tipSize: cue.tipSize || '',
         shaftMaterial: cue.shaftMaterial || '',
         buttMaterial: cue.buttMaterial || '',
-        location: cue.location || ''
+        location: cue.location || '',
+        // Case fields
+        caseCapacity: cue.caseCapacity || '',
+        caseOpening: cue.caseOpening || 'Butterfly',
+        caseType: cue.caseType || 'Soft',
+        color: cue.color || '',
+        caseMaterial: cue.caseMaterial || '',
+        outerDimensions: cue.outerDimensions || '',
+        pocketSpace: cue.pocketSpace || '',
+        handleExtensionSpace: cue.handleExtensionSpace || '',
+        caseWeight: cue.caseWeight || ''
       });
     }
   }, [cue]);
@@ -107,46 +132,81 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     setError(null);
 
     try {
-      // Validate images are provided for new cues
+      // Validate images are provided for new listings
       if (!cue && images.length === 0) {
-        setError('Please upload at least one image for your cue listing.');
+        setError(`Please upload at least one image for your ${productType} listing.`);
         setLoading(false);
         return;
       }
 
-      // Prepare cue data
-      const cueData = {
-        title: formData.title,
-        brand: formData.brand,
-        price: parseFloat(formData.price),
-        condition: formData.condition,
-        description: formData.description,
-        weight: formData.weight ? parseFloat(formData.weight) : null,
-        length: formData.length ? parseFloat(formData.length) : null,
-        tipSize: formData.tipSize ? parseFloat(formData.tipSize) : null,
-        shaftMaterial: formData.shaftMaterial || null,
-        buttMaterial: formData.buttMaterial || null,
-        location: formData.location || null
-      };
+      let savedItem;
+      
+      if (productType === 'cue') {
+        // Handle CUE: Use cueService
+        const cueData = {
+          title: formData.title,
+          brand: formData.brand,
+          price: parseFloat(formData.price),
+          condition: formData.condition,
+          description: formData.description,
+          location: formData.location || null,
+          weight: formData.weight ? parseFloat(formData.weight) : null,
+          length: formData.length ? parseFloat(formData.length) : null,
+          tipSize: formData.tipSize ? parseFloat(formData.tipSize) : null,
+          shaftMaterial: formData.shaftMaterial || null,
+          buttMaterial: formData.buttMaterial || null
+        };
 
-      let savedCue;
-      if (cue) {
-        // Update existing cue
-        savedCue = await cueService.updateCue(cue.id, cueData);
+        if (cue) {
+          // Update existing cue
+          savedItem = await cueService.updateCue(cue.id, cueData);
+        } else {
+          // Create new cue
+          savedItem = await cueService.createCue(cueData);
+        }
+
+        // Upload new images if any
+        if (images.length > 0 && savedItem && savedItem.id) {
+          await cueService.uploadCueImages(savedItem.id, images);
+        }
       } else {
-        // Create new cue
-        savedCue = await cueService.createCue(cueData);
-      }
+        // Handle CASE: Use cueCaseService
+        const caseData = {
+          title: formData.title,
+          brand: formData.brand,
+          price: parseFloat(formData.price),
+          condition: formData.condition,
+          description: formData.description,
+          location: formData.location || null,
+          caseCapacity: formData.caseCapacity || null,
+          caseOpening: formData.caseOpening || null,
+          caseType: formData.caseType || null,
+          color: formData.color || null,
+          caseMaterial: formData.caseMaterial || null,
+          outerDimensions: formData.outerDimensions || null,
+          pocketSpace: formData.pocketSpace || null,
+          handleExtensionSpace: formData.handleExtensionSpace || null,
+          caseWeight: formData.caseWeight || null
+        };
 
-      // Upload new images if any
-      if (images.length > 0 && savedCue && savedCue.id) {
-        await cueService.uploadCueImages(savedCue.id, images);
+        if (cue) {
+          // Update existing case
+          savedItem = await cueCaseService.updateCueCase(cue.id, caseData);
+        } else {
+          // Create new case
+          savedItem = await cueCaseService.createCueCase(caseData);
+        }
+
+        // Upload new images if any
+        if (images.length > 0 && savedItem && savedItem.id) {
+          await cueCaseService.uploadCueCaseImages(savedItem.id, images);
+        }
       }
 
       onSave();
     } catch (error) {
-      console.error('Error saving cue:', error);
-      setError(error.response?.data?.message || 'Failed to save cue. Please try again.');
+      console.error('Error saving listing:', error);
+      setError(error.response?.data?.message || 'Failed to save listing. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -206,6 +266,130 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
         <Form onSubmit={handleSubmit}>
           <Box gap="small">
+            {/* DEBUG: Show cue value */}
+            {console.log('CueFormModal - cue prop:', cue, 'showing selector:', !cue)}
+            
+            {/* Product Type Selector - Always show for new listings */}
+            {!cue && (
+              <Box
+                background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)"
+                pad="large"
+                round="medium"
+                gap="medium"
+                style={{ 
+                  border: '3px solid rgba(59, 130, 246, 0.6)',
+                  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.2)'
+                }}
+              >
+                <Box align="center" gap="xsmall">
+                  <Heading level="3" margin="none" style={{ fontSize: '20px', fontWeight: 700, color: '#3b82f6' }}>
+                    🎯 What are you listing?
+                  </Heading>
+                  <text size="small" color="text-weak" textAlign="center">
+                    Choose the type of product you want to sell
+                  </text>
+                </Box>
+                
+                <Box direction="row" gap="medium">
+                  <Button
+                    fill="horizontal"
+                    onClick={() => setProductType('cue')}
+                    style={{
+                      background: productType === 'cue' 
+                        ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                        : 'rgba(30, 41, 59, 0.7)',
+                      color: productType === 'cue' ? 'white' : '#cbd5e1',
+                      border: productType === 'cue' 
+                        ? '3px solid #3b82f6' 
+                        : '3px solid rgba(51, 65, 85, 0.8)',
+                      borderRadius: '16px',
+                      padding: '24px 20px',
+                      transition: 'all 0.3s ease',
+                      transform: productType === 'cue' ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: productType === 'cue' 
+                        ? '0 12px 28px rgba(59, 130, 246, 0.5), inset 0 0 60px rgba(255, 255, 255, 0.1)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.3)'
+                    }}
+                    hoverIndicator={{
+                      background: productType === 'cue' 
+                        ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                        : 'rgba(30, 41, 59, 0.9)'
+                    }}
+                  >
+                    <Box align="center" gap="small">
+                      <text style={{ fontSize: '48px', lineHeight: '1' }}>🎱</text>
+                      <Box align="center">
+                        <text weight={700} size="large" style={{ lineHeight: '1.2' }}>
+                          Billiard Cue
+                        </text>
+                        <text size="xsmall" color={productType === 'cue' ? 'rgba(255, 255, 255, 0.8)' : '#94a3b8'} style={{ lineHeight: '1.4' }}>
+                          Pool & Snooker Cues
+                        </text>
+                      </Box>
+                      {productType === 'cue' && (
+                        <Box 
+                          background="rgba(255, 255, 255, 0.2)"
+                          pad="xxsmall"
+                          round="small"
+                          margin={{ top: 'xsmall' }}
+                        >
+                          <text size="xsmall" weight={600}>✓ SELECTED</text>
+                        </Box>
+                      )}
+                    </Box>
+                  </Button>
+                  
+                  <Button
+                    fill="horizontal"
+                    onClick={() => setProductType('case')}
+                    style={{
+                      background: productType === 'case' 
+                        ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                        : 'rgba(30, 41, 59, 0.7)',
+                      color: productType === 'case' ? 'white' : '#cbd5e1',
+                      border: productType === 'case' 
+                        ? '3px solid #3b82f6' 
+                        : '3px solid rgba(51, 65, 85, 0.8)',
+                      borderRadius: '16px',
+                      padding: '24px 20px',
+                      transition: 'all 0.3s ease',
+                      transform: productType === 'case' ? 'scale(1.05)' : 'scale(1)',
+                      boxShadow: productType === 'case' 
+                        ? '0 12px 28px rgba(59, 130, 246, 0.5), inset 0 0 60px rgba(255, 255, 255, 0.1)' 
+                        : '0 4px 12px rgba(0, 0, 0, 0.3)'
+                    }}
+                    hoverIndicator={{
+                      background: productType === 'case' 
+                        ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                        : 'rgba(30, 41, 59, 0.9)'
+                    }}
+                  >
+                    <Box align="center" gap="small">
+                      <text style={{ fontSize: '48px', lineHeight: '1' }}>💼</text>
+                      <Box align="center">
+                        <text weight={700} size="large" style={{ lineHeight: '1.2' }}>
+                          Cue Case
+                        </text>
+                        <text size="xsmall" color={productType === 'case' ? 'rgba(255, 255, 255, 0.8)' : '#94a3b8'} style={{ lineHeight: '1.4' }}>
+                          Protective Cases
+                        </text>
+                      </Box>
+                      {productType === 'case' && (
+                        <Box 
+                          background="rgba(255, 255, 255, 0.2)"
+                          pad="xxsmall"
+                          round="small"
+                          margin={{ top: 'xsmall' }}
+                        >
+                          <text size="xsmall" weight={600}>✓ SELECTED</text>
+                        </Box>
+                      )}
+                    </Box>
+                  </Button>
+                </Box>
+              </Box>
+            )}
+
             {/* Basic Info Section */}
             <Box
               background="background-back"
@@ -277,7 +461,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
               </FormField>
             </Box>
 
-            {/* Specifications Section */}
+            {/* Specifications Section - Conditional based on product type */}
             <Box
               background="background-back"
               pad="medium"
@@ -289,67 +473,177 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                 📏 Specifications
               </text>
 
-              <Box direction="row" gap="small">
-                <Box flex>
-                  <FormField label="Weight (oz)" name="weight">
-                    <TextInput
-                      name="weight"
-                      type="number"
-                      value={formData.weight}
-                      onChange={handleChange}
-                      placeholder="18.5"
-                      step="0.1"
-                    />
-                  </FormField>
-                </Box>
-                <Box flex>
-                  <FormField label="Length (inches)" name="length">
-                    <TextInput
-                      name="length"
-                      type="number"
-                      value={formData.length}
-                      onChange={handleChange}
-                      placeholder="58"
-                      step="0.1"
-                    />
-                  </FormField>
-                </Box>
-                <Box flex>
-                  <FormField label="Tip Size (mm)" name="tipSize">
-                    <TextInput
-                      name="tipSize"
-                      type="number"
-                      value={formData.tipSize}
-                      onChange={handleChange}
-                      placeholder="12.9"
-                      step="0.1"
-                    />
-                  </FormField>
-                </Box>
-              </Box>
+              {productType === 'cue' ? (
+                <>
+                  {/* Cue Specifications */}
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Weight (oz)" name="weight">
+                        <TextInput
+                          name="weight"
+                          type="number"
+                          value={formData.weight}
+                          onChange={handleChange}
+                          placeholder="18.5"
+                          step="0.1"
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Length (inches)" name="length">
+                        <TextInput
+                          name="length"
+                          type="number"
+                          value={formData.length}
+                          onChange={handleChange}
+                          placeholder="58"
+                          step="0.1"
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Tip Size (mm)" name="tipSize">
+                        <TextInput
+                          name="tipSize"
+                          type="number"
+                          value={formData.tipSize}
+                          onChange={handleChange}
+                          placeholder="12.9"
+                          step="0.1"
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
 
-              <Box direction="row" gap="small">
-                <Box flex>
-                  <FormField label="Shaft Material" name="shaftMaterial">
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Shaft Material" name="shaftMaterial">
+                        <TextInput
+                          name="shaftMaterial"
+                          value={formData.shaftMaterial}
+                          onChange={handleChange}
+                          placeholder="e.g., Carbon Fiber"
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Butt Material" name="buttMaterial">
+                        <TextInput
+                          name="buttMaterial"
+                          value={formData.buttMaterial}
+                          onChange={handleChange}
+                          placeholder="e.g., Maple"
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
+                </>
+              ) : (
+                <>
+                  {/* Case Specifications */}
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Case Capacity" name="caseCapacity">
+                        <Select
+                          name="caseCapacity"
+                          options={['1x1', '1x2', '2x4', '3x5', '4x8']}
+                          value={formData.caseCapacity}
+                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseCapacity: option }))}
+                          placeholder="Select capacity"
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Case Opening" name="caseOpening">
+                        <Select
+                          name="caseOpening"
+                          options={['Butterfly', 'Top Open', 'Side Open', 'Zipper']}
+                          value={formData.caseOpening}
+                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseOpening: option }))}
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
+
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Case Type" name="caseType">
+                        <Select
+                          name="caseType"
+                          options={['Soft', 'Hard', 'Semi-Hard']}
+                          value={formData.caseType}
+                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseType: option }))}
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Color" name="color">
+                        <TextInput
+                          name="color"
+                          value={formData.color}
+                          onChange={handleChange}
+                          placeholder="e.g., Blue, Black"
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
+
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Case Material" name="caseMaterial">
+                        <TextInput
+                          name="caseMaterial"
+                          value={formData.caseMaterial}
+                          onChange={handleChange}
+                          placeholder="e.g., Ultra Vinyl, Leather"
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Case Weight" name="caseWeight">
+                        <TextInput
+                          name="caseWeight"
+                          value={formData.caseWeight}
+                          onChange={handleChange}
+                          placeholder="e.g., 3.6 lbs"
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
+
+                  <FormField label="Outer Dimensions" name="outerDimensions">
                     <TextInput
-                      name="shaftMaterial"
-                      value={formData.shaftMaterial}
+                      name="outerDimensions"
+                      value={formData.outerDimensions}
                       onChange={handleChange}
-                      placeholder="e.g., Carbon Fiber"
+                      placeholder="e.g., 86.36 cm H x 13.97 cm W x 20.32 cm D"
                     />
                   </FormField>
-                </Box>
-                <Box flex>
-                  <FormField label="Butt Material" name="buttMaterial">
-                    <TextInput
-                      name="buttMaterial"
-                      value={formData.buttMaterial}
-                      onChange={handleChange}
-                      placeholder="e.g., Maple"
-                    />
-                  </FormField>
-                </Box>
-              </Box>
+
+                  <Box direction="row" gap="small">
+                    <Box flex>
+                      <FormField label="Pocket Space" name="pocketSpace">
+                        <Select
+                          name="pocketSpace"
+                          options={['None', 'Small', 'Medium', 'Large', 'Very Large']}
+                          value={formData.pocketSpace}
+                          onChange={({ option }) => setFormData(prev => ({ ...prev, pocketSpace: option }))}
+                        />
+                      </FormField>
+                    </Box>
+                    <Box flex>
+                      <FormField label="Handle/Extension Space" name="handleExtensionSpace">
+                        <TextInput
+                          name="handleExtensionSpace"
+                          value={formData.handleExtensionSpace}
+                          onChange={handleChange}
+                          placeholder="e.g., Protection Sleeves Included"
+                        />
+                      </FormField>
+                    </Box>
+                  </Box>
+                </>
+              )}
             </Box>
 
             {/* Description Section */}

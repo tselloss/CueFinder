@@ -124,6 +124,165 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("Cues");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.CueCase", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AverageRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("CaseCapacity")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CaseMaterial")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CaseOpening")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CaseType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("CaseWeight")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<string>("HandleExtensionSpace")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsSold")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("OuterDimensions")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("PocketSpace")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SoldDate")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_CueCase_CreatedAt");
+
+                    b.HasIndex("IsSold")
+                        .HasDatabaseName("IX_CueCase_IsSold");
+
+                    b.HasIndex("Price")
+                        .HasDatabaseName("IX_CueCase_Price");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_CueCase_UserId");
+
+                    b.ToTable("CueCases");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.CueCaseImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("CueCaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime>("UploadedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp with time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CueCaseId")
+                        .HasDatabaseName("IX_CueCaseImage_CueCaseId");
+
+                    b.HasIndex("CueCaseId", "IsPrimary")
+                        .HasDatabaseName("IX_CueCaseImage_Primary");
+
+                    b.ToTable("CueCaseImages");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.CueImage", b =>
                 {
                     b.Property<int>("Id")
@@ -603,6 +762,28 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.CueCase", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.CueCaseImage", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.CueCase", "CueCase")
+                        .WithMany("Images")
+                        .HasForeignKey("CueCaseId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("CueCase");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.CueImage", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.Cue", "Cue")
@@ -731,6 +912,11 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("Ratings");
 
                     b.Navigation("SavedByUsers");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.CueCase", b =>
+                {
+                    b.Navigation("Images");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.User", b =>

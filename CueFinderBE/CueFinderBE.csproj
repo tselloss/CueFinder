@@ -18,6 +18,7 @@
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Auth\CueFinder.Auth.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Database\CueFinder.Database.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Cues\CueFinder.Cues\CueFinder.Cues.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.CueCases\CueFinder.CueCases\CueFinder.CueCases.csproj" />
   </ItemGroup>
 
 </Project>
