@@ -60,19 +60,24 @@ export default function UserProfile({ onBack }) {
     e.preventDefault();
     setLoading(true);
     try {
-      // Update user in context
+      // Flatten the address object to match backend expectations
       await updateUser({
         name: profile.name,
         email: profile.email,
         phone: profile.phone,
         location: profile.location,
-        address: profile.address,
+        address: profile.address.street,
+        city: profile.address.city,
+        state: profile.address.state,
+        zipCode: profile.address.postalCode,
+        country: profile.address.country,
       });
       setIsEditing(false);
       setMessage({ type: 'success', text: 'Profile updated successfully!' });
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
-      setMessage({ type: 'error', text: 'Failed to update profile' });
+      console.error('Profile update error:', err);
+      setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
     }
     setLoading(false);
   };
