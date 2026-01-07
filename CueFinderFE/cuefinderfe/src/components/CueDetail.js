@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
+import { Box, Button, Heading, Text, Image, Grid, Stack, Card, CardBody, Layer } from 'grommet';
+import { Previous, Next, Close, FormPrevious } from 'grommet-icons';
 import * as cueService from '../api/cueService';
-import './CueDetail.css';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -31,7 +32,11 @@ export default function CueDetail({ onBack }) {
     load();
   }, [id]);
 
-  if (!cue) return <div className="cue-detail-page"><div className="cue-detail-wrapper">Loading...</div></div>;
+  if (!cue) return (
+    <Box fill align="center" justify="center">
+      <Text>Loading...</Text>
+    </Box>
+  );
 
   const images = cue.images && cue.images.length > 0 ? cue.images : [];
   const currentImage = getImageUrl(images[imageIndex]);
@@ -61,188 +66,252 @@ export default function CueDetail({ onBack }) {
   };
 
   return (
-    <div className="cue-detail-page">
-      <div className="cue-detail-wrapper">
-        {/* Header */}
-        <div className="cue-detail-header">
-          <button className="cue-detail-back-btn" onClick={onBack}>
-            ← Back to Listings
-          </button>
-        </div>
+    <Box fill background="background">
+      <Box pad="medium">
+        <Button 
+          icon={<FormPrevious />} 
+          label="Back to Listings" 
+          onClick={onBack}
+          plain
+        />
+      </Box>
 
-        {/* Main Content Grid */}
-        <div className="cue-detail-grid">
+      <Box pad="large" align="center">
+        <Grid
+          columns={{ count: 2, size: 'auto' }}
+          gap="large"
+          width="xlarge"
+        >
           {/* Image Section */}
-          <div className="cue-detail-images">
-            <div className="cue-image-carousel">
-              {images.length > 0 ? (
-                <>
-                  <img 
-                    src={currentImage} 
-                    alt={`${cue.brand} ${cue.title}`}
-                    className="cue-image-main" 
-                    onClick={openFullscreen}
-                  />
-                  {images.length > 1 && (
+          <Box>
+            <Card background="white">
+              <CardBody pad="none">
+                <Box height="medium" position="relative">
+                  {images.length > 0 ? (
                     <>
-                      <div className="cue-image-controls">
-                        <button className="cue-image-btn" onClick={prevImage}>‹</button>
-                        <button className="cue-image-btn" onClick={nextImage}>›</button>
-                      </div>
-                      <div className="cue-image-indicators">
-                        {images.map((_, idx) => (
-                          <span
-                            key={idx}
-                            className={`cue-image-dot ${idx === imageIndex ? 'active' : ''}`}
-                            onClick={() => setImageIndex(idx)}
-                          />
-                        ))}
-                      </div>
+                      <Image
+                        src={currentImage}
+                        alt={`${cue.brand} ${cue.title}`}
+                        fit="contain"
+                        fill
+                        onClick={openFullscreen}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {images.length > 1 && (
+                        <>
+                          <Box
+                            direction="row"
+                            justify="between"
+                            align="center"
+                            fill="horizontal"
+                            pad="small"
+                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                          >
+                            <Button 
+                              icon={<Previous />} 
+                              onClick={prevImage}
+                              plain
+                              hoverIndicator
+                            />
+                            <Button 
+                              icon={<Next />} 
+                              onClick={nextImage}
+                              plain
+                              hoverIndicator
+                            />
+                          </Box>
+                          <Box
+                            direction="row"
+                            justify="center"
+                            gap="xsmall"
+                            pad="small"
+                            style={{ position: 'absolute', bottom: 0, width: '100%' }}
+                          >
+                            {images.map((_, idx) => (
+                              <Box
+                                key={idx}
+                                width="10px"
+                                height="10px"
+                                round="full"
+                                background={idx === imageIndex ? 'brand' : 'light-4'}
+                                onClick={() => setImageIndex(idx)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            ))}
+                          </Box>
+                        </>
+                      )}
                     </>
+                  ) : (
+                    <Box align="center" justify="center" fill background="light-2">
+                      <Text color="dark-4">No images available</Text>
+                    </Box>
                   )}
-                </>
-              ) : (
-                <div className="cue-image-placeholder">No images available</div>
-              )}
-            </div>
-          </div>
+                </Box>
+              </CardBody>
+            </Card>
+          </Box>
 
           {/* Info Section */}
-          <div className="cue-detail-info">
+          <Box gap="medium">
             {/* Title & Price */}
-            <div className="cue-title-section">
-              <h1 className="cue-title">
-                {cue.brand} {cue.title}
-                {(cue.isSold || cue.is_sold) && <span className="badge badge-sold">Sold</span>}
-              </h1>
-              <div className="cue-price">${(cue.price || 0).toFixed(2)}</div>
-            </div>
+            <Box>
+              <Box direction="row" gap="small" align="center">
+                <Heading level="2" margin="none">
+                  {cue.brand} {cue.title}
+                </Heading>
+                {(cue.isSold || cue.is_sold) && (
+                  <Box background="status-error" pad="xsmall" round="xsmall">
+                    <Text size="small" weight="bold" color="white">SOLD</Text>
+                  </Box>
+                )}
+              </Box>
+              <Text size="xxlarge" weight="bold" color="brand">
+                ${(cue.price || 0).toFixed(2)}
+              </Text>
+            </Box>
 
             {/* Specifications */}
-            <div className="cue-specifications">
-              <h3 className="cue-spec-title">Specifications</h3>
-              <div className="cue-spec-grid">
-                <div className="cue-spec-row">
-                  <span className="cue-spec-label">Brand</span>
-                  <span className="cue-spec-value">{cue.brand || 'Not specified'}</span>
-                </div>
-                <div className="cue-spec-row">
-                  <span className="cue-spec-label">Condition</span>
-                  <span className="cue-spec-value">
-                    <span className={`badge ${cue.condition === 'New' ? 'badge-success' : 'badge-primary'}`}>
-                      {cue.condition || 'Not specified'}
-                    </span>
-                  </span>
-                </div>
-                {(cue.material || cue.shaftMaterial) && (
-                  <div className="cue-spec-row">
-                    <span className="cue-spec-label">Material</span>
-                    <span className="cue-spec-value">{cue.material || cue.shaftMaterial}</span>
-                  </div>
-                )}
-                {cue.weight && (
-                  <div className="cue-spec-row">
-                    <span className="cue-spec-label">Weight</span>
-                    <span className="cue-spec-value">{cue.weight}</span>
-                  </div>
-                )}
-                {cue.length && (
-                  <div className="cue-spec-row">
-                    <span className="cue-spec-label">Length</span>
-                    <span className="cue-spec-value">{cue.length}</span>
-                  </div>
-                )}
-                {(cue.tipSize || cue.tip_size) && (
-                  <div className="cue-spec-row">
-                    <span className="cue-spec-label">Tip Size</span>
-                    <span className="cue-spec-value">{cue.tipSize || cue.tip_size}</span>
-                  </div>
-                )}
-                {cue.location && (
-                  <div className="cue-spec-row">
-                    <span className="cue-spec-label">Location</span>
-                    <span className="cue-spec-value">📍 {cue.location}</span>
-                  </div>
-                )}
-              </div>
-            </div>
+            <Card background="white">
+              <CardBody pad="medium">
+                <Heading level="4" margin={{ bottom: 'small' }}>Specifications</Heading>
+                <Box gap="small">
+                  <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                    <Text weight="bold">Brand</Text>
+                    <Text>{cue.brand || 'Not specified'}</Text>
+                  </Box>
+                  <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                    <Text weight="bold">Condition</Text>
+                    <Box background={cue.condition === 'New' ? 'accent-1' : 'brand'} pad="xsmall" round="xsmall">
+                      <Text size="small" color="white">{cue.condition || 'Not specified'}</Text>
+                    </Box>
+                  </Box>
+                  {(cue.material || cue.shaftMaterial) && (
+                    <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                      <Text weight="bold">Material</Text>
+                      <Text>{cue.material || cue.shaftMaterial}</Text>
+                    </Box>
+                  )}
+                  {cue.weight && (
+                    <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                      <Text weight="bold">Weight</Text>
+                      <Text>{cue.weight}</Text>
+                    </Box>
+                  )}
+                  {cue.length && (
+                    <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                      <Text weight="bold">Length</Text>
+                      <Text>{cue.length}</Text>
+                    </Box>
+                  )}
+                  {(cue.tipSize || cue.tip_size) && (
+                    <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                      <Text weight="bold">Tip Size</Text>
+                      <Text>{cue.tipSize || cue.tip_size}</Text>
+                    </Box>
+                  )}
+                  {cue.location && (
+                    <Box direction="row" justify="between" border={{ side: 'bottom', color: 'light-4' }} pad={{ vertical: 'xsmall' }}>
+                      <Text weight="bold">Location</Text>
+                      <Text>📍 {cue.location}</Text>
+                    </Box>
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
 
             {/* Description */}
             {cue.description && (
-              <div className="cue-description">
-                <h3 className="cue-description-title">Description</h3>
-                <p className="cue-description-text">{cue.description}</p>
-              </div>
+              <Card background="white">
+                <CardBody pad="medium">
+                  <Heading level="4" margin={{ bottom: 'small' }}>Description</Heading>
+                  <Text>{cue.description}</Text>
+                </CardBody>
+              </Card>
             )}
 
             {/* Seller Info */}
-            <div className="seller-info-card">
-              <div className="seller-info-header">
-                <div className="seller-avatar">👤</div>
-                <h3 className="seller-info-title">Seller Information</h3>
-              </div>
-              <div className="seller-contact-list">
-                <div className="seller-contact-item">
-                  <div className="seller-contact-icon">👤</div>
-                  <span className="seller-contact-text">
-                    {cue.sellerName || cue.seller_name || 'Name not provided'}
-                  </span>
-                </div>
-                {(cue.sellerEmail || cue.seller_email) && (
-                  <div className="seller-contact-item">
-                    <div className="seller-contact-icon">✉️</div>
-                    <span className="seller-contact-text">
-                      {cue.sellerEmail || cue.seller_email}
-                    </span>
-                  </div>
-                )}
-                {(cue.sellerPhone || cue.seller_phone) && (
-                  <div className="seller-contact-item">
-                    <div className="seller-contact-icon">📞</div>
-                    <span className="seller-contact-text">
-                      {cue.sellerPhone || cue.seller_phone}
-                    </span>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+            <Card background="white">
+              <CardBody pad="medium">
+                <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
+                  <Text size="xlarge">👤</Text>
+                  <Heading level="4" margin="none">Seller Information</Heading>
+                </Box>
+                <Box gap="small">
+                  <Box direction="row" gap="small" align="center">
+                    <Text>👤</Text>
+                    <Text>{cue.sellerName || cue.seller_name || 'Name not provided'}</Text>
+                  </Box>
+                  {(cue.sellerEmail || cue.seller_email) && (
+                    <Box direction="row" gap="small" align="center">
+                      <Text>✉️</Text>
+                      <Text>{cue.sellerEmail || cue.seller_email}</Text>
+                    </Box>
+                  )}
+                  {(cue.sellerPhone || cue.seller_phone) && (
+                    <Box direction="row" gap="small" align="center">
+                      <Text>📞</Text>
+                      <Text>{cue.sellerPhone || cue.seller_phone}</Text>
+                    </Box>
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+          </Box>
+        </Grid>
+      </Box>
 
       {/* Fullscreen Image Viewer */}
       {isFullscreen && (
-        <div className="fullscreen-viewer" onClick={closeFullscreen}>
-          <button className="fullscreen-close" onClick={closeFullscreen}>✕</button>
-          <img 
-            src={currentImage} 
-            alt={`${cue.brand} ${cue.title}`}
-            className="fullscreen-image"
-            onClick={(e) => e.stopPropagation()}
-          />
-          {images.length > 1 && (
-            <>
-              <div className="cue-image-controls">
-                <button 
-                  className="cue-image-btn" 
-                  onClick={(e) => { e.stopPropagation(); prevImageFullscreen(); }}
+        <Layer onEsc={closeFullscreen} onClickOutside={closeFullscreen} full>
+          <Box fill background="dark-1" align="center" justify="center">
+            <Button 
+              icon={<Close />} 
+              onClick={closeFullscreen}
+              style={{ position: 'absolute', top: 20, right: 20, zIndex: 10 }}
+            />
+            <Image
+              src={currentImage}
+              alt={`${cue.brand} ${cue.title}`}
+              fit="contain"
+              style={{ maxHeight: '90vh', maxWidth: '90vw' }}
+            />
+            {images.length > 1 && (
+              <>
+                <Box
+                  direction="row"
+                  justify="between"
+                  align="center"
+                  fill="horizontal"
+                  pad="large"
+                  style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
                 >
-                  ‹
-                </button>
-                <button 
-                  className="cue-image-btn" 
-                  onClick={(e) => { e.stopPropagation(); nextImageFullscreen(); }}
+                  <Button 
+                    icon={<Previous size="large" />} 
+                    onClick={prevImageFullscreen}
+                    size="large"
+                  />
+                  <Button 
+                    icon={<Next size="large" />} 
+                    onClick={nextImageFullscreen}
+                    size="large"
+                  />
+                </Box>
+                <Box
+                  pad="small"
+                  background="dark-3"
+                  round="small"
+                  style={{ position: 'absolute', bottom: 20 }}
                 >
-                  ›
-                </button>
-              </div>
-              <div className="fullscreen-counter">
-                {imageIndex + 1} / {images.length}
-              </div>
-            </>
-          )}
-        </div>
+                  <Text color="white">
+                    {imageIndex + 1} / {images.length}
+                  </Text>
+                </Box>
+              </>
+            )}
+          </Box>
+        </Layer>
       )}
-    </div>
+    </Box>
   );
 }

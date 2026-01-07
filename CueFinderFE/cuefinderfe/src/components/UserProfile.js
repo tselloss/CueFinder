@@ -1,6 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
+import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, Grid } from 'grommet';
+import { FormPrevious, User, Mail, Phone, MapLocation, Location, Edit } from 'grommet-icons';
 import MyCues from './MyCues';
+
+// Available avatar options
+const AVATAR_OPTIONS = [
+  '👤', '😊', '😎', '🎱', '🎯', '⭐', '🔥', '💎', 
+  '🎮', '🏆', '👑', '🚀', '💪', '🎨', '🎭', '🦁',
+  '🐺', '🦅', '🐉', '🦈', '🐯', '🐻', '🦊', '🐼'
+];
 
 export default function UserProfile({ onBack }) {
   const { user, updateUser } = useAuth();
@@ -8,6 +17,8 @@ export default function UserProfile({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
+  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👤');
+  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   
   // Profile form state
   const [profile, setProfile] = useState({
@@ -15,6 +26,7 @@ export default function UserProfile({ onBack }) {
     email: user?.email || '',
     phone: user?.phone || '',
     location: user?.location || '',
+    avatar: user?.avatar || '👤',
     address: {
       street: user?.address || '',
       city: user?.city || '',
@@ -32,6 +44,7 @@ export default function UserProfile({ onBack }) {
         email: user.email || '',
         phone: user.phone || '',
         location: user.location || '',
+        avatar: user.avatar || '👤',
         address: {
           street: user.address || '',
           city: user.city || '',
@@ -40,6 +53,7 @@ export default function UserProfile({ onBack }) {
           country: user.country || '',
         },
       });
+      setSelectedAvatar(user.avatar || '👤');
     }
   }, [user]);
 
@@ -68,6 +82,7 @@ export default function UserProfile({ onBack }) {
         email: profile.email,
         phone: profile.phone,
         location: profile.location,
+        avatar: profile.avatar,
         address: profile.address.street,
         city: profile.address.city,
         state: profile.address.state,
@@ -88,231 +103,418 @@ export default function UserProfile({ onBack }) {
   // If no user, show loading or redirect
   if (!user) {
     return (
-      <div className="user-profile">
-        <div className="profile-header">
-          <button className="btn" onClick={onBack}>← Back</button>
-          <h2>My Profile</h2>
-        </div>
-        <div style={{ padding: '20px', textAlign: 'center' }}>
-          Loading profile...
-        </div>
-      </div>
+      <Box fill align="center" justify="center">
+        <Text>Loading profile...</Text>
+      </Box>
     );
   }
 
   return (
-    <div className="user-profile">
-      <div className="profile-header">
-        <button className="btn" onClick={onBack}>← Back</button>
-        <h2>My Profile</h2>
-        <div></div>
-      </div>
+    <Box fill background="background" pad={{ horizontal: 'medium', vertical: 'large' }}>
+      <Box 
+        direction="row" 
+        align="center" 
+        gap="medium" 
+        margin={{ bottom: 'large' }}
+      >
+        <Button 
+          icon={<FormPrevious size="20px" />} 
+          label={<Text weight={500}>Back</Text>}
+          onClick={onBack}
+          style={{
+            background: 'rgba(59, 130, 246, 0.1)',
+            border: '1px solid rgba(59, 130, 246, 0.3)',
+            borderRadius: '8px',
+            padding: '10px 20px'
+          }}
+          hoverIndicator
+        />
+        <Heading level="2" margin="none" style={{ fontSize: '32px', fontWeight: 700 }}>
+          👤 My Profile
+        </Heading>
+      </Box>
 
       {message && (
-        <div className={`alert alert-${message.type}`}>
-          {message.text}
-        </div>
-      )}
-
-      {/* Tab Navigation */}
-      <div className="profile-tabs">
-        <button
-          className={`tab-btn ${activeTab === 'profile' ? 'active' : ''}`}
-          onClick={() => setActiveTab('profile')}
+        <Box 
+          margin={{ bottom: 'medium' }}
+          background={message.type === 'success' ? 'status-ok' : 'status-error'}
+          pad="medium"
+          round="medium"
+          elevation="small"
         >
-          Profile Settings
-        </button>
-        <button
-          className={`tab-btn ${activeTab === 'myListings' ? 'active' : ''}`}
-          onClick={() => setActiveTab('myListings')}
+          <Text color="white" weight={500}>
+            {message.type === 'success' ? '✅ ' : '⚠️ '}{message.text}
+          </Text>
+        </Box>
+      )}
+
+      <Box>
+        <Tabs 
+          activeIndex={activeTab === 'profile' ? 0 : 1} 
+          onActive={(index) => setActiveTab(index === 0 ? 'profile' : 'myListings')}
+          style={{ marginBottom: '24px' }}
         >
-          My Listings
-        </button>
-      </div>
+          <Tab 
+            title={
+              <Text weight={600} size="medium" style={{ padding: '12px 24px' }}>
+                ⚙️ Profile Settings
+              </Text>
+            }
+          >
+            <Box pad="medium">
+              {!isEditing ? (
+                // View Mode
+                <Box gap="large">
+                  <Card 
+                    background="background-front" 
+                    elevation="medium"
+                    round="medium"
+                    style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+                  >
+                    <CardBody pad="large">
+                      <Box direction="row" justify="between" align="center" margin={{ bottom: 'large' }}>
+                        <Heading level="3" margin="none" style={{ fontSize: '24px', fontWeight: 600 }}>
+                          Account Information
+                        </Heading>
+                        <Button 
+                          icon={<Edit size="18px" />} 
+                          label={<Text weight={600}>Edit Profile</Text>}
+                          onClick={() => setIsEditing(true)}
+                          primary
+                          style={{
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            borderRadius: '8px',
+                            padding: '10px 20px',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+                            border: 'none'
+                          }}
+                        />
+                      </Box>
+                      <Box gap="medium">
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          align="center"
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Avatar</Text>
+                          <Text style={{ fontSize: '48px' }}>{profile.avatar || '👤'}</Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Name</Text>
+                          <Text color="text-strong" size="medium" weight={500}>{profile.name}</Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Email</Text>
+                          <Text color="text-strong" size="medium" weight={500}>{profile.email}</Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Phone</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.phone || 'Not provided'}
+                          </Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Location</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.location || 'Not provided'}
+                          </Text>
+                        </Box>
+                      </Box>
+                    </CardBody>
+                  </Card>
 
-      {/* Profile Settings Tab */}
-      {activeTab === 'profile' && (
-        <div className="profile-content">
-          {!isEditing ? (
-            // View Mode
-            <div className="profile-view">
-              <div className="profile-section">
-                <h3>Account Information</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>Name</label>
-                    <p>{profile.name}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Email</label>
-                    <p>{profile.email}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Phone</label>
-                    <p>{profile.phone || 'Not provided'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Location</label>
-                    <p>{profile.location || 'Not provided'}</p>
-                  </div>
-                </div>
-              </div>
+                  <Card 
+                    background="background-front" 
+                    elevation="medium"
+                    round="medium"
+                    style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+                  >
+                    <CardBody pad="large">
+                      <Heading level="3" margin={{ bottom: 'large' }} style={{ fontSize: '24px', fontWeight: 600 }}>
+                        📍 Address
+                      </Heading>
+                      <Box gap="medium">
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Street</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.address.street || 'Not provided'}
+                          </Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">City</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.address.city || 'Not provided'}
+                          </Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">State/Province</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.address.state || 'Not provided'}
+                          </Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          border={{ side: 'bottom', color: 'border' }} 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Postal Code</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.address.postalCode || 'Not provided'}
+                          </Text>
+                        </Box>
+                        <Box 
+                          direction="row" 
+                          justify="between" 
+                          pad={{ vertical: 'medium' }}
+                        >
+                          <Text weight={600} color="text-weak" size="medium">Country</Text>
+                          <Text color="text-strong" size="medium" weight={500}>
+                            {profile.address.country || 'Not provided'}
+                          </Text>
+                        </Box>
+                      </Box>
+                    </CardBody>
+                  </Card>
+                </Box>
+              ) : (
+                // Edit Mode
+                <Card 
+                  background="background-front" 
+                  elevation="medium"
+                  round="medium"
+                  style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+                >
+                  <CardBody pad="large">
+                    <Form onSubmit={handleSaveProfile} validate="submit">
+                      <Heading level="3" margin={{ bottom: 'large' }} style={{ fontSize: '24px', fontWeight: 600 }}>
+                        ✏️ Edit Account Information
+                      </Heading>
+                      
+                      <FormField label="Choose Your Avatar">
+                        <Box gap="small">
+                          <Box 
+                            align="center" 
+                            pad="medium" 
+                            background="background-back"
+                            round="medium"
+                            border={{ color: 'border', size: 'small' }}
+                          >
+                            <Text style={{ fontSize: '64px' }}>{profile.avatar || '👤'}</Text>
+                          </Box>
+                          <Box 
+                            direction="row" 
+                            wrap 
+                            gap="xsmall" 
+                            pad="small"
+                            background="background-back"
+                            round="small"
+                          >
+                            {AVATAR_OPTIONS.map((avatar) => (
+                              <Button
+                                key={avatar}
+                                plain
+                                onClick={() => {
+                                  setProfile(p => ({ ...p, avatar }));
+                                  setSelectedAvatar(avatar);
+                                }}
+                                style={{
+                                  fontSize: '32px',
+                                  padding: '8px',
+                                  borderRadius: '8px',
+                                  border: profile.avatar === avatar ? '3px solid #3b82f6' : '2px solid transparent',
+                                  background: profile.avatar === avatar ? 'rgba(59, 130, 246, 0.1)' : 'transparent',
+                                  transition: 'all 0.2s ease'
+                                }}
+                                hoverIndicator={{ background: 'rgba(59, 130, 246, 0.1)' }}
+                              >
+                                {avatar}
+                              </Button>
+                            ))}
+                          </Box>
+                        </Box>
+                      </FormField>
 
-              <div className="profile-section">
-                <h3>Address</h3>
-                <div className="info-grid">
-                  <div className="info-item">
-                    <label>Street</label>
-                    <p>{profile.address.street || 'Not provided'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>City</label>
-                    <p>{profile.address.city || 'Not provided'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>State/Province</label>
-                    <p>{profile.address.state || 'Not provided'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Postal Code</label>
-                    <p>{profile.address.postalCode || 'Not provided'}</p>
-                  </div>
-                  <div className="info-item">
-                    <label>Country</label>
-                    <p>{profile.address.country || 'Not provided'}</p>
-                  </div>
-                </div>
-              </div>
+                      <FormField label="Name" name="name" required>
+                        <TextInput
+                          icon={<User size="18px" />}
+                          name="name"
+                          value={profile.name || ''}
+                          onChange={handleProfileChange}
+                          placeholder="Your full name"
+                          required
+                        />
+                      </FormField>
 
-              <button className="btn primary" onClick={() => setIsEditing(true)}>
-                Edit Profile
-              </button>
-            </div>
-          ) : (
-            // Edit Mode
-            <form className="profile-form" onSubmit={handleSaveProfile}>
-              <fieldset>
-                <legend>Account Information</legend>
-                
-                <label>
-                  Name
-                  <input
-                    type="text"
-                    name="name"
-                    value={profile.name}
-                    onChange={handleProfileChange}
-                    required
-                  />
-                </label>
+                      <FormField label="Email" name="email" required>
+                        <TextInput
+                          icon={<Mail size="18px" />}
+                          type="email"
+                          name="email"
+                          value={profile.email || ''}
+                          onChange={handleProfileChange}
+                          placeholder="your.email@example.com"
+                          required
+                        />
+                      </FormField>
 
-                <label>
-                  Email
-                  <input
-                    type="email"
-                    name="email"
-                    value={profile.email}
-                    onChange={handleProfileChange}
-                    required
-                  />
-                </label>
+                      <FormField label="Phone" name="phone" required>
+                        <TextInput
+                          icon={<Phone size="18px" />}
+                          name="phone"
+                          value={profile.phone || ''}
+                          onChange={handleProfileChange}
+                          placeholder="+1 (555) 123-4567"
+                          required
+                        />
+                      </FormField>
 
-                <label>
-                  Phone
-                  <input
-                    type="tel"
-                    name="phone"
-                    value={profile.phone}
-                    onChange={handleProfileChange}
-                    placeholder="+1 (555) 123-4567"
-                  />
-                </label>
+                      <FormField label="Location (City/General Area)" name="location" required>
+                        <TextInput
+                          icon={<Location size="18px" />}
+                          name="location"
+                          value={profile.location || ''}
+                          onChange={handleProfileChange}
+                          placeholder="e.g., New York, NY"
+                          required
+                        />
+                      </FormField>
 
-                <label>
-                  Location (City/General Area)
-                  <input
-                    type="text"
-                    name="location"
-                    value={profile.location}
-                    onChange={handleProfileChange}
-                    placeholder="e.g., New York, NY"
-                  />
-                </label>
-              </fieldset>
+                      <Heading level="3" margin={{ top: 'large', bottom: 'large' }} style={{ fontSize: '24px', fontWeight: 600 }}>
+                        📍 Address Details
+                      </Heading>
+                      
+                      <FormField label="Street Address" name="address.street">
+                        <TextInput
+                          name="address.street"
+                          value={profile.address.street || ''}
+                          onChange={handleProfileChange}
+                          placeholder="123 Main Street"
+                        />
+                      </FormField>
 
-              <fieldset>
-                <legend>Address</legend>
-                
-                <label>
-                  Street Address
-                  <input
-                    type="text"
-                    name="address.street"
-                    value={profile.address.street}
-                    onChange={handleProfileChange}
-                    placeholder="123 Main Street"
-                  />
-                </label>
+                      <Box direction="row" gap="small">
+                        <FormField label="City" name="address.city" flex>
+                          <TextInput
+                            name="address.city"
+                            value={profile.address.city || ''}
+                            onChange={handleProfileChange}
+                            placeholder="City name"
+                          />
+                        </FormField>
 
-                <label>
-                  City
-                  <input
-                    type="text"
-                    name="address.city"
-                    value={profile.address.city}
-                    onChange={handleProfileChange}
-                  />
-                </label>
+                        <FormField label="State/Province" name="address.state" flex>
+                          <TextInput
+                            name="address.state"
+                            value={profile.address.state || ''}
+                            onChange={handleProfileChange}
+                            placeholder="State/Province"
+                          />
+                        </FormField>
+                      </Box>
 
-                <label>
-                  State/Province
-                  <input
-                    type="text"
-                    name="address.state"
-                    value={profile.address.state}
-                    onChange={handleProfileChange}
-                  />
-                </label>
+                      <Box direction="row" gap="small">
+                        <FormField label="Postal Code" name="address.postalCode" flex>
+                          <TextInput
+                            name="address.postalCode"
+                            value={profile.address.postalCode || ''}
+                            onChange={handleProfileChange}
+                            placeholder="12345"
+                          />
+                        </FormField>
 
-                <label>
-                  Postal Code
-                  <input
-                    type="text"
-                    name="address.postalCode"
-                    value={profile.address.postalCode}
-                    onChange={handleProfileChange}
-                  />
-                </label>
+                        <FormField label="Country" name="address.country" flex>
+                          <TextInput
+                            icon={<MapLocation size="18px" />}
+                            name="address.country"
+                            value={profile.address.country || ''}
+                            onChange={handleProfileChange}
+                            placeholder="Country"
+                          />
+                        </FormField>
+                      </Box>
 
-                <label>
-                  Country
-                  <input
-                    type="text"
-                    name="address.country"
-                    value={profile.address.country}
-                    onChange={handleProfileChange}
-                  />
-                </label>
-              </fieldset>
-
-              <div className="form-actions">
-                <button type="button" className="btn" onClick={() => setIsEditing(false)}>
-                  Cancel
-                </button>
-                <button type="submit" className="btn primary" disabled={loading}>
-                  {loading ? 'Saving...' : 'Save Changes'}
-                </button>
-              </div>
-            </form>
-          )}
-        </div>
-      )}
-
-      {/* My Listings Tab */}
-      {activeTab === 'myListings' && (
-        <div className="profile-content">
-          <MyCues />
-        </div>
-      )}
-    </div>
+                      <Box direction="row" gap="medium" margin={{ top: 'large' }}>
+                        <Button 
+                          label={<Text weight={500}>Cancel</Text>}
+                          onClick={() => setIsEditing(false)}
+                          style={{
+                            background: 'transparent',
+                            border: '2px solid rgba(51, 65, 85, 0.3)',
+                            borderRadius: '8px',
+                            padding: '12px 24px'
+                          }}
+                        />
+                        <Button 
+                          type="submit" 
+                          primary 
+                          label={<Text weight={600}>{loading ? 'Saving...' : 'Save Changes'}</Text>}
+                          disabled={loading}
+                          style={{
+                            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                            borderRadius: '8px',
+                            padding: '12px 32px',
+                            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
+                            border: 'none'
+                          }}
+                        />
+                      </Box>
+                    </Form>
+                  </CardBody>
+                </Card>
+              )}
+            </Box>
+          </Tab>
+          
+          <Tab 
+            title={
+              <Text weight={600} size="medium" style={{ padding: '12px 24px' }}>
+                📋 My Listings
+              </Text>
+            }
+          >
+            <Box pad="medium">
+              <MyCues />
+            </Box>
+          </Tab>
+        </Tabs>
+      </Box>
+    </Box>
   );
 }

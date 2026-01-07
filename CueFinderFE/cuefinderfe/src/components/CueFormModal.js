@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
+import { Layer, Box, Button, Heading, Form, FormField, TextInput, TextArea, Select } from 'grommet';
+import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
 import * as cueService from '../api/cueService';
-import './CueFormModal.css';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -106,6 +107,13 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     setError(null);
 
     try {
+      // Validate images are provided for new cues
+      if (!cue && images.length === 0) {
+        setError('Please upload at least one image for your cue listing.');
+        setLoading(false);
+        return;
+      }
+
       // Prepare cue data
       const cueData = {
         title: formData.title,
@@ -145,225 +153,411 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   };
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2>{cue ? 'Edit Listing' : 'Create New Listing'}</h2>
-          <button className="close-btn" onClick={onClose}>&times;</button>
-        </div>
+    <Layer
+      onEsc={onClose}
+      onClickOutside={onClose}
+      style={{
+        maxHeight: '90vh',
+        overflow: 'auto'
+      }}
+    >
+      <Box
+        width="large"
+        pad="medium"
+        gap="small"
+        background="background-front"
+        style={{
+          maxWidth: '700px',
+          borderRadius: '16px',
+          border: '1px solid rgba(59, 130, 246, 0.3)'
+        }}
+      >
+        {/* Header */}
+        <Box direction="row" justify="between" align="center" pad={{ bottom: 'small' }}>
+          <Heading level="2" margin="none" style={{ fontSize: '24px', fontWeight: 700 }}>
+            {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
+          </Heading>
+          <Button
+            icon={<Close />}
+            onClick={onClose}
+            plain
+            style={{
+              padding: '8px',
+              borderRadius: '8px',
+              background: 'rgba(239, 68, 68, 0.1)',
+              border: '1px solid rgba(239, 68, 68, 0.3)'
+            }}
+            hoverIndicator={{ background: 'rgba(239, 68, 68, 0.2)' }}
+          />
+        </Box>
 
         {error && (
-          <div className="error-message">
-            {error}
-          </div>
+          <Box
+            background="status-error"
+            pad="small"
+            round="small"
+            style={{
+              border: '1px solid rgba(239, 68, 68, 0.5)'
+            }}
+          >
+            <text size="small" color="white">{error}</text>
+          </Box>
         )}
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-grid">
-            <div className="form-group">
-              <label>Title *</label>
-              <input
-                type="text"
-                name="title"
-                value={formData.title}
-                onChange={handleChange}
-                required
-                placeholder="e.g., Predator REVO 12.9"
-              />
-            </div>
+        <Form onSubmit={handleSubmit}>
+          <Box gap="small">
+            {/* Basic Info Section */}
+            <Box
+              background="background-back"
+              pad="medium"
+              round="small"
+              gap="small"
+              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+            >
+              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📋 Basic Information
+              </text>
+              
+              <Box direction="row" gap="small">
+                <Box flex>
+                  <FormField label="Title *" name="title" required>
+                    <TextInput
+                      name="title"
+                      value={formData.title}
+                      onChange={handleChange}
+                      placeholder="e.g., Predator REVO 12.9"
+                    />
+                  </FormField>
+                </Box>
+                <Box flex>
+                  <FormField label="Brand *" name="brand" required>
+                    <TextInput
+                      name="brand"
+                      value={formData.brand}
+                      onChange={handleChange}
+                      placeholder="e.g., Predator"
+                    />
+                  </FormField>
+                </Box>
+              </Box>
 
-            <div className="form-group">
-              <label>Brand *</label>
-              <input
-                type="text"
-                name="brand"
-                value={formData.brand}
-                onChange={handleChange}
-                required
-                placeholder="e.g., Predator"
-              />
-            </div>
+              <Box direction="row" gap="small">
+                <Box flex>
+                  <FormField label="Price ($) *" name="price" required>
+                    <TextInput
+                      name="price"
+                      type="number"
+                      value={formData.price}
+                      onChange={handleChange}
+                      placeholder="0.00"
+                      min="0"
+                      step="0.01"
+                    />
+                  </FormField>
+                </Box>
+                <Box flex>
+                  <FormField label="Condition *" name="condition" required>
+                    <Select
+                      name="condition"
+                      options={['New', 'Excellent', 'Good', 'Fair', 'Poor']}
+                      value={formData.condition}
+                      onChange={({ option }) => setFormData(prev => ({ ...prev, condition: option }))}
+                    />
+                  </FormField>
+                </Box>
+              </Box>
 
-            <div className="form-group">
-              <label>Price ($) *</label>
-              <input
-                type="number"
-                name="price"
-                value={formData.price}
-                onChange={handleChange}
-                required
-                min="0"
-                step="0.01"
-                placeholder="0.00"
-              />
-            </div>
+              <FormField label="Location" name="location">
+                <TextInput
+                  name="location"
+                  value={formData.location}
+                  onChange={handleChange}
+                  placeholder="City, State"
+                />
+              </FormField>
+            </Box>
 
-            <div className="form-group">
-              <label>Condition *</label>
-              <select name="condition" value={formData.condition} onChange={handleChange}>
-                <option value="New">New</option>
-                <option value="Excellent">Excellent</option>
-                <option value="Good">Good</option>
-                <option value="Fair">Fair</option>
-                <option value="Poor">Poor</option>
-              </select>
-            </div>
+            {/* Specifications Section */}
+            <Box
+              background="background-back"
+              pad="medium"
+              round="small"
+              gap="small"
+              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+            >
+              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📏 Specifications
+              </text>
 
-            <div className="form-group">
-              <label>Weight (oz)</label>
-              <input
-                type="number"
-                name="weight"
-                value={formData.weight}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="18.5"
-              />
-            </div>
+              <Box direction="row" gap="small">
+                <Box flex>
+                  <FormField label="Weight (oz)" name="weight">
+                    <TextInput
+                      name="weight"
+                      type="number"
+                      value={formData.weight}
+                      onChange={handleChange}
+                      placeholder="18.5"
+                      step="0.1"
+                    />
+                  </FormField>
+                </Box>
+                <Box flex>
+                  <FormField label="Length (inches)" name="length">
+                    <TextInput
+                      name="length"
+                      type="number"
+                      value={formData.length}
+                      onChange={handleChange}
+                      placeholder="58"
+                      step="0.1"
+                    />
+                  </FormField>
+                </Box>
+                <Box flex>
+                  <FormField label="Tip Size (mm)" name="tipSize">
+                    <TextInput
+                      name="tipSize"
+                      type="number"
+                      value={formData.tipSize}
+                      onChange={handleChange}
+                      placeholder="12.9"
+                      step="0.1"
+                    />
+                  </FormField>
+                </Box>
+              </Box>
 
-            <div className="form-group">
-              <label>Length (inches)</label>
-              <input
-                type="number"
-                name="length"
-                value={formData.length}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="58"
-              />
-            </div>
+              <Box direction="row" gap="small">
+                <Box flex>
+                  <FormField label="Shaft Material" name="shaftMaterial">
+                    <TextInput
+                      name="shaftMaterial"
+                      value={formData.shaftMaterial}
+                      onChange={handleChange}
+                      placeholder="e.g., Carbon Fiber"
+                    />
+                  </FormField>
+                </Box>
+                <Box flex>
+                  <FormField label="Butt Material" name="buttMaterial">
+                    <TextInput
+                      name="buttMaterial"
+                      value={formData.buttMaterial}
+                      onChange={handleChange}
+                      placeholder="e.g., Maple"
+                    />
+                  </FormField>
+                </Box>
+              </Box>
+            </Box>
 
-            <div className="form-group">
-              <label>Tip Size (mm)</label>
-              <input
-                type="number"
-                name="tipSize"
-                value={formData.tipSize}
-                onChange={handleChange}
-                step="0.1"
-                placeholder="12.9"
-              />
-            </div>
+            {/* Description Section */}
+            <Box
+              background="background-back"
+              pad="medium"
+              round="small"
+              gap="small"
+              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+            >
+              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📝 Description
+              </text>
+              
+              <FormField name="description">
+                <TextArea
+                  name="description"
+                  value={formData.description}
+                  onChange={handleChange}
+                  rows={4}
+                  placeholder="Describe the cue's features, condition, and any special notes..."
+                />
+              </FormField>
+            </Box>
 
-            <div className="form-group">
-              <label>Location</label>
-              <input
-                type="text"
-                name="location"
-                value={formData.location}
-                onChange={handleChange}
-                placeholder="City, State"
-              />
-            </div>
+            {/* Images Section */}
+            <Box
+              background="background-back"
+              pad="medium"
+              round="small"
+              gap="small"
+              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
+            >
+              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                📷 Images {!cue && <text size="xsmall" color="status-error">*</text>}
+              </text>
 
-            <div className="form-group">
-              <label>Shaft Material</label>
-              <input
-                type="text"
-                name="shaftMaterial"
-                value={formData.shaftMaterial}
-                onChange={handleChange}
-                placeholder="e.g., Carbon Fiber"
-              />
-            </div>
-
-            <div className="form-group">
-              <label>Butt Material</label>
-              <input
-                type="text"
-                name="buttMaterial"
-                value={formData.buttMaterial}
-                onChange={handleChange}
-                placeholder="e.g., Maple"
-              />
-            </div>
-          </div>
-
-          <div className="form-group full-width">
-            <label>Description</label>
-            <textarea
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              rows="4"
-              placeholder="Describe the cue's features, condition, and any special notes..."
-            />
-          </div>
-
-          {/* Existing images (if editing) */}
-          {cue && cue.images && cue.images.length > 0 && (
-            <div className="form-group full-width">
-              <label>Current Images</label>
-              <div className="existing-images-grid">
-                {cue.images.map(img => (
-                  <div key={img.id} className={`image-thumbnail ${img.isPrimary ? 'primary' : ''}`}>
-                    <img src={getImageUrl(img)} alt="Cue" />
-                    {img.isPrimary && <span className="primary-badge">Primary</span>}
-                    <div className="image-actions">
-                      {!img.isPrimary && (
-                        <button
-                          type="button"
-                          className="btn-icon"
-                          onClick={() => handleSetPrimaryImage(img.id)}
-                          title="Set as primary"
-                        >
-                          ⭐
-                        </button>
-                      )}
-                      <button
-                        type="button"
-                        className="btn-icon danger"
-                        onClick={() => handleDeleteExistingImage(img.id)}
-                        title="Delete image"
+              {/* Existing images */}
+              {cue && cue.images && cue.images.length > 0 && (
+                <Box gap="xsmall">
+                  <text size="small" weight={500}>Current Images</text>
+                  <Box direction="row" gap="small" wrap>
+                    {cue.images.map(img => (
+                      <Box
+                        key={img.id}
+                        width="120px"
+                        height="120px"
+                        style={{
+                          position: 'relative',
+                          borderRadius: '8px',
+                          overflow: 'hidden',
+                          border: img.isPrimary ? '3px solid #3b82f6' : '1px solid rgba(51, 65, 85, 0.3)'
+                        }}
                       >
-                        🗑️
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
+                        <img
+                          src={getImageUrl(img)}
+                          alt="Cue"
+                          style={{
+                            width: '100%',
+                            height: '100%',
+                            objectFit: 'cover'
+                          }}
+                        />
+                        {img.isPrimary && (
+                          <Box
+                            background="brand"
+                            pad="xxsmall"
+                            style={{
+                              position: 'absolute',
+                              top: 0,
+                              left: 0,
+                              fontSize: '10px',
+                              fontWeight: 600
+                            }}
+                          >
+                            <text size="xsmall" color="white">PRIMARY</text>
+                          </Box>
+                        )}
+                        <Box
+                          direction="row"
+                          gap="xxsmall"
+                          style={{
+                            position: 'absolute',
+                            bottom: '4px',
+                            right: '4px'
+                          }}
+                        >
+                          {!img.isPrimary && (
+                            <Button
+                              icon={<text>⭐</text>}
+                              onClick={() => handleSetPrimaryImage(img.id)}
+                              size="small"
+                              style={{
+                                background: 'rgba(59, 130, 246, 0.9)',
+                                padding: '4px',
+                                borderRadius: '4px'
+                              }}
+                              tip="Set as primary"
+                            />
+                          )}
+                          <Button
+                            icon={<text>🗑️</text>}
+                            onClick={() => handleDeleteExistingImage(img.id)}
+                            size="small"
+                            style={{
+                              background: 'rgba(239, 68, 68, 0.9)',
+                              padding: '4px',
+                              borderRadius: '4px'
+                            }}
+                            tip="Delete image"
+                          />
+                        </Box>
+                      </Box>
+                    ))}
+                  </Box>
+                </Box>
+              )}
 
-          {/* New image upload */}
-          <div className="form-group full-width">
-            <label>
-              {cue ? 'Add More Images' : 'Upload Images'}
-              <span className="hint"> (JPG, PNG, GIF, WebP - Max 5MB each)</span>
-            </label>
-            <input
-              type="file"
-              accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
-              multiple
-              onChange={handleImageSelect}
-            />
-            {imagePreviews.length > 0 && (
-              <div className="image-previews">
-                <p>{imagePreviews.length} new image(s) selected</p>
-                <div className="previews-grid">
-                  {imagePreviews.map((preview, index) => (
-                    <img key={index} src={preview} alt={`Preview ${index + 1}`} />
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
+              {/* New image upload */}
+              <Box gap="xsmall">
+                <text size="small" weight={500}>
+                  {cue ? 'Add More Images' : 'Upload Images *'}
+                </text>
+                <input
+                  type="file"
+                  accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
+                  multiple
+                  onChange={handleImageSelect}
+                  style={{
+                    padding: '12px',
+                    borderRadius: '8px',
+                    border: '2px dashed rgba(59, 130, 246, 0.5)',
+                    background: 'rgba(30, 41, 59, 0.5)',
+                    color: '#cbd5e1',
+                    cursor: 'pointer'
+                  }}
+                />
+                <text size="xsmall" color="text-weak">
+                  JPG, PNG, GIF, WebP - Max 5MB each
+                </text>
+                
+                {imagePreviews.length > 0 && (
+                  <Box gap="xsmall" margin={{ top: 'small' }}>
+                    <text size="small" weight={500}>
+                      {imagePreviews.length} new image(s) selected
+                    </text>
+                    <Box direction="row" gap="small" wrap>
+                      {imagePreviews.map((preview, index) => (
+                        <Box
+                          key={index}
+                          width="80px"
+                          height="80px"
+                          style={{
+                            borderRadius: '8px',
+                            overflow: 'hidden',
+                            border: '1px solid rgba(59, 130, 246, 0.5)'
+                          }}
+                        >
+                          <img
+                            src={preview}
+                            alt={`Preview ${index + 1}`}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover'
+                            }}
+                          />
+                        </Box>
+                      ))}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            </Box>
 
-          <div className="form-actions">
-            <button type="button" className="btn secondary" onClick={onClose} disabled={loading}>
-              Cancel
-            </button>
-            <button type="submit" className="btn primary" disabled={loading}>
-              {loading ? (
-                <>
-                  <span className="spinner"></span>
-                  Saving...
-                </>
-              ) : (cue ? 'Update Listing' : 'Create Listing')}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+            {/* Action Buttons */}
+            <Box direction="row" gap="small" justify="end" margin={{ top: 'small' }}>
+              <Button
+                label="Cancel"
+                onClick={onClose}
+                disabled={loading}
+                style={{
+                  background: 'rgba(239, 68, 68, 0.1)',
+                  border: '2px solid rgba(239, 68, 68, 0.5)',
+                  borderRadius: '8px',
+                  padding: '10px 24px',
+                  color: '#f87171'
+                }}
+              />
+              <Button
+                type="submit"
+                label={
+                  loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')
+                }
+                disabled={loading}
+                primary
+                style={{
+                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  padding: '10px 24px',
+                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
+                }}
+              />
+            </Box>
+          </Box>
+        </Form>
+      </Box>
+    </Layer>
   );
 }

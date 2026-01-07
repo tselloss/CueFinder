@@ -27,8 +27,8 @@ test.describe('End-to-End: User Registration and Authentication', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app home page
     await page.goto('http://localhost:3000');
-    // Wait for the page to load
-    await expect(page.locator('.logo:has-text("CueFinder")')).toBeVisible({ timeout: 10000 });
+    // Wait for the page to load - look for the main heading
+    await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
   test('Direct login with valid credentials', async ({ page }) => {
@@ -37,17 +37,17 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     // Navigate to login page first
     await page.locator('button:has-text("Sign In")').click();
     await page.waitForTimeout(500);
-    await expect(page.locator('h3:has-text("Sign in")')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
 
     // Use admin credentials with correct password
-    await page.locator('#username').fill('admin');
-    await page.locator('#password').fill('Admin123!');
+    await page.getByPlaceholder('Enter username').fill('admin');
+    await page.getByPlaceholder('Password').fill('Admin123!');
 
     await page.locator('button[type="submit"]:has-text("Sign in")').click();
     await page.waitForTimeout(2000);
 
-    // Verify successful login - should redirect to home and show signed in status
-    await expect(page.locator('text=Signed in as')).toBeVisible({ timeout: 10000 });
+    // Verify successful login - should redirect to home and show user profile button
+    await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
     console.log('✓ Direct login successful');
   });
 
@@ -57,16 +57,16 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     // Navigate to login page first
     await page.locator('button:has-text("Sign In")').click();
     await page.waitForTimeout(500);
-    await expect(page.locator('h3:has-text("Sign in")')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
 
     // Login as admin
-    await page.locator('#username').fill('admin');
-    await page.locator('#password').fill('Admin123!');
+    await page.getByPlaceholder('Enter username').fill('admin');
+    await page.getByPlaceholder('Password').fill('Admin123!');
     await page.locator('button[type="submit"]:has-text("Sign in")').click();
     await page.waitForTimeout(2000);
 
     // Verify logged in
-    await expect(page.locator('text=Signed in as')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
 
     // Look for admin button in header
     const adminButton = page.locator('button:has-text("Admin")');
@@ -88,15 +88,15 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     await page.waitForTimeout(500);
     
     // Wait for form to be in register mode
-    await expect(page.locator('h3:has-text("Create account")')).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible({ timeout: 5000 });
     console.log('✓ Registration form visible');
 
     // Fill form with test data
-    await page.locator('#username').fill(testUser.username);
-    await page.locator('#name').fill(testUser.name);
-    await page.locator('#email').fill(testUser.email);
-    await page.locator('#phone').fill(testUser.phone);
-    await page.locator('#password').fill(testUser.password);
+    await page.getByPlaceholder('Enter username').fill(testUser.username);
+    await page.getByPlaceholder('Your name').fill(testUser.name);
+    await page.getByPlaceholder('you@example.com').fill(testUser.email);
+    await page.getByPlaceholder('e.g. +15551234567').fill(testUser.phone);
+    await page.getByPlaceholder('Password').fill(testUser.password);
     console.log('✓ Form fields filled');
 
     // Submit - this will trigger SMS verification flow
@@ -125,11 +125,11 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     // Login as admin first
     await page.locator('button:has-text("Sign In")').click();
     await page.waitForTimeout(500);
-    await page.locator('#username').fill('admin');
-    await page.locator('#password').fill('Admin123!');
+    await page.getByPlaceholder('Enter username').fill('admin');
+    await page.getByPlaceholder('Password').fill('Admin123!');
     await page.locator('button[type="submit"]:has-text("Sign in")').click();
     await page.waitForTimeout(2000);
-    await expect(page.locator('text=Signed in as')).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
     console.log('✓ Logged in as admin');
 
     // Test profile navigation
