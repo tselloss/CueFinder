@@ -4,6 +4,7 @@ using CueFinder.Cues.Extensions;
 using CueFinder.Cues.Controllers;
 using CueFinder.CueCases.Extensions;
 using CueFinder.CueCases.Controllers;
+using CueFinder.Extensions.Caching;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -26,6 +27,9 @@ builder.Services.AddDatabaseServices(connectionString);
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
+
+// Add caching services
+builder.Services.AddCueFinderCaching(builder.Configuration);
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");

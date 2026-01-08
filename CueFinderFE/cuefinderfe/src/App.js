@@ -11,6 +11,7 @@ import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
+import * as cueCaseService from './api/cueCaseService';
 
 function AppInner() {
   const [cues, setCues] = useState([]);
@@ -37,8 +38,26 @@ function AppInner() {
 
   useEffect(() => {
     async function load() {
-      const data = await cueService.getCues();
-      setCues(data);
+      // Fetch both cues and cases
+      const [cuesData, casesData] = await Promise.all([
+        cueService.getCues(),
+        cueCaseService.getCueCases()
+      ]);
+      
+      // Add category field to each item and combine
+      const cuesWithCategory = cuesData.map(cue => ({ ...cue, category: 'cue' }));
+      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, category: 'case' }));
+      
+      // Combine both arrays
+      const allListings = [...cuesWithCategory, ...casesWithCategory];
+      
+      console.log('Loaded listings:', {
+        cues: cuesWithCategory.length,
+        cases: casesWithCategory.length,
+        total: allListings.length
+      });
+      
+      setCues(allListings);
     }
     load();
   }, []);
@@ -70,10 +89,22 @@ function AppInner() {
     setEditingCue(null); // Clear the editing state
     // Refresh the cues list
     try {
-      const updatedCues = await cueService.getCues();
-      setCues(updatedCues);
+      // Fetch both cues and cases
+      const [cuesData, casesData] = await Promise.all([
+        cueService.getCues(),
+        cueCaseService.getCueCases()
+      ]);
+      
+      // Add category field to each item and combine
+      const cuesWithCategory = cuesData.map(cue => ({ ...cue, category: 'cue' }));
+      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, category: 'case' }));
+      
+      // Combine both arrays
+      const allListings = [...cuesWithCategory, ...casesWithCategory];
+      
+      setCues(allListings);
     } catch (err) {
-      console.error('Error refreshing cues:', err);
+      console.error('Error refreshing listings:', err);
     }
   };
 
