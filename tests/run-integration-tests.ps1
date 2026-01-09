@@ -59,6 +59,12 @@ if ($ready) {
     exit 1
 }
 
+# Export environment variables for tests
+$env:TEST_DB_HOST = "127.0.0.1"
+$env:TEST_DB_PORT = "5433"
+$env:TEST_DB_USER = "postgres"
+$env:TEST_DB_PASSWORD = "postgres"
+
 # Run Database Integration Tests
 Write-Host ""
 Write-Host "Running Database Integration Tests..." -ForegroundColor Cyan
@@ -72,6 +78,20 @@ Write-Host "Running Auth Integration Tests..." -ForegroundColor Cyan
 Write-Host "----------------------------------" -ForegroundColor Cyan
 dotnet test IntegrationTests/CueFinder.Auth.IntegrationTests/CueFinder.Auth.IntegrationTests.csproj --logger "console;verbosity=normal"
 $authTestResult = $LASTEXITCODE
+
+# Run Cues Integration Tests
+Write-Host ""
+Write-Host "Running Cues Integration Tests..." -ForegroundColor Cyan
+Write-Host "----------------------------------" -ForegroundColor Cyan
+dotnet test IntegrationTests/CueFinder.Cues.IntegrationTests/CueFinder.Cues.IntegrationTests.csproj --logger "console;verbosity=normal"
+$cuesTestResult = $LASTEXITCODE
+
+# Run CueCases Integration Tests
+Write-Host ""
+Write-Host "Running CueCases Integration Tests..." -ForegroundColor Cyan
+Write-Host "-------------------------------------" -ForegroundColor Cyan
+dotnet test IntegrationTests/CueFinder.CueCases.IntegrationTests/CueFinder.CueCases.IntegrationTests.csproj --logger "console;verbosity=normal"
+$cueCasesTestResult = $LASTEXITCODE
 
 # Clean up
 Write-Host ""
@@ -97,8 +117,20 @@ if ($authTestResult -eq 0) {
     Write-Host "✗ Auth Integration Tests: FAILED" -ForegroundColor Red
 }
 
+if ($cuesTestResult -eq 0) {
+    Write-Host "✓ Cues Integration Tests: PASSED" -ForegroundColor Green
+} else {
+    Write-Host "✗ Cues Integration Tests: FAILED" -ForegroundColor Red
+}
+
+if ($cueCasesTestResult -eq 0) {
+    Write-Host "✓ CueCases Integration Tests: PASSED" -ForegroundColor Green
+} else {
+    Write-Host "✗ CueCases Integration Tests: FAILED" -ForegroundColor Red
+}
+
 Write-Host ""
-if ($databaseTestResult -eq 0 -and $authTestResult -eq 0) {
+if ($databaseTestResult -eq 0 -and $authTestResult -eq 0 -and $cuesTestResult -eq 0 -and $cueCasesTestResult -eq 0) {
     Write-Host "🎉 All integration tests passed!" -ForegroundColor Green
     exit 0
 } else {

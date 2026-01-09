@@ -60,11 +60,14 @@ public class CueService : ICueService
 
     public async Task<CueResponseDto?> GetCueByIdAsync(int cueId)
     {
+        // Query cues excluding soft-deleted ones (IsSold = true)
         var cue = await _context.Cues
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == cueId); // Show all cues including sold ones
+            .Where(c => c.Id == cueId)
+            .Where(c => !c.IsSold)
+            .FirstOrDefaultAsync();
 
         if (cue == null)
             return null;
