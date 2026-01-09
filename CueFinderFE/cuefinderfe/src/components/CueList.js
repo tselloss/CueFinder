@@ -17,7 +17,8 @@ const getImageUrl = (images) => {
   return `${API_BASE_URL}${url}`;
 };
 
-export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, sortBy }) {
+export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, sortBy, priceRange }) {
+  const currencySymbol = '€';
   // Filter by search, category, and condition
   let filtered = (cues || []).filter((c) => {
     // Text search
@@ -29,10 +30,10 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
       if (!matchesSearch) return false;
     }
     
-    // Category filter
+    // Category filter (uses itemType injected by App.js: 'cue' or 'case')
     if (category && category !== 'all') {
-      if (category === 'cues' && c.category !== 'cue') return false;
-      if (category === 'cases' && c.category !== 'case') return false;
+      if (category === 'cues' && c.itemType !== 'cue') return false;
+      if (category === 'cases' && c.itemType !== 'case') return false;
     }
     
     // Condition filter
@@ -40,7 +41,15 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
       if (c.condition !== condition) return false;
     }
     
-    return true;
+  // Price range filter
+  const price = Number(c.price || 0);
+    if (Array.isArray(priceRange) && priceRange.length === 2) {
+      const [min, max] = priceRange;
+      if (price < min) return false;
+      if (price > max) return false;
+    }
+
+  return true;
   });
 
   // Sort
@@ -65,10 +74,12 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
           gap="large" 
           pad={{ vertical: 'small' }}
         >
-          {filtered.map((c) => (
+  {filtered.map((c) => {
+            const displayPrice = Number(c.price || 0);
+    return (
             <Card 
               key={c.id} 
-              onClick={() => onSelect(c.id)}
+        onClick={() => onSelect(c)}
               hoverIndicator
               background="background-front"
               elevation="medium"
@@ -124,21 +135,23 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
                     margin={{ top: 'small' }}
                   >
                     <Text weight="bold" size="large" color="white" style={{ fontSize: '24px' }}>
-                      ${(c.price||0).toFixed(0)}
+                      {currencySymbol}{displayPrice.toFixed(0)}
                     </Text>
                   </Box>
                 </Box>
               </CardBody>
             </Card>
-          ))}
+          )})}
         </Grid>
       ) : (
         <Box gap="large" pad={{ vertical: 'medium' }}>
-          {filtered.map((c) => (
+  {filtered.map((c) => {
+            const displayPrice = Number(c.price || 0);
+    return (
             <Card 
               key={c.id} 
               direction="row" 
-              onClick={() => onSelect(c.id)}
+        onClick={() => onSelect(c)}
               hoverIndicator
               background="background-front"
               pad="medium"
@@ -213,12 +226,12 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
                   round="medium"
                 >
                   <Text weight="bold" size="xxlarge" color="white" style={{ fontSize: '28px' }}>
-                    ${(c.price||0).toFixed(0)}
+                    {currencySymbol}{displayPrice.toFixed(0)}
                   </Text>
                 </Box>
               </Box>
             </Card>
-          ))}
+          )})}
         </Box>
       )}
 
@@ -234,7 +247,8 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
         round="small"
       >
         <Text size="small" color="text-weak">
-          <Text weight="bold" color="text-strong">{filtered.length}</Text> cues available
+          <Text weight="bold" color="text-strong">{filtered.length}</Text>{' '}
+          {category === 'cases' ? 'cases' : category === 'cues' ? 'cues' : 'items'} available
         </Text>
         <Box direction="row" gap="xsmall">
           <Button

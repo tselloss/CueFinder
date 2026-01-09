@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Box, Card, CardBody, Form, FormField, TextInput, Button, Heading, Text } from 'grommet';
 import { User, Lock, Mail, Phone, Location, MapLocation } from 'grommet-icons';
+import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
 
 export default function LoginPage() {
   const { login, register, sendSms, verifySms } = useAuth();
@@ -72,7 +73,20 @@ export default function LoginPage() {
         navigate(from, { replace: true });
       }
     } catch (err) {
-      setError(err.message || 'Login failed');
+      // Use error utility to extract proper message from Problem Details
+      const errorMessage = getErrorMessage(err, isRegister ? 'Registration failed' : 'Login failed');
+      
+      // If there are validation errors, add them
+      if (isValidationError(err)) {
+        const validationDetails = formatValidationErrors(err);
+        if (validationDetails) {
+          setError(`${errorMessage}\n${validationDetails}`);
+        } else {
+          setError(errorMessage);
+        }
+      } else {
+        setError(errorMessage);
+      }
     }
     setLoading(false);
   };
@@ -269,7 +283,7 @@ export default function LoginPage() {
                         setError('Invalid code');
                       }
                     } catch (e) {
-                      setError(e.message);
+                      setError(getErrorMessage(e, 'Verification failed'));
                     }
                   }}
                   secondary

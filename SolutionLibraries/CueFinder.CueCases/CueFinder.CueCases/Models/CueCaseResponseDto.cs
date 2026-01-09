@@ -25,6 +25,12 @@ public class CueCaseResponseDto
     public DateTime? SoldDate { get; set; }
     public int UserId { get; set; }
     public string? UserName { get; set; }
+    
+    // Seller info (duplicated for convenience/consistency with cues API)
+    public int SellerId { get; set; }
+    public string? SellerName { get; set; }
+    public string? SellerEmail { get; set; }
+    public string? SellerPhone { get; set; }
     public int ViewCount { get; set; }
     public decimal AverageRating { get; set; }
     public int RatingCount { get; set; }

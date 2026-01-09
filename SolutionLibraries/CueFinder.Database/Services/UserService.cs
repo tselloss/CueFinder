@@ -10,6 +10,7 @@ namespace CueFinder.Database.Services
     /// </summary>
     public interface IUserService
     {
+    Task<List<User>> GetAllUsersAsync();
         Task<User?> GetUserWithDetailsAsync(int id);
         Task<User?> GetByUsernameAsync(string username);
         Task<User?> GetByEmailAsync(string email);
@@ -37,6 +38,22 @@ namespace CueFinder.Database.Services
             _userRepository = userRepository;
             _context = context;
             _logger = logger;
+        }
+
+        /// <summary>
+        /// Get all users
+        /// </summary>
+        public async Task<List<User>> GetAllUsersAsync()
+        {
+            try
+            {
+                return await _userRepository.GetAllAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving all users");
+                throw;
+            }
         }
 
         /// <summary>

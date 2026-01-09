@@ -1,7 +1,7 @@
 // Simple in-memory admin service
 let users = [
-  { id: 1, name: 'Alice', email: 'alice@example.com', banned: false },
-  { id: 2, name: 'Bob', email: 'bob@example.com', banned: false },
+  { id: 1, name: 'Alice', email: 'alice@example.com', role: 'user', banned: false },
+  { id: 2, name: 'Bob', email: 'bob@example.com', role: 'user', banned: false },
 ];
 
 export async function getUsers() {
@@ -22,7 +22,20 @@ export async function unbanUser(id) {
 
 export async function createUser(user) {
   const id = users.length ? Math.max(...users.map((u) => u.id)) + 1 : 1;
-  const item = { ...user, id, banned: false };
+  const item = { ...user, id, role: user.role || 'user', banned: false };
   users.push(item);
   return new Promise((res) => setTimeout(() => res(item), 80));
+}
+
+export async function updateUser(id, data) {
+  const idx = users.findIndex((u) => u.id === id);
+  if (idx === -1) return new Promise((res) => setTimeout(() => res(null), 50));
+  users[idx] = { ...users[idx], ...data };
+  return new Promise((res) => setTimeout(() => res({ ...users[idx] }), 80));
+}
+
+export async function deleteUser(id) {
+  const idx = users.findIndex((u) => u.id === id);
+  if (idx >= 0) users.splice(idx, 1);
+  return new Promise((res) => setTimeout(() => res({ success: idx >= 0 }), 80));
 }

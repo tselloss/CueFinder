@@ -1,6 +1,8 @@
 using CueFinder.Cues.Interfaces;
 using CueFinder.Cues.Services;
+using CueFinder.Cues.Controllers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 
 namespace CueFinder.Cues.Extensions;
 
@@ -16,6 +18,10 @@ public static class ServiceCollectionExtensions
     /// <returns>The service collection for chaining</returns>
     public static IServiceCollection AddCueServices(this IServiceCollection services)
     {
+        // Register controllers
+        services.TryAddScoped<CuesController>();
+        services.TryAddScoped<ImagesController>();
+
         // Register cue management service
         services.AddScoped<ICueService, CueService>();
 

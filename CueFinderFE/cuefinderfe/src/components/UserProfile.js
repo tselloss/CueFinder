@@ -3,6 +3,7 @@ import { useAuth } from '../auth/AuthContext';
 import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, Grid } from 'grommet';
 import { FormPrevious, User, Mail, Phone, MapLocation, Location, Edit } from 'grommet-icons';
 import MyCues from './MyCues';
+import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
 
 // Available avatar options
 const AVATAR_OPTIONS = [
@@ -94,7 +95,21 @@ export default function UserProfile({ onBack }) {
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
       console.error('Profile update error:', err);
-      setMessage({ type: 'error', text: err.message || 'Failed to update profile' });
+      
+      // Use error utility to extract proper message from Problem Details
+      const errorMessage = getErrorMessage(err, 'Failed to update profile');
+      
+      // If there are validation errors, add them
+      if (isValidationError(err)) {
+        const validationDetails = formatValidationErrors(err);
+        if (validationDetails) {
+          setMessage({ type: 'error', text: `${errorMessage}\n${validationDetails}` });
+        } else {
+          setMessage({ type: 'error', text: errorMessage });
+        }
+      } else {
+        setMessage({ type: 'error', text: errorMessage });
+      }
     } finally {
       setLoading(false);
     }

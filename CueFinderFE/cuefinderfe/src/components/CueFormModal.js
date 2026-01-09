@@ -3,6 +3,7 @@ import { Layer, Box, Button, Heading, Form, FormField, TextInput, TextArea, Sele
 import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
+import { getErrorMessage } from '../utils/errorUtils';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -107,7 +108,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         cue.images = cue.images.filter(img => img.id !== imageId);
       }
     } catch (error) {
-      setError('Failed to delete image');
+      setError(getErrorMessage(error, 'Failed to delete image'));
     }
   };
 
@@ -122,7 +123,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         }));
       }
     } catch (error) {
-      setError('Failed to set primary image');
+      setError(getErrorMessage(error, 'Failed to set primary image'));
     }
   };
 
@@ -206,7 +207,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
       onSave();
     } catch (error) {
       console.error('Error saving listing:', error);
-      setError(error.response?.data?.message || 'Failed to save listing. Please try again.');
+      setError(getErrorMessage(error, 'Failed to save listing. Please try again.'));
     } finally {
       setLoading(false);
     }
@@ -427,7 +428,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
               <Box direction="row" gap="small">
                 <Box flex>
-                  <FormField label="Price ($) *" name="price" required>
+                  <FormField label="Price (€) *" name="price" required>
                     <TextInput
                       name="price"
                       type="number"

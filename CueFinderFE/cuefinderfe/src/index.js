@@ -4,6 +4,7 @@ import { HashRouter } from 'react-router-dom';
 import { Grommet } from 'grommet';
 import { grommet } from 'grommet/themes';
 import { deepMerge } from 'grommet/utils';
+import './i18n';
 import './index.css';
 import App from './App';
 import reportWebVitals from './reportWebVitals';

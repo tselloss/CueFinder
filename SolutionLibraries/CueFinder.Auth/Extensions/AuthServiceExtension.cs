@@ -1,8 +1,10 @@
 using CueFinder.Auth.Interfaces;
 using CueFinder.Auth.Services;
+using CueFinder.Auth.Controllers;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -12,6 +14,9 @@ namespace CueFinder.Auth.Extensions
     {
         public static IServiceCollection AddAuthServices(this IServiceCollection services, IConfiguration configuration)
         {
+            // Register controllers
+            services.TryAddScoped<AuthController>();
+
             // Register DatabaseAuthService instead of mock AuthService
             services.AddScoped<IAuthService, DatabaseAuthService>();
             services.AddScoped<ITokenService, TokenService>();

@@ -1,0 +1,21 @@
+.grommetux-textinput__icon {
+  margin-right: 0.75em !important;
+}
+.grommetux-textinput input {
+  padding-left: 2.5em !important;
+}
+
+/* For custom wrapper if needed in the future */
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-wrapper .input-icon {
+  position: absolute;
+  left: 0.75em;
+  pointer-events: none;
+}
+.input-icon-wrapper input {
+  padding-left: 2.5em;
+}

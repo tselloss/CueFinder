@@ -75,11 +75,38 @@ export async function makeRequest(url, options = {}) {
     }
 
     if (!response.ok) {
-      const error = new Error(
-        data?.message || data?.error || `HTTP ${response.status}`
-      );
+      // Extract error message from Problem Details or fallback formats
+      let errorMessage = `HTTP ${response.status}`;
+      
+      if (data) {
+        // RFC 7807 Problem Details format
+        if (data.title) {
+          errorMessage = data.title;
+          // Add detail if available and different from title
+          if (data.detail && data.detail !== data.title) {
+            errorMessage = data.detail;
+          }
+        }
+        // Fallback to common error formats
+        else if (data.message) {
+          errorMessage = data.message;
+        }
+        else if (data.error) {
+          errorMessage = data.error;
+        }
+        // If data has errors object (validation errors)
+        else if (data.errors && typeof data.errors === 'object') {
+          const firstError = Object.values(data.errors)[0];
+          if (Array.isArray(firstError) && firstError.length > 0) {
+            errorMessage = firstError[0];
+          }
+        }
+      }
+
+      const error = new Error(errorMessage);
       error.status = response.status;
       error.data = data;
+      error.problemDetails = data; // Store full Problem Details for advanced handling
 
       // If unauthorized, clear auth and redirect to login
       if (response.status === 401) {
