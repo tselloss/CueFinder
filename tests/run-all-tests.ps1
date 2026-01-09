@@ -24,6 +24,21 @@ Write-Host "Running CueFinder.Database.Tests..." -ForegroundColor Yellow
 dotnet test UnitTests/CueFinder.Database.Tests/CueFinder.Database.Tests.csproj --logger "console;verbosity=minimal"
 if ($LASTEXITCODE -ne 0) { $testsFailed = $true }
 
+Write-Host ""
+Write-Host "Running CueFinder.Cues.Tests..." -ForegroundColor Yellow
+dotnet test UnitTests/CueFinder.Cues.Tests/CueFinder.Cues.Tests.csproj --logger "console;verbosity=minimal"
+if ($LASTEXITCODE -ne 0) { $testsFailed = $true }
+
+Write-Host ""
+Write-Host "Running CueFinder.CueCases.Tests..." -ForegroundColor Yellow
+dotnet test UnitTests/CueFinder.CueCases.Tests/CueFinder.CueCases.Tests.csproj --logger "console;verbosity=minimal"
+if ($LASTEXITCODE -ne 0) { $testsFailed = $true }
+
+Write-Host ""
+Write-Host "Running CueFinder.Extensions.Tests..." -ForegroundColor Yellow
+dotnet test UnitTests/CueFinder.Extensions.Tests/CueFinder.Extensions.Tests.csproj --logger "console;verbosity=minimal"
+if ($LASTEXITCODE -ne 0) { $testsFailed = $true }
+
 # Run Integration Tests
 Write-Host ""
 Write-Host "STEP 2: Running Integration Tests" -ForegroundColor Cyan

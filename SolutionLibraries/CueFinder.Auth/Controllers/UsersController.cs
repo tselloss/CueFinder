@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using CueFinder.Database.Services;
 using CueFinder.Auth.Models;
 using Microsoft.Extensions.Logging;

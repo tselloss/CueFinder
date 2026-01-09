@@ -31,15 +31,25 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Database", "..\So
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.Cues", "CueFinder.Cues", "{3B2707F3-2FD0-4F59-9D9F-240D7588F2B5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.Cues", "..\SolutionLibraries\CueFinder.Cues\CueFinder.Cues\CueFinder.Cues.csproj", "{83D2A4D2-205A-4492-8F77-497932D30BC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Cues", "..\SolutionLibraries\CueFinder.Cues\CueFinder.Cues\CueFinder.Cues.csproj", "{83D2A4D2-205A-4492-8F77-497932D30BC5}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.CueCases", "CueFinder.CueCases", "{F88DA989-874A-4056-B695-2C6A50E9BAFF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.CueCases", "..\SolutionLibraries\CueFinder.CueCases\CueFinder.CueCases\CueFinder.CueCases.csproj", "{584BDEDA-BA15-406F-923E-D8E4785D40CA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.CueCases", "..\SolutionLibraries\CueFinder.CueCases\CueFinder.CueCases\CueFinder.CueCases.csproj", "{584BDEDA-BA15-406F-923E-D8E4785D40CA}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.Extensions", "CueFinder.Extensions", "{3E6385EF-74AC-4922-A9A0-D1786E84A5FF}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.Extensions", "..\SolutionLibraries\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj", "{E83E5CD7-C924-4F28-858F-93D6A142889A}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Extensions", "..\SolutionLibraries\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj", "{E83E5CD7-C924-4F28-858F-93D6A142889A}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Cues.Tests", "..\tests\UnitTests\CueFinder.Cues.Tests\CueFinder.Cues.Tests.csproj", "{DE0E08CD-08B5-414C-89BC-88F5002C85A3}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.CueCases.Tests", "..\tests\UnitTests\CueFinder.CueCases.Tests\CueFinder.CueCases.Tests.csproj", "{AEC76900-22E6-4DD4-A5E1-95E229F4E123}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Extensions.Tests", "..\tests\UnitTests\CueFinder.Extensions.Tests\CueFinder.Extensions.Tests.csproj", "{23FCC18A-084B-40C6-877B-DD7D856017DA}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Cues.IntegrationTests", "..\tests\IntegrationTests\CueFinder.Cues.IntegrationTests\CueFinder.Cues.IntegrationTests.csproj", "{737F22D0-320E-45DA-956E-06E9DB323FA4}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.CueCases.IntegrationTests", "..\tests\IntegrationTests\CueFinder.CueCases.IntegrationTests\CueFinder.CueCases.IntegrationTests.csproj", "{6576EE80-38A1-4F5E-BDE1-7CD20841A659}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -87,6 +97,26 @@ Global
 		{E83E5CD7-C924-4F28-858F-93D6A142889A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{E83E5CD7-C924-4F28-858F-93D6A142889A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{E83E5CD7-C924-4F28-858F-93D6A142889A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{DE0E08CD-08B5-414C-89BC-88F5002C85A3}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{DE0E08CD-08B5-414C-89BC-88F5002C85A3}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{DE0E08CD-08B5-414C-89BC-88F5002C85A3}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{DE0E08CD-08B5-414C-89BC-88F5002C85A3}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AEC76900-22E6-4DD4-A5E1-95E229F4E123}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AEC76900-22E6-4DD4-A5E1-95E229F4E123}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AEC76900-22E6-4DD4-A5E1-95E229F4E123}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AEC76900-22E6-4DD4-A5E1-95E229F4E123}.Release|Any CPU.Build.0 = Release|Any CPU
+		{23FCC18A-084B-40C6-877B-DD7D856017DA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{23FCC18A-084B-40C6-877B-DD7D856017DA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{23FCC18A-084B-40C6-877B-DD7D856017DA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{23FCC18A-084B-40C6-877B-DD7D856017DA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{737F22D0-320E-45DA-956E-06E9DB323FA4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{737F22D0-320E-45DA-956E-06E9DB323FA4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{737F22D0-320E-45DA-956E-06E9DB323FA4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{737F22D0-320E-45DA-956E-06E9DB323FA4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6576EE80-38A1-4F5E-BDE1-7CD20841A659}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6576EE80-38A1-4F5E-BDE1-7CD20841A659}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6576EE80-38A1-4F5E-BDE1-7CD20841A659}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6576EE80-38A1-4F5E-BDE1-7CD20841A659}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -108,6 +138,11 @@ Global
 		{584BDEDA-BA15-406F-923E-D8E4785D40CA} = {F88DA989-874A-4056-B695-2C6A50E9BAFF}
 		{3E6385EF-74AC-4922-A9A0-D1786E84A5FF} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
 		{E83E5CD7-C924-4F28-858F-93D6A142889A} = {3E6385EF-74AC-4922-A9A0-D1786E84A5FF}
+		{DE0E08CD-08B5-414C-89BC-88F5002C85A3} = {03C80F52-D111-4F96-BEE2-38C776169402}
+		{AEC76900-22E6-4DD4-A5E1-95E229F4E123} = {03C80F52-D111-4F96-BEE2-38C776169402}
+		{23FCC18A-084B-40C6-877B-DD7D856017DA} = {03C80F52-D111-4F96-BEE2-38C776169402}
+		{737F22D0-320E-45DA-956E-06E9DB323FA4} = {5C4E2B5F-215D-46CE-A0AF-1240205C3F5B}
+		{6576EE80-38A1-4F5E-BDE1-7CD20841A659} = {5C4E2B5F-215D-46CE-A0AF-1240205C3F5B}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {50ADDDDF-C3D8-41DA-A1C2-A83864BFC928}
