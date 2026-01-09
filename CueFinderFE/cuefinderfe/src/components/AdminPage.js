@@ -15,14 +15,25 @@ export default function AdminPage({ onBack }) {
 
   useEffect(() => {
     async function load() {
-      const [u, c, k] = await Promise.all([
-        adminUsers.getAllUsers(),
-        cueService.getCues(),
-        cueCaseService.getCueCases()
-      ]);
-      setUsers(u);
-      setCues(c);
-      setCases(k);
+      console.log('AdminPage: Loading data...');
+      try {
+        const [u, c, k] = await Promise.all([
+          adminUsers.getAllUsers().catch(err => { console.error('Error loading users:', err); return []; }),
+          cueService.getCues().catch(err => { console.error('Error loading cues:', err); return []; }),
+          cueCaseService.getCueCases().catch(err => { console.error('Error loading cases:', err); return []; })
+        ]);
+        console.log('AdminPage: Users loaded:', u?.length || 0, u);
+        console.log('AdminPage: Cues loaded:', c?.length || 0, c);
+        console.log('AdminPage: Cases loaded:', k?.length || 0, k);
+        setUsers(u || []);
+        setCues(c || []);
+        setCases(k || []);
+      } catch (error) {
+        console.error('AdminPage: Fatal error loading data:', error);
+        setUsers([]);
+        setCues([]);
+        setCases([]);
+      }
     }
     load();
   }, []);
@@ -30,16 +41,16 @@ export default function AdminPage({ onBack }) {
   const listings = useMemo(() => {
     const cueItems = (cues || []).map(x => ({
       id: x.id,
-  uid: `cue-${x.id}`,
-      title: `${x.make ?? ''} ${x.model ?? ''}`.trim() || x.title || `Cue #${x.id}`,
+      uid: `cue-${x.id}`,
+      title: x.title || `${x.brand ?? ''} ${x.model ?? ''}`.trim() || `Cue #${x.id}`,
       price: Number(x.price ?? 0),
       itemType: 'cue',
       flagged: x.flagged || false,
     }));
     const caseItems = (cases || []).map(x => ({
       id: x.id,
-  uid: `case-${x.id}`,
-      title: `${x.brand ?? ''} ${x.type ?? ''}`.trim() || x.title || `Case #${x.id}`,
+      uid: `case-${x.id}`,
+      title: x.title || `${x.brand ?? ''} ${x.type ?? ''}`.trim() || `Case #${x.id}`,
       price: Number(x.price ?? 0),
       itemType: 'case',
       flagged: x.flagged || false,
@@ -110,8 +121,8 @@ export default function AdminPage({ onBack }) {
       </Box>
 
       <Box pad="medium">
-        <Grid columns={['flex', 'flex']} gap="medium">
-          <Card background="white">
+        <Grid columns={['1fr', '1fr']} gap="medium">
+          <Card background="white" height={{ min: 'large' }}>
             <CardBody pad="medium">
               <Heading level="3" margin={{ bottom: 'medium' }}>Users</Heading>
               <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
@@ -169,10 +180,16 @@ export default function AdminPage({ onBack }) {
                   {
                     property: 'actions',
                     header: <Text weight="bold">Actions</Text>,
+                    size: 'auto',
                     render: datum => (
-                      <Box direction="row" gap="xsmall">
+                      <Box direction="row" gap="xsmall" flex={false} wrap={false} style={{ minWidth: '280px' }}>
                         <Button icon={<Edit />} size="small" tip="Edit" onClick={() => setEditingUser({ ...datum })} />
-                        <Button icon={datum.isActive === false ? <StatusGood /> : <Close />} label={datum.isActive === false ? 'Activate' : 'Disable'} onClick={() => toggleBan(datum)} size="small" />
+                        <Button 
+                          icon={datum.isActive === false ? <StatusGood /> : <Close />} 
+                          label={datum.isActive === false ? 'Activate' : 'Disable'} 
+                          onClick={() => toggleBan(datum)} 
+                          size="small" 
+                        />
                         <Button icon={<Trash />} size="small" tip="Delete" onClick={() => deleteUser(datum.id)} />
                       </Box>
                     )
@@ -182,11 +199,13 @@ export default function AdminPage({ onBack }) {
                   const q = userQuery.trim().toLowerCase();
                   return !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q);
                 })}
+                step={10}
+                paginate
               />
             </CardBody>
           </Card>
 
-          <Card background="white">
+          <Card background="white" height={{ min: 'large' }}>
             <CardBody pad="medium">
               <Heading level="3" margin={{ bottom: 'medium' }}>Listings</Heading>
               <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
