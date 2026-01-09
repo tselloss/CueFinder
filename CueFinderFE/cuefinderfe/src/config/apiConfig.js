@@ -43,6 +43,11 @@ export const API_ENDPOINTS = {
     UPDATE: (id) => `${API_BASE_URL}/ratings/${id}`,
     DELETE: (id) => `${API_BASE_URL}/ratings/${id}`,
   },
+  // Admin endpoints
+  ADMIN: {
+    USERS: `${API_BASE_URL}/users`,
+    USER: (id) => `${API_BASE_URL}/users/${id}`,
+  },
 };
 
 export const API_BASE = API_BASE_URL;

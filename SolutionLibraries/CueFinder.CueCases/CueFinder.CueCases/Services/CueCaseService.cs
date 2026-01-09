@@ -240,7 +240,7 @@ public class CueCaseService : ICueCaseService
 
     private static CueCaseResponseDto MapToCueCaseResponseDto(CueCase cueCase)
     {
-        return new CueCaseResponseDto
+    return new CueCaseResponseDto
         {
             Id = cueCase.Id,
             Title = cueCase.Title,
@@ -262,6 +262,10 @@ public class CueCaseService : ICueCaseService
             SoldDate = cueCase.SoldDate,
             UserId = cueCase.UserId,
             UserName = cueCase.User?.Username,
+            SellerId = cueCase.UserId,
+            SellerName = cueCase.User?.Name ?? cueCase.User?.Username,
+            SellerEmail = cueCase.User?.Email,
+            SellerPhone = cueCase.User?.Phone,
             ViewCount = cueCase.ViewCount,
             AverageRating = cueCase.AverageRating,
             RatingCount = cueCase.RatingCount,

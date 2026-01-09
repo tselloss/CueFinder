@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button, Header, Heading, Text, TextInput, Select, Footer } from 'grommet';
-import { Add, Search, User, Logout, UserAdmin, Menu } from 'grommet-icons';
+import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector } from 'grommet';
+import { Add, Search, User, Logout, UserAdmin } from 'grommet-icons';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
+import CueCaseDetail from './components/CueCaseDetail';
 import AdminPage from './components/AdminPage';
 import LoginPage from './components/LoginPage';
 import UserProfile from './components/UserProfile';
@@ -13,7 +14,18 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 
+import './form-icons.css';
+import { useTranslation } from 'react-i18next';
+
 function AppInner() {
+  const { t, i18n } = useTranslation();
+  // Load saved language from localStorage
+  useEffect(() => {
+    const saved = localStorage.getItem('lang');
+    if (saved && saved !== i18n.language) {
+      i18n.changeLanguage(saved);
+    }
+  }, [i18n]);
   const [cues, setCues] = useState([]);
   const [search, setSearch] = useState('');
   const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
@@ -22,7 +34,20 @@ function AppInner() {
   const [category, setCategory] = useState('all'); // 'all', 'cues', 'cases'
   const [condition, setCondition] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
-  const [sidebarOpen, setSidebarOpen] = useState(false); // Hidden by default
+  const sidebarOpen = true; // Always open on home page
+  // Price range slider [min,max] in USD
+  const [priceRange, setPriceRange] = useState([0, 5000]);
+  const PRICE_MIN_LIMIT = 0;
+  const PRICE_MAX_LIMIT = 10000;
+  const PRICE_STEP = 1;
+  const presetRanges = [
+    { label: '< $200', value: [0, 200] },
+    { label: '$200–$500', value: [200, 500] },
+    { label: '$500–$1000', value: [500, 1000] },
+    { label: '> $1000', value: [1000, PRICE_MAX_LIMIT] },
+  ];
+  // Prices are in EUR; use € labels
+  const currencySymbol = '€';
   const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
@@ -44,9 +69,9 @@ function AppInner() {
         cueCaseService.getCueCases()
       ]);
       
-      // Add category field to each item and combine
-      const cuesWithCategory = cuesData.map(cue => ({ ...cue, category: 'cue' }));
-      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, category: 'case' }));
+  // Add itemType field to each item and combine (avoid colliding with backend 'category')
+  const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
+  const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
       
       // Combine both arrays
       const allListings = [...cuesWithCategory, ...casesWithCategory];
@@ -62,13 +87,17 @@ function AppInner() {
     load();
   }, []);
 
-  const handleSelect = (id) => {
+  const handleSelect = (item) => {
     if (!user) {
       // Redirect to login if not authenticated
       navigate('/login');
       return;
     }
-    navigate(`/cue/${id}`);
+  if (item.itemType === 'case') {
+      navigate(`/case/${item.id}`);
+    } else {
+      navigate(`/cue/${item.id}`);
+    }
   };
   
   const handleBack = () => navigate('/');
@@ -95,9 +124,9 @@ function AppInner() {
         cueCaseService.getCueCases()
       ]);
       
-      // Add category field to each item and combine
-      const cuesWithCategory = cuesData.map(cue => ({ ...cue, category: 'cue' }));
-      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, category: 'case' }));
+  // Add itemType field to each item and combine (avoid colliding with backend 'category')
+  const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
+  const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
       
       // Combine both arrays
       const allListings = [...cuesWithCategory, ...casesWithCategory];
@@ -137,28 +166,14 @@ function AppInner() {
         }}
       >
         <Box direction="row" align="center" gap="small">
-          {/* Menu Toggle Button - Only on home page */}
-          {isHomePage && (
-            <Button
-              icon={<Menu size="20px" color="white" />}
-              onClick={() => setSidebarOpen(!sidebarOpen)}
-              tip={sidebarOpen ? "Hide Categories" : "Show Categories"}
-              style={{
-                background: 'rgba(255, 255, 255, 0.15)',
-                border: '2px solid rgba(255, 255, 255, 0.3)',
-                borderRadius: '10px',
-                padding: '8px',
-                transition: 'all 0.3s ease'
-              }}
-              hoverIndicator={{ background: 'rgba(255, 255, 255, 0.25)' }}
-            />
-          )}
+          {/* Sidebar is always open on the home page; toggle removed */}
           
           <Heading level="2" margin="none" color="text-strong" style={{ fontWeight: 700, letterSpacing: '-0.5px', fontSize: 'clamp(18px, 4vw, 24px)' }}>
-            🎱 CueFinder
+            🎱 {t('app.title')}
           </Heading>
         </Box>
         <Box direction="row" align="center" gap="medium" wrap style={{ flexShrink: 0 }}>
+          {/* Language Switcher hidden */}
           {user ? (
             <>
               {/* User Info Display */}
@@ -192,7 +207,7 @@ function AppInner() {
               {/* Action Buttons */}
               <Button 
                 icon={<User color="white" size="18px" />} 
-                label={<Text size="small" color="white" weight={600}>Profile</Text>}
+                label={<Text size="small" color="white" weight={600}>{t('actions.profile')}</Text>}
                 onClick={() => navigate('/profile')} 
                 style={{ 
                   background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
@@ -209,7 +224,7 @@ function AppInner() {
               {user.role === 'admin' && (
                 <Button 
                   icon={<UserAdmin color="white" size="18px" />} 
-                  label={<Text size="small" color="white" weight={600}>Admin</Text>}
+                  label={<Text size="small" color="white" weight={600}>{t('actions.admin')}</Text>}
                   onClick={() => navigate('/admin')} 
                   style={{ 
                     background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
@@ -226,7 +241,7 @@ function AppInner() {
               )}
               <Button 
                 icon={<Logout color="white" size="18px" />} 
-                label={<Text size="small" color="white" weight={600}>Logout</Text>}
+                label={<Text size="small" color="white" weight={600}>{t('actions.logout')}</Text>}
                 onClick={handleLogout} 
                 style={{ 
                   background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
@@ -245,7 +260,7 @@ function AppInner() {
             <>
               <Button 
                 primary 
-                label={<Text size="xsmall" weight={700} color="white">Sign In</Text>}
+                label={<Text size="xsmall" weight={700} color="white">{t('actions.signIn')}</Text>}
                 onClick={() => navigate('/login')} 
                 style={{ 
                   background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
@@ -258,7 +273,7 @@ function AppInner() {
                 }}
               />
               <Button 
-                label={<Text size="xsmall" color="text-strong" weight={600}>Register</Text>}
+                label={<Text size="xsmall" color="text-strong" weight={600}>{t('actions.register')}</Text>}
                 onClick={() => navigate('/register')} 
                 style={{ 
                   background: 'rgba(59, 130, 246, 0.2)',
@@ -304,10 +319,10 @@ function AppInner() {
                   textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
                 }}
               >
-                Find Your Perfect Cue
+                {t('hero.title')}
               </Heading>
               <Text size="medium" textAlign="center" color="text-weak" style={{ fontSize: 'clamp(14px, 2.5vw, 18px)' }}>
-                Browse premium billiard cues and cases from sellers worldwide
+                {t('hero.subtitle')}
               </Text>
             </Box>
 
@@ -426,12 +441,12 @@ function AppInner() {
                   width="100%"
                 >
                   <Box direction="row" align="center" gap="xsmall">
-                    <Text size="small" color="text-weak" weight={500}>Filter by:</Text>
+                    <Text size="small" color="text-weak" weight={500}>{t('filters.filterBy')}</Text>
                   </Box>
                   <Select
-                    options={['All Conditions', 'Like New', 'Used', 'Fair']}
-                    value={condition === 'all' ? 'All Conditions' : condition}
-                    onChange={({ option }) => setCondition(option === 'All Conditions' ? 'all' : option)}
+                    options={[t('filters.condition.all'), t('filters.condition.likeNew'), t('filters.condition.used'), t('filters.condition.fair')]}
+                    value={condition === 'all' ? t('filters.condition.all') : condition}
+                    onChange={({ option }) => setCondition(option === t('filters.condition.all') ? 'all' : option)}
                     size="small"
                     style={{ 
                       minWidth: '130px',
@@ -443,11 +458,11 @@ function AppInner() {
                     }}
                   />
                   <Select
-                    options={['Newest First', 'Lowest Price', 'Highest Price']}
-                    value={sortBy === 'newest' ? 'Newest First' : sortBy === 'price_asc' ? 'Lowest Price' : 'Highest Price'}
+                    options={[t('filters.sort.newest'), t('filters.sort.low'), t('filters.sort.high')]}
+                    value={sortBy === 'newest' ? t('filters.sort.newest') : sortBy === 'price_asc' ? t('filters.sort.low') : t('filters.sort.high')}
                     onChange={({ option }) => {
-                      if (option === 'Newest First') setSortBy('newest');
-                      else if (option === 'Lowest Price') setSortBy('price_asc');
+                      if (option === t('filters.sort.newest')) setSortBy('newest');
+                      else if (option === t('filters.sort.low')) setSortBy('price_asc');
                       else setSortBy('price_desc');
                     }}
                     size="small"
@@ -463,7 +478,7 @@ function AppInner() {
                   {user && (
                     <Button 
                       icon={<Add size="16px" />} 
-                      label={<Text weight={600} size="small" color="white">New Listing</Text>}
+                      label={<Text weight={600} size="small" color="white">{t('filters.newListing')}</Text>}
                       onClick={handleAdd}
                       style={{ 
                         background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
@@ -513,7 +528,7 @@ function AppInner() {
       <Box flex="grow" background="background" style={{ flexGrow: 1 }}>
         <Box direction="row" fill>
           {/* Modern Collapsible Sidebar - Only on home page */}
-          {isHomePage && sidebarOpen && (
+          {isHomePage && (
             <Box 
               width="300px" 
               background="background-front" 
@@ -563,7 +578,7 @@ function AppInner() {
                     color: '#f1f5f9',
                     letterSpacing: '-0.02em'
                   }}>
-                    Categories
+                    {t('categories.all')}
                   </Heading>
                 </Box>
               </Box>
@@ -601,7 +616,7 @@ function AppInner() {
                     <Text size="xlarge" style={{ lineHeight: '1' }}>🎱</Text>
                     <Box>
                       <Text weight={category === 'all' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        All Items
+                        {t('categories.all')}
                       </Text>
                       {category === 'all' && (
                         <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
@@ -643,7 +658,7 @@ function AppInner() {
                     <Text size="xlarge" style={{ lineHeight: '1' }}>🎯</Text>
                     <Box>
                       <Text weight={category === 'cues' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        Cues
+                        {t('categories.cues')}
                       </Text>
                       {category === 'cues' && (
                         <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
@@ -685,7 +700,7 @@ function AppInner() {
                     <Text size="xlarge" style={{ lineHeight: '1' }}>💼</Text>
                     <Box>
                       <Text weight={category === 'cases' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        Cases
+                        {t('categories.cases')}
                       </Text>
                       {category === 'cases' && (
                         <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
@@ -727,10 +742,68 @@ function AppInner() {
                   pad="medium"
                   round="8px"
                   border={{ color: 'rgba(51, 65, 85, 0.5)', size: '1px' }}
+                  gap="small"
                 >
-                  <Text size="small" color="#94a3b8" style={{ fontStyle: 'italic' }}>
-                    🎨 Price range & advanced filters coming soon...
-                  </Text>
+                  <Heading level="4" margin="none" style={{ fontSize: '14px', fontWeight: 600, color: '#cbd5e1' }}>
+                    {t('price.range')}
+                  </Heading>
+                  {/* Currency fixed to EUR */}
+                  <Box gap="small">
+                    {/* Preset quick filters */}
+                    <Box direction="row" gap="xsmall" wrap>
+                      {presetRanges.map((p) => (
+                        <Button
+                          key={p.label}
+                          label={<Text size="xsmall" weight={600} color={'brand'}>{p.label.replace('$', currencySymbol)}</Text>}
+                          onClick={() => {
+                            const [min, max] = p.value;
+                            setPriceRange([min, max]);
+                          }}
+                          style={{
+                            background: priceRange[0] === p.value[0] && priceRange[1] === p.value[1]
+                              ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
+                              : 'rgba(30,41,59,0.5)',
+                            border: '1px solid rgba(59,130,246,0.3)',
+                            borderRadius: '16px',
+                            padding: '4px 10px'
+                          }}
+                          hoverIndicator={false}
+                        />
+                      ))}
+                    </Box>
+                    {/* Current values */}
+                    <Box direction="row" justify="between" align="center">
+                      <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[0]}</Text>
+                      <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[1]}</Text>
+                    </Box>
+                    {/* Range slider */}
+                    <Box gap="xsmall">
+                      {/* Styled track with highlighted selected range */}
+                      <Box height="6px" round="large" background={{ color: 'rgba(51,65,85,0.6)' }}>
+                        <Box
+                          height="6px"
+                          round="large"
+                          background={{ color: 'brand' }}
+                          style={{
+                            width: `${((priceRange[1] - priceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
+                            marginLeft: `${((priceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
+                            transition: 'width 0.1s ease, margin-left 0.1s ease'
+                          }}
+                        />
+                      </Box>
+                      <Box pad={{ horizontal: 'xsmall' }}>
+                        <RangeSelector
+                          direction="horizontal"
+                          min={PRICE_MIN_LIMIT}
+                          max={PRICE_MAX_LIMIT}
+                          step={PRICE_STEP}
+                          values={priceRange}
+                          onChange={setPriceRange}
+                        />
+                      </Box>
+                    </Box>
+                    <Text size="xsmall" color="#94a3b8">Step: {currencySymbol}{PRICE_STEP}</Text>
+                  </Box>
                 </Box>
               </Box>
 
@@ -762,9 +835,9 @@ function AppInner() {
             flex 
             pad={{ horizontal: 'medium', vertical: 'none' }} 
             style={{ 
-              maxWidth: sidebarOpen ? '100%' : '1400px', 
+              maxWidth: isHomePage && sidebarOpen ? '100%' : '1400px', 
               width: '100%',
-              margin: sidebarOpen ? '0' : '0 auto'
+              margin: isHomePage && sidebarOpen ? '0' : '0 auto'
             }}
           >
             <Routes>
@@ -779,6 +852,7 @@ function AppInner() {
                   category={category}
                   condition={condition}
                   sortBy={sortBy}
+                  priceRange={priceRange}
                 />
               } />
               
@@ -794,6 +868,9 @@ function AppInner() {
               
               <Route path="/cue/:id" element={
                 user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/case/:id" element={
+                user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/profile" element={

@@ -1,7 +1,8 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Grid, Card, CardBody, Button, Heading, Text, Image, Stack, Notification } from 'grommet';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Box, Grid, Card, CardBody, Button, Heading, Text, Image, Stack } from 'grommet';
 import { Add, Edit, Trash, StatusGood, StatusCritical } from 'grommet-icons';
 import * as cueService from '../api/cueService';
+import * as cueCaseService from '../api/cueCaseService';
 import CueFormModal from './CueFormModal';
 
 const API_BASE_URL = 'http://localhost:5000';
@@ -18,30 +19,38 @@ const getImageUrl = (img) => {
 };
 
 export default function MyCues() {
-  const [myCues, setMyCues] = useState([]);
+  const [myListings, setMyListings] = useState([]); // cues + cases
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
   const [editingCue, setEditingCue] = useState(null);
   const [message, setMessage] = useState(null);
 
-  useEffect(() => {
-    loadMyCues();
-  }, []);
-
-  const loadMyCues = async () => {
+  const loadMyCues = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching my cues from API...');
-      const cues = await cueService.getMyCues();
-      console.log('Received cues:', cues);
-      setMyCues(cues);
+      console.log('Fetching my listings from API...');
+      const [cues, cases] = await Promise.all([
+        cueService.getMyCues(),
+        cueCaseService.getMyCueCases()
+      ]);
+      const cuesWithCategory = (cues || []).map(c => ({ ...c, category: 'cue' }));
+      const casesWithCategory = (cases || []).map(cs => ({ ...cs, category: 'case' }));
+      const combined = [...cuesWithCategory, ...casesWithCategory];
+      console.log('Received listings:', { cues: cuesWithCategory.length, cases: casesWithCategory.length, total: combined.length });
+      setMyListings(combined);
     } catch (error) {
       console.error('Error loading my cues:', error);
       showMessage('error', 'Failed to load your cue listings: ' + (error.message || 'Unknown error'));
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    loadMyCues();
+  }, [loadMyCues]);
+
+  // loadMyCues defined above with useCallback
 
   const showMessage = (type, text) => {
     setMessage({ type, text });
@@ -65,7 +74,7 @@ export default function MyCues() {
 
     try {
       await cueService.deleteCue(cueId);
-      setMyCues(myCues.filter(c => c.id !== cueId));
+      setMyListings(myListings.filter(c => c.id !== cueId));
       showMessage('success', 'Cue listing deleted successfully');
     } catch (error) {
       showMessage('error', 'Failed to delete cue listing');
@@ -78,7 +87,7 @@ export default function MyCues() {
         ...cue,
         isSold: !cue.isSold
       });
-      setMyCues(myCues.map(c => c.id === cue.id ? updated : c));
+  setMyListings(myListings.map(c => c.id === cue.id ? updated : c));
       showMessage('success', `Cue marked as ${!cue.isSold ? 'sold' : 'available'}`);
     } catch (error) {
       showMessage('error', 'Failed to update cue status');
@@ -100,7 +109,7 @@ export default function MyCues() {
   if (loading) {
     return (
       <Box align="center" justify="center" pad="large">
-        <Text size="large" color="text-weak">Loading your cue listings...</Text>
+        <Text size="large" color="text-weak">Loading your listings...</Text>
       </Box>
     );
   }
@@ -109,7 +118,7 @@ export default function MyCues() {
     <Box gap="large">
       <Box direction="row" justify="between" align="center">
         <Heading level="3" margin="none" style={{ fontSize: '28px', fontWeight: 700 }}>
-          📋 My Cue Listings
+          📋 My Listings
         </Heading>
         <Button 
           primary
@@ -139,7 +148,7 @@ export default function MyCues() {
         </Box>
       )}
 
-      {myCues.length === 0 ? (
+  {myListings.length === 0 ? (
         <Box 
           align="center" 
           justify="center" 
@@ -150,7 +159,7 @@ export default function MyCues() {
           elevation="small"
         >
           <Text size="large" color="text-weak" textAlign="center">
-            You haven't created any cue listings yet.
+            You haven't created any listings yet.
           </Text>
           <Button
             primary
@@ -167,13 +176,13 @@ export default function MyCues() {
         </Box>
       ) : (
         <Grid columns="medium" gap="medium">
-          {myCues.map(cue => (
+          {myListings.map(item => (
             <CueCard
-              key={cue.id}
-              cue={cue}
-              onEdit={() => handleEdit(cue)}
-              onDelete={() => handleDelete(cue.id)}
-              onToggleSold={() => handleToggleSold(cue)}
+              key={item.id}
+              cue={item}
+              onEdit={() => handleEdit(item)}
+              onDelete={() => handleDelete(item.id)}
+              onToggleSold={() => handleToggleSold(item)}
             />
           ))}
         </Grid>
@@ -219,6 +228,16 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
               onError={(e) => e.target.src = '/placeholder.png'}
             />
           </Box>
+          {cue.category && (
+            <Box 
+              background="brand" 
+              pad="xsmall" 
+              round="small"
+              style={{ position: 'absolute', top: '12px', left: '12px' }}
+            >
+              <Text size="small" weight="bold" color="white">{cue.category === 'case' ? 'Case' : 'Cue'}</Text>
+            </Box>
+          )}
           {cue.isSold && (
             <Box 
               background="status-error" 

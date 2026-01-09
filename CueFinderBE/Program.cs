@@ -1,18 +1,14 @@
 using CueFinder.Auth.Extensions;
-using CueFinder.Database.Extensions;
-using CueFinder.Cues.Extensions;
-using CueFinder.Cues.Controllers;
 using CueFinder.CueCases.Extensions;
-using CueFinder.CueCases.Controllers;
+using CueFinder.Cues.Extensions;
+using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
+using CueFinder.Extensions.ProblemDetails;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container
-// Include controllers from all assemblies (main + CueFinder.Cues + CueFinder.CueCases)
-builder.Services.AddControllers()
-    .AddApplicationPart(typeof(CuesController).Assembly)
-    .AddApplicationPart(typeof(CueCasesController).Assembly);
+builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
@@ -30,6 +26,10 @@ builder.Services.AddCueCasesServices();
 
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);
+
+// Add ProblemDetails support with exception details in Development
+builder.Services.AddCueFinderProblemDetails(
+    includeExceptionDetails: builder.Environment.IsDevelopment());
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");
@@ -66,6 +66,10 @@ app.UseCors("AllowFrontend");
 
 // Enable static files for serving uploaded images
 app.UseStaticFiles();
+
+// Add exception handler and status code pages for ProblemDetails
+app.UseExceptionHandler();
+app.UseStatusCodePages();
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
