@@ -36,6 +36,11 @@ namespace CueFinder.Auth.Models
         public string Role { get; set; } = "user";
 
         /// <summary>
+        /// Whether the user account is active
+        /// </summary>
+        public bool IsActive { get; set; } = true;
+
+        /// <summary>
         /// User's location (city/general area)
         /// </summary>
         public string? Location { get; set; }
