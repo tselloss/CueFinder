@@ -54,5 +54,10 @@ namespace CueFinder.Auth.Models
     /// Country
     /// </summary>
     public string? Country { get; set; }
+
+    /// <summary>
+    /// Whether the user accepts the terms and conditions
+    /// </summary>
+    public bool AcceptedTerms { get; set; } = false;
 }
 }

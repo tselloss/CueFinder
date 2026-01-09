@@ -1,7 +1,7 @@
 {
   "app.title": "CueFinder",
-  "hero.title": "Βρες το ιδανικό σου στέκ",
-  "hero.subtitle": "Περιηγήσου σε premium στέκα και θήκες από πωλητές παγκοσμίως",
+  "hero.title": "Βρες την ιδανική σου στέκα",
+  "hero.subtitle": "Περιηγήσου σε premium στέκες και θήκες από πωλητές παγκοσμίως",
   "actions.signIn": "Σύνδεση",
   "actions.register": "Εγγραφή",
   "actions.logout": "Αποσύνδεση",
@@ -23,5 +23,8 @@
   "price.step": "Βήμα",
   "footer.tagline": "Το premium marketplace για στέκες μπιλιάρδου",
   "footer.privacy": "Πολιτική απορρήτου",
-  "footer.terms": "Όροι χρήσης"
+  "footer.terms": "Όροι χρήσης",
+  "registration.terms.accept": "Αποδέχομαι τους",
+  "registration.terms.link": "Όρους και Προϋποθέσεις",
+  "registration.terms.required": "Πρέπει να αποδεχτείτε τους όρους και προϋποθέσεις για να εγγραφείτε"
 }
