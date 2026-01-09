@@ -1,6 +1,6 @@
 import React from 'react';
 import { Box, Grid, Card, CardBody, CardHeader, Image, Text, Button, Stack } from 'grommet';
-import { Apps, List as ListIcon } from 'grommet-icons';
+import { Apps, List as ListIcon, Image as ImageIcon } from 'grommet-icons';
 
 const API_BASE_URL = 'http://localhost:5000';
 
@@ -16,6 +16,20 @@ const getImageUrl = (images) => {
   // If relative URL, prepend API base
   return `${API_BASE_URL}${url}`;
 };
+
+// Image Placeholder Component
+const ImagePlaceholder = ({ height = '200px' }) => (
+  <Box
+    fill
+    background="light-2"
+    align="center"
+    justify="center"
+    style={{ height }}
+  >
+    <ImageIcon size="large" color="light-4" />
+    <Text size="small" color="dark-4" margin={{ top: 'small' }}>No Image</Text>
+  </Box>
+);
 
 export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, sortBy, priceRange }) {
   const currencySymbol = '€';
@@ -93,16 +107,20 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
               <CardHeader pad="none" height="200px" style={{ overflow: 'hidden' }}>
                 <Stack anchor="top-right" fill>
                   <Box fill style={{ position: 'relative' }}>
-                    <Image
-                      src={getImageUrl(c.images) || 'https://via.placeholder.com/300x200?text=No+Image'}
-                      fit="cover"
-                      style={{ 
-                        width: '100%', 
-                        height: '200px', 
-                        objectFit: 'cover',
-                        display: 'block'
-                      }}
-                    />
+                    {getImageUrl(c.images) ? (
+                      <Image
+                        src={getImageUrl(c.images)}
+                        fit="cover"
+                        style={{ 
+                          width: '100%', 
+                          height: '200px', 
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                    ) : (
+                      <ImagePlaceholder height="200px" />
+                    )}
                   </Box>
                   {(c.isSold || c.is_sold) ? (
                     <Box background="status-error" pad="xsmall" margin="small" round="small">
@@ -173,16 +191,20 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
               >
                 <Stack fill>
                   <Box fill>
-                    <Image
-                      src={getImageUrl(c.images) || 'https://via.placeholder.com/180x120?text=No+Image'}
-                      fit="cover"
-                      style={{ 
-                        width: '100%', 
-                        height: '120px', 
-                        objectFit: 'cover',
-                        display: 'block'
-                      }}
-                    />
+                    {getImageUrl(c.images) ? (
+                      <Image
+                        src={getImageUrl(c.images)}
+                        fit="cover"
+                        style={{ 
+                          width: '100%', 
+                          height: '120px', 
+                          objectFit: 'cover',
+                          display: 'block'
+                        }}
+                      />
+                    ) : (
+                      <ImagePlaceholder height="120px" />
+                    )}
                   </Box>
                   {(c.isSold || c.is_sold) ? (
                     <Box 

@@ -82,76 +82,6 @@ export default function CueDetail({ onBack }) {
           gap="large"
           width="xlarge"
         >
-          {/* Image Section */}
-          <Box>
-            <Card background="white">
-              <CardBody pad="none">
-                <Box height="medium" position="relative">
-                  {images.length > 0 ? (
-                    <>
-                      <Image
-                        src={currentImage}
-                        alt={`${cue.brand} ${cue.title}`}
-                        fit="contain"
-                        fill
-                        onClick={openFullscreen}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      {images.length > 1 && (
-                        <>
-                          <Box
-                            direction="row"
-                            justify="between"
-                            align="center"
-                            fill="horizontal"
-                            pad="small"
-                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
-                          >
-                            <Button 
-                              icon={<Previous />} 
-                              onClick={prevImage}
-                              plain
-                              hoverIndicator
-                            />
-                            <Button 
-                              icon={<Next />} 
-                              onClick={nextImage}
-                              plain
-                              hoverIndicator
-                            />
-                          </Box>
-                          <Box
-                            direction="row"
-                            justify="center"
-                            gap="xsmall"
-                            pad="small"
-                            style={{ position: 'absolute', bottom: 0, width: '100%' }}
-                          >
-                            {images.map((_, idx) => (
-                              <Box
-                                key={idx}
-                                width="10px"
-                                height="10px"
-                                round="full"
-                                background={idx === imageIndex ? 'brand' : 'light-4'}
-                                onClick={() => setImageIndex(idx)}
-                                style={{ cursor: 'pointer' }}
-                              />
-                            ))}
-                          </Box>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <Box align="center" justify="center" fill background="light-2">
-                      <Text color="dark-4">No images available</Text>
-                    </Box>
-                  )}
-                </Box>
-              </CardBody>
-            </Card>
-          </Box>
-
           {/* Info Section */}
           <Box gap="medium">
             {/* Title & Price */}
@@ -252,6 +182,76 @@ export default function CueDetail({ onBack }) {
                     <Box direction="row" gap="small" align="center">
                       <Text>📞</Text>
                       <Text>{cue.sellerPhone || cue.seller_phone}</Text>
+                    </Box>
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+          </Box>
+
+          {/* Image Section */}
+          <Box margin={{ top: 'xlarge' }} pad={{ top: 'xlarge' }}>
+            <Card background="white">
+              <CardBody pad="none">
+                <Box height="medium" position="relative">
+                  {images.length > 0 ? (
+                    <>
+                      <Image
+                        src={currentImage}
+                        alt={`${cue.brand} ${cue.title}`}
+                        fit="contain"
+                        fill
+                        onClick={openFullscreen}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {images.length > 1 && (
+                        <>
+                          <Box
+                            direction="row"
+                            justify="between"
+                            align="center"
+                            fill="horizontal"
+                            pad="small"
+                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                          >
+                            <Button 
+                              icon={<Previous />} 
+                              onClick={prevImage}
+                              plain
+                              hoverIndicator
+                            />
+                            <Button 
+                              icon={<Next />} 
+                              onClick={nextImage}
+                              plain
+                              hoverIndicator
+                            />
+                          </Box>
+                          <Box
+                            direction="row"
+                            justify="center"
+                            gap="xsmall"
+                            pad="small"
+                            style={{ position: 'absolute', bottom: 0, width: '100%' }}
+                          >
+                            {images.map((_, idx) => (
+                              <Box
+                                key={idx}
+                                width="10px"
+                                height="10px"
+                                round="full"
+                                background={idx === imageIndex ? 'brand' : 'light-4'}
+                                onClick={() => setImageIndex(idx)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            ))}
+                          </Box>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <Box align="center" justify="center" fill background="light-2">
+                      <Text color="dark-4">No images available</Text>
                     </Box>
                   )}
                 </Box>
