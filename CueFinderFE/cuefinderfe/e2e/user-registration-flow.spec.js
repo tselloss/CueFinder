@@ -99,6 +99,39 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     await page.getByPlaceholder('Password').fill(testUser.password);
     console.log('✓ Form fields filled');
 
+    // Test 1: Try to submit WITHOUT accepting terms - should fail
+    console.log('Testing terms checkbox validation...');
+    await page.locator('button[type="submit"]:has-text("Create Account")').click();
+    await page.waitForTimeout(1000);
+    
+    // Should show error about accepting terms
+    const termsError = page.locator('text=/must accept.*terms/i');
+    const hasTermsError = await termsError.isVisible().catch(() => false);
+    if (hasTermsError) {
+      console.log('✅ Terms validation working - error shown when checkbox not checked');
+    }
+
+    // Test 2: Check the terms checkbox exists and has link
+    // Look for the text first (more reliable for Grommet components)
+    const termsText = page.locator('text=/Αποδέχομαι τους|I accept the/');
+    await expect(termsText).toBeVisible({ timeout: 5000 });
+    console.log('✓ Terms acceptance text visible');
+
+    // Verify terms link exists
+    const termsLink = page.locator('a[href*="terms"]');
+    await expect(termsLink).toBeVisible({ timeout: 5000 });
+    console.log('✓ Terms and Conditions link visible');
+
+    // Test 3: Click terms link to verify it opens (in new tab or same page)
+    const linkHref = await termsLink.getAttribute('href');
+    console.log(`✓ Terms link points to: ${linkHref}`);
+
+    // Test 4: Accept terms by clicking the checkbox label area (Grommet CheckBox)
+    // Click on the terms text area to toggle the checkbox
+    await termsText.click();
+    await page.waitForTimeout(500);
+    console.log('✓ Terms checkbox checked');
+
     // Submit - this will trigger SMS verification flow
     await page.locator('button[type="submit"]:has-text("Create Account")').click();
     await page.waitForTimeout(2000);

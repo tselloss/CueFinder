@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { Box, Card, CardBody, Form, FormField, TextInput, Button, Heading, Text } from 'grommet';
+import { Box, Card, CardBody, Form, FormField, TextInput, Button, Heading, Text, CheckBox, Anchor } from 'grommet';
 import { User, Lock, Mail, Phone, Location, MapLocation } from 'grommet-icons';
 import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginPage() {
   const { login, register, sendSms, verifySms } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
+  const { t, i18n } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -16,6 +18,7 @@ export default function LoginPage() {
   const [phone, setPhone] = useState('');
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState({ street: '', city: '', state: '', postalCode: '', country: '' });
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [verificationToken, setVerificationToken] = useState('');
   const [code, setCode] = useState('');
@@ -40,9 +43,12 @@ export default function LoginPage() {
         // Step 1: Register the user first
         if (!codeSent) {
           if (!phone) throw new Error('Please provide mobile phone for verification');
+          if (!acceptedTerms) {
+            throw new Error(t('registration.terms.required'));
+          }
           
           // Register user account
-          await register(username, password, name, phone, email, address);
+          await register(username, password, name, phone, email, address, acceptedTerms);
           
           // Step 2: Now send SMS verification code
           const response = await sendSms(phone, 'SMS');
@@ -95,19 +101,20 @@ export default function LoginPage() {
     <Box 
       fill 
       align="center" 
-      justify="center" 
+      justify="start" 
       background="background"
-      pad="large"
+      pad={{ vertical: 'medium', horizontal: 'large' }}
+      overflow="auto"
     >
       <Card 
-        width="large" 
+        width="xlarge" 
         background="background-front" 
         elevation="large"
         round="medium"
-        style={{ maxWidth: '500px', border: '1px solid rgba(51, 65, 85, 0.3)' }}
+        style={{ maxWidth: '900px', border: '1px solid rgba(51, 65, 85, 0.3)', width: '100%' }}
       >
-        <CardBody pad="large">
-          <Box align="center" margin={{ bottom: 'large' }}>
+        <CardBody pad="medium">
+          <Box align="center" margin={{ bottom: 'medium' }}>
             <Heading 
               level="2" 
               margin={{ bottom: 'xsmall' }} 
@@ -134,54 +141,68 @@ export default function LoginPage() {
           )}
 
           <Form onSubmit={submit} validate="submit">
-            <FormField label="Username" name="username" required>
-              <TextInput
-                id="username"
-                name="username"
-                icon={<User size="18px" />}
-                value={username}
-                onChange={(e) => setUsername(e.target.value)}
-                placeholder="Enter username"
-              />
-            </FormField>
+            <Box direction="row" gap="medium" wrap>
+              <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
+                <FormField label="Username" name="username" required>
+                  <TextInput
+                    id="username"
+                    name="username"
+                    icon={<User size="18px" />}
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    placeholder="Enter username"
+                  />
+                </FormField>
+              </Box>
+
+              {isRegister && (
+                <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
+                  <FormField label="Display name" name="name" required>
+                    <TextInput
+                      id="name"
+                      name="name"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Your name"
+                      required
+                    />
+                  </FormField>
+                </Box>
+              )}
+            </Box>
 
             {isRegister && (
               <>
-                <FormField label="Display name" name="name" required>
-                  <TextInput
-                    id="name"
-                    name="name"
-                    value={name}
-                    onChange={(e) => setName(e.target.value)}
-                    placeholder="Your name"
-                    required
-                  />
-                </FormField>
-                
-                <FormField label="Email" name="email" required>
-                  <TextInput
-                    id="email"
-                    name="email"
-                    icon={<Mail />}
-                    type="email"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                    placeholder="you@example.com"
-                    required
-                  />
-                </FormField>
-                
-                <FormField label="Mobile phone" name="phone" required>
-                  <TextInput
-                    id="phone"
-                    name="phone"
-                    icon={<Phone />}
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    placeholder="e.g. +15551234567"
-                    required
-                  />
-                </FormField>
+                <Box direction="row" gap="medium" wrap>
+                  <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
+                    <FormField label="Email" name="email" required>
+                      <TextInput
+                        id="email"
+                        name="email"
+                        icon={<Mail />}
+                        type="email"
+                        value={email}
+                        onChange={(e) => setEmail(e.target.value)}
+                        placeholder="you@example.com"
+                        required
+                      />
+                    </FormField>
+                  </Box>
+                  
+                  <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
+                    <FormField label="Mobile phone" name="phone" required>
+                      <TextInput
+                        id="phone"
+                        name="phone"
+                        icon={<Phone />}
+                        value={phone}
+                        onChange={(e) => setPhone(e.target.value)}
+                        placeholder="e.g. +15551234567"
+                        required
+                      />
+                    </FormField>
+                  </Box>
+                </Box>
                 
                 <FormField label="Street address" name="street">
                   <TextInput
@@ -194,49 +215,55 @@ export default function LoginPage() {
                   />
                 </FormField>
                 
-                <Box direction="row" gap="small">
-                  <FormField label="City" name="city" flex>
-                    <TextInput
-                      id="city"
-                      name="city"
-                      value={address.city}
-                      onChange={(e) => setAddress(a => ({ ...a, city: e.target.value }))}
-                      placeholder="City"
-                    />
-                  </FormField>
+                <Box direction="row" gap="medium" wrap>
+                  <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '200px' }}>
+                    <FormField label="City" name="city">
+                      <TextInput
+                        id="city"
+                        name="city"
+                        value={address.city}
+                        onChange={(e) => setAddress(a => ({ ...a, city: e.target.value }))}
+                        placeholder="City"
+                      />
+                    </FormField>
+                  </Box>
                   
-                  <FormField label="State / Province" name="state" flex>
-                    <TextInput
-                      id="state"
-                      name="state"
-                      value={address.state}
-                      onChange={(e) => setAddress(a => ({ ...a, state: e.target.value }))}
-                      placeholder="State"
-                    />
-                  </FormField>
-                </Box>
+                  <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '150px' }}>
+                    <FormField label="State / Province" name="state">
+                      <TextInput
+                        id="state"
+                        name="state"
+                        value={address.state}
+                        onChange={(e) => setAddress(a => ({ ...a, state: e.target.value }))}
+                        placeholder="State"
+                      />
+                    </FormField>
+                  </Box>
                 
-                <Box direction="row" gap="small">
-                  <FormField label="Postal code" name="postalCode" flex>
-                    <TextInput
-                      id="postalCode"
-                      name="postalCode"
-                      value={address.postalCode}
-                      onChange={(e) => setAddress(a => ({ ...a, postalCode: e.target.value }))}
-                      placeholder="Postal code"
-                    />
-                  </FormField>
+                  <Box flex={{ grow: 0.7, shrink: 1 }} style={{ minWidth: '120px' }}>
+                    <FormField label="Postal code" name="postalCode">
+                      <TextInput
+                        id="postalCode"
+                        name="postalCode"
+                        value={address.postalCode}
+                        onChange={(e) => setAddress(a => ({ ...a, postalCode: e.target.value }))}
+                        placeholder="Postal code"
+                      />
+                    </FormField>
+                  </Box>
                   
-                  <FormField label="Country" name="country" flex>
-                    <TextInput
-                      id="country"
-                      name="country"
-                      icon={<MapLocation />}
-                      value={address.country}
-                      onChange={(e) => setAddress(a => ({ ...a, country: e.target.value }))}
-                      placeholder="Country"
-                    />
-                  </FormField>
+                  <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '150px' }}>
+                    <FormField label="Country" name="country">
+                      <TextInput
+                        id="country"
+                        name="country"
+                        icon={<MapLocation />}
+                        value={address.country}
+                        onChange={(e) => setAddress(a => ({ ...a, country: e.target.value }))}
+                        placeholder="Country"
+                      />
+                    </FormField>
+                  </Box>
                 </Box>
               </>
             )}
@@ -252,6 +279,27 @@ export default function LoginPage() {
                 placeholder="Password"
               />
             </FormField>
+
+            {isRegister && !codeSent && (
+              <Box margin={{ top: 'medium', bottom: 'medium' }}>
+                <CheckBox
+                  checked={acceptedTerms}
+                  label={
+                    <Text size="small">
+                      {t('registration.terms.accept')}{' '}
+                      <Anchor
+                        href={i18n.language === 'gr' ? '/terms-gr.html' : '/terms-en.html'}
+                        target="_blank"
+                        label={t('registration.terms.link')}
+                        style={{ fontWeight: 600 }}
+                      />
+                    </Text>
+                  }
+                  onChange={(event) => setAcceptedTerms(event.target.checked)}
+                  required
+                />
+              </Box>
+            )}
 
             {isRegister && codeSent && (
               <Box 

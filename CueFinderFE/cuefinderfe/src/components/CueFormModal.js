@@ -223,12 +223,13 @@ export default function CueFormModal({ cue, onClose, onSave }) {
       }}
     >
       <Box
-        width="large"
+        width="xlarge"
         pad="medium"
         gap="small"
         background="background-front"
         style={{
-          maxWidth: '700px',
+          maxWidth: '1000px',
+          width: '95vw',
           borderRadius: '16px',
           border: '1px solid rgba(59, 130, 246, 0.3)'
         }}

@@ -23,5 +23,8 @@
   "price.step": "Step",
   "footer.tagline": "Your Premium Billiard Cue Marketplace",
   "footer.privacy": "Privacy Policy",
-  "footer.terms": "Terms of Service"
+  "footer.terms": "Terms of Service",
+  "registration.terms.accept": "I accept the",
+  "registration.terms.link": "Terms and Conditions",
+  "registration.terms.required": "You must accept the terms and conditions to register"
 }

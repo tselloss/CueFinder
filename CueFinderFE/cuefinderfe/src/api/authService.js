@@ -45,7 +45,7 @@ export async function login(username, password) {
 /**
  * Register a new user
  */
-export async function register(username, password, name, phone, email, addressObj) {
+export async function register(username, password, name, phone, email, addressObj, acceptedTerms = false) {
   try {
     const data = await post(API_ENDPOINTS.AUTH.REGISTER, {
       username,
@@ -58,6 +58,7 @@ export async function register(username, password, name, phone, email, addressOb
       state: addressObj?.state,
       zipCode: addressObj?.postalCode,
       country: addressObj?.country,
+      acceptedTerms,
     });
 
     // Store token and user info

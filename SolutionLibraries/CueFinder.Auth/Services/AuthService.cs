@@ -90,6 +90,12 @@ namespace CueFinder.Auth.Services
                 throw new ArgumentException("Username, password, and name are required");
             }
 
+            // Validate terms acceptance
+            if (!request.AcceptedTerms)
+            {
+                throw new ArgumentException("You must accept the terms and conditions to register");
+            }
+
             // Check if username already exists
             if (Users.Any(u => u.Username == request.Username))
             {
