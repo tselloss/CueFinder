@@ -122,6 +122,12 @@ namespace CueFinder.Auth.Services
                     throw new ArgumentException("Password must be at least 6 characters long");
                 }
 
+                // Validate terms acceptance
+                if (!request.AcceptedTerms)
+                {
+                    throw new ArgumentException("You must accept the terms and conditions to register");
+                }
+
                 // Check if username already exists
                 var userExists = await _userService.UserExistsAsync(request.Username);
                 if (userExists)
@@ -160,6 +166,8 @@ namespace CueFinder.Auth.Services
                 Role = "user",
                 IsActive = true,
                 IsEmailVerified = false,
+                AcceptedTerms = request.AcceptedTerms,
+                AcceptedTermsAt = request.AcceptedTerms ? DateTime.UtcNow : null,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };                // Save to database

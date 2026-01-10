@@ -117,7 +117,19 @@ namespace CueFinder.Database.Models
     /// <summary>
     /// Whether the account is active
     /// </summary>
-    public bool IsActive { get; set; } = true;        /// <summary>
+    public bool IsActive { get; set; } = true;
+
+    /// <summary>
+    /// Whether the user accepted the terms and conditions
+    /// </summary>
+    public bool AcceptedTerms { get; set; } = false;
+
+    /// <summary>
+    /// Timestamp when the user accepted the terms
+    /// </summary>
+    public DateTime? AcceptedTermsAt { get; set; }
+
+    /// <summary>
         /// Account creation timestamp
         /// </summary>
         public DateTime CreatedAt { get; set; }

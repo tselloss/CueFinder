@@ -15,6 +15,7 @@ import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 
 import './form-icons.css';
+import './mobile-responsive.css';
 import { useTranslation } from 'react-i18next';
 
 function AppInner() {
@@ -28,12 +29,16 @@ function AppInner() {
   }, [i18n]);
   const [cues, setCues] = useState([]);
   const [search, setSearch] = useState('');
-  const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+  // Set default view mode based on screen size
+  const [viewMode, setViewMode] = useState(
+    window.innerWidth <= 768 ? 'list' : 'grid'
+  ); // 'grid' or 'list'
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingCue, setEditingCue] = useState(null);
   const [category, setCategory] = useState('all'); // 'all', 'cues', 'cases'
   const [condition, setCondition] = useState('all');
   const [sortBy, setSortBy] = useState('newest');
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile sidebar toggle
   const sidebarOpen = true; // Always open on home page
   // Price range slider [min,max] in USD
   const [priceRange, setPriceRange] = useState([0, 5000]);
@@ -55,6 +60,19 @@ function AppInner() {
   // Check if we're on the home page (listings page)
   const isHomePage = location.pathname === '/';
   
+  // Handle view mode based on screen size
+  useEffect(() => {
+    const handleResize = () => {
+      if (window.innerWidth <= 768) {
+        setViewMode('list'); // Mobile: always list view
+      }
+      // Don't auto-change on desktop - let user choose
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   // Debug logging
   useEffect(() => {
     console.log('Current path:', location.pathname);
@@ -293,7 +311,7 @@ function AppInner() {
       {isHomePage && (
         <Box 
           background="background-back" 
-          pad={{ vertical: "large", horizontal: "medium" }} 
+          pad={{ vertical: "large", horizontal: "small" }} 
           align="center"
           style={{ 
             boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
@@ -328,6 +346,7 @@ function AppInner() {
 
             {/* Search Bar - Directly Below Hero Text */}
             <Box 
+              className="hero-search-section"
               width="100%"
               align="center"
               pad={{ horizontal: 'small' }}
@@ -345,7 +364,7 @@ function AppInner() {
                   direction="row" 
                   align="center"
                   background="background-front"
-                  pad={{ horizontal: 'medium', vertical: 'small' }}
+                  pad={{ horizontal: 'small', vertical: 'small' }}
                   round="medium"
                   elevation="large"
                   style={{ 
@@ -366,15 +385,15 @@ function AppInner() {
                     e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
                   }}
                 >
-                  <Search size="24px" color="#3b82f6" style={{ flexShrink: 0, marginRight: '12px' }} />
-                  <Box flex={{ grow: 1 }}>
+                  <Search size="20px" color="#3b82f6" style={{ flexShrink: 0, marginRight: '8px' }} />
+                  <Box flex={{ grow: 1 }} style={{ minWidth: 0 }}>
                     <TextInput
-                      placeholder="Search for cues, brands, or locations..."
+                      placeholder="Search for cues, brands..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
                       plain
                       style={{
-                        fontSize: '17px',
+                        fontSize: '15px',
                         fontWeight: 400,
                         border: 'none',
                         background: 'transparent',
@@ -407,12 +426,12 @@ function AppInner() {
                   )}
                   <Button 
                     primary 
-                    label={<Text weight={700} size="medium" color="white">Search</Text>}
+                    label={<Text weight={700} size="small" color="white">Search</Text>}
                     onClick={() => console.log('Search clicked:', search)}
                     style={{ 
                       background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
                       borderRadius: '8px',
-                      padding: '12px 32px',
+                      padding: '10px 20px',
                       border: 'none',
                       boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
                       whiteSpace: 'nowrap',
@@ -527,9 +546,18 @@ function AppInner() {
       {/* Main Content Area with Sidebar */}
       <Box flex="grow" background="background" style={{ flexGrow: 1 }}>
         <Box direction="row" fill>
+          {/* Mobile Sidebar Overlay */}
+          {isHomePage && mobileMenuOpen && (
+            <Box 
+              className="sidebar-overlay"
+              onClick={() => setMobileMenuOpen(false)}
+            />
+          )}
+
           {/* Modern Collapsible Sidebar - Only on home page */}
           {isHomePage && (
             <Box 
+              className={`sidebar-desktop ${mobileMenuOpen ? 'sidebar-mobile-open' : ''}`}
               width="300px" 
               background="background-front" 
               pad="medium"
@@ -538,14 +566,14 @@ function AppInner() {
               style={{ 
                 borderRight: '1px solid rgba(59, 130, 246, 0.2)',
                 height: 'fit-content',
-                position: window.innerWidth <= 768 ? 'fixed' : 'sticky',
-                top: window.innerWidth <= 768 ? '0' : '20px',
-                left: window.innerWidth <= 768 ? '0' : '20px',
-                zIndex: window.innerWidth <= 768 ? 100 : 1,
-                maxHeight: window.innerWidth <= 768 ? '100vh' : 'calc(100vh - 40px)',
+                position: 'sticky',
+                top: '20px',
+                left: '20px',
+                zIndex: 1,
+                maxHeight: 'calc(100vh - 40px)',
                 overflowY: 'auto',
                 overflowX: 'hidden',
-                borderRadius: window.innerWidth <= 768 ? '0' : '16px',
+                borderRadius: '16px',
                 backdropFilter: 'blur(20px)',
                 background: 'rgba(15, 23, 42, 0.8)',
                 boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 1px rgba(59, 130, 246, 0.3)',
@@ -581,6 +609,19 @@ function AppInner() {
                     {t('categories.all')}
                   </Heading>
                 </Box>
+                {/* Close button for mobile */}
+                <Button
+                  icon={
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                      <line x1="18" y1="6" x2="6" y2="18"></line>
+                      <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                  }
+                  onClick={() => setMobileMenuOpen(false)}
+                  plain
+                  className="mobile-close-button"
+                  style={{ display: 'none' }}
+                />
               </Box>
               
               {/* Category Buttons */}
@@ -884,6 +925,22 @@ function AppInner() {
           </Box>
         </Box>
       </Box>
+
+      {/* Mobile Menu Button - Only on home page */}
+      {isHomePage && (
+        <Button
+          className="mobile-menu-button"
+          icon={
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+              <line x1="3" y1="6" x2="21" y2="6"></line>
+              <line x1="3" y1="12" x2="21" y2="12"></line>
+              <line x1="3" y1="18" x2="21" y2="18"></line>
+            </svg>
+          }
+          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          plain
+        />
+      )}
 
       <Footer 
         background="background-front" 

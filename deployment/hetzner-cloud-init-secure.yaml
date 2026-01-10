@@ -1,0 +1,206 @@
+#cloud-config
+# CueFinder Production Server - Hetzner Cloud Init
+# Your IP: 94.70.71.16
+# Date: January 10, 2026
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - ufw
+  - fail2ban
+  - git
+  - curl
+  - wget
+  - htop
+  - net-tools
+  - vim
+
+users:
+  - name: cuefinder
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCw9k2pookyRsA/ZaY3w0vMEij2uT7CrHXFQS9nfZ1+aXsCwb5WslU8TzN++PtkH1P+h+EjquMOhGPYpgI7CyDFCaVOQm2pjEESP3GYgUnq//ZVq+2VArwnkYqTPz+me5J3L0Qe6fLsYB5FsnZYY9U8rMNqVbUwYlExFp/cBmf286Vm0cFV3kNXf6pITyewqC66GzrIB61ClQe+2iLp30tJMOclCSWW1DQqVqjgBZwrY2Y0mlI62KbW5K4Amg/kIAH2/+rCie2qnFziO6eo9xaKa1D72gjQqu7EAIOJdfZKXRKjRNuayTZFbfBbTx83pmuBQjgoi+iohWZA8CY93z/zs8XOTSHVSTCsaLT64MJGsHVEaqBQscwyyNbA2rQQvjollvvWVW/3Yn2q72eEEYk7EJsZAI9RqUyFTY0kKMrlF7wJTWRGZnst0WJfEt7+kLC0OcWJeF8VsAyTD3vxowUOVDT9jiWS292dgbQsap7LcA45VIbbmMa5NE2/IuVJeybYsGFx9xwXKCidDDEFcVBbzkQ7EA498F64zF5qBjawCXMPjk1zoI2mEuwaYmkCT4bG4UfO2cN4eFd8Mjj2po30jqpgftK84eLvPSDbtR7YhV+PUN3pmH38OdyptMYiQCmZAP/z9HPQanq9oFvjjPttwLVQ7FXOclgv1QA1Eer65Q== cuefinder
+
+runcmd:
+  # Docker setup
+  - systemctl start docker
+  - systemctl enable docker
+  - usermod -aG docker cuefinder
+  
+  # Configure Docker logging to prevent disk space issues
+  - mkdir -p /etc/docker
+  - echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}' > /etc/docker/daemon.json
+  - systemctl restart docker
+  
+  # UFW Firewall setup - SECURE with your specific IP
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow from 94.70.71.16 to any port 22 proto tcp comment 'SSH from your PC only'
+  - ufw allow 80/tcp comment 'HTTP'
+  - ufw allow 443/tcp comment 'HTTPS'
+  - ufw --force enable
+  
+  # SSH Security hardening
+  - sed -i 's/#PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+  - sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+  - sed -i 's/#PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - sed -i 's/PasswordAuthentication yes/PasswordAuthentication no/' /etc/ssh/sshd_config
+  - echo 'AllowUsers cuefinder' >> /etc/ssh/sshd_config
+  - systemctl restart sshd
+  
+  # Fail2ban configuration for SSH protection
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+  - |
+    cat > /etc/fail2ban/jail.local << 'EOF'
+    [DEFAULT]
+    bantime = 3600
+    findtime = 600
+    maxretry = 5
+    
+    [sshd]
+    enabled = true
+    port = 22
+    logpath = /var/log/auth.log
+    maxretry = 3
+    
+    [nginx-http-auth]
+    enabled = true
+    port = http,https
+    logpath = /var/log/nginx/error.log
+    EOF
+  - systemctl restart fail2ban
+  
+  # Create application directory structure
+  - mkdir -p /home/cuefinder/app
+  - mkdir -p /home/cuefinder/backups
+  - mkdir -p /home/cuefinder/logs
+  - mkdir -p /home/cuefinder/data/postgres
+  - chown -R cuefinder:cuefinder /home/cuefinder
+  
+  # Create welcome message with your IP
+  - |
+    cat > /etc/motd << 'EOF'
+    
+    ╔═══════════════════════════════════════════════════════════╗
+    ║                                                           ║
+    ║              🎱 CueFinder Production Server 🎱            ║
+    ║                                                           ║
+    ╚═══════════════════════════════════════════════════════════╝
+    
+    Server Information:
+    -------------------
+    • Firewall: Configured for IP 94.70.71.16
+    • SSH Access: From your IP only
+    • User: cuefinder
+    • App Directory: /home/cuefinder/app
+    
+    Next Steps:
+    -----------
+    1. cd /home/cuefinder/app
+    2. git clone https://github.com/tselloss/CueFinder.git .
+    3. cp .env.production.example .env.production
+    4. nano .env.production (add passwords)
+    5. docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+    
+    Useful Commands:
+    ----------------
+    • docker-compose ps              - Check container status
+    • docker-compose logs -f         - View live logs
+    • sudo ufw status                - Check firewall
+    • sudo fail2ban-client status    - Check fail2ban
+    
+    ⚠️  If your IP changes, update UFW:
+    sudo ufw delete allow from 94.70.71.16 to any port 22
+    sudo ufw allow from NEW_IP to any port 22 proto tcp
+    
+    EOF
+  
+  # Set up automatic security updates
+  - apt-get install -y unattended-upgrades
+  - dpkg-reconfigure -plow unattended-upgrades
+  
+  # Create health check script
+  - |
+    cat > /home/cuefinder/health-check.sh << 'EOF'
+    #!/bin/bash
+    echo "=== CueFinder Health Check ==="
+    echo "Date: $(date)"
+    echo ""
+    echo "1. Docker Status:"
+    systemctl is-active docker && echo "   ✓ Docker running" || echo "   ✗ Docker DOWN"
+    echo ""
+    echo "2. Containers:"
+    docker ps --format "table {{.Names}}\t{{.Status}}"
+    echo ""
+    echo "3. Firewall Rules:"
+    sudo ufw status numbered
+    echo ""
+    echo "4. Disk Space:"
+    df -h / | tail -1
+    echo ""
+    echo "5. Memory:"
+    free -h | grep Mem
+    EOF
+  - chmod +x /home/cuefinder/health-check.sh
+  - chown cuefinder:cuefinder /home/cuefinder/health-check.sh
+  
+  # Create IP update helper script
+  - |
+    cat > /home/cuefinder/update-ssh-ip.sh << 'EOF'
+    #!/bin/bash
+    # Update SSH firewall rule with new IP
+    
+    if [ -z "$1" ]; then
+        echo "Usage: ./update-ssh-ip.sh NEW_IP_ADDRESS"
+        echo "Example: ./update-ssh-ip.sh 94.70.71.16"
+        exit 1
+    fi
+    
+    NEW_IP=$1
+    
+    echo "Updating SSH firewall rule to allow: $NEW_IP"
+    
+    # Remove old rule (find the number first)
+    RULE_NUM=$(sudo ufw status numbered | grep "22.*ALLOW.*94.70.71.16" | awk '{print $1}' | tr -d '[]')
+    if [ ! -z "$RULE_NUM" ]; then
+        echo "Removing old rule #$RULE_NUM"
+        echo "y" | sudo ufw delete $RULE_NUM
+    fi
+    
+    # Add new rule
+    echo "Adding new rule for $NEW_IP"
+    sudo ufw allow from $NEW_IP to any port 22 proto tcp comment "SSH from updated IP"
+    
+    echo ""
+    echo "✓ Firewall updated!"
+    echo ""
+    sudo ufw status numbered
+    EOF
+  - chmod +x /home/cuefinder/update-ssh-ip.sh
+  - chown cuefinder:cuefinder /home/cuefinder/update-ssh-ip.sh
+
+ssh_deletekeys: true
+ssh_genkeytypes: ['rsa', 'ecdsa', 'ed25519']
+disable_root: true
+ssh_pwauth: false
+timezone: Europe/Athens
+
+final_message: |
+  ========================================
+  CueFinder Server Setup Complete!
+  ========================================
+  
+  Your IP: 94.70.71.16
+  SSH: ssh cuefinder@SERVER_IP
+  
+  Firewall configured for your IP only
+  ========================================

@@ -78,11 +78,13 @@ export default function ItemDetail({
         />
       </Box>
 
-      <Box pad="large" align="center">
+      <Box pad={{ horizontal: 'small', vertical: 'medium' }} align="center">
         <Grid
-          columns={['1fr', '1fr']}
-          gap="large"
-          width="xlarge"
+          columns={{ count: 'fit', size: 'auto' }}
+          gap="medium"
+          style={{ maxWidth: '1200px', width: '100%' }}
+          responsive
+          rows="auto"
         >
           {/* Info Section */}
           <Box gap="medium">
