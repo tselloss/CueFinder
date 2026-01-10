@@ -272,7 +272,7 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
           <Text weight="bold" color="text-strong">{filtered.length}</Text>{' '}
           {category === 'cases' ? 'cases' : category === 'cues' ? 'cues' : 'items'} available
         </Text>
-        <Box direction="row" gap="xsmall">
+        <Box direction="row" gap="xsmall" className="view-toggle-buttons">
           <Button
             icon={<Apps color={viewMode === 'grid' ? 'white' : 'text'} />}
             onClick={() => setViewMode('grid')}
