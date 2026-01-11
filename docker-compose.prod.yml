@@ -47,8 +47,7 @@ services:
       - ImageStorageSettings__UploadPath=/app/wwwroot/uploads
       - ImageStorageSettings__MaxFileSizeMB=10
       - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
-    ports:
-      - "127.0.0.1:5000:5000"  # Only localhost, Nginx will proxy
+    # No external port binding needed - frontend nginx proxies to backend internally
     depends_on:
       postgres:
         condition: service_healthy
