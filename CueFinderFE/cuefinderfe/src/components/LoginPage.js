@@ -143,11 +143,19 @@ export default function LoginPage() {
           <Form onSubmit={submit} validate="submit">
             <Box direction="row" gap="medium" wrap>
               <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
-                <FormField label="Username" name="username" required>
+                <FormField
+                  label={
+                    <Box direction="row" gap="xsmall" align="center">
+                      <User size="16px" />
+                      <Text>Username</Text>
+                    </Box>
+                  }
+                  name="username"
+                  required
+                >
                   <TextInput
                     id="username"
                     name="username"
-                    icon={<User size="18px" />}
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
@@ -175,11 +183,19 @@ export default function LoginPage() {
               <>
                 <Box direction="row" gap="medium" wrap>
                   <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
-                    <FormField label="Email" name="email" required>
+                    <FormField
+                      label={
+                        <Box direction="row" gap="xsmall" align="center">
+                          <Mail size="16px" />
+                          <Text>Email</Text>
+                        </Box>
+                      }
+                      name="email"
+                      required
+                    >
                       <TextInput
                         id="email"
                         name="email"
-                        icon={<Mail />}
                         type="email"
                         value={email}
                         onChange={(e) => setEmail(e.target.value)}
@@ -190,11 +206,19 @@ export default function LoginPage() {
                   </Box>
                   
                   <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '250px' }}>
-                    <FormField label="Mobile phone" name="phone" required>
+                    <FormField
+                      label={
+                        <Box direction="row" gap="xsmall" align="center">
+                          <Phone size="16px" />
+                          <Text>Mobile phone</Text>
+                        </Box>
+                      }
+                      name="phone"
+                      required
+                    >
                       <TextInput
                         id="phone"
                         name="phone"
-                        icon={<Phone />}
                         value={phone}
                         onChange={(e) => setPhone(e.target.value)}
                         placeholder="e.g. +15551234567"
@@ -204,11 +228,18 @@ export default function LoginPage() {
                   </Box>
                 </Box>
                 
-                <FormField label="Street address" name="street">
+                <FormField
+                  label={
+                    <Box direction="row" gap="xsmall" align="center">
+                      <Location size="16px" />
+                      <Text>Street address</Text>
+                    </Box>
+                  }
+                  name="street"
+                >
                   <TextInput
                     id="street"
                     name="street"
-                    icon={<Location />}
                     value={address.street}
                     onChange={(e) => setAddress(a => ({ ...a, street: e.target.value }))}
                     placeholder="123 Main st"
@@ -253,11 +284,18 @@ export default function LoginPage() {
                   </Box>
                   
                   <Box flex={{ grow: 1, shrink: 1 }} style={{ minWidth: '150px' }}>
-                    <FormField label="Country" name="country">
+                    <FormField
+                      label={
+                        <Box direction="row" gap="xsmall" align="center">
+                          <MapLocation size="16px" />
+                          <Text>Country</Text>
+                        </Box>
+                      }
+                      name="country"
+                    >
                       <TextInput
                         id="country"
                         name="country"
-                        icon={<MapLocation />}
                         value={address.country}
                         onChange={(e) => setAddress(a => ({ ...a, country: e.target.value }))}
                         placeholder="Country"
@@ -268,11 +306,19 @@ export default function LoginPage() {
               </>
             )}
 
-            <FormField label="Password" name="password" required>
+            <FormField
+              label={
+                <Box direction="row" gap="xsmall" align="center">
+                  <Lock size="16px" />
+                  <Text>Password</Text>
+                </Box>
+              }
+              name="password"
+              required
+            >
               <TextInput
                 id="password"
                 name="password"
-                icon={<Lock />}
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}

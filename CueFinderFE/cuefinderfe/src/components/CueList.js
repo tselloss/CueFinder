@@ -1,8 +1,7 @@
 import React from 'react';
 import { Box, Grid, Card, CardBody, CardHeader, Image, Text, Button, Stack } from 'grommet';
 import { Apps, List as ListIcon, Image as ImageIcon } from 'grommet-icons';
-
-const API_BASE_URL = 'http://localhost:5000';
+import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
 const getImageUrl = (images) => {
@@ -13,6 +12,8 @@ const getImageUrl = (images) => {
   if (!url) return '';
   // If data URI (base64) or absolute URL, use as-is
   if (url.startsWith('data:') || url.startsWith('http')) return url;
+  // Uploaded files are served at /uploads/* on the public site (proxied to backend)
+  if (url.startsWith('/uploads/')) return `${SITE_BASE_URL}${url}`;
   // If relative URL, prepend API base
   return `${API_BASE_URL}${url}`;
 };

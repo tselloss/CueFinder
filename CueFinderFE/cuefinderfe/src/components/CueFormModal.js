@@ -4,8 +4,7 @@ import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import { getErrorMessage } from '../utils/errorUtils';
-
-const API_BASE_URL = 'http://localhost:5000';
+import { API_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {

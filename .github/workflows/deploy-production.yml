@@ -1,0 +1,88 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Hetzner
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        run: |
+          mkdir -p ~/.ssh
+          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan -H ${{ secrets.SERVER_IP }} >> ~/.ssh/known_hosts
+
+      - name: Deploy to Server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+        run: |
+          # Create deployment script
+          cat > deploy.sh << 'EOF'
+          #!/bin/bash
+          set -e
+          
+          echo "🚀 Starting deployment to production..."
+          
+          # Navigate to app directory
+          cd /home/cuefinder/app
+          
+          # Pull latest code
+          if [ -d ".git" ]; then
+            echo "📦 Pulling latest changes..."
+            git pull origin main || git pull origin master
+          else
+            echo "📦 Cloning repository..."
+            git clone https://github.com/${{ github.repository }}.git .
+          fi
+          
+          # Create .env file
+          echo "⚙️  Configuring environment..."
+          cat > .env << ENVEOF
+          DB_PASSWORD=${DB_PASSWORD}
+          JWT_SECRET=${JWT_SECRET}
+          FRONTEND_API_URL=${FRONTEND_API_URL}
+          ENVEOF
+          
+          # Build and deploy with Docker Compose
+          echo "🐳 Building and starting containers..."
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+          
+          # Check container status
+          echo "📊 Container status:"
+          docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+          
+          echo "✅ Deployment complete!"
+          EOF
+          
+          # Copy and execute deployment script
+          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+          
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
+          echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"
