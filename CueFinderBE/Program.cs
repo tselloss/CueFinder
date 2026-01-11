@@ -51,7 +51,14 @@ var frontendOrigin = corsOrigins["Frontend"];
 if (!string.IsNullOrEmpty(frontendOrigin))
 {
     allowedOrigins.Add(frontendOrigin);
+    Console.WriteLine($"✅ CORS: Added production origin: {frontendOrigin}");
 }
+else
+{
+    Console.WriteLine("⚠️ CORS: No production frontend origin configured");
+}
+
+Console.WriteLine($"🔧 CORS: Allowed origins: {string.Join(", ", allowedOrigins)}");
 
 builder.Services.AddCors(options =>
 {
