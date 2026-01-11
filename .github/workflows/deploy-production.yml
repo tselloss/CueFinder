@@ -18,11 +18,21 @@ jobs:
       - name: Setup SSH
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
+        shell: bash
         run: |
-          mkdir -p ~/.ssh
-          echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+          set -euo pipefail
+          : "${HOME:?HOME is not set}"
+
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+
+          # Use printf to avoid newline/escape issues when writing multi-line secrets
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
+          chmod 600 "$HOME/.ssh/id_rsa"
+
+          # Prevent interactive host key prompts
+          ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
 
       - name: Deploy to Server
         env:
@@ -45,10 +55,12 @@ jobs:
           # Pull latest code
           if [ -d ".git" ]; then
             echo "📦 Pulling latest changes..."
-            git pull origin main || git pull origin master
+            git fetch --prune origin
+            git checkout release
+            git pull --ff-only origin release
           else
             echo "📦 Cloning repository..."
-            git clone https://github.com/${{ github.repository }}.git .
+            git clone --branch release https://github.com/${{ github.repository }}.git .
           fi
           
           # Create .env file
@@ -61,13 +73,19 @@ jobs:
           
           # Build and deploy with Docker Compose
           echo "🐳 Building and starting containers..."
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml down
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
+          if command -v docker-compose >/dev/null 2>&1; then
+            DC="docker-compose"
+          else
+            DC="docker compose"
+          fi
+
+          $DC -f docker-compose.yml -f docker-compose.prod.yml down
+          $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+          $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
           
           # Check container status
           echo "📊 Container status:"
-          docker-compose -f docker-compose.yml -f docker-compose.prod.yml ps
+          $DC -f docker-compose.yml -f docker-compose.prod.yml ps
           
           echo "✅ Deployment complete!"
           EOF
