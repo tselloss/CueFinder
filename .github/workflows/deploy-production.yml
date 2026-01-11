@@ -41,6 +41,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
         run: |
           # Create deployment script
           cat > deploy.sh << 'EOF'
@@ -63,13 +64,13 @@ jobs:
             git clone --branch release git@github.com:${{ github.repository }}.git .
           fi
           
-          # Create .env file
+          # Create .env file with all required variables
           echo "⚙️  Configuring environment..."
           cat > .env << ENVEOF
-          DB_PASSWORD=$DB_PASSWORD
-          JWT_SECRET=$JWT_SECRET
-          FRONTEND_API_URL=$FRONTEND_API_URL
-          CORS_FRONTEND_ORIGIN=https://billiardscuefinder.com
+          DB_PASSWORD=${DB_PASSWORD}
+          JWT_SECRET=${JWT_SECRET}
+          FRONTEND_API_URL=${FRONTEND_API_URL}
+          CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
           ENVEOF
           
           # Build and deploy with Docker Compose
