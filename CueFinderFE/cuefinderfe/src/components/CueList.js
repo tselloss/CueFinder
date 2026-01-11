@@ -1,8 +1,7 @@
 import React from 'react';
 import { Box, Grid, Card, CardBody, CardHeader, Image, Text, Button, Stack } from 'grommet';
 import { Apps, List as ListIcon, Image as ImageIcon } from 'grommet-icons';
-
-const API_BASE_URL = 'http://localhost:5000';
+import { API_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
 const getImageUrl = (images) => {

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './PhoneVerificationModal.css';
+import { API_ENDPOINTS } from '../config/apiConfig';
 
 const PhoneVerificationModal = ({ 
   isOpen, 
@@ -53,7 +54,7 @@ const PhoneVerificationModal = ({
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/phone/send-verification', {
+      const response = await fetch(API_ENDPOINTS.AUTH.PHONE_SEND_VERIFICATION, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -96,7 +97,7 @@ const PhoneVerificationModal = ({
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/phone/verify-code', {
+      const response = await fetch(API_ENDPOINTS.AUTH.PHONE_VERIFY_CODE, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -145,7 +146,7 @@ const PhoneVerificationModal = ({
 
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch('http://localhost:5000/api/auth/phone/resend', {
+      const response = await fetch(API_ENDPOINTS.AUTH.PHONE_RESEND, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
