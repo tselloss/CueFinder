@@ -50,7 +50,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
   useEffect(() => {
     if (cue) {
-      setProductType(cue.productType || 'cue');
+      // Determine product type from category property (set in MyCues component)
+      setProductType(cue.category === 'case' ? 'case' : 'cue');
       setFormData({
         title: cue.title || '',
         brand: cue.brand || '',
@@ -101,7 +102,12 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     }
 
     try {
-      await cueService.deleteImage(imageId);
+      // Use the appropriate service based on product type
+      if (productType === 'case') {
+        await cueCaseService.deleteCueCaseImage(cue.id, imageId);
+      } else {
+        await cueService.deleteImage(imageId);
+      }
       // Update the cue object to remove the deleted image
       if (cue && cue.images) {
         cue.images = cue.images.filter(img => img.id !== imageId);
@@ -113,7 +119,12 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
   const handleSetPrimaryImage = async (imageId) => {
     try {
-      await cueService.setPrimaryImage(imageId);
+      // Use the appropriate service based on product type
+      if (productType === 'case') {
+        await cueCaseService.setPrimaryCueCaseImage(cue.id, imageId);
+      } else {
+        await cueService.setPrimaryImage(imageId);
+      }
       // Update the cue object to set the new primary
       if (cue && cue.images) {
         cue.images = cue.images.map(img => ({
