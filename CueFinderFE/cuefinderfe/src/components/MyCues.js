@@ -68,30 +68,41 @@ export default function MyCues() {
     setShowCreateModal(true);
   };
 
-  const handleDelete = async (cueId) => {
-    if (!window.confirm('Are you sure you want to delete this cue listing?')) {
+  const handleDelete = async (item) => {
+    const itemType = item.category === 'case' ? 'case' : 'cue';
+    if (!window.confirm(`Are you sure you want to delete this ${itemType} listing?`)) {
       return;
     }
 
     try {
-      await cueService.deleteCue(cueId);
-      setMyListings(myListings.filter(c => c.id !== cueId));
-      showMessage('success', 'Cue listing deleted successfully');
+      if (item.category === 'case') {
+        await cueCaseService.deleteCueCase(item.id);
+      } else {
+        await cueService.deleteCue(item.id);
+      }
+      setMyListings(myListings.filter(c => c.id !== item.id));
+      showMessage('success', `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} listing deleted successfully`);
     } catch (error) {
-      showMessage('error', 'Failed to delete cue listing');
+      showMessage('error', `Failed to delete ${itemType} listing`);
     }
   };
 
-  const handleToggleSold = async (cue) => {
+  const handleToggleSold = async (item) => {
     try {
-      const updated = await cueService.updateCue(cue.id, {
-        ...cue,
-        isSold: !cue.isSold
-      });
-  setMyListings(myListings.map(c => c.id === cue.id ? updated : c));
-      showMessage('success', `Cue marked as ${!cue.isSold ? 'sold' : 'available'}`);
+      let updated;
+      if (item.category === 'case') {
+        updated = await cueCaseService.updateCueCase(item.id, {
+          isSold: !item.isSold
+        });
+      } else {
+        updated = await cueService.updateCue(item.id, {
+          isSold: !item.isSold
+        });
+      }
+      setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
+      showMessage('success', `Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
     } catch (error) {
-      showMessage('error', 'Failed to update cue status');
+      showMessage('error', 'Failed to update listing status');
     }
   };
 
@@ -182,7 +193,7 @@ export default function MyCues() {
               key={item.id}
               cue={item}
               onEdit={() => handleEdit(item)}
-              onDelete={() => handleDelete(item.id)}
+              onDelete={() => handleDelete(item)}
               onToggleSold={() => handleToggleSold(item)}
             />
           ))}
