@@ -16,9 +16,13 @@ const normalizeApiBaseUrl = (raw) => {
   return `${withoutTrailingSlash}/api`;
 };
 
-const API_BASE_URL =
+export const API_BASE_URL =
   normalizeApiBaseUrl(process.env.REACT_APP_API_URL) ||
   'http://localhost:5000/api';
+
+// Public website origin (same host as the API, but without the "/api" prefix).
+// Use this when you need to build URLs for static files (e.g. uploaded images at "/uploads/*").
+export const SITE_BASE_URL = API_BASE_URL.replace(/\/+api$/i, '');
 
 export const API_ENDPOINTS = {
   // Auth endpoints
