@@ -14,8 +14,7 @@ services:
       POSTGRES_DB: cuefinder
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "127.0.0.1:5432:5432"  # Only localhost access, not exposed to internet
+    # No external port binding needed - containers communicate internally via docker network
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 10s
