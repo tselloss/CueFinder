@@ -7,6 +7,8 @@ services:
   postgres:
     container_name: cuefinder-postgres-prod
     restart: always
+    image: postgres:15
+    ports: []  # Override base compose to remove external port exposure
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -16,7 +18,7 @@ services:
       POSTGRES_PASSWORD: ${DB_PASSWORD}
     # No external port binding needed - containers communicate internally via docker network
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuefinder"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -38,12 +40,14 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD}
-      - JwtSettings__Secret=${JWT_SECRET}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
+      - JwtSettings__SecretKey=${JWT_SECRET}
       - JwtSettings__Issuer=cuefinder.com
       - JwtSettings__Audience=cuefinder.com
       - JwtSettings__ExpirationMinutes=1440
       - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
+      - BASE_URL=https://billiardscuefinder.com
+      - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
       - ImageStorageSettings__UploadPath=/app/wwwroot/uploads
       - ImageStorageSettings__MaxFileSizeMB=10
       - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
