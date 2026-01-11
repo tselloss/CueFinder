@@ -3,7 +3,11 @@ using CueFinder.CueCases.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
+using CueFinder.Extensions.Images;
 using CueFinder.Extensions.ProblemDetails;
+
+// Configure Npgsql to handle DateTime without timezone issues
+AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -27,21 +31,33 @@ builder.Services.AddCueCasesServices();
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);
 
+// Add image upload/storage services
+builder.Services.AddCueFinderImageServices(builder.Configuration);
+
 // Add ProblemDetails support with exception details in Development
 builder.Services.AddCueFinderProblemDetails(
     includeExceptionDetails: builder.Environment.IsDevelopment());
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");
+var allowedOrigins = new List<string>
+{
+    "http://localhost:3000",
+    "http://127.0.0.1:3000"
+};
+
+// Add configured frontend origin if it exists
+var frontendOrigin = corsOrigins["Frontend"];
+if (!string.IsNullOrEmpty(frontendOrigin))
+{
+    allowedOrigins.Add(frontendOrigin);
+}
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(
-                corsOrigins["Frontend"] ?? "http://localhost:3000",
-                "http://localhost:3000",
-                "http://127.0.0.1:3000"
-            )
+        policy.WithOrigins(allowedOrigins.ToArray())
             .AllowAnyMethod()
             .AllowAnyHeader()
             .AllowCredentials()
@@ -60,6 +76,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwagger();
     app.UseSwaggerUI();
 }
+
+// Simple health endpoint for container orchestration / load balancers.
+// Keep it lightweight (no DB dependency) so it reflects process liveness.
+app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
+    .AllowAnonymous();
 
 // CORS must be before UseHttpsRedirection
 app.UseCors("AllowFrontend");

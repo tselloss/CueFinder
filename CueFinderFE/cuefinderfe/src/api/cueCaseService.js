@@ -1,6 +1,11 @@
 import axios from 'axios';
+import { API_BASE } from '../config/apiConfig';
 
-const API_BASE_URL = 'http://localhost:5000/api';
+// Canonical API base, e.g.
+//  - dev:  http://localhost:5000/api
+//  - prod: https://billiardscuefinder.com/api
+// Avoid deriving this via string replacement (can produce "/api/api" in prod).
+const API_BASE_URL = API_BASE;
 
 // Helper to get auth token
 const getAuthToken = () => {
