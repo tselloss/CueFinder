@@ -79,7 +79,8 @@ jobs:
             DC="docker compose"
           fi
 
-          $DC -f docker-compose.yml -f docker-compose.prod.yml down
+          # Stop all containers first (including orphans/detached)
+          $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
           $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
           $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
           
