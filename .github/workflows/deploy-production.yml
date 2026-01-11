@@ -66,9 +66,10 @@ jobs:
           # Create .env file
           echo "⚙️  Configuring environment..."
           cat > .env << ENVEOF
-          DB_PASSWORD=${DB_PASSWORD}
-          JWT_SECRET=${JWT_SECRET}
-          FRONTEND_API_URL=${FRONTEND_API_URL}
+          DB_PASSWORD=$DB_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          FRONTEND_API_URL=$FRONTEND_API_URL
+          CORS_FRONTEND_ORIGIN=https://billiardscuefinder.com
           ENVEOF
           
           # Build and deploy with Docker Compose
@@ -93,7 +94,7 @@ jobs:
           
           # Copy and execute deployment script
           scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-          ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+          ssh $SERVER_USER@$SERVER_IP "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
 
       - name: Verify Deployment
         run: |
