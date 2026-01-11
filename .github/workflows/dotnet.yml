@@ -1,0 +1,145 @@
+name: Deploy to Production2
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: true
+
+jobs:
+  deploy:
+    name: Deploy to Hetzner
+    runs-on: ubuntu-latest
+
+    steps:
+      # -----------------------
+      # 1) CHECKOUT WITH FULL HISTORY
+      # -----------------------
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0   # full history to avoid ff-only issues
+
+      # -----------------------
+      # 2) SSH SETUP
+      # -----------------------
+      - name: Setup SSH
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          set -euo pipefail
+          mkdir -p ~/.ssh
+          chmod 700 ~/.ssh
+
+          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
+          chmod 644 ~/.ssh/known_hosts
+
+      # -----------------------
+      # 3) BUILD REMOTE DEPLOY SCRIPT
+      # -----------------------
+      - name: Deploy to server
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
+        run: |
+          cat > deploy.sh <<'EOF'
+          #!/bin/bash
+          set -euo pipefail
+
+          echo "🚀 Starting deployment to production..."
+
+          cd /home/cuefinder/app
+
+          # ------------------------------
+          # GIT SYNC — ALWAYS MATCH REMOTE
+          # ------------------------------
+          if [ -d ".git" ]; then
+            echo "📦 Syncing repository..."
+            git fetch origin
+            git checkout release
+            git reset --hard origin/release
+          else
+            echo "📦 Cloning repository..."
+            git clone --branch release git@github.com:${{ github.repository }}.git .
+          fi
+
+          # ------------------------------
+          # ENV GENERATION
+          # ------------------------------
+          echo "⚙️ Writing .env..."
+          cat > .env <<ENVEOF
+          DB_PASSWORD=${DB_PASSWORD}
+          JWT_SECRET=${JWT_SECRET}
+          FRONTEND_API_URL=${FRONTEND_API_URL}
+          CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
+          ENVEOF
+
+          # ------------------------------
+          # DOCKER DEPLOY
+          # ------------------------------
+          echo "🐳 Rebuilding containers..."
+
+          if command -v docker-compose >/dev/null 2>&1; then
+            DC="docker-compose"
+          else
+            DC="docker compose"
+          fi
+
+          $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
+          $DC -f docker-compose.yml -f docker-compose.prod.yml build --pull
+          $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+          echo "📊 Container status:"
+          $DC -f docker-compose.yml -f docker-compose.prod.yml ps
+
+          # ------------------------------
+          # HEALTH CHECK (optional)
+          # ------------------------------
+          echo "🔍 Checking backend health..."
+          sleep 5
+          curl -fs http://localhost:5000/health || echo "⚠️ Health check failed but continuing"
+
+          echo "✅ Deployment complete!"
+          EOF
+
+          # upload and execute remotely
+          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
+          ssh $SERVER_USER@$SERVER_IP "\
+            chmod +x /home/cuefinder/deploy.sh && \
+            DB_PASSWORD='$DB_PASSWORD' \
+            JWT_SECRET='$JWT_SECRET' \
+            FRONTEND_API_URL='$FRONTEND_API_URL' \
+            CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' \
+            /home/cuefinder/deploy.sh \
+          "
+
+      # -----------------------
+      # 4) DEPLOYMENT VERIFICATION
+      # -----------------------
+      - name: Verify Deployment
+        run: |
+          echo "🔍 Verifying deployment..."
+          ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+
+      # -----------------------
+      # 5) SUCCESS MESSAGE
+      # -----------------------
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment successful"
+          echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
+          echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"
+
