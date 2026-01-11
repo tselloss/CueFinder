@@ -46,12 +46,20 @@ var allowedOrigins = new List<string>
     "http://127.0.0.1:3000"
 };
 
-// Add configured frontend origin if it exists
+// Add configured frontend origin(s) - supports comma-separated values
 var frontendOrigin = corsOrigins["Frontend"];
 if (!string.IsNullOrEmpty(frontendOrigin))
 {
-    allowedOrigins.Add(frontendOrigin);
-    Console.WriteLine($"✅ CORS: Added production origin: {frontendOrigin}");
+    // Split by comma to support multiple origins
+    var origins = frontendOrigin.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    foreach (var origin in origins)
+    {
+        if (!allowedOrigins.Contains(origin))
+        {
+            allowedOrigins.Add(origin);
+        }
+    }
+    Console.WriteLine($"✅ CORS: Added production origin(s): {frontendOrigin}");
 }
 else
 {
