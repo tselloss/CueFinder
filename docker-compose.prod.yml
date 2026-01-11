@@ -86,7 +86,7 @@ services:
       args:
         - REACT_APP_API_URL=${FRONTEND_API_URL}
     ports:
-      - "127.0.0.1:3000:80"  # Only localhost, Nginx will proxy
+      - "0.0.0.0:8080:3000"  # Changed from 3000 to 8080 to avoid Docker bug
     depends_on:
       - backend
     healthcheck:
