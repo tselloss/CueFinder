@@ -2,12 +2,19 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
+# Accept API URL as build argument
+ARG REACT_APP_API_URL=https://billiardscuefinder.com/api
+ENV REACT_APP_API_URL=$REACT_APP_API_URL
+
 # Copy package files
 COPY package*.json ./
 RUN npm install
 
 # Copy source files
 COPY . .
+
+# Debug: Print environment variable
+RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL"
 
 # Build the application
 RUN npm run build

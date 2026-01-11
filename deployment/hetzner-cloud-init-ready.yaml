@@ -1,0 +1,61 @@
+#cloud-config
+
+package_update: true
+package_upgrade: true
+
+packages:
+  - docker.io
+  - docker-compose
+  - nginx
+  - certbot
+  - python3-certbot-nginx
+  - ufw
+  - fail2ban
+  - git
+  - curl
+  - htop
+  - net-tools
+
+users:
+  - name: cuefinder
+    groups: sudo, docker
+    shell: /bin/bash
+    sudo: ['ALL=(ALL) NOPASSWD:ALL']
+    ssh_authorized_keys:
+      - ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAACAQCw9k2pookyRsA/ZaY3w0vMEij2uT7CrHXFQS9nfZ1+aXsCwb5WslU8TzN++PtkH1P+h+EjquMOhGPYpgI7CyDFCaVOQm2pjEESP3GYgUnq//ZVq+2VArwnkYqTPz+me5J3L0Qe6fLsYB5FsnZYY9U8rMNqVbUwYlExFp/cBmf286Vm0cFV3kNXf6pITyewqC66GzrIB61ClQe+2iLp30tJMOclCSWW1DQqVqjgBZwrY2Y0mlI62KbW5K4Amg/kIAH2/+rCie2qnFziO6eo9xaKa1D72gjQqu7EAIOJdfZKXRKjRNuayTZFbfBbTx83pmuBQjgoi+iohWZA8CY93z/zs8XOTSHVSTCsaLT64MJGsHVEaqBQscwyyNbA2rQQvjollvvWVW/3Yn2q72eEEYk7EJsZAI9RqUyFTY0kKMrlF7wJTWRGZnst0WJfEt7+kLC0OcWJeF8VsAyTD3vxowUOVDT9jiWS292dgbQsap7LcA45VIbbmMa5NE2/IuVJeybYsGFx9xwXKCidDDEFcVBbzkQ7EA498F64zF5qBjawCXMPjk1zoI2mEuwaYmkCT4bG4UfO2cN4eFd8Mjj2po30jqpgftK84eLvPSDbtR7YhV+PUN3pmH38OdyptMYiQCmZAP/z9HPQanq9oFvjjPttwLVQ7FXOclgv1QA1Eer65Q== cuefinder
+
+runcmd:
+  # Docker setup
+  - systemctl start docker
+  - systemctl enable docker
+  
+  # Firewall setup
+  - ufw default deny incoming
+  - ufw default allow outgoing
+  - ufw allow 22/tcp
+  - ufw allow 80/tcp
+  - ufw allow 443/tcp
+  - ufw --force enable
+  
+  # Fail2ban for brute force protection
+  - systemctl enable fail2ban
+  - systemctl start fail2ban
+  
+  # Create app directory
+  - mkdir -p /home/cuefinder/app
+  - chown -R cuefinder:cuefinder /home/cuefinder
+  
+  # Docker logging configuration
+  - echo '{"log-driver":"json-file","log-opts":{"max-size":"10m","max-file":"3"}}' > /etc/docker/daemon.json
+  - systemctl restart docker
+  
+  # Disable root login
+  - sed -i 's/PermitRootLogin yes/PermitRootLogin no/' /etc/ssh/sshd_config
+  - systemctl restart sshd
+
+ssh_deletekeys: true
+disable_root: true
+ssh_pwauth: false
+timezone: Europe/Athens
+
+final_message: "CueFinder server ready! SSH as 'cuefinder' user."

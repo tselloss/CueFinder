@@ -3,7 +3,22 @@
  * Centralized configuration for all API endpoints
  */
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
+const normalizeApiBaseUrl = (raw) => {
+  const value = (raw || '').trim();
+  if (!value) return '';
+
+  // Ensure we don't end up with "/api/api" when env already includes "/api".
+  // Accept either:
+  //  - https://billiardscuefinder.com      (we'll append /api)
+  //  - https://billiardscuefinder.com/api  (leave as-is)
+  const withoutTrailingSlash = value.replace(/\/+$/, '');
+  if (/\/api$/i.test(withoutTrailingSlash)) return withoutTrailingSlash;
+  return `${withoutTrailingSlash}/api`;
+};
+
+const API_BASE_URL =
+  normalizeApiBaseUrl(process.env.REACT_APP_API_URL) ||
+  'http://localhost:5000/api';
 
 export const API_ENDPOINTS = {
   // Auth endpoints

@@ -34,8 +34,8 @@ services:
     container_name: cuefinder-backend-prod
     restart: always
     build:
-      context: ./CueFinderBE
-      dockerfile: Dockerfile
+      context: .
+      dockerfile: ./CueFinderBE/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5000
@@ -44,6 +44,7 @@ services:
       - JwtSettings__Issuer=cuefinder.com
       - JwtSettings__Audience=cuefinder.com
       - JwtSettings__ExpirationMinutes=1440
+      - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
       - ImageStorageSettings__UploadPath=/app/wwwroot/uploads
       - ImageStorageSettings__MaxFileSizeMB=10
       - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
@@ -55,7 +56,12 @@ services:
     volumes:
       - ./CueFinderBE/wwwroot/uploads:/app/wwwroot/uploads
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      test:
+        - CMD-SHELL
+        - >
+          # dotnet runtime image doesn't ship curl; use a lightweight TCP probe.
+          # If you want strict HTTP-level checks, we can add a tiny HealthProbe console app and run it with dotnet.
+          echo | openssl s_client -connect localhost:5000 -servername localhost -brief >/dev/null 2>&1 || exit 1
       interval: 30s
       timeout: 10s
       retries: 3

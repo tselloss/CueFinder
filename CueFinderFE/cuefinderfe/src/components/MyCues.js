@@ -4,8 +4,7 @@ import { Add, Edit, Trash, StatusGood, StatusCritical } from 'grommet-icons';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import CueFormModal from './CueFormModal';
-
-const API_BASE_URL = 'http://localhost:5000';
+import { API_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
