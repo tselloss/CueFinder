@@ -133,6 +133,7 @@ public class ImagesController : ControllerBase
     }
 
     [HttpGet("cue/{cueId}")]
+    [HttpGet("cues/{cueId}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(List<CueImage>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status404NotFound)]
