@@ -27,4 +27,9 @@ public interface IImageService
     /// Get all images for a specific cue case
     /// </summary>
     Task<List<CueCaseImageDto>> GetCueCaseImagesAsync(int cueCaseId);
+    
+    /// <summary>
+    /// Delete all images for a cue case (internal use - no ownership check)
+    /// </summary>
+    Task DeleteCueCaseImagesInternalAsync(int cueCaseId);
 }

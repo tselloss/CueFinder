@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using Moq;
 using Xunit;
+using CueFinder.CueCases.Interfaces;
 
 namespace CueFinder.CueCases.Tests.Services
 {
@@ -14,6 +15,7 @@ namespace CueFinder.CueCases.Tests.Services
     {
         private readonly CueFinderDbContext _context;
         private readonly Mock<ILogger<CueCaseService>> _logger = new();
+        private readonly Mock<IImageService> _imageService = new();
         private readonly CueCaseService _service;
 
         public CueCaseServiceTests()
@@ -22,7 +24,7 @@ namespace CueFinder.CueCases.Tests.Services
                 .UseInMemoryDatabase(Guid.NewGuid().ToString())
                 .Options;
             _context = new CueFinderDbContext(options);
-            _service = new CueCaseService(_context, _logger.Object);
+            _service = new CueCaseService(_context, _logger.Object, _imageService.Object);
         }
 
         [Fact]
