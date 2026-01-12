@@ -113,7 +113,7 @@ export async function uploadCueCaseImages(cueCaseId, files, onProgress) {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'multipart/form-data'
-        }
+        },
         onUploadProgress: (event) => {
           if (!onProgress) return;
           const percent = Math.round((event.loaded * 100) / (event.total || 1));
