@@ -51,7 +51,7 @@ services:
       - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
       - BASE_URL=https://billiardscuefinder.com
       - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
-      - ImageStorageSettings__UploadPath=/app/wwwroot/uploads
+      - ImageStorageSettings__UploadPath=/app/uploads
       - ImageStorageSettings__MaxFileSizeMB=10
       - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
     ports: []
@@ -59,7 +59,7 @@ services:
       postgres:
         condition: service_healthy
     volumes:
-      - ./CueFinderBE/wwwroot/uploads:/app/wwwroot/uploads
+      - ./uploads:/app/uploads
     healthcheck:
       test:
         - CMD-SHELL
@@ -121,6 +121,7 @@ services:
     volumes:
       - ./CueFinderFE/cuefinderfe/nginx-ssl.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
+      - ./uploads:/app/uploads:ro
     depends_on:
       - frontend
       - backend
