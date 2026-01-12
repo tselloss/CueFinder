@@ -23,7 +23,8 @@ public class ImageService : IImageService
         _logger = logger;
         
         // Set upload path
-        _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", "uploads", "cases");
+        // Use shared uploads volume (works in Docker and locally)
+        _uploadPath = Path.Combine(Directory.GetCurrentDirectory(), "uploads", "cases");
         
         // Ensure directory exists
         if (!Directory.Exists(_uploadPath))

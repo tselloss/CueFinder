@@ -151,7 +151,7 @@ export async function deleteCue(id) {
 }
 
 // Upload images for a cue (requires auth)
-export async function uploadCueImages(cueId, files) {
+export async function uploadCueImages(cueId, files, onProgress) {
   const formData = new FormData();
   files.forEach(file => formData.append('files', file));
   
@@ -163,6 +163,11 @@ export async function uploadCueImages(cueId, files) {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (event) => {
+          if (!onProgress) return;
+          const percent = Math.round((event.loaded * 100) / (event.total || 1));
+          onProgress(percent);
         }
       }
     );

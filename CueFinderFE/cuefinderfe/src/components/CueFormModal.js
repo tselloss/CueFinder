@@ -47,6 +47,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   const [imagePreviews, setImagePreviews] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
+  const [uploadProgress, setUploadProgress] = useState(null);
 
   useEffect(() => {
     if (cue) {
@@ -178,7 +179,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
         // Upload new images if any
         if (images.length > 0 && savedItem && savedItem.id) {
-          await cueService.uploadCueImages(savedItem.id, images);
+          setUploadProgress(0);
+          await cueService.uploadCueImages(savedItem.id, images, setUploadProgress);
         }
       } else {
         // Handle CASE: Use cueCaseService
@@ -210,7 +212,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
         // Upload new images if any
         if (images.length > 0 && savedItem && savedItem.id) {
-          await cueCaseService.uploadCueCaseImages(savedItem.id, images);
+          setUploadProgress(0);
+          await cueCaseService.uploadCueCaseImages(savedItem.id, images, setUploadProgress);
         }
       }
 
@@ -220,6 +223,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
       setError(getErrorMessage(error, 'Failed to save listing. Please try again.'));
     } finally {
       setLoading(false);
+      setUploadProgress(null);
     }
   };
 
@@ -796,6 +800,28 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                 <text size="xsmall" color="text-weak">
                   JPG, PNG, GIF, WebP - Max 5MB each
                 </text>
+
+                {uploadProgress !== null && (
+                  <Box gap="xxsmall" margin={{ top: 'xsmall' }}>
+                    <text size="small" weight={500}>
+                      Uploading images... {uploadProgress}%
+                    </text>
+                    <Box
+                      background="background-back"
+                      height="8px"
+                      round="small"
+                      style={{ border: '1px solid rgba(59, 130, 246, 0.4)' }}
+                    >
+                      <Box
+                        background="brand"
+                        height="8px"
+                        round="small"
+                        width={`${Math.max(0, Math.min(100, uploadProgress))}%`}
+                        style={{ transition: 'width 0.2s ease' }}
+                      />
+                    </Box>
+                  </Box>
+                )}
                 
                 {imagePreviews.length > 0 && (
                   <Box gap="xsmall" margin={{ top: 'small' }}>
