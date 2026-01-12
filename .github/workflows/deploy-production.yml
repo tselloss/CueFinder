@@ -26,9 +26,11 @@ jobs:
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
+          # Write SSH private key
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
           chmod 600 "$HOME/.ssh/id_rsa"
 
+          # Add server to known_hosts
           ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
 
@@ -43,14 +45,15 @@ jobs:
           CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
         shell: bash
         run: |
+          # Create deploy script locally
           cat > deploy.sh << 'EOF'
           #!/bin/bash
           set -euo pipefail
-
+          
           echo "🚀 Starting deployment to production..."
-
+          
           cd /home/cuefinder/app || exit
-
+          
           # Pull latest code or clone if missing
           if [ -d ".git" ]; then
             echo "📦 Pulling latest changes..."
@@ -61,7 +64,7 @@ jobs:
             echo "📦 Cloning repository..."
             git clone --branch release git@github.com:${GITHUB_REPOSITORY}.git .
           fi
-
+          
           # Write .env file safely
           cat > .env <<ENV
           DB_PASSWORD="$DB_PASSWORD"
@@ -69,28 +72,28 @@ jobs:
           FRONTEND_API_URL="$FRONTEND_API_URL"
           CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
           ENV
-
+          
           # Docker Compose command detection
           if command -v docker-compose >/dev/null 2>&1; then
             DC="docker-compose"
           else
             DC="docker compose"
           fi
-
+          
           # Stop & remove old containers
           $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
-
+          
           # Build containers with frontend build-arg
           $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache \
               --build-arg REACT_APP_API_URL="$FRONTEND_API_URL"
-
+          
           # Start containers
           $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
-
+          
           # Show status
           echo "📊 Container status:"
           $DC -f docker-compose.yml -f docker-compose.prod.yml ps
-
+          
           echo "✅ Deployment complete!"
           EOF
 
@@ -103,8 +106,8 @@ jobs:
           /home/cuefinder/deploy.sh
           "
 
-      # 4️⃣ Optional: Install/renew SSL certificates with Certbot
-      - name: Ensure SSL certificates (Certbot)
+      # 4️⃣ Install/renew SSL certificates with Certbot on host
+      - name: Ensure SSL certificates
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
           SERVER_USER: cuefinder
@@ -113,6 +116,8 @@ jobs:
           ssh $SERVER_USER@$SERVER_IP "
           sudo apt update && sudo apt install -y certbot python3-certbot-nginx
           sudo mkdir -p /var/www/certbot
+          
+          # Obtain or renew certificate
           sudo certbot certonly --webroot -w /var/www/certbot \
             -d billiardscuefinder.com -d www.billiardscuefinder.com \
             --non-interactive --agree-tos -m admin@billiardscuefinder.com || true
@@ -129,5 +134,5 @@ jobs:
         if: success()
         run: |
           echo "✅ Deployment successful!"
-          echo "🌐 Frontend: http://billiardscuefinder.com"
-          echo "🔧 Backend: http://billiardscuefinder.com:5000"
+          echo "🌐 Frontend: https://billiardscuefinder.com"
+          echo "🔧 Backend: https://billiardscuefinder.com/api"
