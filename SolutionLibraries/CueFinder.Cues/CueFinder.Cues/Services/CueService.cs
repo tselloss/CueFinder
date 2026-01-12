@@ -15,11 +15,13 @@ public class CueService : ICueService
 {
     private readonly CueFinderDbContext _context;
     private readonly ILogger<CueService> _logger;
+    private readonly CueFinder.Extensions.Images.IImageService _imageService;
 
-    public CueService(CueFinderDbContext context, ILogger<CueService> logger)
+    public CueService(CueFinderDbContext context, ILogger<CueService> logger, CueFinder.Extensions.Images.IImageService imageService)
     {
         _context = context;
         _logger = logger;
+        _imageService = imageService;
     }
 
     public async Task<List<CueResponseDto>> GetAllCuesAsync(string? condition = null, string? brand = null,
@@ -172,6 +174,9 @@ public class CueService : ICueService
         // Check ownership or admin
         if (cue.UserId != userId && !isAdmin)
             throw new UnauthorizedAccessException("You can only delete your own cues");
+
+        // Delete all associated images first
+        await _imageService.DeleteCueImagesInternalAsync(cueId);
 
         // Soft delete by marking as sold
         cue.IsSold = true;

@@ -187,4 +187,40 @@ public class ImageService : IImageService
 
         return images;
     }
+
+    /// <summary>
+    /// Delete all images for a cue case without ownership checks (internal use)
+    /// </summary>
+    public async Task DeleteCueCaseImagesInternalAsync(int cueCaseId)
+    {
+        var images = await _context.CueCaseImages
+            .Where(i => i.CueCaseId == cueCaseId)
+            .ToListAsync();
+
+        foreach (var image in images)
+        {
+            // Delete file from disk
+            var fileName = Path.GetFileName(image.ImageUrl);
+            var filePath = Path.Combine(_uploadPath, fileName);
+            
+            if (File.Exists(filePath))
+            {
+                try
+                {
+                    File.Delete(filePath);
+                    _logger.LogInformation("Deleted image file {FilePath} for cue case {CueCaseId}", filePath, cueCaseId);
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Failed to delete image file {FilePath}", filePath);
+                }
+            }
+        }
+
+        // Remove all database records
+        _context.CueCaseImages.RemoveRange(images);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Deleted {Count} images for cue case {CueCaseId}", images.Count, cueCaseId);
+    }
 }

@@ -5,6 +5,8 @@ using CueFinder.Database.IntegrationTests.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using CueFinder.CueCases.Interfaces;
+using Microsoft.AspNetCore.Http;
 
 namespace CueFinder.CueCases.IntegrationTests
 {
@@ -17,8 +19,19 @@ namespace CueFinder.CueCases.IntegrationTests
             if (_service == null)
             {
                 var logger = new TestLogger<CueCaseService>();
-                _service = new CueCaseService(Context, logger);
+                var imageService = new TestImageService();
+                _service = new CueCaseService(Context, logger, imageService);
             }
+        }
+
+        // Test stub for IImageService
+        private class TestImageService : IImageService
+        {
+            public Task<List<CueCaseImageDto>> UploadImagesAsync(int cueCaseId, List<IFormFile> files, int userId) => Task.FromResult(new List<CueCaseImageDto>());
+            public Task<bool> DeleteImageAsync(int imageId, int userId) => Task.FromResult(true);
+            public Task<bool> SetPrimaryImageAsync(int imageId, int cueCaseId, int userId) => Task.FromResult(true);
+            public Task<List<CueCaseImageDto>> GetCueCaseImagesAsync(int cueCaseId) => Task.FromResult(new List<CueCaseImageDto>());
+            public Task DeleteCueCaseImagesInternalAsync(int cueCaseId) => Task.CompletedTask;
         }
 
         #region Create Tests

@@ -51,9 +51,11 @@ services:
       - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
       - BASE_URL=https://billiardscuefinder.com
       - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
-      - ImageStorageSettings__UploadPath=/app/uploads
-      - ImageStorageSettings__MaxFileSizeMB=10
-      - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
+      - ImageStorageSettings__StoragePath=uploads/cues
+      - ImageStorageSettings__ImageUrlBase=/uploads/cues
+      - ImageStorageSettings__MaxFileSizeBytes=10485760
+      - ImageStorageSettings__AllowedExtensions=.jpg,.jpeg,.png,.gif,.webp
+      - ImageStorageSettings__AllowedMimeTypes=image/jpeg,image/png,image/gif,image/webp
     ports: []
     depends_on:
       postgres:
