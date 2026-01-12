@@ -20,7 +20,7 @@ public static class ServiceCollectionExtensions
     {
         // Register controllers
         services.TryAddScoped<CuesController>();
-        services.TryAddScoped<ImagesController>();
+        // Note: ImagesController is now in CueFinder.Extensions project
 
         // Register cue management service
         services.AddScoped<ICueService, CueService>();
