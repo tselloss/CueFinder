@@ -4,7 +4,7 @@ import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import { getErrorMessage } from '../utils/errorUtils';
-import { API_BASE_URL } from '../config/apiConfig';
+import { SITE_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
@@ -13,8 +13,8 @@ const getImageUrl = (img) => {
   if (!url) return '';
   // If data URI (base64) or absolute URL, use as-is
   if (url.startsWith('data:') || url.startsWith('http')) return url;
-  // If relative URL, prepend API base
-  return `${API_BASE_URL}${url}`;
+  // If relative URL, prepend SITE_BASE_URL (not API_BASE_URL - images are served by nginx directly)
+  return `${SITE_BASE_URL}${url}`;
 };
 
 export default function CueFormModal({ cue, onClose, onSave }) {
