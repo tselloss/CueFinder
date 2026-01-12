@@ -66,18 +66,10 @@ jobs:
           
           # Create .env file with all required variables
           echo "⚙️  Configuring environment..."
-          cat > .env << 'ENVEOF'
-DB_PASSWORD=${DB_PASSWORD}
-JWT_SECRET=${JWT_SECRET}
-FRONTEND_API_URL=${FRONTEND_API_URL}
-CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
-ENVEOF
-          
-          # Replace placeholders with actual values from environment
-          sed -i "s/\${DB_PASSWORD}/${DB_PASSWORD}/g" .env
-          sed -i "s/\${JWT_SECRET}/${JWT_SECRET}/g" .env
-          sed -i "s|\${FRONTEND_API_URL}|${FRONTEND_API_URL}|g" .env
-          sed -i "s|\${CORS_FRONTEND_ORIGIN}|${CORS_FRONTEND_ORIGIN}|g" .env
+          echo "DB_PASSWORD=${DB_PASSWORD}" > .env
+          echo "JWT_SECRET=${JWT_SECRET}" >> .env
+          echo "FRONTEND_API_URL=${FRONTEND_API_URL}" >> .env
+          echo "CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}" >> .env
           
           # Build and deploy with Docker Compose
           echo "🐳 Building and starting containers..."
