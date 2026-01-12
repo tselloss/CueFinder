@@ -25,8 +25,8 @@ FROM nginx:alpine
 # Copy built files
 COPY --from=build /app/build /usr/share/nginx/html
 
-# Copy nginx config for React SPA + ACME challenge
-COPY nginx.conf /etc/nginx/conf.d/default.conf
+# Copy nginx config for serving static React files
+COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 # Expose standard HTTP port
 EXPOSE 80
