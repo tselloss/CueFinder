@@ -93,7 +93,7 @@ jobs:
           
           # Copy and execute deployment script
           scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-          ssh $SERVER_USER@$SERVER_IP "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' /home/cuefinder/deploy.sh"
 
       - name: Verify Deployment
         run: |
