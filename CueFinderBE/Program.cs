@@ -40,11 +40,15 @@ builder.Services.AddCueFinderProblemDetails(
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");
-var allowedOrigins = new List<string>
+var allowedOrigins = new List<string>();
+
+// Only add localhost in Development environment
+if (builder.Environment.IsDevelopment())
 {
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-};
+    allowedOrigins.Add("http://localhost:3000");
+    allowedOrigins.Add("http://127.0.0.1:3000");
+    Console.WriteLine("🔧 CORS: Development mode - localhost origins added");
+}
 
 // Add configured frontend origin(s) - supports comma-separated values
 var frontendOrigin = corsOrigins["Frontend"];
@@ -75,8 +79,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins.ToArray())
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials()
-            .SetIsOriginAllowedToAllowWildcardSubdomains();
+            .AllowCredentials();
     });
 });
 

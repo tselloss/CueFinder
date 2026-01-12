@@ -1,6 +1,7 @@
 #!/bin/bash
 # Quick fix script to update .env on production server
 # Run this locally: bash deployment/fix-env-on-server.sh
+# WARNING: This file is for reference only. Use deploy-manual.ps1 or GitHub Actions instead.
 
 set -e
 
@@ -22,8 +23,8 @@ fi
 
 # Create new .env with all required variables
 cat > .env << 'EOF'
-DB_PASSWORD=CueFinderDB2024SecurePass
-JWT_SECRET=CueFinderJWT2024VerySecureSecretKey256Bits
+DB_PASSWORD=REPLACE_WITH_SECURE_PASSWORD
+JWT_SECRET=REPLACE_WITH_SECURE_JWT_SECRET_MIN_32_CHARS
 FRONTEND_API_URL=https://billiardscuefinder.com/api
 CORS_FRONTEND_ORIGIN=https://billiardscuefinder.com
 EOF

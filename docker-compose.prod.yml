@@ -30,6 +30,10 @@ services:
     networks:
       - cuefinder-network
 
+  # Ensure PgAdmin from the base compose is not exposed publicly in production
+  pgadmin:
+    ports: []
+
   backend:
     container_name: cuefinder-backend-prod
     restart: always

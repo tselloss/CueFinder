@@ -10,31 +10,30 @@ jobs:
   deploy:
     name: Deploy to Hetzner
     runs-on: ubuntu-latest
-
+    
     steps:
-      # 1️⃣ Checkout the repository
       - name: Checkout code
         uses: actions/checkout@v4
 
-      # 2️⃣ Setup SSH
       - name: Setup SSH
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
         shell: bash
         run: |
           set -euo pipefail
+          : "${HOME:?HOME is not set}"
+
           mkdir -p "$HOME/.ssh"
           chmod 700 "$HOME/.ssh"
 
-          # Write SSH private key
+          # Use printf to avoid newline/escape issues when writing multi-line secrets
           printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
           chmod 600 "$HOME/.ssh/id_rsa"
 
-          # Add server to known_hosts
+          # Prevent interactive host key prompts
           ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"
           chmod 644 "$HOME/.ssh/known_hosts"
 
-      # 3️⃣ Deploy to server
       - name: Deploy to Server
         env:
           SERVER_IP: ${{ secrets.SERVER_IP }}
@@ -43,96 +42,69 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
           CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
-        shell: bash
         run: |
-          # Create deploy script locally
+          # Create deployment script
           cat > deploy.sh << 'EOF'
           #!/bin/bash
-          set -euo pipefail
+          set -e
           
           echo "🚀 Starting deployment to production..."
           
-          cd /home/cuefinder/app || exit
+          # Navigate to app directory
+          cd /home/cuefinder/app
           
-          # Pull latest code or clone if missing
+          # Pull latest code
           if [ -d ".git" ]; then
             echo "📦 Pulling latest changes..."
             git fetch --prune origin
             git checkout release
-            git reset --hard origin/release
+            git pull --ff-only origin release
           else
             echo "📦 Cloning repository..."
-            git clone --branch release git@github.com:${GITHUB_REPOSITORY}.git .
+            git clone --branch release git@github.com:${{ github.repository }}.git .
           fi
           
-          # Write .env file safely
-          cat > .env <<ENV
-          DB_PASSWORD="$DB_PASSWORD"
-          JWT_SECRET="$JWT_SECRET"
-          FRONTEND_API_URL="$FRONTEND_API_URL"
-          CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
-          ENV
+          # Create .env file with all required variables
+          echo "⚙️  Configuring environment..."
+          cat > .env << ENVEOF
+          DB_PASSWORD=${DB_PASSWORD}
+          JWT_SECRET=${JWT_SECRET}
+          FRONTEND_API_URL=${FRONTEND_API_URL}
+          CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
+          ENVEOF
           
-          # Docker Compose command detection
+          # Build and deploy with Docker Compose
+          echo "🐳 Building and starting containers..."
           if command -v docker-compose >/dev/null 2>&1; then
             DC="docker-compose"
           else
             DC="docker compose"
           fi
-          
-          # Stop & remove old containers
+
+          # Stop all containers first (including orphans/detached)
           $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
-          
-          # Build containers with frontend build-arg
-          $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache \
-              --build-arg REACT_APP_API_URL="$FRONTEND_API_URL"
-          
-          # Start containers
+          $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
           $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
           
-          # Show status
+          # Check container status
           echo "📊 Container status:"
           $DC -f docker-compose.yml -f docker-compose.prod.yml ps
           
           echo "✅ Deployment complete!"
           EOF
-
-          # Copy deploy script to server
-          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-
-          # Run deploy script on server
-          ssh $SERVER_USER@$SERVER_IP "
-          chmod +x /home/cuefinder/deploy.sh
-          /home/cuefinder/deploy.sh
-          "
-
-      # 4️⃣ Install/renew SSL certificates with Certbot on host
-      - name: Ensure SSL certificates
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-        shell: bash
-        run: |
-          ssh $SERVER_USER@$SERVER_IP "
-          sudo apt update && sudo apt install -y certbot python3-certbot-nginx
-          sudo mkdir -p /var/www/certbot
           
-          # Obtain or renew certificate
-          sudo certbot certonly --webroot -w /var/www/certbot \
-            -d billiardscuefinder.com -d www.billiardscuefinder.com \
-            --non-interactive --agree-tos -m admin@billiardscuefinder.com || true
-          "
+          # Copy and execute deployment script
+          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
+          ssh $SERVER_USER@$SERVER_IP "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
 
-      # 5️⃣ Verify deployment
       - name: Verify Deployment
         run: |
           echo "🔍 Verifying deployment..."
           ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
-
-      # 6️⃣ Notify success
+          
       - name: Notify Success
         if: success()
         run: |
           echo "✅ Deployment successful!"
-          echo "🌐 Frontend: https://billiardscuefinder.com"
-          echo "🔧 Backend: https://billiardscuefinder.com/api"
+          echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
+          echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"
