@@ -383,3 +383,7 @@ build.log
 # Deployment scripts with secrets (keep .example versions)
 deployment/*-secrets.ps1
 deployment/*-secrets.sh
+
+# User uploaded files (production data)
+uploads/
+CueFinderBE/wwwroot/uploads/

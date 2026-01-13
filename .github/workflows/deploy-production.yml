@@ -68,8 +68,8 @@ jobs:
             git checkout release
             echo "🔄 Running git reset --hard origin/release..."
             git reset --hard origin/release
-            echo "🧹 Running git clean -fdx..."
-            git clean -fdx
+            echo "🧹 Running git clean -fdx (excluding uploads)..."
+            git clean -fdx -e uploads/ -e CueFinderBE/wwwroot/uploads/
             echo "✅ Repository cleaned and reset successfully"
           else
             echo "📦 Cloning repository..."
