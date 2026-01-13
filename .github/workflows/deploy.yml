@@ -45,9 +45,9 @@ if [ -d ".git" ]; then
   echo "📦 Pulling latest changes..."
   git fetch --prune origin
   git checkout release
-  # Remove any untracked files that would block reset/pull
-  git clean -fd
+  # Force a pristine tree: drop tracked changes and untracked/ignored files
   git reset --hard origin/release
+  git clean -fdx
 else
   echo "📦 Cloning repository..."
   git clone --branch release git@github.com:REPO_PLACEHOLDER.git .
