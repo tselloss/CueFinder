@@ -125,7 +125,17 @@ else
 }
 
 // Enable static files for serving uploaded images
-app.UseStaticFiles();
+var uploadsPath = Path.Combine(app.Environment.ContentRootPath, "uploads");
+if (!Directory.Exists(uploadsPath))
+{
+    Directory.CreateDirectory(uploadsPath);
+}
+
+app.UseStaticFiles(new StaticFileOptions
+{
+    FileProvider = new Microsoft.Extensions.FileProviders.PhysicalFileProvider(uploadsPath),
+    RequestPath = "/uploads"
+});
 
 // Add exception handler and status code pages for ProblemDetails
 app.UseExceptionHandler();
