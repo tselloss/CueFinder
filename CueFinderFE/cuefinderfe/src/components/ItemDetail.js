@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Box, Button, Heading, Text, Image, Grid, Card, CardBody, Layer } from 'grommet';
 import { Previous, Next, Close, FormPrevious, Image as ImageIcon } from 'grommet-icons';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
@@ -33,6 +33,15 @@ export default function ItemDetail({
 }) {
   const [imageIndex, setImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth <= 768);
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   if (!item) return (
     <Box fill align="center" justify="center">
@@ -87,8 +96,76 @@ export default function ItemDetail({
           responsive
           rows="auto"
         >
-          {/* Info Section */}
-          <Box gap="medium">
+          {/* Image Section - Shows first on mobile */}
+          <Box margin={{ top: 'xlarge' }} pad={{ top: 'xlarge' }} style={{ order: isMobile ? -1 : 1 }}>
+            <Card background="white">
+              <CardBody pad="none">
+                <Box height="medium" position="relative">
+                  {hasImages ? (
+                    <>
+                      <Image
+                        src={currentImage}
+                        alt={`${item.brand} ${item.title}`}
+                        fit="contain"
+                        fill
+                        onClick={openFullscreen}
+                        style={{ cursor: 'pointer' }}
+                      />
+                      {images.length > 1 && (
+                        <>
+                          <Box
+                            direction="row"
+                            justify="between"
+                            align="center"
+                            fill="horizontal"
+                            pad="small"
+                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                          >
+                            <Button 
+                              icon={<Previous />} 
+                              onClick={prevImage}
+                              plain
+                              hoverIndicator
+                            />
+                            <Button 
+                              icon={<Next />} 
+                              onClick={nextImage}
+                              plain
+                              hoverIndicator
+                            />
+                          </Box>
+                          <Box
+                            direction="row"
+                            justify="center"
+                            gap="xsmall"
+                            pad="small"
+                            style={{ position: 'absolute', bottom: 0, width: '100%' }}
+                          >
+                            {images.map((_, idx) => (
+                              <Box
+                                key={idx}
+                                width="10px"
+                                height="10px"
+                                round="full"
+                                background={idx === imageIndex ? 'brand' : 'light-4'}
+                                onClick={() => setImageIndex(idx)}
+                                style={{ cursor: 'pointer' }}
+                              />
+                            ))}
+                          </Box>
+                        </>
+                      )}
+                    </>
+                  ) : (
+                    <ImagePlaceholder height="medium" />
+                  )}
+                </Box>
+              </CardBody>
+            </Card>
+          </Box>
+
+          {/* Info Section - Shows second on mobile */}
+          <Box gap="medium" style={{ order: isMobile ? 1 : 0 }}>
             {/* Title & Price */}
             <Box>
               <Box direction="row" gap="small" align="center">
@@ -179,25 +256,8 @@ export default function ItemDetail({
               </CardBody>
             </Card>
           </Box>
-
-          {/* Image Section */}
-          <Box margin={{ top: 'xlarge' }} pad={{ top: 'xlarge' }}>
-            <Card background="white">
-              <CardBody pad="none">
-                <Box height="medium" position="relative">
-                  {hasImages ? (
-                    <>
-                      <Image
-                        src={currentImage}
-                        alt={`${item.brand} ${item.title}`}
-                        fit="contain"
-                        fill
-                        onClick={openFullscreen}
-                        style={{ cursor: 'pointer' }}
-                      />
-                      {images.length > 1 && (
-                        <>
-                          <Box
+        </Grid>
+      </Box>
                             direction="row"
                             justify="between"
                             align="center"
