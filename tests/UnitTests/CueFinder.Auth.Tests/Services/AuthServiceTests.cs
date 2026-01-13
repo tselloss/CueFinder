@@ -265,7 +265,7 @@ namespace CueFinder.Auth.Tests.Services
             int userId = 1;
 
             // Act
-            var result = await _authService.UpdateUserProfileAsync(userId, "Updated Name", "updated@test.com", "555-9999", "", "", "", "", "", "");
+            var result = await _authService.UpdateUserProfileAsync(userId, "Updated Name", "updated@test.com", "555-9999", "", "", "", "", "", "", null);
 
             // Assert
             result.Should().NotBeNull();
@@ -281,7 +281,7 @@ namespace CueFinder.Auth.Tests.Services
             int userId = 999;
 
             // Act
-            var result = await _authService.UpdateUserProfileAsync(userId, "Updated Name", "", "", "", "", "", "", "", "");
+            var result = await _authService.UpdateUserProfileAsync(userId, "Updated Name", "", "", "", "", "", "", "", "", null);
 
             // Assert
             result.Should().BeNull();
@@ -295,7 +295,7 @@ namespace CueFinder.Auth.Tests.Services
 
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(
-                () => _authService.UpdateUserProfileAsync(userId, "", "admin@cuefinder.com", "", "", "", "", "", "", "")); // Already used by another user
+                () => _authService.UpdateUserProfileAsync(userId, "", "admin@cuefinder.com", "", "", "", "", "", "", "", null)); // Already used by another user
         }
     }
 }

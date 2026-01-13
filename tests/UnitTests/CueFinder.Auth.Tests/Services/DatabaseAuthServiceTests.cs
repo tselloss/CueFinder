@@ -295,7 +295,7 @@ namespace CueFinder.Auth.Tests.Services
                 .ReturnsAsync(user);
 
             // Act
-            var result = await _authService.UpdateUserProfileAsync(1, "Updated Name", "updated@test.com", "555-9999", "", "", "", "", "", "");
+            var result = await _authService.UpdateUserProfileAsync(1, "Updated Name", "updated@test.com", "555-9999", "", "", "", "", "", "", null);
 
             // Assert
             result.Should().NotBeNull();
