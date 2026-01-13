@@ -83,6 +83,17 @@ jobs:
           echo "FRONTEND_API_URL=${FRONTEND_API_URL}" >> .env
           echo "CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}" >> .env
           
+          # Ensure SSL directory exists and generate self-signed certificates if missing
+          echo "🔐 Checking SSL certificates..."
+          mkdir -p ssl
+          if [ ! -f "ssl/origin-cert.pem" ] || [ ! -f "ssl/origin-key.pem" ]; then
+            echo "📜 Generating self-signed SSL certificates..."
+            docker run --rm -v $(pwd)/ssl:/ssl alpine:latest sh -c 'apk add openssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /ssl/origin-key.pem -out /ssl/origin-cert.pem -subj /CN=billiardscuefinder.com' || true
+            echo "✅ SSL certificates generated"
+          else
+            echo "✅ SSL certificates already exist"
+          fi
+          
           # Build and deploy with Docker Compose
           echo "🐳 Building and starting containers..."
           if command -v docker-compose >/dev/null 2>&1; then
