@@ -21,7 +21,7 @@ namespace CueFinder.Messages.Services
             _logger = logger;
         }
 
-        public async Task<MessageResponseDto> SendMessageAsync(int senderId, SendMessageRequest request)
+        public async Task<MessageResponseDto> SendMessageAsync(int senderId, SendMessageRequest request, bool isReply = false)
         {
             if (senderId == request.RecipientId)
                 throw new InvalidOperationException("You cannot message yourself.");
@@ -34,8 +34,9 @@ namespace CueFinder.Messages.Services
             {
                 cue = await _context.Cues.FindAsync(request.CueId.Value) ?? throw new InvalidOperationException("Cue not found.");
 
-                // If message is tied to a listing, enforce the recipient is the listing owner.
-                if (cue.UserId != request.RecipientId)
+                // If message is a new inquiry (not a reply), enforce the recipient is the listing owner.
+                // For replies, any user can be the recipient since it's a conversation.
+                if (!isReply && cue.UserId != request.RecipientId)
                     throw new InvalidOperationException("Recipient must be the listing owner for cue messages.");
             }
 
@@ -173,7 +174,7 @@ namespace CueFinder.Messages.Services
 
             _logger.LogInformation("User {SenderId} replying to message {MessageId}", senderId, messageId);
 
-            return await SendMessageAsync(senderId, request);
+            return await SendMessageAsync(senderId, request, isReply: true);
         }
 
         public async Task<bool> DeleteMessageAsync(int messageId, int userId)
