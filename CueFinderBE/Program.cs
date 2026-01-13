@@ -76,11 +76,25 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend", policy =>
     {
-        policy.WithOrigins(allowedOrigins.ToArray())
+        policy
+            .WithOrigins(allowedOrigins.ToArray())
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials();
+            .AllowCredentials()
+            .WithExposedHeaders("Content-Disposition", "X-Total-Count");
     });
+    
+    // Development-only permissive CORS for debugging
+    if (builder.Environment.IsDevelopment())
+    {
+        options.AddPolicy("AllowDevelopment", policy =>
+        {
+            policy
+                .AllowAnyOrigin()
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
+    }
 });
 
 var app = builder.Build();
@@ -101,7 +115,14 @@ app.MapGet("/health", () => Results.Ok(new { status = "ok" }))
     .AllowAnonymous();
 
 // CORS must be before UseHttpsRedirection
-app.UseCors("AllowFrontend");
+if (app.Environment.IsDevelopment())
+{
+    app.UseCors("AllowDevelopment");
+}
+else
+{
+    app.UseCors("AllowFrontend");
+}
 
 // Enable static files for serving uploaded images
 app.UseStaticFiles();

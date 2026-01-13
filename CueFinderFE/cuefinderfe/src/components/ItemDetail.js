@@ -258,57 +258,6 @@ export default function ItemDetail({
           </Box>
         </Grid>
       </Box>
-                            direction="row"
-                            justify="between"
-                            align="center"
-                            fill="horizontal"
-                            pad="small"
-                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
-                          >
-                            <Button 
-                              icon={<Previous />} 
-                              onClick={prevImage}
-                              plain
-                              hoverIndicator
-                            />
-                            <Button 
-                              icon={<Next />} 
-                              onClick={nextImage}
-                              plain
-                              hoverIndicator
-                            />
-                          </Box>
-                          <Box
-                            direction="row"
-                            justify="center"
-                            gap="xsmall"
-                            pad="small"
-                            style={{ position: 'absolute', bottom: 0, width: '100%' }}
-                          >
-                            {images.map((_, idx) => (
-                              <Box
-                                key={idx}
-                                width="10px"
-                                height="10px"
-                                round="full"
-                                background={idx === imageIndex ? 'brand' : 'light-4'}
-                                onClick={() => setImageIndex(idx)}
-                                style={{ cursor: 'pointer' }}
-                              />
-                            ))}
-                          </Box>
-                        </>
-                      )}
-                    </>
-                  ) : (
-                    <ImagePlaceholder height="medium" />
-                  )}
-                </Box>
-              </CardBody>
-            </Card>
-          </Box>
-        </Grid>
-      </Box>
 
       {/* Fullscreen Image Viewer */}
       {isFullscreen && hasImages && (
