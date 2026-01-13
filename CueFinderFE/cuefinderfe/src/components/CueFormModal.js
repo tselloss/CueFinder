@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Layer, Box, Button, Heading, Form, FormField, TextInput, TextArea, Select } from 'grommet';
-import { Close, CloudUpload, Trash, Star } from 'grommet-icons';
+import { Close } from 'grommet-icons';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import { getErrorMessage } from '../utils/errorUtils';
