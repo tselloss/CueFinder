@@ -77,6 +77,8 @@ export const API_ENDPOINTS = {
       return cueId ? `${base}?cueId=${cueId}` : base;
     },
     MARK_READ: (id) => `${API_BASE_URL}/messages/${id}/read`,
+    REPLY: (id) => `${API_BASE_URL}/messages/${id}/reply`,
+    DELETE: (id) => `${API_BASE_URL}/messages/${id}`,
   },
 };
 

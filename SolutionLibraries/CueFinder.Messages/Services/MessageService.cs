@@ -139,6 +139,62 @@ namespace CueFinder.Messages.Services
             return true;
         }
 
+        public async Task<MessageResponseDto> ReplyToMessageAsync(int messageId, int senderId, string content)
+        {
+            // Get original message
+            var originalMessage = await _context.Messages
+                .Include(m => m.Sender)
+                .Include(m => m.Recipient)
+                .FirstOrDefaultAsync(m => m.Id == messageId);
+
+            if (originalMessage == null)
+                throw new InvalidOperationException("Original message not found.");
+
+            // Verify the sender is part of the conversation (either sender or recipient of original)
+            if (originalMessage.SenderId != senderId && originalMessage.RecipientId != senderId)
+                throw new UnauthorizedAccessException("You are not part of this conversation.");
+
+            // Determine who receives the reply
+            int recipientId = originalMessage.SenderId == senderId 
+                ? originalMessage.RecipientId 
+                : originalMessage.SenderId;
+
+            // Create reply message
+            var request = new SendMessageRequest
+            {
+                RecipientId = recipientId,
+                CueId = originalMessage.CueId,
+                Subject = originalMessage.Subject.StartsWith("Re:") 
+                    ? originalMessage.Subject 
+                    : $"Re: {originalMessage.Subject}",
+                Content = content,
+                MessageType = "message"
+            };
+
+            _logger.LogInformation("User {SenderId} replying to message {MessageId}", senderId, messageId);
+
+            return await SendMessageAsync(senderId, request);
+        }
+
+        public async Task<bool> DeleteMessageAsync(int messageId, int userId)
+        {
+            var message = await _context.Messages.FindAsync(messageId);
+
+            if (message == null)
+                return false;
+
+            // Only sender or recipient can delete
+            if (message.SenderId != userId && message.RecipientId != userId)
+                throw new UnauthorizedAccessException("You do not have permission to delete this message.");
+
+            _context.Messages.Remove(message);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Message {MessageId} deleted by user {UserId}", messageId, userId);
+
+            return true;
+        }
+
         private static MessageResponseDto MapToDto(Message message, User? sender, User? recipient)
         {
             return new MessageResponseDto
