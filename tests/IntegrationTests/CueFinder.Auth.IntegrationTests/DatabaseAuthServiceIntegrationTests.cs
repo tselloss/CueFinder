@@ -118,7 +118,8 @@ namespace CueFinder.Auth.IntegrationTests
                 "Test City",
                 "Test State",
                 "12345",
-                "Test Country");
+                "Test Country",
+                null);
 
             // Assert update
             updatedProfile.Should().NotBeNull();
@@ -275,7 +276,8 @@ namespace CueFinder.Auth.IntegrationTests
                     "",
                     "",
                     "",
-                    ""));
+                    "",
+                    null));
         }
 
         [Fact]

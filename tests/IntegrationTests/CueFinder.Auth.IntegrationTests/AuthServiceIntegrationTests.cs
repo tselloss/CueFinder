@@ -374,7 +374,8 @@ namespace CueFinder.Auth.IntegrationTests
                 "New City",
                 "NY",
                 "12345",
-                "USA");
+                "USA",
+                null);
 
             // Assert
             updatedProfile.Should().NotBeNull();
@@ -401,7 +402,8 @@ namespace CueFinder.Auth.IntegrationTests
                 "",
                 "",
                 "",
-                "");
+                "",
+                null);
 
             // Assert
             result.Should().BeNull();
@@ -447,7 +449,8 @@ namespace CueFinder.Auth.IntegrationTests
                     "",
                     "",
                     "",
-                    ""));
+                    "",
+                    null));
         }
 
         #endregion
@@ -533,7 +536,8 @@ namespace CueFinder.Auth.IntegrationTests
                 "",
                 "",
                 "",
-                "");
+                "",
+                null);
             updatedProfile.Should().NotBeNull();
             updatedProfile!.Name.Should().Be("Updated Name");
             updatedProfile.Email.Should().Be("updated@example.com");
