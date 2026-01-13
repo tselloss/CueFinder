@@ -302,7 +302,22 @@ export default function ItemDetail({
                     {(item.sellerPhone || item.seller_phone) && (
                       <Box direction="row" gap="small" align="center">
                         <Text>📞</Text>
-                        <Text>{item.sellerPhone || item.seller_phone}</Text>
+                        {(item.sellerHidePhone || item.seller_hidePhone) ? (
+                          <Box 
+                            pad={{ horizontal: 'small', vertical: 'xsmall' }} 
+                            background="background-back"
+                            round="small"
+                            style={{ 
+                              filter: 'blur(5px)',
+                              userSelect: 'none',
+                              cursor: 'not-allowed'
+                            }}
+                          >
+                            <Text>{item.sellerPhone || item.seller_phone}</Text>
+                          </Box>
+                        ) : (
+                          <Text>{item.sellerPhone || item.seller_phone}</Text>
+                        )}
                       </Box>
                     )}
                     {item.sellerId && (

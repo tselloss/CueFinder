@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, Grid } from 'grommet';
+import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, Grid, CheckBox } from 'grommet';
 import { FormPrevious, User, Mail, Phone, MapLocation, Location, Edit } from 'grommet-icons';
 import MyCues from './MyCues';
 import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
@@ -26,6 +26,7 @@ export default function UserProfile({ onBack }) {
     name: user?.name || '',
     email: user?.email || '',
     phone: user?.phone || '',
+    hidePhone: user?.hidePhone || false,
     location: user?.location || '',
     avatar: user?.avatar || '👤',
     address: {
@@ -44,6 +45,7 @@ export default function UserProfile({ onBack }) {
         name: user.name || '',
         email: user.email || '',
         phone: user.phone || '',
+        hidePhone: user.hidePhone || false,
         location: user.location || '',
         avatar: user.avatar || '👤',
         address: {
@@ -71,6 +73,10 @@ export default function UserProfile({ onBack }) {
     }
   };
 
+  const handleHidePhoneChange = (checked) => {
+    setProfile(p => ({ ...p, hidePhone: checked }));
+  };
+
   const handleSaveProfile = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -82,6 +88,7 @@ export default function UserProfile({ onBack }) {
         name: profile.name,
         email: profile.email,
         phone: profile.phone,
+        hidePhone: profile.hidePhone,
         location: profile.location,
         avatar: profile.avatar,
         address: profile.address.street,
@@ -241,9 +248,14 @@ export default function UserProfile({ onBack }) {
                           pad={{ vertical: 'medium' }}
                         >
                           <Text weight={600} color="text-weak" size="medium">Phone</Text>
-                          <Text color="text-strong" size="medium" weight={500}>
-                            {profile.phone || 'Not provided'}
-                          </Text>
+                          <Box align="end">
+                            <Text color="text-strong" size="medium" weight={500}>
+                              {profile.phone || 'Not provided'}
+                            </Text>
+                            <Text size="small" color="text-weak">
+                              {profile.hidePhone ? 'Hidden from other users' : 'Visible to other users'}
+                            </Text>
+                          </Box>
                         </Box>
                         <Box 
                           direction="row" 
@@ -419,6 +431,14 @@ export default function UserProfile({ onBack }) {
                           required
                         />
                       </FormField>
+
+                      <CheckBox
+                        label="Hide my phone from other users"
+                        checked={profile.hidePhone}
+                        onChange={(e) => handleHidePhoneChange(e.target.checked)}
+                        toggle
+                        margin={{ bottom: 'medium' }}
+                      />
 
                       <FormField label="Location (City/General Area)" name="location" required>
                         <TextInput

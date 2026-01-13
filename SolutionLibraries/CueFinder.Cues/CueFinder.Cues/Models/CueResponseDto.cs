@@ -27,6 +27,7 @@ public class CueResponseDto
     public string? SellerName { get; set; }
     public string? SellerEmail { get; set; }
     public string? SellerPhone { get; set; }
+    public bool SellerHidePhone { get; set; }
     
     // Images
     public List<CueImageDto> Images { get; set; } = new();

@@ -184,7 +184,8 @@ namespace CueFinder.Auth.Controllers
                     request.City ?? string.Empty,
                     request.State ?? string.Empty,
                     request.ZipCode ?? string.Empty,
-                    request.Country ?? string.Empty
+                    request.Country ?? string.Empty,
+                    request.HidePhone
                 );
 
                 if (profile == null)

@@ -271,6 +271,7 @@ public class CueCaseService : ICueCaseService
             SellerName = cueCase.User?.Name ?? cueCase.User?.Username,
             SellerEmail = cueCase.User?.Email,
             SellerPhone = cueCase.User?.Phone,
+            SellerHidePhone = cueCase.User?.HidePhone ?? false,
             ViewCount = cueCase.ViewCount,
             AverageRating = cueCase.AverageRating,
             RatingCount = cueCase.RatingCount,
