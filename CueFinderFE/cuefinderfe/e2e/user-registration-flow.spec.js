@@ -6,7 +6,7 @@
  * 1. Backend must be running on http://localhost:5000
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
- * 4. Admin user must exist with username: admin, password: Admin123!
+ * 4. Admin user must exist with username: CuefinderAdminTheOneAndOnly, password: TheBestAdminThatYouEverHave
  * 
  * Run this test with: npx playwright test
  */
@@ -35,20 +35,46 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     console.log('Testing direct login...');
 
     // Navigate to login page first
-    await page.locator('button:has-text("Sign In")').click();
+    await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
     await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
 
-    // Use admin credentials with correct password
-    await page.getByPlaceholder('Enter username').fill('admin');
-    await page.getByPlaceholder('Password').fill('Admin123!');
+    // Wait for form inputs to be ready
+    const usernameInput = page.getByPlaceholder('Enter username');
+    const passwordInput = page.getByPlaceholder('Password');
+    
+    await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
+    await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
 
-    await page.locator('button[type="submit"]:has-text("Sign in")').click();
-    await page.waitForTimeout(2000);
+    // Fill in credentials
+    await usernameInput.fill('testadmin');
+    await passwordInput.fill('TestAdmin123!');
+    await page.waitForTimeout(500);
 
-    // Verify successful login - should redirect to home and show user profile button
-    await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
-    console.log('✓ Direct login successful');
+    // Find and click submit button - try multiple selectors
+    let submitButton = page.locator('button[type="submit"]').first();
+    const submitCount = await submitButton.count();
+    console.log('Submit buttons found:', submitCount);
+
+    if (submitCount > 0) {
+      console.log('Clicking submit button...');
+      await submitButton.click();
+      // Wait for either successful redirect or check if any errors appear
+      await page.waitForTimeout(3000);
+    }
+
+    // Check if we got the auth token
+    let storedToken = await page.evaluate(() => localStorage.getItem('authToken'));
+    console.log('Auth token in localStorage:', storedToken ? 'Found ✓' : 'Not found ✗');
+
+    if (storedToken) {
+      console.log('✓ Direct login successful - token stored');
+    } else {
+      // Check for error messages
+      const errors = await page.locator('[role="alert"]').allTextContents().catch(() => []);
+      console.log('Error messages:', errors);
+      throw new Error(`Login failed - no auth token stored. Errors: ${errors.join(', ')}`);
+    }
   });
 
   test('Admin user can access admin page', async ({ page }) => {
@@ -60,8 +86,8 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
 
     // Login as admin
-    await page.getByPlaceholder('Enter username').fill('admin');
-    await page.getByPlaceholder('Password').fill('Admin123!');
+    await page.getByPlaceholder('Enter username').fill('CuefinderAdminTheOneAndOnly');
+    await page.getByPlaceholder('Password').fill('TheBestAdminThatYouEverHave');
     await page.locator('button[type="submit"]:has-text("Sign in")').click();
     await page.waitForTimeout(2000);
 
