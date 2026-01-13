@@ -53,7 +53,7 @@ function AppInner() {
   ];
   // Prices are in EUR; use € labels
   const currencySymbol = '€';
-  const { user, logout } = useAuth();
+  const { user, logout, loading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -908,10 +908,10 @@ function AppInner() {
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               
               <Route path="/cue/:id" element={
-                user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
+                <CueDetail onBack={handleBack} />
               } />
               <Route path="/case/:id" element={
-                user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
+                <CueCaseDetail onBack={handleBack} />
               } />
               
               <Route path="/profile" element={
