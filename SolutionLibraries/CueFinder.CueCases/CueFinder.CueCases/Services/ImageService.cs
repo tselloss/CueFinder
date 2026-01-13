@@ -175,7 +175,8 @@ public class ImageService : IImageService
     {
         var images = await _context.CueCaseImages
             .Where(i => i.CueCaseId == cueCaseId)
-            .OrderBy(i => i.DisplayOrder)
+            .OrderByDescending(i => i.IsPrimary)
+            .ThenBy(i => i.DisplayOrder)
             .Select(i => new CueCaseImageDto
             {
                 Id = i.Id,
