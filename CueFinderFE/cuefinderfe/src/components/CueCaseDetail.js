@@ -1,11 +1,21 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import * as cueCaseService from '../api/cueCaseService';
+import { useAuth } from '../auth/AuthContext';
 import ItemDetail from './ItemDetail';
 
 export default function CueCaseDetail({ onBack }) {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user, loading } = useAuth();
   const [cueCase, setCueCase] = useState(null);
+
+  // Redirect to login if not authenticated (after loading completes)
+  useEffect(() => {
+    if (!loading && !user) {
+      navigate('/login');
+    }
+  }, [user, loading, navigate]);
 
   useEffect(() => {
     async function load() {
