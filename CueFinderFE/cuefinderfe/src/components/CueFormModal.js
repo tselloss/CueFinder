@@ -26,6 +26,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     condition: 'Excellent',
     description: '',
     // Cue-specific fields
+    cueType: 'playing',
     weight: '',
     length: '',
     tipSize: '',
@@ -60,6 +61,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         condition: cue.condition || 'Excellent',
         description: cue.description || '',
         // Cue fields
+        cueType: cue.cueType || 'playing',
         weight: cue.weight || '',
         length: cue.length || '',
         tipSize: cue.tipSize || '',
@@ -161,6 +163,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
           price: parseFloat(formData.price),
           condition: formData.condition,
           description: formData.description,
+          cueType: formData.cueType || 'playing',
           location: formData.location || null,
           weight: formData.weight ? parseFloat(formData.weight) : null,
           length: formData.length ? parseFloat(formData.length) : null,
@@ -466,6 +469,22 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                   </FormField>
                 </Box>
               </Box>
+
+              {productType === 'cue' && (
+                <FormField label="Cue Type *" name="cueType" required>
+                  <Select
+                    name="cueType"
+                    options={['playing', 'break', 'jump']}
+                    value={formData.cueType}
+                    onChange={({ option }) => setFormData(prev => ({ ...prev, cueType: option }))}
+                    labelKey={(option) => {
+                      const labels = { playing: '🎯 Playing Cue', break: '💥 Break Cue', jump: '🚀 Jump Cue' };
+                      return labels[option] || option;
+                    }}
+                    valueKey={{ key: 'value', reduce: true }}
+                  />
+                </FormField>
+              )}
 
               <FormField label="Location" name="location">
                 <TextInput

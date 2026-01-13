@@ -45,7 +45,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<string>("CueType")
@@ -83,7 +83,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("text");
 
                     b.Property<DateTime?>("SoldDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<decimal?>("TipSize")
                         .HasColumnType("numeric");
@@ -95,7 +95,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int>("UserId")
@@ -174,7 +174,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<string>("Description")
@@ -210,7 +210,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("SoldDate")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Title")
                         .IsRequired()
@@ -219,7 +219,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int>("UserId")
@@ -269,7 +269,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UploadedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.HasKey("Id");
@@ -317,7 +317,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UploadedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.HasKey("Id");
@@ -343,7 +343,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int?>("CueId")
@@ -358,7 +358,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<DateTime?>("ReadAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<int>("RecipientId")
                         .HasColumnType("integer");
@@ -399,11 +399,11 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<DateTime>("ExpiresAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("IpAddress")
                         .HasMaxLength(45)
@@ -416,7 +416,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastResentAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("MagicLinkToken")
                         .IsRequired()
@@ -452,7 +452,7 @@ namespace CueFinder.Database.Migrations
                         .HasDefaultValue("SMS");
 
                     b.Property<DateTime?>("VerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.HasKey("Id");
 
@@ -484,7 +484,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int>("CueId")
@@ -506,7 +506,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.HasKey("Id");
@@ -538,7 +538,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("SavedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int>("UserId")
@@ -567,11 +567,11 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("integer");
 
                     b.Property<DateTime?>("CompletedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<int>("CueId")
@@ -613,7 +613,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.HasKey("Id");
@@ -642,6 +642,12 @@ namespace CueFinder.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<bool>("AcceptedTerms")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("AcceptedTermsAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
@@ -656,7 +662,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<string>("Email")
@@ -683,7 +689,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<DateTime?>("LastLoginAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("Location")
                         .HasColumnType("text");
@@ -704,7 +710,7 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("character varying(20)");
 
                     b.Property<DateTime?>("PhoneVerifiedAt")
-                        .HasColumnType("timestamp with time zone");
+                        .HasColumnType("timestamp without time zone");
 
                     b.Property<string>("ProfilePictureUrl")
                         .HasColumnType("text");
@@ -721,7 +727,7 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<DateTime>("UpdatedAt")
                         .ValueGeneratedOnAddOrUpdate()
-                        .HasColumnType("timestamp with time zone")
+                        .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
                     b.Property<string>("Username")

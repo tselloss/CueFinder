@@ -37,9 +37,12 @@ const ImagePlaceholder = ({ height = '200px' }) => (
   </Box>
 );
 
-export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, sortBy, priceRange }) {
+export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, cueType, sortBy, priceRange }) {
   const currencySymbol = '€';
-  // Filter by search, category, and condition
+  
+  console.log(`[CueList] Rendering with cueType prop = "${cueType}", category = "${category}"`);
+  
+  // Filter by search, category, condition, and cue type
   let filtered = (cues || []).filter((c) => {
     // Text search
     if (query) {
@@ -59,6 +62,17 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
     // Condition filter
     if (condition && condition !== 'all' && condition !== 'All Conditions') {
       if (c.condition !== condition) return false;
+    }
+    
+    // Cue Type filter
+    // If a CueType is selected, only cues should remain visible.
+    // Normalize to support different backend field casing/serialization.
+    if (cueType && cueType !== 'all') {
+      if (c.itemType !== 'cue') return false;
+      const itemCueType = (c.cueType ?? c.cue_type ?? '').toString().toLowerCase();
+      const filterCueType = cueType.toLowerCase();
+      console.log(`[CueType Filter] Cue: "${c.title}", cueType field: "${c.cueType}", cue_type field: "${c.cue_type}", computed: "${itemCueType}", filter: "${filterCueType}", match: ${itemCueType === filterCueType}`);
+      if (itemCueType !== filterCueType) return false;
     }
     
   // Price range filter

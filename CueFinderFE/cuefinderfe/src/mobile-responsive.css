@@ -32,7 +32,7 @@
     animation: fadeIn 0.3s ease-out;
   }
 
-  /* Mobile menu button */
+  /* Mobile menu button - Enhanced visibility */
   .mobile-menu-button {
     display: flex !important;
     align-items: center;
@@ -40,20 +40,31 @@
     position: fixed;
     bottom: 20px;
     right: 20px;
-    width: 56px;
-    height: 56px;
+    width: 64px;
+    height: 64px;
     border-radius: 50%;
     background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
-    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+    box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6), 0 0 0 0 rgba(59, 130, 246, 0.7);
     z-index: 998;
-    border: none;
+    border: 3px solid rgba(255, 255, 255, 0.3);
     cursor: pointer;
     transition: all 0.3s ease;
+    animation: menuButtonPulse 2s ease-in-out infinite;
   }
 
   .mobile-menu-button:hover {
-    transform: scale(1.1);
-    box-shadow: 0 6px 16px rgba(59, 130, 246, 0.6);
+    transform: scale(1.15);
+    box-shadow: 0 8px 24px rgba(59, 130, 246, 0.8), 0 0 0 8px rgba(59, 130, 246, 0.2);
+    animation: none;
+  }
+
+  @keyframes menuButtonPulse {
+    0%, 100% {
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6), 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+    50% {
+      box-shadow: 0 6px 20px rgba(59, 130, 246, 0.6), 0 0 0 10px rgba(59, 130, 246, 0);
+    }
   }
 
   /* Show close button in sidebar on mobile */
@@ -65,6 +76,20 @@
 /* Show menu button only on mobile */
 @media (min-width: 769px) {
   .mobile-menu-button {
+    display: none !important;
+  }
+
+  /* Ensure sidebar is always visible on desktop */
+  .sidebar-desktop {
+    display: block !important;
+    position: relative !important;
+    width: auto !important;
+    height: auto !important;
+    animation: none !important;
+  }
+
+  /* Hide sidebar overlay on desktop */
+  .sidebar-overlay {
     display: none !important;
   }
 }
