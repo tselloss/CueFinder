@@ -53,12 +53,14 @@ jobs:
           # Navigate to app directory
           cd /home/cuefinder/app
           
-          # Pull latest code
+          # Pull latest code with hard reset
           if [ -d ".git" ]; then
-            echo "📦 Pulling latest changes..."
+            echo "📦 Pulling latest changes (hard reset)..."
             git fetch --prune origin
             git checkout release
-            git pull --ff-only origin release
+            # Discard all local changes and untracked files
+            git reset --hard origin/release
+            git clean -fdx
           else
             echo "📦 Cloning repository..."
             git clone --branch release git@github.com:${{ github.repository }}.git .
