@@ -100,6 +100,10 @@ public class CueService : ICueService
         if (user == null)
             throw new InvalidOperationException("User not found");
 
+        var cueType = string.IsNullOrWhiteSpace(dto.CueType)
+            ? "playing"
+            : dto.CueType.Trim().ToLowerInvariant();
+
         var cue = new Cue
         {
             Title = dto.Title,
@@ -107,6 +111,7 @@ public class CueService : ICueService
             Description = dto.Description,
             Price = dto.Price,
             Condition = dto.Condition,
+            CueType = cueType,
             ShaftMaterial = dto.Material ?? string.Empty,
             Weight = dto.Weight,
             Length = dto.Length,
@@ -148,6 +153,7 @@ public class CueService : ICueService
         if (dto.Description != null) cue.Description = dto.Description;
         if (dto.Price.HasValue) cue.Price = dto.Price.Value;
         if (dto.Condition != null) cue.Condition = dto.Condition;
+        if (dto.CueType != null) cue.CueType = dto.CueType.Trim().ToLowerInvariant();
         if (dto.Material != null) cue.ShaftMaterial = dto.Material;
         if (dto.Weight.HasValue) cue.Weight = dto.Weight;
         if (dto.Length.HasValue) cue.Length = dto.Length;
@@ -218,6 +224,7 @@ public class CueService : ICueService
             Description = cue.Description,
             Price = cue.Price,
             Condition = cue.Condition,
+            CueType = cue.CueType,
             Material = cue.ShaftMaterial,
             Weight = cue.Weight,
             Length = cue.Length,

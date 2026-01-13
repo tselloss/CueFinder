@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector } from 'grommet';
 import { Add, Search, User, Logout, UserAdmin } from 'grommet-icons';
@@ -37,6 +37,7 @@ function AppInner() {
   const [editingCue, setEditingCue] = useState(null);
   const [category, setCategory] = useState('all'); // 'all', 'cues', 'cases'
   const [condition, setCondition] = useState('all');
+  const [cueType, setCueType] = useState('all'); // 'all', 'playing', 'break', 'jump'
   const [sortBy, setSortBy] = useState('newest');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile sidebar toggle
   const sidebarOpen = true; // Always open on home page
@@ -53,7 +54,7 @@ function AppInner() {
   ];
   // Prices are in EUR; use € labels
   const currencySymbol = '€';
-  const { user, logout, loading } = useAuth();
+  const { user, logout } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -79,38 +80,59 @@ function AppInner() {
     console.log('Is home page:', isHomePage);
   }, [location.pathname, isHomePage]);
 
+  // Reset cueType filter when switching away from cues category
   useEffect(() => {
-    async function load() {
-      // Fetch both cues and cases
-      const [cuesData, casesData] = await Promise.all([
-        cueService.getCues(),
-        cueCaseService.getCueCases()
-      ]);
-      
-  // Add itemType field to each item and combine (avoid colliding with backend 'category')
-  const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
-  const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
-      
-      // Combine both arrays
-      const allListings = [...cuesWithCategory, ...casesWithCategory];
-      
-      console.log('Loaded listings:', {
-        cues: cuesWithCategory.length,
-        cases: casesWithCategory.length,
-        total: allListings.length
-      });
-      
-      setCues(allListings);
+    if (category !== 'cues' && category !== 'all') {
+      setCueType('all');
     }
-    load();
+  }, [category]);
+
+  const refreshListings = useCallback(async () => {
+    // Fetch both cues and cases
+    const [cuesData, casesData] = await Promise.all([
+      cueService.getCues(),
+      cueCaseService.getCueCases()
+    ]);
+
+    // Add itemType field to each item and combine (avoid colliding with backend 'category')
+    const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
+    const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
+
+    // Combine both arrays
+    const allListings = [...cuesWithCategory, ...casesWithCategory];
+
+    console.log('Loaded listings:', {
+      cues: cuesWithCategory.length,
+      cases: casesWithCategory.length,
+      total: allListings.length
+    });
+    
+    // Log first cue for debugging
+    if (cuesWithCategory.length > 0) {
+      console.log('Sample cue data:', {
+        title: cuesWithCategory[0].title,
+        cueType: cuesWithCategory[0].cueType,
+        cue_type: cuesWithCategory[0].cue_type,
+        itemType: cuesWithCategory[0].itemType,
+        keys: Object.keys(cuesWithCategory[0])
+      });
+    }
+
+    setCues(allListings);
+    
+    // Expose for debugging in E2E tests
+    if (typeof window !== 'undefined') {
+      window.__cuesData = allListings;
+    }
   }, []);
 
+  // Keep listings fresh on the home page when navigating back or switching categories
+  useEffect(() => {
+    if (!isHomePage) return;
+    refreshListings();
+  }, [isHomePage, category, refreshListings]);
+
   const handleSelect = (item) => {
-    if (!user) {
-      // Redirect to login if not authenticated
-      navigate('/login');
-      return;
-    }
   if (item.itemType === 'case') {
       navigate(`/case/${item.id}`);
     } else {
@@ -136,20 +158,7 @@ function AppInner() {
     setEditingCue(null); // Clear the editing state
     // Refresh the cues list
     try {
-      // Fetch both cues and cases
-      const [cuesData, casesData] = await Promise.all([
-        cueService.getCues(),
-        cueCaseService.getCueCases()
-      ]);
-      
-  // Add itemType field to each item and combine (avoid colliding with backend 'category')
-  const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
-  const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
-      
-      // Combine both arrays
-      const allListings = [...cuesWithCategory, ...casesWithCategory];
-      
-      setCues(allListings);
+      await refreshListings();
     } catch (err) {
       console.error('Error refreshing listings:', err);
     }
@@ -388,6 +397,8 @@ function AppInner() {
                   <Search size="20px" color="#3b82f6" style={{ flexShrink: 0, marginRight: '8px' }} />
                   <Box flex={{ grow: 1 }} style={{ minWidth: 0 }}>
                     <TextInput
+                      data-testid="search-input"
+                      name="search"
                       placeholder="Search for cues, brands..."
                       value={search}
                       onChange={(e) => setSearch(e.target.value)}
@@ -411,6 +422,7 @@ function AppInner() {
                   </Box>
                   {search && (
                     <Button
+                      data-testid="search-clear"
                       plain
                       icon={<Text size="large" style={{ lineHeight: 1, color: '#94a3b8' }}>×</Text>}
                       onClick={() => setSearch('')}
@@ -628,7 +640,11 @@ function AppInner() {
               <Box gap="xsmall" margin={{ top: 'small' }}>
                 <Button
                   fill="horizontal"
-                  onClick={() => setCategory('all')}
+                  data-testid="sidebar-category-all"
+                  onClick={() => {
+                    setCategory('all');
+                    setMobileMenuOpen(false);
+                  }}
                   style={{
                     background: category === 'all' 
                       ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
@@ -670,7 +686,11 @@ function AppInner() {
                 
                 <Button
                   fill="horizontal"
-                  onClick={() => setCategory('cues')}
+                  data-testid="sidebar-category-cues"
+                  onClick={() => {
+                    setCategory('cues');
+                    setMobileMenuOpen(false);
+                  }}
                   style={{
                     background: category === 'cues' 
                       ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
@@ -712,7 +732,11 @@ function AppInner() {
                 
                 <Button
                   fill="horizontal"
-                  onClick={() => setCategory('cases')}
+                  data-testid="sidebar-category-cases"
+                  onClick={() => {
+                    setCategory('cases');
+                    setMobileMenuOpen(false);
+                  }}
                   style={{
                     background: category === 'cases' 
                       ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
@@ -752,6 +776,130 @@ function AppInner() {
                   </Box>
                 </Button>
               </Box>
+
+              {/* Cue Type Sub-filters - Only show when Cues category is selected */}
+              {category === 'cues' && (
+                <Box 
+                  gap="xxsmall" 
+                  margin={{ top: 'small', left: 'small' }}
+                  pad={{ left: 'small' }}
+                  border={{ side: 'left', color: 'rgba(59, 130, 246, 0.3)', size: '2px' }}
+                >
+                  <Text size="xsmall" weight={600} color="#94a3b8" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
+                    Cue Type
+                  </Text>
+                  
+                  <Button
+                    data-testid="cue-type-all"
+                    onClick={() => {
+                      setCueType('all');
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      background: cueType === 'all' 
+                        ? 'rgba(59, 130, 246, 0.3)' 
+                        : 'transparent',
+                      color: cueType === 'all' ? '#60a5fa' : '#94a3b8',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      justifyContent: 'flex-start',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease'
+                    }}
+                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
+                  >
+                    <Text size="small" weight={cueType === 'all' ? 600 : 400}>
+                      All Types
+                    </Text>
+                  </Button>
+                  
+                  <Button
+                    data-testid="cue-type-playing"
+                    onClick={() => {
+                      setCueType('playing');
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      background: cueType === 'playing' 
+                        ? 'rgba(59, 130, 246, 0.3)' 
+                        : 'transparent',
+                      color: cueType === 'playing' ? '#60a5fa' : '#94a3b8',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      justifyContent: 'flex-start',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease'
+                    }}
+                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
+                  >
+                    <Box direction="row" gap="small" align="center">
+                      <Text size="small">🎯</Text>
+                      <Text size="small" weight={cueType === 'playing' ? 600 : 400}>
+                        Playing Cue
+                      </Text>
+                    </Box>
+                  </Button>
+                  
+                  <Button
+                    data-testid="cue-type-break"
+                    onClick={() => {
+                      setCueType('break');
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      background: cueType === 'break' 
+                        ? 'rgba(59, 130, 246, 0.3)' 
+                        : 'transparent',
+                      color: cueType === 'break' ? '#60a5fa' : '#94a3b8',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      justifyContent: 'flex-start',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease'
+                    }}
+                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
+                  >
+                    <Box direction="row" gap="small" align="center">
+                      <Text size="small">💥</Text>
+                      <Text size="small" weight={cueType === 'break' ? 600 : 400}>
+                        Break Cue
+                      </Text>
+                    </Box>
+                  </Button>
+                  
+                  <Button
+                    data-testid="cue-type-jump"
+                    onClick={() => {
+                      console.log('[App.js] Setting cueType to: jump');
+                      setCueType('jump');
+                      setMobileMenuOpen(false);
+                    }}
+                    style={{
+                      background: cueType === 'jump' 
+                        ? 'rgba(59, 130, 246, 0.3)' 
+                        : 'transparent',
+                      color: cueType === 'jump' ? '#60a5fa' : '#94a3b8',
+                      border: 'none',
+                      borderRadius: '8px',
+                      padding: '8px 12px',
+                      justifyContent: 'flex-start',
+                      textAlign: 'left',
+                      transition: 'all 0.2s ease'
+                    }}
+                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
+                  >
+                    <Box direction="row" gap="small" align="center">
+                      <Text size="small">🚀</Text>
+                      <Text size="small" weight={cueType === 'jump' ? 600 : 400}>
+                        Jump Cue
+                      </Text>
+                    </Box>
+                  </Button>
+                </Box>
+              )}
 
               {/* Filters Section */}
               <Box 
@@ -892,6 +1040,7 @@ function AppInner() {
                   setViewMode={setViewMode}
                   category={category}
                   condition={condition}
+                  cueType={cueType}
                   sortBy={sortBy}
                   priceRange={priceRange}
                 />
@@ -930,6 +1079,7 @@ function AppInner() {
       {isHomePage && (
         <Button
           className="mobile-menu-button"
+          data-testid="mobile-menu-toggle"
           icon={
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
               <line x1="3" y1="6" x2="21" y2="6"></line>

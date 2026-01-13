@@ -10,6 +10,7 @@ public class CreateCueDto
     public string Description { get; set; } = string.Empty;
     public decimal Price { get; set; }
     public string Condition { get; set; } = string.Empty; // New, Used, Like New
+    public string CueType { get; set; } = "playing"; // playing, break, jump
     public string? Material { get; set; }
     public decimal? Weight { get; set; }
     public decimal? Length { get; set; }

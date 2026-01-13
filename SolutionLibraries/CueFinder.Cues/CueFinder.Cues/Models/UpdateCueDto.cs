@@ -10,6 +10,7 @@ public class UpdateCueDto
     public string? Description { get; set; }
     public decimal? Price { get; set; }
     public string? Condition { get; set; }
+    public string? CueType { get; set; }
     public string? Material { get; set; }
     public decimal? Weight { get; set; }
     public decimal? Length { get; set; }

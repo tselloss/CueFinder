@@ -1,21 +1,13 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import * as cueService from '../api/cueService';
-import { useAuth } from '../auth/AuthContext';
 import ItemDetail from './ItemDetail';
 
 export default function CueDetail({ onBack }) {
   const { id } = useParams();
-  const navigate = useNavigate();
-  const { user, loading } = useAuth();
   const [cue, setCue] = useState(null);
 
-  // Redirect to login if not authenticated (after loading completes)
-  useEffect(() => {
-    if (!loading && !user) {
-      navigate('/login');
-    }
-  }, [user, loading, navigate]);
+  // Cue details are public; do not force login here.
 
   useEffect(() => {
     async function load() {
