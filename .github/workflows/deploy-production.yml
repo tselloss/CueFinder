@@ -53,14 +53,24 @@ jobs:
           # Navigate to app directory
           cd /home/cuefinder/app
           
+          # Stop containers first to release file locks
+          echo "🛑 Stopping existing containers..."
+          if command -v docker-compose >/dev/null 2>&1; then
+            docker-compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans || true
+          else
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans || true
+          fi
+          
           # Pull latest code with hard reset
           if [ -d ".git" ]; then
             echo "📦 Pulling latest changes (hard reset)..."
             git fetch --prune origin
             git checkout release
-            # Discard all local changes and untracked files
+            echo "🔄 Running git reset --hard origin/release..."
             git reset --hard origin/release
+            echo "🧹 Running git clean -fdx..."
             git clean -fdx
+            echo "✅ Repository cleaned and reset successfully"
           else
             echo "📦 Cloning repository..."
             git clone --branch release git@github.com:${{ github.repository }}.git .
@@ -81,8 +91,7 @@ jobs:
             DC="docker compose"
           fi
 
-          # Stop all containers first (including orphans/detached)
-          $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
+          # Build and start containers
           $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
           $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
           
