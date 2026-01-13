@@ -120,6 +120,71 @@ namespace CueFinder.Messages.Controllers
             }
         }
 
+        [HttpPost("{id}/reply")]
+        [ProducesResponseType(typeof(MessageResponseDto), StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult<MessageResponseDto>> ReplyToMessage(int id, [FromBody] ReplyMessageRequest request)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return BadRequest(ModelState);
+
+                var userId = GetCurrentUserId();
+                var reply = await _messageService.ReplyToMessageAsync(id, userId, request.Content);
+                
+                _logger.LogInformation("User {UserId} replied to message {MessageId}", userId, id);
+                
+                return Ok(reply);
+            }
+            catch (InvalidOperationException ex)
+            {
+                _logger.LogWarning(ex, "Message {MessageId} not found for reply", id);
+                return NotFound(new { message = ex.Message });
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "User {UserId} unauthorized to reply to message {MessageId}", GetCurrentUserId(), id);
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error replying to message {MessageId}", id);
+                return StatusCode(500, new { message = "Error sending reply", error = ex.Message });
+            }
+        }
+
+        [HttpDelete("{id}")]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status403Forbidden)]
+        public async Task<ActionResult> DeleteMessage(int id)
+        {
+            try
+            {
+                var userId = GetCurrentUserId();
+                var deleted = await _messageService.DeleteMessageAsync(id, userId);
+
+                if (!deleted)
+                    return NotFound(new { message = "Message not found" });
+
+                _logger.LogInformation("User {UserId} deleted message {MessageId}", userId, id);
+
+                return NoContent();
+            }
+            catch (UnauthorizedAccessException ex)
+            {
+                _logger.LogWarning(ex, "User {UserId} unauthorized to delete message {MessageId}", GetCurrentUserId(), id);
+                return StatusCode(403, new { message = ex.Message });
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error deleting message {MessageId}", id);
+                return StatusCode(500, new { message = "Error deleting message", error = ex.Message });
+            }
+        }
+
         private int GetCurrentUserId()
         {
             var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;

@@ -41,3 +41,19 @@ export async function markAsRead(id) {
   const response = await axios.post(API_ENDPOINTS.MESSAGES.MARK_READ(id), {}, { headers });
   return response.status === 204;
 }
+
+export async function replyToMessage(messageId, content) {
+  const headers = {
+    ...getAuthHeaders(),
+    'Content-Type': 'application/json',
+  };
+  const payload = { content };
+  const response = await axios.post(API_ENDPOINTS.MESSAGES.REPLY(messageId), payload, { headers });
+  return response.data;
+}
+
+export async function deleteMessage(messageId) {
+  const headers = getAuthHeaders();
+  const response = await axios.delete(API_ENDPOINTS.MESSAGES.DELETE(messageId), { headers });
+  return response.status === 204;
+}

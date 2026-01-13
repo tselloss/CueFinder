@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Heading, Text, Card, CardBody, Layer, TextArea, Spinner } from 'grommet';
-import { Close, Search, MailOption, Previous } from 'grommet-icons';
+import { Close, Search, MailOption, Previous, Trash } from 'grommet-icons';
 import Badge from './Badge';
 import * as messageService from '../api/messageService';
 import * as authService from '../api/authService';
@@ -50,21 +50,31 @@ export default function Inbox({ onBack }) {
 
     setSending(true);
     try {
-      await messageService.sendMessage({
-        recipientId: selectedMessage.senderId,
-        cueId: selectedMessage.cueId,
-        subject: `Re: ${selectedMessage.subject}`,
-        content: replyBody,
-        messageType: 'message'
-      });
-
+      await messageService.replyToMessage(selectedMessage.id, replyBody);
+      
       setReplyBody('');
       setSelectedMessage(null);
       loadInbox();
+      alert('Reply sent successfully!');
     } catch (err) {
       console.error('Error sending reply:', err);
+      alert('Failed to send reply. Please try again.');
     } finally {
       setSending(false);
+    }
+  };
+
+  const handleDelete = async (messageId) => {
+    if (!window.confirm('Are you sure you want to delete this message?')) return;
+
+    try {
+      await messageService.deleteMessage(messageId);
+      loadInbox();
+      setSelectedMessage(null);
+      alert('Message deleted successfully!');
+    } catch (err) {
+      console.error('Error deleting message:', err);
+      alert('Failed to delete message. Please try again.');
     }
   };
 
@@ -193,7 +203,7 @@ export default function Inbox({ onBack }) {
           <Box pad="medium" gap="medium" width="large" overflow="auto">
             {/* Header */}
             <Box direction="row" justify="between" align="center">
-              <Box>
+              <Box flex="grow">
                 <Heading level="4" margin="none">
                   {selectedMessage.senderName}
                 </Heading>
@@ -201,7 +211,14 @@ export default function Inbox({ onBack }) {
                   {new Date(selectedMessage.createdAt).toLocaleString()}
                 </Text>
               </Box>
-              <Button icon={<Close />} onClick={() => setSelectedMessage(null)} />
+              <Box direction="row" gap="small">
+                <Button 
+                  icon={<Trash color="status-critical" />} 
+                  onClick={() => handleDelete(selectedMessage.id)}
+                  tip="Delete message"
+                />
+                <Button icon={<Close />} onClick={() => setSelectedMessage(null)} />
+              </Box>
             </Box>
 
             {/* Subject & Meta */}
