@@ -5,6 +5,8 @@ using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Images;
 using CueFinder.Extensions.ProblemDetails;
+using CueFinder.Messages.Extensions;
+using CueFinder.Messages.Hubs;
 
 // Configure Npgsql to handle DateTime without timezone issues
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -15,6 +17,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddSignalR();
 
 // Get connection string
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
@@ -27,6 +30,7 @@ builder.Services.AddDatabaseServices(connectionString);
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
+builder.Services.AddMessageServices();
 
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);
@@ -146,5 +150,6 @@ app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
+app.MapHub<MessageHub>("/hubs/messages");
 
 app.Run();

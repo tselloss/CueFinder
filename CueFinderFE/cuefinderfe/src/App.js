@@ -1,7 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
 import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector } from 'grommet';
-import { Add, Search, User, Logout, UserAdmin } from 'grommet-icons';
+import { Add, Search, User, Logout, UserAdmin, MailOption } from 'grommet-icons';
+import Badge from './components/Badge';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
@@ -10,9 +11,11 @@ import AdminPage from './components/AdminPage';
 import LoginPage from './components/LoginPage';
 import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
+import Inbox from './components/Inbox';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
+import * as messageService from './api/messageService';
 
 import './form-icons.css';
 import './mobile-responsive.css';
@@ -41,6 +44,7 @@ function AppInner() {
   const [sortBy, setSortBy] = useState('newest');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile sidebar toggle
   const sidebarOpen = true; // Always open on home page
+  const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   // Price range slider [min,max] in USD
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const PRICE_MIN_LIMIT = 0;
@@ -174,11 +178,25 @@ function AppInner() {
     navigate('/'); // Ensure we navigate to home page after logout
   };
 
-  // Debug logging
   useEffect(() => {
-    console.log('User state:', user);
-    console.log('User is logged in:', !!user);
+    if (!user) return;
+    
+    const loadUnreadCount = async () => {
+      try {
+        const messages = await messageService.getInbox(true);
+        setUnreadMessageCount((messages || []).length);
+      } catch (err) {
+        console.error('Error loading unread count:', err);
+      }
+    };
+
+    loadUnreadCount();
+    
+    // Refresh unread count every 30 seconds when user is logged in
+    const interval = setInterval(loadUnreadCount, 30000);
+    return () => clearInterval(interval);
   }, [user]);
+
 
   return (
     <Box fill background="background" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
@@ -232,6 +250,34 @@ function AppInner() {
               </Box>
 
               {/* Action Buttons */}
+              <Box position="relative" style={{ display: 'inline-block' }}>
+                <Button 
+                  icon={<MailOption color="white" size="18px" />} 
+                  label={<Text size="small" color="white" weight={600}>Inbox</Text>}
+                  onClick={() => navigate('/inbox')} 
+                  style={{ 
+                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
+                    border: 'none',
+                    borderRadius: '8px',
+                    padding: '8px 14px',
+                    transition: 'all 0.3s ease',
+                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)'
+                  }}
+                  hoverIndicator={{ 
+                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+                  }}
+                />
+                {unreadMessageCount > 0 && (
+                  <Badge 
+                    background="status-critical" 
+                    value={unreadMessageCount}
+                    pad="xsmall"
+                    round="full"
+                    style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '12px' }}
+                  />
+                )}
+              </Box>
+
               <Button 
                 icon={<User color="white" size="18px" />} 
                 label={<Text size="small" color="white" weight={600}>{t('actions.profile')}</Text>}
@@ -1065,6 +1111,10 @@ function AppInner() {
               
               <Route path="/profile" element={
                 user ? <UserProfile onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              
+              <Route path="/inbox" element={
+                user ? <Inbox onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/admin" element={

@@ -67,6 +67,17 @@ export const API_ENDPOINTS = {
     USERS: `${API_BASE_URL}/users`,
     USER: (id) => `${API_BASE_URL}/users/${id}`,
   },
+  // Messaging endpoints
+  MESSAGES: {
+    SEND: `${API_BASE_URL}/messages`,
+    INBOX: `${API_BASE_URL}/messages/inbox`,
+    SENT: `${API_BASE_URL}/messages/sent`,
+    THREAD: (otherUserId, cueId) => {
+      const base = `${API_BASE_URL}/messages/thread/${otherUserId}`;
+      return cueId ? `${base}?cueId=${cueId}` : base;
+    },
+    MARK_READ: (id) => `${API_BASE_URL}/messages/${id}/read`,
+  },
 };
 
 export const API_BASE = API_BASE_URL;
