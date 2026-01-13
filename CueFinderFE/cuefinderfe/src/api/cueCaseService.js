@@ -99,7 +99,7 @@ export async function deleteCueCase(id) {
 }
 
 // Upload images for a cue case
-export async function uploadCueCaseImages(cueCaseId, files) {
+export async function uploadCueCaseImages(cueCaseId, files, onProgress) {
   try {
     const formData = new FormData();
     files.forEach((file) => {
@@ -113,6 +113,11 @@ export async function uploadCueCaseImages(cueCaseId, files) {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (event) => {
+          if (!onProgress) return;
+          const percent = Math.round((event.loaded * 100) / (event.total || 1));
+          onProgress(percent);
         }
       }
     );

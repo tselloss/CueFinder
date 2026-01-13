@@ -40,18 +40,37 @@ builder.Services.AddCueFinderProblemDetails(
 
 // Add CORS
 var corsOrigins = builder.Configuration.GetSection("CorsOrigins");
-var allowedOrigins = new List<string>
-{
-    "http://localhost:3000",
-    "http://127.0.0.1:3000"
-};
+var allowedOrigins = new List<string>();
 
-// Add configured frontend origin if it exists
+// Only add localhost in Development environment
+if (builder.Environment.IsDevelopment())
+{
+    allowedOrigins.Add("http://localhost:3000");
+    allowedOrigins.Add("http://127.0.0.1:3000");
+    Console.WriteLine("🔧 CORS: Development mode - localhost origins added");
+}
+
+// Add configured frontend origin(s) - supports comma-separated values
 var frontendOrigin = corsOrigins["Frontend"];
 if (!string.IsNullOrEmpty(frontendOrigin))
 {
-    allowedOrigins.Add(frontendOrigin);
+    // Split by comma to support multiple origins
+    var origins = frontendOrigin.Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries);
+    foreach (var origin in origins)
+    {
+        if (!allowedOrigins.Contains(origin))
+        {
+            allowedOrigins.Add(origin);
+        }
+    }
+    Console.WriteLine($"✅ CORS: Added production origin(s): {frontendOrigin}");
 }
+else
+{
+    Console.WriteLine("⚠️ CORS: No production frontend origin configured");
+}
+
+Console.WriteLine($"🔧 CORS: Allowed origins: {string.Join(", ", allowedOrigins)}");
 
 builder.Services.AddCors(options =>
 {
@@ -60,8 +79,7 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins.ToArray())
             .AllowAnyMethod()
             .AllowAnyHeader()
-            .AllowCredentials()
-            .SetIsOriginAllowedToAllowWildcardSubdomains();
+            .AllowCredentials();
     });
 });
 

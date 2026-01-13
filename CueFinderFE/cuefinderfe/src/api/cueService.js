@@ -151,18 +151,24 @@ export async function deleteCue(id) {
 }
 
 // Upload images for a cue (requires auth)
-export async function uploadCueImages(cueId, files) {
+export async function uploadCueImages(cueId, files, onProgress) {
   const formData = new FormData();
+  formData.append('cueId', cueId);
   files.forEach(file => formData.append('files', file));
   
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/images/cues/${cueId}`,
+      `${API_BASE_URL}/images/upload-multiple`,
       formData,
       {
         headers: {
           ...getAuthHeaders(),
           'Content-Type': 'multipart/form-data'
+        },
+        onUploadProgress: (event) => {
+          if (!onProgress) return;
+          const percent = Math.round((event.loaded * 100) / (event.total || 1));
+          onProgress(percent);
         }
       }
     );

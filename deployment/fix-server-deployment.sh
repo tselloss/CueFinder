@@ -1,6 +1,7 @@
 #!/bin/bash
 # Server Deployment Fix Script
 # This script fixes the PostgreSQL password mismatch and redeploys
+# WARNING: This file is for reference only. Use deploy-manual.ps1 or GitHub Actions instead.
 
 echo "=== CueFinder Server Deployment Fix ==="
 cd /home/cuefinder/app
@@ -13,8 +14,8 @@ sudo rm -rf /home/cuefinder/data/postgres/*
 
 echo "3. Verifying .env file..."
 cat > .env << 'EOF'
-DB_PASSWORD=CueFinderDB2024SecurePass
-JWT_SECRET=CueFinderJWT2024VerySecureSecretKey256Bits
+DB_PASSWORD=REPLACE_WITH_SECURE_PASSWORD
+JWT_SECRET=REPLACE_WITH_SECURE_JWT_SECRET_MIN_32_CHARS
 FRONTEND_API_URL=https://billiardscuefinder.com
 CORS_FRONTEND_ORIGIN=https://billiardscuefinder.com
 EOF
