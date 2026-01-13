@@ -49,5 +49,10 @@ namespace CueFinder.Auth.Models
         /// Updated country
         /// </summary>
         public string? Country { get; set; }
+
+        /// <summary>
+        /// Preference to hide phone number from others
+        /// </summary>
+        public bool? HidePhone { get; set; }
     }
 }

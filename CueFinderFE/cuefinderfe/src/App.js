@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector } from 'grommet';
-import { Add, Search, User, Logout, UserAdmin, MailOption } from 'grommet-icons';
+import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector, Menu } from 'grommet';
+import { Add, Search, User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
 import Badge from './components/Badge';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
@@ -197,9 +197,73 @@ function AppInner() {
     return () => clearInterval(interval);
   }, [user]);
 
+  const userMenuItems = user
+    ? [
+        {
+          label: (
+            <Box direction="row" align="center" gap="small">
+              <Box direction="row" align="center" gap="xsmall" style={{ position: 'relative' }}>
+                <MailOption color="text-strong" size="18px" />
+                <Text size="small" weight={600} color="text-strong">Inbox</Text>
+                {unreadMessageCount > 0 && (
+                  <Badge
+                    count={unreadMessageCount}
+                    background="status-critical"
+                    round="full"
+                    pad={{ horizontal: '6px', vertical: '2px' }}
+                  />
+                )}
+              </Box>
+            </Box>
+          ),
+          onClick: () => navigate('/inbox')
+        },
+        {
+          label: (
+            <Box direction="row" align="center" gap="small">
+              <User color="text-strong" size="18px" />
+              <Text size="small" weight={600} color="text-strong">{t('actions.profile')}</Text>
+            </Box>
+          ),
+          onClick: () => navigate('/profile')
+        },
+        ...(user.role === 'admin'
+          ? [
+              {
+                label: (
+                  <Box direction="row" align="center" gap="small">
+                    <UserAdmin color="text-strong" size="18px" />
+                    <Text size="small" weight={600} color="text-strong">{t('actions.admin')}</Text>
+                  </Box>
+                ),
+                onClick: () => navigate('/admin')
+              }
+            ]
+          : []),
+        {
+          label: (
+            <Box direction="row" align="center" gap="small">
+              <Logout color="text-strong" size="18px" />
+              <Text size="small" weight={600} color="text-strong">{t('actions.logout')}</Text>
+            </Box>
+          ),
+          onClick: handleLogout
+        }
+      ]
+    : [];
+
 
   return (
     <Box fill background="background" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+      <style>{`
+        @keyframes pulse {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.7; }
+        }
+        .unread-badge {
+          animation: pulse 2s infinite;
+        }
+      `}</style>
       <Header 
         background="background-front" 
         pad={{ horizontal: "medium", vertical: "small" }}
@@ -249,85 +313,51 @@ function AppInner() {
                 </Box>
               </Box>
 
-              {/* Action Buttons */}
-              <Box position="relative" style={{ display: 'inline-block' }}>
-                <Button 
-                  icon={<MailOption color="white" size="18px" />} 
-                  label={<Text size="small" color="white" weight={600}>Inbox</Text>}
-                  onClick={() => navigate('/inbox')} 
-                  style={{ 
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 14px',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(139, 92, 246, 0.3)'
-                  }}
-                  hoverIndicator={{ 
-                    background: 'linear-gradient(135deg, #7c3aed 0%, #6d28d9 100%)'
+              {/* User Actions Menu */}
+              <Box style={{ position: 'relative' }}>
+                <Menu
+                  a11yTitle="User menu"
+                  icon={<MenuIcon color="white" size="20px" />}
+                  label={<Text size="small" weight={700} color="white">Menu</Text>}
+                  items={userMenuItems}
+                  dropAlign={{ top: 'bottom', right: 'right' }}
+                  dropProps={{ background: 'background-front', elevation: 'medium', round: 'small' }}
+                  buttonProps={{
+                    plain: false,
+                    style: {
+                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
+                      borderRadius: '10px',
+                      padding: '8px 14px',
+                      border: 'none',
+                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)'
+                    }
                   }}
                 />
                 {unreadMessageCount > 0 && (
-                  <Badge 
-                    background="status-critical" 
-                    value={unreadMessageCount}
-                    pad="xsmall"
-                    round="full"
-                    style={{ position: 'absolute', top: '-8px', right: '-8px', fontSize: '12px' }}
-                  />
+                  <Box
+                    style={{
+                      position: 'absolute',
+                      top: '-8px',
+                      right: '-8px',
+                      background: '#ef4444',
+                      borderRadius: '50%',
+                      width: '24px',
+                      height: '24px',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      fontSize: '12px',
+                      fontWeight: 'bold',
+                      color: 'white',
+                      border: '2px solid white',
+                      animation: 'pulse 2s infinite',
+                      boxShadow: '0 0 12px rgba(239, 68, 68, 0.6)'
+                    }}
+                  >
+                    {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                  </Box>
                 )}
               </Box>
-
-              <Button 
-                icon={<User color="white" size="18px" />} 
-                label={<Text size="small" color="white" weight={600}>{t('actions.profile')}</Text>}
-                onClick={() => navigate('/profile')} 
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
-                }}
-                hoverIndicator={{ 
-                  background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                }}
-              />
-              {user.role === 'admin' && (
-                <Button 
-                  icon={<UserAdmin color="white" size="18px" />} 
-                  label={<Text size="small" color="white" weight={600}>{t('actions.admin')}</Text>}
-                  onClick={() => navigate('/admin')} 
-                  style={{ 
-                    background: 'linear-gradient(135deg, #ec4899 0%, #db2777 100%)',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 14px',
-                    transition: 'all 0.3s ease',
-                    boxShadow: '0 2px 8px rgba(236, 72, 153, 0.3)'
-                  }}
-                  hoverIndicator={{
-                    background: 'linear-gradient(135deg, #db2777 0%, #be185d 100%)'
-                  }}
-                />
-              )}
-              <Button 
-                icon={<Logout color="white" size="18px" />} 
-                label={<Text size="small" color="white" weight={600}>{t('actions.logout')}</Text>}
-                onClick={handleLogout} 
-                style={{ 
-                  background: 'linear-gradient(135deg, #ef4444 0%, #dc2626 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '8px 14px',
-                  transition: 'all 0.3s ease',
-                  boxShadow: '0 2px 8px rgba(239, 68, 68, 0.3)'
-                }}
-                hoverIndicator={{ 
-                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)'
-                }}
-              />
             </>
           ) : (
             <>

@@ -31,6 +31,11 @@ namespace CueFinder.Auth.Models
         public string Phone { get; set; } = string.Empty;
 
         /// <summary>
+        /// Whether to hide the phone number from other users
+        /// </summary>
+        public bool HidePhone { get; set; } = false;
+
+        /// <summary>
         /// User's role (admin, user, etc.)
         /// </summary>
         public string Role { get; set; } = "user";

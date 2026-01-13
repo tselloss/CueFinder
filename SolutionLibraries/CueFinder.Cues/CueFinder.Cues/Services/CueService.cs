@@ -238,6 +238,7 @@ public class CueService : ICueService
             SellerName = cue.User?.Name ?? string.Empty,
             SellerEmail = cue.User?.Email ?? string.Empty,
             SellerPhone = cue.User?.Phone ?? string.Empty,
+            SellerHidePhone = cue.User?.HidePhone ?? false,
             Images = cue.Images?.Select(i => new CueImageDto
             {
                 Id = i.Id,

@@ -84,6 +84,7 @@ namespace CueFinder.Auth.Services
                     Name = user.Name,
                     Email = user.Email,
                     Phone = user.Phone,
+                    HidePhone = user.HidePhone,
                     Role = user.Role,
                     Address = user.Address,
                     City = user.City,
@@ -188,6 +189,7 @@ namespace CueFinder.Auth.Services
                     Name = createdUser.Name,
                     Email = createdUser.Email,
                     Phone = createdUser.Phone,
+                    HidePhone = createdUser.HidePhone,
                     Role = createdUser.Role,
                     Address = createdUser.Address,
                     City = createdUser.City,
@@ -228,6 +230,7 @@ namespace CueFinder.Auth.Services
                     Name = user.Name,
                     Email = user.Email,
                     Phone = user.Phone,
+                    HidePhone = user.HidePhone,
                     Role = user.Role,
                     Location = user.Location,
                     Address = user.Address,
@@ -249,7 +252,7 @@ namespace CueFinder.Auth.Services
         /// <summary>
         /// Update user profile
         /// </summary>
-        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country)
+        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country, bool? hidePhone)
         {
             try
             {
@@ -286,6 +289,11 @@ namespace CueFinder.Auth.Services
                 if (!string.IsNullOrWhiteSpace(phone))
                 {
                     user.Phone = phone;
+                }
+
+                if (hidePhone.HasValue)
+                {
+                    user.HidePhone = hidePhone.Value;
                 }
 
                 if (!string.IsNullOrWhiteSpace(location))
@@ -332,6 +340,7 @@ namespace CueFinder.Auth.Services
                     Name = updatedUser.Name,
                     Email = updatedUser.Email,
                     Phone = updatedUser.Phone,
+                    HidePhone = updatedUser.HidePhone,
                     Role = updatedUser.Role,
                     Location = updatedUser.Location,
                     Address = updatedUser.Address,

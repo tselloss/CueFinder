@@ -72,6 +72,7 @@ namespace CueFinder.Auth.Services
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
+                HidePhone = user.HidePhone,
                 Role = user.Role,
                 ExpiresIn = expiresIn
             };
@@ -121,6 +122,7 @@ namespace CueFinder.Auth.Services
                 Name = request.Name,
                 Email = request.Email ?? string.Empty,
                 Phone = request.Phone ?? string.Empty,
+                HidePhone = false,
                 Role = "user",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
@@ -140,6 +142,7 @@ namespace CueFinder.Auth.Services
                 Name = newUser.Name,
                 Email = newUser.Email,
                 Phone = newUser.Phone,
+                HidePhone = newUser.HidePhone,
                 Role = newUser.Role,
                 ExpiresIn = expiresIn
             };
@@ -166,6 +169,7 @@ namespace CueFinder.Auth.Services
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
+                HidePhone = user.HidePhone,
                 Role = user.Role,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
@@ -175,7 +179,7 @@ namespace CueFinder.Auth.Services
         /// <summary>
         /// Update user profile
         /// </summary>
-        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country)
+        public async Task<UserProfile?> UpdateUserProfileAsync(int userId, string name, string email, string phone, string location, string address, string city, string state, string zipCode, string country, bool? hidePhone)
         {
             // Simulate async operation
             await Task.Delay(100);
@@ -210,6 +214,11 @@ namespace CueFinder.Auth.Services
                 user.Phone = phone;
             }
 
+            if (hidePhone.HasValue)
+            {
+                user.HidePhone = hidePhone.Value;
+            }
+
             // Note: In-memory service doesn't store address fields
             // These parameters are accepted to match interface but not persisted
 
@@ -222,6 +231,7 @@ namespace CueFinder.Auth.Services
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
+                HidePhone = user.HidePhone,
                 Role = user.Role,
                 CreatedAt = user.CreatedAt,
                 UpdatedAt = user.UpdatedAt
@@ -286,6 +296,7 @@ namespace CueFinder.Auth.Services
                 Name = user.Name,
                 Email = user.Email,
                 Phone = user.Phone,
+                HidePhone = user.HidePhone,
                 Role = user.Role,
                 ExpiresIn = expiresIn,
                 ExternalProvider = request.Provider.ToString(),
@@ -304,6 +315,7 @@ namespace CueFinder.Auth.Services
             public string Name { get; set; } = string.Empty;
             public string Email { get; set; } = string.Empty;
             public string Phone { get; set; } = string.Empty;
+            public bool HidePhone { get; set; } = false;
             public string Role { get; set; } = "user";
             public DateTime CreatedAt { get; set; }
             public DateTime UpdatedAt { get; set; }
