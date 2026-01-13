@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Heading, Text, Image, Grid, Card, CardBody, Layer } from 'grommet';
+import { Box, Button, Heading, Text, Image, Grid, Card, CardBody, Layer, TextArea } from 'grommet';
 import { Previous, Next, Close, FormPrevious, Image as ImageIcon } from 'grommet-icons';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
+import * as messageService from '../api/messageService';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
@@ -34,6 +35,12 @@ export default function ItemDetail({
   const [imageIndex, setImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showMessage, setShowMessage] = useState(false);
+  const [messageSubject, setMessageSubject] = useState('');
+  const [messageBody, setMessageBody] = useState('');
+  const [sending, setSending] = useState(false);
+  const [sendError, setSendError] = useState('');
+  const [sendSuccess, setSendSuccess] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -42,6 +49,53 @@ export default function ItemDetail({
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  useEffect(() => {
+    if (item) {
+      const defaultSubject = item.title ? `Inquiry about ${item.title}` : 'Message about your listing';
+      setMessageSubject(defaultSubject);
+    }
+  }, [item]);
+
+  const handleSendMessage = async () => {
+    if (!item || !item.sellerId) {
+      setSendError('Missing seller information.');
+      return;
+    }
+    if (!messageBody.trim()) {
+      setSendError('Please enter a message.');
+      return;
+    }
+
+    setSending(true);
+    setSendError('');
+    setSendSuccess(false);
+
+    try {
+      console.log('📤 Sending message to seller:', item.sellerId);
+      const response = await messageService.sendMessage({
+        recipientId: item.sellerId,
+        cueId: item.id,
+        subject: messageSubject || 'Message',
+        content: messageBody,
+        messageType: 'inquiry'
+      });
+      console.log('✅ Message sent successfully:', response);
+      setSendSuccess(true);
+      setMessageBody('');
+      setMessageSubject('');
+      // Close modal after showing success
+      setTimeout(() => {
+        setShowMessage(false);
+      }, 1500);
+    } catch (err) {
+      console.error('❌ Failed to send message:', err);
+      const msg = err?.response?.data?.message || err?.message || 'Failed to send message. Please try again.';
+      setSendError(msg);
+    } finally {
+      setSending(false);
+    }
+  };
 
   if (!item) return (
     <Box fill align="center" justify="center">
@@ -251,6 +305,11 @@ export default function ItemDetail({
                         <Text>{item.sellerPhone || item.seller_phone}</Text>
                       </Box>
                     )}
+                    {item.sellerId && (
+                      <Box margin={{ top: 'small' }} direction="row" gap="small">
+                        <Button label="Message Seller" primary onClick={() => { setSendError(''); setSendSuccess(false); setShowMessage(true); }} />
+                      </Box>
+                    )}
                   </Box>
                 )}
               </CardBody>
@@ -292,6 +351,40 @@ export default function ItemDetail({
                 </Box>
               </>
             )}
+          </Box>
+        </Layer>
+      )}
+
+      {showMessage && (
+        <Layer onEsc={() => setShowMessage(false)} onClickOutside={() => setShowMessage(false)}>
+          <Box pad="medium" gap="small" width="medium">
+            <Box direction="row" justify="between" align="center">
+              <Heading level="4" margin="none">Message the Seller</Heading>
+              <Button icon={<Close />} onClick={() => setShowMessage(false)} />
+            </Box>
+            {sendError && <Text color="status-critical">{sendError}</Text>}
+            {sendSuccess && <Text color="status-ok">Message sent!</Text>}
+            <Text weight="bold">Subject</Text>
+            <TextArea
+              value={messageSubject}
+              onChange={(e) => setMessageSubject(e.target.value)}
+              rows={2}
+            />
+            <Text weight="bold">Message</Text>
+            <TextArea
+              value={messageBody}
+              onChange={(e) => setMessageBody(e.target.value)}
+              rows={6}
+            />
+            <Box direction="row" gap="small" justify="end" margin={{ top: 'small' }}>
+              <Button label="Cancel" onClick={() => setShowMessage(false)} />
+              <Button
+                label={sending ? 'Sending...' : 'Send'}
+                primary
+                onClick={handleSendMessage}
+                disabled={sending}
+              />
+            </Box>
           </Box>
         </Layer>
       )}
