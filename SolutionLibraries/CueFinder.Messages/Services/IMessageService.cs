@@ -4,7 +4,7 @@ namespace CueFinder.Messages.Services
 {
     public interface IMessageService
     {
-        Task<MessageResponseDto> SendMessageAsync(int senderId, SendMessageRequest request);
+        Task<MessageResponseDto> SendMessageAsync(int senderId, SendMessageRequest request, bool isReply = false);
         Task<MessageResponseDto> ReplyToMessageAsync(int messageId, int senderId, string content);
         Task<bool> DeleteMessageAsync(int messageId, int userId);
         Task<List<MessageResponseDto>> GetInboxAsync(int userId, bool unreadOnly = false);
