@@ -14,11 +14,13 @@ public class CueCaseService : ICueCaseService
 {
     private readonly CueFinderDbContext _context;
     private readonly ILogger<CueCaseService> _logger;
+    private readonly IImageService _imageService;
 
-    public CueCaseService(CueFinderDbContext context, ILogger<CueCaseService> logger)
+    public CueCaseService(CueFinderDbContext context, ILogger<CueCaseService> logger, IImageService imageService)
     {
         _context = context;
         _logger = logger;
+        _imageService = imageService;
     }
 
     public async Task<List<CueCaseResponseDto>> GetAllCueCasesAsync(string? condition = null, string? brand = null,
@@ -209,6 +211,9 @@ public class CueCaseService : ICueCaseService
         // Verify ownership or admin
         if (cueCase.UserId != userId && !isAdmin)
             throw new UnauthorizedAccessException("You can only delete your own listings");
+
+        // Delete all associated images first
+        await _imageService.DeleteCueCaseImagesInternalAsync(cueCaseId);
 
         _context.CueCases.Remove(cueCase);
         await _context.SaveChangesAsync();

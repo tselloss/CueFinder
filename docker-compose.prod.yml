@@ -7,6 +7,8 @@ services:
   postgres:
     container_name: cuefinder-postgres-prod
     restart: always
+    image: postgres:15
+    ports: []  # Override base compose to remove external port exposure
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./backups:/backups
@@ -14,10 +16,8 @@ services:
       POSTGRES_DB: cuefinder
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: ${DB_PASSWORD}
-    ports:
-      - "127.0.0.1:5432:5432"  # Only localhost access, not exposed to internet
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      test: ["CMD-SHELL", "pg_isready -U postgres -d cuefinder"]
       interval: 10s
       timeout: 5s
       retries: 5
@@ -30,6 +30,10 @@ services:
     networks:
       - cuefinder-network
 
+  # Ensure PgAdmin from the base compose is not exposed publicly in production
+  pgadmin:
+    ports: []
+
   backend:
     container_name: cuefinder-backend-prod
     restart: always
@@ -39,29 +43,29 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD}
-      - JwtSettings__Secret=${JWT_SECRET}
+      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
+      - JwtSettings__SecretKey=${JWT_SECRET}
       - JwtSettings__Issuer=cuefinder.com
       - JwtSettings__Audience=cuefinder.com
       - JwtSettings__ExpirationMinutes=1440
       - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
-      - ImageStorageSettings__UploadPath=/app/wwwroot/uploads
-      - ImageStorageSettings__MaxFileSizeMB=10
-      - ImageStorageSettings__AllowedExtensions=jpg,jpeg,png,gif,webp
-    ports:
-      - "127.0.0.1:5000:5000"  # Only localhost, Nginx will proxy
+      - BASE_URL=https://billiardscuefinder.com
+      - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
+      - ImageStorageSettings__StoragePath=/app/uploads/cues
+      - ImageStorageSettings__ImageUrlBase=/uploads/cues
+      - ImageStorageSettings__MaxFileSizeBytes=10485760
+      - ImageStorageSettings__AllowedExtensions=.jpg,.jpeg,.png,.gif,.webp
+      - ImageStorageSettings__AllowedMimeTypes=image/jpeg,image/png,image/gif,image/webp
+    ports: []
     depends_on:
       postgres:
         condition: service_healthy
     volumes:
-      - ./CueFinderBE/wwwroot/uploads:/app/wwwroot/uploads
+      - ./uploads:/app/uploads
     healthcheck:
       test:
         - CMD-SHELL
-        - >
-          # dotnet runtime image doesn't ship curl; use a lightweight TCP probe.
-          # If you want strict HTTP-level checks, we can add a tiny HealthProbe console app and run it with dotnet.
-          echo | openssl s_client -connect localhost:5000 -servername localhost -brief >/dev/null 2>&1 || exit 1
+        - wget --quiet --tries=1 --spider http://localhost:5000/health || exit 1
       interval: 30s
       timeout: 10s
       retries: 3
@@ -87,8 +91,7 @@ services:
       dockerfile: Dockerfile
       args:
         - REACT_APP_API_URL=${FRONTEND_API_URL}
-    ports:
-      - "127.0.0.1:3000:80"  # Only localhost, Nginx will proxy
+    ports: []
     depends_on:
       - backend
     healthcheck:
@@ -110,6 +113,33 @@ services:
         max-size: "10m"
         max-file: "3"
 
+  nginx:
+    container_name: cuefinder-nginx-prod
+    image: nginx:stable-alpine
+    restart: always
+    ports:
+      - "0.0.0.0:80:80"
+      - "0.0.0.0:443:443"
+    volumes:
+      - ./CueFinderFE/cuefinderfe/nginx-ssl.conf:/etc/nginx/conf.d/default.conf:ro
+      - ./ssl:/etc/nginx/ssl:ro
+      - ./uploads:/app/uploads:ro
+    depends_on:
+      - frontend
+      - backend
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "https://localhost/health", "--no-check-certificate"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    networks:
+      - cuefinder-network
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
 volumes:
   postgres_data:
     driver: local
@@ -117,6 +147,18 @@ volumes:
       type: none
       o: bind
       device: /home/cuefinder/data/postgres
+  letsencrypt:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /etc/letsencrypt
+  certbot_www:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /var/www/certbot
 
 networks:
   cuefinder-network:

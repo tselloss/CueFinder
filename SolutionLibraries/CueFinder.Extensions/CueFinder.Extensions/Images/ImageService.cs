@@ -33,7 +33,10 @@ public class ImageService : IImageService
 
     private string GetCueFolderPath(int cueId)
     {
-        var storageRoot = Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        // If StoragePath is absolute, use it directly; otherwise combine with WebRootPath
+        var storageRoot = Path.IsPathRooted(_settings.StoragePath)
+            ? _settings.StoragePath
+            : Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
         return Path.Combine(storageRoot, cueId.ToString());
     }
 
@@ -44,7 +47,10 @@ public class ImageService : IImageService
 
     public void EnsureStorageRootExists()
     {
-        var storageRoot = Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        // If StoragePath is absolute, use it directly; otherwise combine with WebRootPath
+        var storageRoot = Path.IsPathRooted(_settings.StoragePath)
+            ? _settings.StoragePath
+            : Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
         Directory.CreateDirectory(storageRoot);
     }
 

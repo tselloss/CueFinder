@@ -1,0 +1,102 @@
+name: Deploy to Production
+
+on:
+  push:
+    branches:
+      - release
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    name: Deploy to Hetzner
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH agent and known_hosts
+        uses: webfactory/ssh-agent@v0.5.4
+        with:
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
+
+      - name: Add server to known_hosts
+        run: |
+          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
+
+      - name: Prepare deploy artifacts (runner)
+        env:
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
+          GITHUB_REPO: ${{ github.repository }}
+        run: |
+          set -euo pipefail
+
+          cat > deploy.sh <<'DEPLOY'
+#!/bin/bash
+set -euo pipefail
+
+cd /home/cuefinder/app
+
+if [ -d ".git" ]; then
+  echo "📦 Pulling latest changes..."
+  git fetch --prune origin
+  git checkout release
+  git reset --hard origin/release
+else
+  echo "📦 Cloning repository..."
+  git clone --branch release git@github.com:REPO_PLACEHOLDER.git .
+fi
+
+if [ -x /usr/bin/docker-compose ]; then
+  DC="/usr/bin/docker-compose"
+else
+  DC="docker compose"
+fi
+
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
+
+echo "✅ Deployment complete"
+DEPLOY
+
+          sed -i "s|REPO_PLACEHOLDER|${GITHUB_REPO}|g" deploy.sh
+          chmod +x deploy.sh
+
+          cat > .env.deploy <<EOF
+DB_PASSWORD=${DB_PASSWORD}
+JWT_SECRET=${JWT_SECRET}
+FRONTEND_API_URL=${FRONTEND_API_URL}
+CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
+EOF
+          chmod 600 .env.deploy
+
+      - name: Copy artifacts to server and run deploy
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+        run: |
+          set -euo pipefail
+
+          scp -o StrictHostKeyChecking=yes deploy.sh "${SERVER_USER}@${SERVER_IP}:/home/cuefinder/deploy.sh"
+          scp -o StrictHostKeyChecking=yes .env.deploy "${SERVER_USER}@${SERVER_IP}:/home/cuefinder/app/.env"
+
+          shred -u .env.deploy || rm -f .env.deploy
+          rm -f deploy.sh
+
+          ssh "${SERVER_USER}@${SERVER_IP}" "chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+
+      - name: Verify Deployment
+        run: |
+          ssh cuefinder@${{ secrets.SERVER_IP }} "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+
+      - name: Notify Success
+        if: success()
+        run: |
+          echo "✅ Deployment successful!"
+          echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
+          echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"

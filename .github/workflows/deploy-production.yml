@@ -41,6 +41,7 @@ jobs:
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
         run: |
           # Create deployment script
           cat > deploy.sh << 'EOF'
@@ -63,14 +64,12 @@ jobs:
             git clone --branch release git@github.com:${{ github.repository }}.git .
           fi
           
-          # Create .env file
+          # Create .env file with all required variables
           echo "⚙️  Configuring environment..."
-          cat > .env << ENVEOF
-          DB_PASSWORD=$DB_PASSWORD
-          JWT_SECRET=$JWT_SECRET
-          FRONTEND_API_URL=$FRONTEND_API_URL
-          CORS_FRONTEND_ORIGIN=https://billiardscuefinder.com
-          ENVEOF
+          echo "DB_PASSWORD=${DB_PASSWORD}" > .env
+          echo "JWT_SECRET=${JWT_SECRET}" >> .env
+          echo "FRONTEND_API_URL=${FRONTEND_API_URL}" >> .env
+          echo "CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}" >> .env
           
           # Build and deploy with Docker Compose
           echo "🐳 Building and starting containers..."
@@ -94,7 +93,7 @@ jobs:
           
           # Copy and execute deployment script
           scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-          ssh $SERVER_USER@$SERVER_IP "DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+          ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' /home/cuefinder/deploy.sh"
 
       - name: Verify Deployment
         run: |

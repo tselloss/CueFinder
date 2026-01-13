@@ -5,6 +5,8 @@ using CueFinder.Database.IntegrationTests.Infrastructure;
 using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xunit;
+using CueFinder.Extensions.Images;
+using Microsoft.AspNetCore.Http;
 
 namespace CueFinder.Cues.IntegrationTests
 {
@@ -17,8 +19,26 @@ namespace CueFinder.Cues.IntegrationTests
             if (_service == null)
             {
                 var logger = new TestLogger<CueService>();
-                _service = new CueService(Context, logger);
+                var imageService = new TestImageService();
+                _service = new CueService(Context, logger, imageService);
             }
+        }
+
+        // Test stub for IImageService
+        private class TestImageService : IImageService
+        {
+            public Task<ImageUploadResponse> UploadImageAsync(ImageUploadRequest request, int userId) => Task.FromResult(new ImageUploadResponse());
+            public Task<List<ImageUploadResponse>> UploadMultipleImagesAsync(List<IFormFile> files, int cueId, int userId) => Task.FromResult(new List<ImageUploadResponse>());
+            public Task<bool> DeleteImageAsync(int imageId, int userId) => Task.FromResult(true);
+            public Task<CueImage?> GetImageAsync(int imageId) => Task.FromResult<CueImage?>(null);
+            public Task<List<CueImage>> GetCueImagesAsync(int cueId) => Task.FromResult(new List<CueImage>());
+            public Task<bool> SetPrimaryImageAsync(int imageId, int userId) => Task.FromResult(true);
+            public Task<bool> UpdateImageOrderAsync(int imageId, int newOrder) => Task.FromResult(true);
+            public Task<bool> DeleteCueImagesAsync(int cueId, int userId) => Task.FromResult(true);
+            public Task DeleteCueImagesInternalAsync(int cueId) => Task.CompletedTask;
+            public void EnsureStorageRootExists() { }
+            public Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile file) => Task.FromResult((true, (string?)null));
+            public string GetImageUrl(string fileName) => $"/uploads/cues/{fileName}";
         }
 
         #region Create Tests
