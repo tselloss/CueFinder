@@ -6,7 +6,12 @@ import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 // Helper to get full image URL from image object
 const getImageUrl = (images) => {
   if (!images || images.length === 0) return '';
-  const img = images[0];
+  // Find primary image first, otherwise use first image
+  const primaryImg = images.find(img => {
+    if (typeof img === 'object') return img.isPrimary;
+    return false;
+  });
+  const img = primaryImg || images[0];
   // Handle both string URLs and image objects
   const url = typeof img === 'string' ? img : img.imageUrl;
   if (!url) return '';
