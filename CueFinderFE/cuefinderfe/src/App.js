@@ -955,6 +955,7 @@ function AppInner() {
                     </Box>
                   </Box>
                 </Button>
+              </Box>
 
               {/* Cue Type Sub-filters - Only show when Cues category is selected */}
               {category === 'cues' && (

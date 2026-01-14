@@ -156,6 +156,8 @@
   }
 }
 
+/* Mobile view adjustments for screens 600px and below */
+@media (max-width: 600px) {
   /* Hero section adjustments */
   .hero-section {
     padding: 40px 16px !important;
