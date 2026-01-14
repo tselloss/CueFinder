@@ -398,9 +398,17 @@ export default function UserProfile({ onBack }) {
                         </Box>
                       </FormField>
 
-                      <FormField label="Name" name="name" required>
+                      <FormField 
+                        label={
+                          <Box direction="row" gap="xsmall" align="center">
+                            <User size="16px" />
+                            <Text>Name</Text>
+                          </Box>
+                        }
+                        name="name" 
+                        required
+                      >
                         <TextInput
-                          icon={<User size="18px" />}
                           name="name"
                           value={profile.name || ''}
                           onChange={handleProfileChange}
@@ -409,9 +417,17 @@ export default function UserProfile({ onBack }) {
                         />
                       </FormField>
 
-                      <FormField label="Email" name="email" required>
+                      <FormField 
+                        label={
+                          <Box direction="row" gap="xsmall" align="center">
+                            <Mail size="16px" />
+                            <Text>Email</Text>
+                          </Box>
+                        }
+                        name="email" 
+                        required
+                      >
                         <TextInput
-                          icon={<Mail size="18px" />}
                           type="email"
                           name="email"
                           value={profile.email || ''}
@@ -421,9 +437,17 @@ export default function UserProfile({ onBack }) {
                         />
                       </FormField>
 
-                      <FormField label="Phone" name="phone" required>
+                      <FormField 
+                        label={
+                          <Box direction="row" gap="xsmall" align="center">
+                            <Phone size="16px" />
+                            <Text>Phone</Text>
+                          </Box>
+                        }
+                        name="phone" 
+                        required
+                      >
                         <TextInput
-                          icon={<Phone size="18px" />}
                           name="phone"
                           value={profile.phone || ''}
                           onChange={handleProfileChange}
@@ -440,9 +464,17 @@ export default function UserProfile({ onBack }) {
                         margin={{ bottom: 'medium' }}
                       />
 
-                      <FormField label="Location (City/General Area)" name="location" required>
+                      <FormField 
+                        label={
+                          <Box direction="row" gap="xsmall" align="center">
+                            <Location size="16px" />
+                            <Text>Location (City/General Area)</Text>
+                          </Box>
+                        }
+                        name="location" 
+                        required
+                      >
                         <TextInput
-                          icon={<Location size="18px" />}
                           name="location"
                           value={profile.location || ''}
                           onChange={handleProfileChange}
@@ -455,7 +487,15 @@ export default function UserProfile({ onBack }) {
                         📍 Address Details
                       </Heading>
                       
-                      <FormField label="Street Address" name="address.street">
+                      <FormField 
+                        label={
+                          <Box direction="row" gap="xsmall" align="center">
+                            <Location size="16px" />
+                            <Text>Street Address</Text>
+                          </Box>
+                        }
+                        name="address.street"
+                      >
                         <TextInput
                           name="address.street"
                           value={profile.address.street || ''}
@@ -494,9 +534,17 @@ export default function UserProfile({ onBack }) {
                           />
                         </FormField>
 
-                        <FormField label="Country" name="address.country" flex>
+                        <FormField 
+                          label={
+                            <Box direction="row" gap="xsmall" align="center">
+                              <MapLocation size="16px" />
+                              <Text>Country</Text>
+                            </Box>
+                          }
+                          name="address.country" 
+                          flex
+                        >
                           <TextInput
-                            icon={<MapLocation size="18px" />}
                             name="address.country"
                             value={profile.address.country || ''}
                             onChange={handleProfileChange}
