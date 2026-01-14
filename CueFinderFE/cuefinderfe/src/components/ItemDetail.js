@@ -3,6 +3,7 @@ import { Box, Button, Heading, Text, Image, Grid, Card, CardBody, Layer, TextAre
 import { Previous, Next, Close, FormPrevious, Image as ImageIcon } from 'grommet-icons';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import * as messageService from '../api/messageService';
+import { useAuth } from '../auth/AuthContext';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
@@ -32,6 +33,7 @@ export default function ItemDetail({
   onBack,
   specifications = [] // Array of { label, value, highlight }
 }) {
+  const { user } = useAuth();
   const [imageIndex, setImageIndex] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
@@ -41,6 +43,7 @@ export default function ItemDetail({
   const [sending, setSending] = useState(false);
   const [sendError, setSendError] = useState('');
   const [sendSuccess, setSendSuccess] = useState(false);
+  const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
@@ -58,6 +61,11 @@ export default function ItemDetail({
   }, [item]);
 
   const handleSendMessage = async () => {
+    if (!user) {
+      setShowLoginPrompt(true);
+      return;
+    }
+    
     if (!item || !item.sellerId) {
       setSendError('Missing seller information.');
       return;
@@ -366,7 +374,19 @@ export default function ItemDetail({
                     )}
                     {item.sellerId && (
                       <Box margin={{ top: 'small' }} direction="row" gap="small">
-                        <Button label="Message Seller" primary onClick={() => { setSendError(''); setSendSuccess(false); setShowMessage(true); }} />
+                        <Button 
+                          label="Message Seller" 
+                          primary 
+                          onClick={() => { 
+                            if (!user) {
+                              setShowLoginPrompt(true);
+                            } else {
+                              setSendError(''); 
+                              setSendSuccess(false); 
+                              setShowMessage(true);
+                            }
+                          }} 
+                        />
                       </Box>
                     )}
                   </Box>
@@ -501,6 +521,26 @@ export default function ItemDetail({
                 onClick={handleSendMessage}
                 disabled={sending}
               />
+            </Box>
+          </Box>
+        </Layer>
+      )}
+
+      {showLoginPrompt && (
+        <Layer onEsc={() => setShowLoginPrompt(false)} onClickOutside={() => setShowLoginPrompt(false)}>
+          <Box pad="medium" gap="medium" width="medium">
+            <Box direction="row" justify="between" align="center">
+              <Heading level="4" margin="none">Sign In Required</Heading>
+              <Button icon={<Close />} onClick={() => setShowLoginPrompt(false)} />
+            </Box>
+            <Text>
+              You need to be registered and signed in to send messages to sellers.
+            </Text>
+            <Text size="small" color="text-weak">
+              Please sign in or create an account to contact sellers about their listings.
+            </Text>
+            <Box direction="row" gap="small" justify="end">
+              <Button label="Close" onClick={() => setShowLoginPrompt(false)} />
             </Box>
           </Box>
         </Layer>
