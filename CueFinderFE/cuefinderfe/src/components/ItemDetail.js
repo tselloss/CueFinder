@@ -142,16 +142,16 @@ export default function ItemDetail({
         />
       </Box>
 
-      <Box pad={{ horizontal: 'small', vertical: 'medium' }} align="center">
+      <Box pad={{ horizontal: 'small', vertical: 'medium' }} align="center" style={{ paddingTop: isMobile ? '12px' : 'medium', paddingBottom: isMobile ? '12px' : 'medium' }}>
         <Grid
           columns={{ count: 'fit', size: 'auto' }}
-          gap="medium"
+          gap={isMobile ? 'small' : 'medium'}
           style={{ maxWidth: '1200px', width: '100%' }}
           responsive
           rows="auto"
         >
           {/* Image Section - Shows first on mobile */}
-          <Box margin={{ top: 'xlarge' }} pad={{ top: 'xlarge' }} style={{ order: isMobile ? -1 : 1 }}>
+          <Box margin={{ top: isMobile ? 'small' : 'xlarge' }} pad={{ top: isMobile ? 'none' : 'xlarge' }} style={{ order: isMobile ? -1 : 1 }}>
             <Card background="white">
               <CardBody pad="none">
                 <Box height="medium" position="relative">
@@ -173,19 +173,63 @@ export default function ItemDetail({
                             align="center"
                             fill="horizontal"
                             pad="small"
-                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                            style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 2 }}
                           >
                             <Button 
-                              icon={<Previous />} 
+                              icon={<Previous size={isMobile ? 'medium' : 'large'} />}
                               onClick={prevImage}
                               plain
-                              hoverIndicator
+                              style={{
+                                width: isMobile ? '40px' : '48px',
+                                height: isMobile ? '40px' : '48px',
+                                borderRadius: '50%',
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                backdropFilter: 'blur(4px)',
+                                transition: 'all 0.2s ease',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)';
+                                e.currentTarget.style.transform = 'scale(1.1)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
                             />
                             <Button 
-                              icon={<Next />} 
+                              icon={<Next size={isMobile ? 'medium' : 'large'} />}
                               onClick={nextImage}
                               plain
-                              hoverIndicator
+                              style={{
+                                width: isMobile ? '40px' : '48px',
+                                height: isMobile ? '40px' : '48px',
+                                borderRadius: '50%',
+                                background: 'rgba(255, 255, 255, 0.9)',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)',
+                                backdropFilter: 'blur(4px)',
+                                transition: 'all 0.2s ease',
+                                cursor: 'pointer'
+                              }}
+                              onMouseEnter={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 1)';
+                                e.currentTarget.style.boxShadow = '0 6px 16px rgba(0, 0, 0, 0.4)';
+                                e.currentTarget.style.transform = 'scale(1.1)';
+                              }}
+                              onMouseLeave={(e) => {
+                                e.currentTarget.style.background = 'rgba(255, 255, 255, 0.9)';
+                                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0, 0, 0, 0.3)';
+                                e.currentTarget.style.transform = 'scale(1)';
+                              }}
                             />
                           </Box>
                           <Box
@@ -219,7 +263,7 @@ export default function ItemDetail({
           </Box>
 
           {/* Info Section - Shows second on mobile */}
-          <Box gap="medium" style={{ order: isMobile ? 1 : 0 }}>
+          <Box gap={isMobile ? 'small' : 'medium'} style={{ order: isMobile ? 1 : 0 }}>
             {/* Title & Price */}
             <Box>
               <Box direction="row" gap="small" align="center">
@@ -239,8 +283,8 @@ export default function ItemDetail({
 
             {/* Specifications */}
             <Card background="white">
-              <CardBody pad="medium">
-                <Heading level="4" margin={{ bottom: 'small' }}>
+              <CardBody pad={isMobile ? 'small' : 'medium'}>
+                <Heading level="4" margin={{ bottom: isMobile ? 'xsmall' : 'small' }}>
                   {itemType === 'case' ? 'Case Specifications' : 'Specifications'}
                 </Heading>
                 <Box gap="small">
@@ -269,8 +313,8 @@ export default function ItemDetail({
             {/* Description */}
             {item.description && (
               <Card background="white">
-                <CardBody pad="medium">
-                  <Heading level="4" margin={{ bottom: 'small' }}>Description</Heading>
+                <CardBody pad={isMobile ? 'small' : 'medium'}>
+                  <Heading level="4" margin={{ bottom: isMobile ? 'xsmall' : 'small' }}>Description</Heading>
                   <Text>{item.description}</Text>
                 </CardBody>
               </Card>
@@ -278,8 +322,8 @@ export default function ItemDetail({
 
             {/* Seller Info */}
             <Card background="white">
-              <CardBody pad="medium">
-                <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
+              <CardBody pad={isMobile ? 'small' : 'medium'}>
+                <Box direction="row" gap="small" align="center" margin={{ bottom: isMobile ? 'xsmall' : 'small' }}>
                   <Text size="xlarge">👤</Text>
                   <Heading level="4" margin="none">Seller Information</Heading>
                 </Box>
@@ -355,11 +399,69 @@ export default function ItemDetail({
                   justify="between"
                   align="center"
                   fill="horizontal"
-                  pad="large"
-                  style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)' }}
+                  pad={isMobile ? 'medium' : 'large'}
+                  style={{ position: 'absolute', top: '50%', transform: 'translateY(-50%)', zIndex: 10 }}
                 >
-                  <Button icon={<Previous size="large" />} onClick={prevImageFullscreen} size="large" />
-                  <Button icon={<Next size="large" />} onClick={nextImageFullscreen} size="large" />
+                  <Button 
+                    icon={<Previous size="xlarge" />} 
+                    onClick={prevImageFullscreen}
+                    plain
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                      backdropFilter: 'blur(8px)',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      color: 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                      e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.6)';
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.5)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  />
+                  <Button 
+                    icon={<Next size="xlarge" />} 
+                    onClick={nextImageFullscreen}
+                    plain
+                    style={{
+                      width: '56px',
+                      height: '56px',
+                      borderRadius: '50%',
+                      background: 'rgba(255, 255, 255, 0.15)',
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      boxShadow: '0 4px 16px rgba(0, 0, 0, 0.5)',
+                      backdropFilter: 'blur(8px)',
+                      transition: 'all 0.2s ease',
+                      cursor: 'pointer',
+                      border: '1px solid rgba(255, 255, 255, 0.3)',
+                      color: 'white'
+                    }}
+                    onMouseEnter={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.25)';
+                      e.currentTarget.style.boxShadow = '0 6px 20px rgba(0, 0, 0, 0.6)';
+                      e.currentTarget.style.transform = 'scale(1.1)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.currentTarget.style.background = 'rgba(255, 255, 255, 0.15)';
+                      e.currentTarget.style.boxShadow = '0 4px 16px rgba(0, 0, 0, 0.5)';
+                      e.currentTarget.style.transform = 'scale(1)';
+                    }}
+                  />
                 </Box>
                 <Box pad="small" background="dark-3" round="small" style={{ position: 'absolute', bottom: 20 }}>
                   <Text color="white">{imageIndex + 1} / {images.length}</Text>

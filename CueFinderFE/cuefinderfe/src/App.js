@@ -12,6 +12,7 @@ import LoginPage from './components/LoginPage';
 import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
+import ComingSoon from './components/ComingSoon';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -133,8 +134,15 @@ function AppInner() {
   // Keep listings fresh on the home page when navigating back or switching categories
   useEffect(() => {
     if (!isHomePage) return;
+    
+    // Navigate to coming soon page for tables and accessories
+    if (category === 'tables' || category === 'accessories') {
+      navigate('/coming-soon');
+      return;
+    }
+    
     refreshListings();
-  }, [isHomePage, category, refreshListings]);
+  }, [isHomePage, category, refreshListings, navigate]);
 
   const handleSelect = (item) => {
   if (item.itemType === 'case') {
@@ -271,17 +279,19 @@ function AppInner() {
         style={{
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
-          flexWrap: 'wrap'
+          flexWrap: 'wrap',
+          justifyContent: 'space-between',
+          alignItems: 'center'
         }}
       >
-        <Box direction="row" align="center" gap="small">
+        <Box direction="row" align="center" gap="small" style={{ minWidth: 0 }}>
           {/* Sidebar is always open on the home page; toggle removed */}
           
-          <Heading level="2" margin="none" color="text-strong" style={{ fontWeight: 700, letterSpacing: '-0.5px', fontSize: 'clamp(18px, 4vw, 24px)' }}>
+          <Heading level="2" margin="none" color="text-strong" style={{ fontWeight: 700, letterSpacing: '-0.5px', fontSize: 'clamp(16px, 3.5vw, 24px)', whiteSpace: 'nowrap' }}>
             🎱 {t('app.title')}
           </Heading>
         </Box>
-        <Box direction="row" align="center" gap="medium" wrap style={{ flexShrink: 0 }}>
+        <Box direction="row" align="center" gap="xsmall" wrap style={{ flexShrink: 0, justifyContent: 'flex-end' }}>
           {/* Language Switcher hidden */}
           {user ? (
             <>
@@ -295,30 +305,32 @@ function AppInner() {
                 round="8px"
                 style={{
                   border: '2px solid rgba(59, 130, 246, 0.5)',
-                  backdropFilter: 'blur(10px)'
+                  backdropFilter: 'blur(10px)',
+                  minWidth: 0,
+                  maxWidth: '100%'
                 }}
               >
-                <Text size="medium" style={{ fontSize: '20px' }}>
+                <Text size="medium" style={{ fontSize: '18px', flexShrink: 0 }}>
                   {user.avatar || '👤'}
                 </Text>
-                <Box>
-                  <Text size="small" color="text-strong" weight={700}>
+                <Box style={{ minWidth: 0 }}>
+                  <Text size="small" color="text-strong" weight={700} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
                     {user.name}
                   </Text>
                   {user.role === 'admin' && (
                     <Text size="xsmall" color="brand" weight={600} style={{ lineHeight: '1' }}>
-                      Administrator
+                      Admin
                     </Text>
                   )}
                 </Box>
               </Box>
 
               {/* User Actions Menu */}
-              <Box style={{ position: 'relative' }}>
+              <Box style={{ position: 'relative', flexShrink: 0 }}>
                 <Menu
                   a11yTitle="User menu"
-                  icon={<MenuIcon color="white" size="20px" />}
-                  label={<Text size="small" weight={700} color="white">Menu</Text>}
+                  icon={<MenuIcon color="white" size="18px" />}
+                  label={<Text size="xsmall" weight={700} color="white" style={{ display: 'none' }}>Menu</Text>}
                   items={userMenuItems}
                   dropAlign={{ top: 'bottom', right: 'right' }}
                   dropProps={{ background: 'background-front', elevation: 'medium', round: 'small' }}
@@ -326,10 +338,11 @@ function AppInner() {
                     plain: false,
                     style: {
                       background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                      borderRadius: '10px',
-                      padding: '8px 14px',
+                      borderRadius: '8px',
+                      padding: '6px 10px',
                       border: 'none',
-                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)'
+                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
+                      minWidth: '40px'
                     }
                   }}
                 />
@@ -765,7 +778,6 @@ function AppInner() {
                   data-testid="sidebar-category-cues"
                   onClick={() => {
                     setCategory('cues');
-                    setMobileMenuOpen(false);
                   }}
                   style={{
                     background: category === 'cues' 
@@ -851,7 +863,98 @@ function AppInner() {
                     </Box>
                   </Box>
                 </Button>
-              </Box>
+
+                <Button
+                  fill="horizontal"
+                  data-testid="sidebar-category-tables"
+                  onClick={() => {
+                    setCategory('tables');
+                    setMobileMenuOpen(false);
+                  }}
+                  style={{
+                    background: category === 'tables' 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                      : 'rgba(30, 41, 59, 0.5)',
+                    color: category === 'tables' ? 'white' : '#cbd5e1',
+                    border: category === 'tables' 
+                      ? '2px solid transparent' 
+                      : '2px solid rgba(51, 65, 85, 0.5)',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    transform: category === 'tables' ? 'translateX(4px)' : 'translateX(0)',
+                    boxShadow: category === 'tables' 
+                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+                      : 'none'
+                  }}
+                  hoverIndicator={{
+                    background: category === 'tables' 
+                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      : 'rgba(30, 41, 59, 0.8)'
+                  }}
+                >
+                  <Box direction="row" gap="medium" align="center">
+                    <Text size="xlarge" style={{ lineHeight: '1' }}>🪑</Text>
+                    <Box>
+                      <Text weight={category === 'tables' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
+                        Billiard Tables
+                      </Text>
+                      {category === 'tables' && (
+                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
+                          Pool & billiard tables
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
+
+                <Button
+                  fill="horizontal"
+                  data-testid="sidebar-category-accessories"
+                  onClick={() => {
+                    setCategory('accessories');
+                    setMobileMenuOpen(false);
+                  }}
+                  style={{
+                    background: category === 'accessories' 
+                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
+                      : 'rgba(30, 41, 59, 0.5)',
+                    color: category === 'accessories' ? 'white' : '#cbd5e1',
+                    border: category === 'accessories' 
+                      ? '2px solid transparent' 
+                      : '2px solid rgba(51, 65, 85, 0.5)',
+                    borderRadius: '12px',
+                    padding: '14px 18px',
+                    justifyContent: 'flex-start',
+                    textAlign: 'left',
+                    transition: 'all 0.2s ease',
+                    transform: category === 'accessories' ? 'translateX(4px)' : 'translateX(0)',
+                    boxShadow: category === 'accessories' 
+                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+                      : 'none'
+                  }}
+                  hoverIndicator={{
+                    background: category === 'accessories' 
+                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
+                      : 'rgba(30, 41, 59, 0.8)'
+                  }}
+                >
+                  <Box direction="row" gap="medium" align="center">
+                    <Text size="xlarge" style={{ lineHeight: '1' }}>🛠️</Text>
+                    <Box>
+                      <Text weight={category === 'accessories' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
+                        Accessories
+                      </Text>
+                      {category === 'accessories' && (
+                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
+                          Billiard accessories
+                        </Text>
+                      )}
+                    </Box>
+                  </Box>
+                </Button>
 
               {/* Cue Type Sub-filters - Only show when Cues category is selected */}
               {category === 'cues' && (
@@ -1149,6 +1252,10 @@ function AppInner() {
               
               <Route path="/admin" element={
                 user && user.role === 'admin' ? <AdminPage onBack={handleBack} /> : <Navigate to="/" />
+              } />
+              
+              <Route path="/coming-soon" element={
+                <ComingSoon category={category} onBack={handleBack} />
               } />
             </Routes>
           </Box>

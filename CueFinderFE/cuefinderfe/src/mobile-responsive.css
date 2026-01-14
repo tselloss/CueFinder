@@ -114,21 +114,21 @@
 }
 
 /* Mobile header adjustments */
-@media (max-width: 600px) {
+@media (max-width: 768px) {
   /* Compact header on mobile */
   header {
-    padding: 8px 12px !important;
-  }
-
-  /* Stack header items vertically on very small screens */
-  header > div {
-    flex-wrap: wrap;
+    padding: 8px 10px !important;
     gap: 8px !important;
   }
 
-  /* Smaller buttons */
+  /* Better spacing between items */
+  header > div {
+    gap: 8px !important;
+  }
+
+  /* Smaller buttons and tighter spacing */
   header button {
-    padding: 6px 12px !important;
+    padding: 6px 10px !important;
     font-size: 12px !important;
   }
 
@@ -136,6 +136,25 @@
   .user-name-desktop {
     display: none !important;
   }
+}
+
+/* Extra small screens adjustments */
+@media (max-width: 480px) {
+  /* Even more compact on very small screens */
+  header {
+    padding: 6px 8px !important;
+  }
+
+  /* Reduce logo size on tiny screens */
+  header h2 {
+    font-size: 16px !important;
+  }
+
+  /* User menu button compact */
+  header .grommet-menu {
+    padding: 4px 8px !important;
+  }
+}
 
   /* Hero section adjustments */
   .hero-section {
@@ -212,15 +231,36 @@
     grid-template-columns: 1fr !important;
   }
 
-  /* Image section on detail page */
+  /* Image section on detail page - reduce spacing */
   .detail-image-section {
     margin-top: 0 !important;
     padding-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  /* Detail page container - tighter padding */
+  .detail-container {
+    padding: 8px 8px 12px 8px !important;
+  }
+
+  /* Detail cards - reduce margins */
+  .detail-card {
+    margin-bottom: 8px !important;
   }
 
   /* Specifications cards */
   .spec-card {
     font-size: 14px !important;
+  }
+
+  /* Detail heading - reduce margins */
+  .detail-heading {
+    margin-bottom: 4px !important;
+  }
+
+  /* Detail info box - tighter spacing */
+  .detail-info-box {
+    gap: 8px !important;
   }
 
   /* Admin page cards */
