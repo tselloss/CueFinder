@@ -1,8 +1,19 @@
 import React from 'react';
 import { Box, Button, Heading, Text } from 'grommet';
 import { Previous } from 'grommet-icons';
+import { useNavigate } from 'react-router-dom';
 
 export default function ComingSoon({ category, onBack }) {
+  const navigate = useNavigate();
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else {
+      navigate('/');
+    }
+  };
+
   const getCategoryEmoji = () => {
     switch(category) {
       case 'tables':
@@ -30,7 +41,7 @@ export default function ComingSoon({ category, onBack }) {
       <Button 
         icon={<Previous />} 
         label="Back"
-        onClick={onBack}
+        onClick={handleBack}
         plain
         style={{ marginBottom: '24px' }}
       />

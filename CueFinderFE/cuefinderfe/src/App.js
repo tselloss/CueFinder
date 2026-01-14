@@ -152,7 +152,10 @@ function AppInner() {
     }
   };
   
-  const handleBack = () => navigate('/');
+  const handleBack = () => {
+    setCategory('all');
+    navigate('/');
+  };
   
   const handleAdd = () => {
     if (!user) {
