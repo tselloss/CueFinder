@@ -23,6 +23,7 @@
     <ProjectReference Include="..\SolutionLibraries\CueFinder.CueCases\CueFinder.CueCases\CueFinder.CueCases.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Messages\CueFinder.Messages.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.Forum\CueFinder.Forum.csproj" />
   </ItemGroup>
 
 </Project>
