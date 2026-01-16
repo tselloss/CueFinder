@@ -37,8 +37,11 @@ export default function MobileFiltersBar({
         position: 'sticky',
         top: '60px',
         zIndex: 100,
-        borderBottom: '1px solid rgba(59, 130, 246, 0.2)',
-        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.3)'
+        borderBottom: '2px solid rgba(59, 130, 246, 0.3)',
+        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
+        maxHeight: showMobileFilters ? '70vh' : 'auto',
+        overflowY: 'auto',
+        overflowX: 'hidden'
       }}
     >
       {/* Header with Toggle */}
@@ -108,9 +111,10 @@ export default function MobileFiltersBar({
             <Text size="xsmall" weight={700} color="#a5b4fc" style={{ letterSpacing: '0.05em', textTransform: 'uppercase' }}>
               Filter bar
             </Text>
-            <Box direction="row" gap="xsmall" wrap>
-              <Box direction="row" gap="xsmall" align="center">
-                <Text size="xsmall" color="#cbd5e1" weight={600}>Filter by:</Text>
+            {/* Dropdown Row */}
+            <Box direction="row" gap="xsmall" fill>
+              <Box direction="row" gap="xsmall" align="center" flex>
+                <Text size="xsmall" color="#cbd5e1" weight={600} style={{ whiteSpace: 'nowrap' }}>Filter:</Text>
                 <Select
                   options={[
                     t('filters.condition.all'),
@@ -125,15 +129,16 @@ export default function MobileFiltersBar({
                     background: 'rgba(30, 41, 59, 0.9)',
                     border: '1px solid rgba(99, 102, 241, 0.5)',
                     borderRadius: '12px',
-                    padding: '6px 10px',
-                    fontSize: '13px',
-                    minWidth: '130px'
+                    padding: '6px 8px',
+                    fontSize: '12px',
+                    flex: 1,
+                    minWidth: 0
                   }}
                 />
               </Box>
 
-              <Box direction="row" gap="xsmall" align="center">
-                <Text size="xsmall" color="#cbd5e1" weight={600}>Sort:</Text>
+              <Box direction="row" gap="xsmall" align="center" flex>
+                <Text size="xsmall" color="#cbd5e1" weight={600} style={{ whiteSpace: 'nowrap' }}>Sort:</Text>
                 <Select
                   options={[
                     t('filters.sort.newest'),
@@ -155,28 +160,33 @@ export default function MobileFiltersBar({
                     background: 'rgba(30, 41, 59, 0.9)',
                     border: '1px solid rgba(99, 102, 241, 0.5)',
                     borderRadius: '12px',
-                    padding: '6px 10px',
-                    fontSize: '13px',
-                    minWidth: '140px'
+                    padding: '6px 8px',
+                    fontSize: '12px',
+                    flex: 1,
+                    minWidth: 0
                   }}
                 />
               </Box>
-
-              {user && (
-                <Button
-                  icon={<Add size="14px" />}
-                  label={<Text size="small" weight={700} color="white">New Listing</Text>}
-                  onClick={onAddListing}
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
-                    borderRadius: '12px',
-                    padding: '8px 12px',
-                    border: 'none',
-                    boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)'
-                  }}
-                />
-              )}
             </Box>
+
+            {/* New Listing Button - Full Width */}
+            {user && (
+              <Button
+                icon={<Add size="16px" />}
+                label={<Text size="small" weight={700} color="white">New Listing</Text>}
+                onClick={onAddListing}
+                fill="horizontal"
+                style={{
+                  background: 'linear-gradient(135deg, #22c55e 0%, #10b981 100%)',
+                  borderRadius: '12px',
+                  padding: '10px 14px',
+                  border: 'none',
+                  boxShadow: '0 4px 12px rgba(16, 185, 129, 0.35)',
+                  fontSize: '14px',
+                  fontWeight: 700
+                }}
+              />
+            )}
           </Box>
 
           {/* Browse By Category */}
