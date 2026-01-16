@@ -13,6 +13,8 @@ public class Discussion
     
     public Guid CreatedByUserId { get; set; }
     
+    public string CreatedByUsername { get; set; } = "User";
+    
     public Guid CategoryId { get; set; }
     
     public int ViewCount { get; set; }
