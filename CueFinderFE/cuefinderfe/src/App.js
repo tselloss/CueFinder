@@ -747,8 +747,26 @@ function AppInner() {
       )}
 
       {/* Main Content Area with Sidebar */}
-      <Box flex="grow" background="background" style={{ flexGrow: 1 }}>
-        <Box direction="row" fill>
+      <Box 
+        flex="grow" 
+        background="background" 
+        style={{ 
+          flexGrow: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          position: 'relative',
+          minHeight: 0
+        }}
+      >
+        <Box 
+          direction="row" 
+          fill="horizontal"
+          style={{
+            flex: 1,
+            minHeight: 0,
+            position: 'relative'
+          }}
+        >
           {/* Mobile Sidebar Overlay */}
           {isHomePage && mobileMenuOpen && (
             <Box 
@@ -782,11 +800,17 @@ function AppInner() {
           {/* Main Content */}
           <Box 
             flex 
+            className="main-content-wrapper"
             pad={{ horizontal: 'medium', vertical: 'none' }} 
             style={{ 
-              maxWidth: isHomePage && sidebarOpen ? '100%' : '1400px', 
+              flex: 1,
+              maxWidth: isHomePage && sidebarOpen ? 'none' : '1400px', 
               width: '100%',
-              margin: isHomePage && sidebarOpen ? '0' : '0 auto'
+              margin: isHomePage && sidebarOpen ? '0' : '0 auto',
+              position: 'relative',
+              minHeight: 0,
+              overflowX: 'hidden',
+              overflowY: 'auto'
             }}
           >
             <Routes>

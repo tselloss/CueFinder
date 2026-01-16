@@ -31,18 +31,8 @@ export default function MobileFiltersBar({
     <Box
       className="mobile-filters-toolbar"
       background="background-front"
-      pad={{ horizontal: 'small', vertical: 'xsmall' }}
+      pad={{ horizontal: 'small', vertical: 'small' }}
       gap="small"
-      style={{
-        position: 'sticky',
-        top: '60px',
-        zIndex: 100,
-        borderBottom: '3px solid #3b82f6',
-        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.2)',
-        maxHeight: 'none',
-        overflowY: 'visible',
-        overflowX: 'hidden'
-      }}
     >
       {/* Header with Toggle */}
       <Box direction="row" align="center" justify="between">

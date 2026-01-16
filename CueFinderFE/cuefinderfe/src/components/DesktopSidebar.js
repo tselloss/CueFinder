@@ -27,7 +27,8 @@ export default function DesktopSidebar({
   return (
     <Box 
       className={`sidebar-desktop ${mobileMenuOpen ? 'sidebar-mobile-open' : ''}`}
-      width="300px" 
+      width="280px" 
+      flex={{ shrink: 0 }}
       background="background-front" 
       pad="medium"
       gap="medium"
@@ -36,10 +37,10 @@ export default function DesktopSidebar({
         borderRight: '1px solid rgba(59, 130, 246, 0.2)',
         height: 'fit-content',
         position: 'sticky',
-        top: '20px',
-        left: '20px',
-        zIndex: 1,
-        maxHeight: 'calc(100vh - 40px)',
+        top: '80px',
+        alignSelf: 'flex-start',
+        zIndex: 20,
+        maxHeight: 'calc(100vh - 100px)',
         overflowY: 'auto',
         overflowX: 'hidden',
         borderRadius: '16px',
@@ -47,7 +48,8 @@ export default function DesktopSidebar({
         background: 'rgba(15, 23, 42, 0.8)',
         boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 1px rgba(59, 130, 246, 0.3)',
         animation: 'slideIn 0.3s ease-out',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
+        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        margin: '20px 0 20px 20px'
       }}
     >
       {/* Sidebar Header */}
