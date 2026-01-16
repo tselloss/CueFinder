@@ -1,8 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, RangeSelector, Menu } from 'grommet';
+import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, Menu } from 'grommet';
 import { Add, Search, User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
-import Badge from './components/Badge';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
@@ -13,10 +12,14 @@ import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
+import Forum from './components/Forum';
+import MobileFiltersBar from './components/MobileFiltersBar';
+import DesktopSidebar from './components/DesktopSidebar';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 import * as messageService from './api/messageService';
+import * as forumService from './api/forumService';
 
 import './form-icons.css';
 import './mobile-responsive.css';
@@ -44,8 +47,11 @@ function AppInner() {
   const [cueType, setCueType] = useState('all'); // 'all', 'playing', 'break', 'jump'
   const [sortBy, setSortBy] = useState('newest');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile sidebar toggle
+  const [showMobileFilters, setShowMobileFilters] = useState(true); // Mobile filters collapse
   const sidebarOpen = true; // Always open on home page
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
+  const [forumCategories, setForumCategories] = useState([]);
+  const [showForumCategories, setShowForumCategories] = useState(false);
   // Price range slider [min,max] in USD
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const PRICE_MIN_LIMIT = 0;
@@ -208,21 +214,45 @@ function AppInner() {
     return () => clearInterval(interval);
   }, [user]);
 
+  // Load forum categories on mount
+  useEffect(() => {
+    const loadForumCategories = async () => {
+      try {
+        const categories = await forumService.getCategories();
+        setForumCategories(categories);
+      } catch (error) {
+        console.error('Failed to load forum categories:', error);
+      }
+    };
+    
+    loadForumCategories();
+  }, []);
+
   const userMenuItems = user
     ? [
         {
           label: (
-            <Box direction="row" align="center" gap="small">
-              <Box direction="row" align="center" gap="xsmall" style={{ position: 'relative' }}>
-                <MailOption color="text-strong" size="18px" />
-                <Text size="small" weight={600} color="text-strong">Inbox</Text>
+            <Box 
+              direction="row" 
+              align="center" 
+              gap="medium" 
+              pad={{ horizontal: 'small', vertical: 'small' }}
+              style={{ transition: 'all 0.2s ease' }}
+            >
+              <Box direction="row" align="center" gap="small" fill="horizontal">
+                <MailOption color="#3b82f6" size="20px" />
+                <Text size="medium" weight={600} color="text-strong">Inbox</Text>
                 {unreadMessageCount > 0 && (
-                  <Badge
-                    count={unreadMessageCount}
-                    background="status-critical"
+                  <Box
+                    background="#ef4444"
                     round="full"
-                    pad={{ horizontal: '6px', vertical: '2px' }}
-                  />
+                    pad={{ horizontal: '8px', vertical: '2px' }}
+                    style={{ minWidth: '24px', textAlign: 'center', marginLeft: 'auto' }}
+                  >
+                    <Text size="xsmall" weight={700} color="white">
+                      {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+                    </Text>
+                  </Box>
                 )}
               </Box>
             </Box>
@@ -231,9 +261,15 @@ function AppInner() {
         },
         {
           label: (
-            <Box direction="row" align="center" gap="small">
-              <User color="text-strong" size="18px" />
-              <Text size="small" weight={600} color="text-strong">{t('actions.profile')}</Text>
+            <Box 
+              direction="row" 
+              align="center" 
+              gap="medium" 
+              pad={{ horizontal: 'small', vertical: 'small' }}
+              style={{ transition: 'all 0.2s ease' }}
+            >
+              <User color="#3b82f6" size="20px" />
+              <Text size="medium" weight={600} color="text-strong">{t('actions.profile')}</Text>
             </Box>
           ),
           onClick: () => navigate('/profile')
@@ -242,9 +278,15 @@ function AppInner() {
           ? [
               {
                 label: (
-                  <Box direction="row" align="center" gap="small">
-                    <UserAdmin color="text-strong" size="18px" />
-                    <Text size="small" weight={600} color="text-strong">{t('actions.admin')}</Text>
+                  <Box 
+                    direction="row" 
+                    align="center" 
+                    gap="medium" 
+                    pad={{ horizontal: 'small', vertical: 'small' }}
+                    style={{ transition: 'all 0.2s ease' }}
+                  >
+                    <UserAdmin color="#f59e0b" size="20px" />
+                    <Text size="medium" weight={600} color="text-strong">{t('actions.admin')}</Text>
                   </Box>
                 ),
                 onClick: () => navigate('/admin')
@@ -253,9 +295,20 @@ function AppInner() {
           : []),
         {
           label: (
-            <Box direction="row" align="center" gap="small">
-              <Logout color="text-strong" size="18px" />
-              <Text size="small" weight={600} color="text-strong">{t('actions.logout')}</Text>
+            <Box 
+              direction="row" 
+              align="center" 
+              gap="medium" 
+              pad={{ horizontal: 'small', vertical: 'small' }}
+              style={{ 
+                borderTop: '2px solid rgba(59, 130, 246, 0.2)',
+                marginTop: '4px',
+                paddingTop: '12px',
+                transition: 'all 0.2s ease'
+              }}
+            >
+              <Logout color="#ef4444" size="20px" />
+              <Text size="medium" weight={700} color="#ef4444">{t('actions.logout')}</Text>
             </Box>
           ),
           onClick: handleLogout
@@ -332,20 +385,40 @@ function AppInner() {
               <Box style={{ position: 'relative', flexShrink: 0 }}>
                 <Menu
                   a11yTitle="User menu"
-                  icon={<MenuIcon color="white" size="18px" />}
-                  label={<Text size="xsmall" weight={700} color="white" style={{ display: 'none' }}>Menu</Text>}
+                  icon={<MenuIcon color="white" size="20px" />}
+                  label={<Text size="small" weight={700} color="white" style={{ display: 'none' }}>Menu</Text>}
                   items={userMenuItems}
                   dropAlign={{ top: 'bottom', right: 'right' }}
-                  dropProps={{ background: 'background-front', elevation: 'medium', round: 'small' }}
+                  dropProps={{ 
+                    background: 'background-front', 
+                    elevation: 'xlarge', 
+                    round: 'medium',
+                    style: {
+                      border: '2px solid rgba(59, 130, 246, 0.3)',
+                      boxShadow: '0 12px 24px -4px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2)',
+                      marginTop: '8px',
+                      minWidth: '220px',
+                      backdropFilter: 'blur(10px)'
+                    }
+                  }}
                   buttonProps={{
                     plain: false,
                     style: {
                       background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                      borderRadius: '8px',
-                      padding: '6px 10px',
+                      borderRadius: '10px',
+                      padding: '10px 14px',
                       border: 'none',
-                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.35)',
-                      minWidth: '40px'
+                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
+                      minWidth: '48px',
+                      transition: 'all 0.2s ease'
+                    },
+                    onMouseEnter: (e) => {
+                      e.currentTarget.style.transform = 'translateY(-2px)';
+                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.5)';
+                    },
+                    onMouseLeave: (e) => {
+                      e.currentTarget.style.transform = 'translateY(0)';
+                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.4)';
                     }
                   }}
                 />
@@ -647,6 +720,32 @@ function AppInner() {
         </Box>
       )}
 
+      {/* Mobile Filters & Sorting Toolbar - Shows after hero on mobile only */}
+      {isHomePage && (
+        <MobileFiltersBar
+          search={search}
+          setSearch={setSearch}
+          category={category}
+          setCategory={setCategory}
+          cueType={cueType}
+          setCueType={setCueType}
+          condition={condition}
+          setCondition={setCondition}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          showMobileFilters={showMobileFilters}
+          setShowMobileFilters={setShowMobileFilters}
+          user={user}
+          onAddListing={handleAdd}
+          PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+          PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+          PRICE_STEP={PRICE_STEP}
+          currencySymbol={currencySymbol}
+        />
+      )}
+
       {/* Main Content Area with Sidebar */}
       <Box flex="grow" background="background" style={{ flexGrow: 1 }}>
         <Box direction="row" fill>
@@ -658,548 +757,26 @@ function AppInner() {
             />
           )}
 
-          {/* Modern Collapsible Sidebar - Only on home page */}
+          {/* Desktop Sidebar - Only on home page */}
           {isHomePage && (
-            <Box 
-              className={`sidebar-desktop ${mobileMenuOpen ? 'sidebar-mobile-open' : ''}`}
-              width="300px" 
-              background="background-front" 
-              pad="medium"
-              gap="medium"
-              elevation="xlarge"
-              style={{ 
-                borderRight: '1px solid rgba(59, 130, 246, 0.2)',
-                height: 'fit-content',
-                position: 'sticky',
-                top: '20px',
-                left: '20px',
-                zIndex: 1,
-                maxHeight: 'calc(100vh - 40px)',
-                overflowY: 'auto',
-                overflowX: 'hidden',
-                borderRadius: '16px',
-                backdropFilter: 'blur(20px)',
-                background: 'rgba(15, 23, 42, 0.8)',
-                boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5), 0 0 1px rgba(59, 130, 246, 0.3)',
-                animation: 'slideIn 0.3s ease-out',
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)'
-              }}
-            >
-              {/* Sidebar Header */}
-              <Box 
-                direction="row" 
-                justify="between" 
-                align="center"
-                pad={{ bottom: 'small' }}
-                border={{ side: 'bottom', color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
-              >
-                <Box direction="row" gap="small" align="center">
-                  <Box 
-                    background="linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)"
-                    pad="xsmall"
-                    round="small"
-                    style={{ 
-                      boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
-                    }}
-                  >
-                    <Text size="medium" style={{ lineHeight: '1' }}>📋</Text>
-                  </Box>
-                  <Heading level="3" margin="none" style={{ 
-                    fontSize: '18px', 
-                    fontWeight: 700,
-                    color: '#f1f5f9',
-                    letterSpacing: '-0.02em'
-                  }}>
-                    {t('categories.all')}
-                  </Heading>
-                </Box>
-                {/* Close button for mobile */}
-                <Button
-                  icon={
-                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                      <line x1="18" y1="6" x2="6" y2="18"></line>
-                      <line x1="6" y1="6" x2="18" y2="18"></line>
-                    </svg>
-                  }
-                  onClick={() => setMobileMenuOpen(false)}
-                  plain
-                  className="mobile-close-button"
-                  style={{ display: 'none' }}
-                />
-              </Box>
-              
-              {/* Category Buttons */}
-              <Box gap="xsmall" margin={{ top: 'small' }}>
-                <Button
-                  fill="horizontal"
-                  data-testid="sidebar-category-all"
-                  onClick={() => {
-                    setCategory('all');
-                    setMobileMenuOpen(false);
-                  }}
-                  style={{
-                    background: category === 'all' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                      : 'rgba(30, 41, 59, 0.5)',
-                    color: category === 'all' ? 'white' : '#cbd5e1',
-                    border: category === 'all' 
-                      ? '2px solid transparent' 
-                      : '2px solid rgba(51, 65, 85, 0.5)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    transform: category === 'all' ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: category === 'all' 
-                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-                      : 'none'
-                  }}
-                  hoverIndicator={{
-                    background: category === 'all' 
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'rgba(30, 41, 59, 0.8)'
-                  }}
-                >
-                  <Box direction="row" gap="medium" align="center">
-                    <Text size="xlarge" style={{ lineHeight: '1' }}>🎱</Text>
-                    <Box>
-                      <Text weight={category === 'all' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        {t('categories.all')}
-                      </Text>
-                      {category === 'all' && (
-                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
-                          Browse everything
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
-                </Button>
-                
-                <Button
-                  fill="horizontal"
-                  data-testid="sidebar-category-cues"
-                  onClick={() => {
-                    setCategory('cues');
-                  }}
-                  style={{
-                    background: category === 'cues' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                      : 'rgba(30, 41, 59, 0.5)',
-                    color: category === 'cues' ? 'white' : '#cbd5e1',
-                    border: category === 'cues' 
-                      ? '2px solid transparent' 
-                      : '2px solid rgba(51, 65, 85, 0.5)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    transform: category === 'cues' ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: category === 'cues' 
-                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-                      : 'none'
-                  }}
-                  hoverIndicator={{
-                    background: category === 'cues' 
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'rgba(30, 41, 59, 0.8)'
-                  }}
-                >
-                  <Box direction="row" gap="medium" align="center">
-                    <Text size="xlarge" style={{ lineHeight: '1' }}>🎯</Text>
-                    <Box>
-                      <Text weight={category === 'cues' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        {t('categories.cues')}
-                      </Text>
-                      {category === 'cues' && (
-                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
-                          Pool & snooker cues
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
-                </Button>
-                
-                <Button
-                  fill="horizontal"
-                  data-testid="sidebar-category-cases"
-                  onClick={() => {
-                    setCategory('cases');
-                    setMobileMenuOpen(false);
-                  }}
-                  style={{
-                    background: category === 'cases' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                      : 'rgba(30, 41, 59, 0.5)',
-                    color: category === 'cases' ? 'white' : '#cbd5e1',
-                    border: category === 'cases' 
-                      ? '2px solid transparent' 
-                      : '2px solid rgba(51, 65, 85, 0.5)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    transform: category === 'cases' ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: category === 'cases' 
-                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-                      : 'none'
-                  }}
-                  hoverIndicator={{
-                    background: category === 'cases' 
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'rgba(30, 41, 59, 0.8)'
-                  }}
-                >
-                  <Box direction="row" gap="medium" align="center">
-                    <Text size="xlarge" style={{ lineHeight: '1' }}>💼</Text>
-                    <Box>
-                      <Text weight={category === 'cases' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        {t('categories.cases')}
-                      </Text>
-                      {category === 'cases' && (
-                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
-                          Protective cases
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
-                </Button>
-
-                <Button
-                  fill="horizontal"
-                  data-testid="sidebar-category-tables"
-                  onClick={() => {
-                    setCategory('tables');
-                    setMobileMenuOpen(false);
-                  }}
-                  style={{
-                    background: category === 'tables' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                      : 'rgba(30, 41, 59, 0.5)',
-                    color: category === 'tables' ? 'white' : '#cbd5e1',
-                    border: category === 'tables' 
-                      ? '2px solid transparent' 
-                      : '2px solid rgba(51, 65, 85, 0.5)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    transform: category === 'tables' ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: category === 'tables' 
-                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-                      : 'none'
-                  }}
-                  hoverIndicator={{
-                    background: category === 'tables' 
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'rgba(30, 41, 59, 0.8)'
-                  }}
-                >
-                  <Box direction="row" gap="medium" align="center">
-                    <Text size="xlarge" style={{ lineHeight: '1' }}>🪑</Text>
-                    <Box>
-                      <Text weight={category === 'tables' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        Billiard Tables
-                      </Text>
-                      {category === 'tables' && (
-                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
-                          Pool & billiard tables
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
-                </Button>
-
-                <Button
-                  fill="horizontal"
-                  data-testid="sidebar-category-accessories"
-                  onClick={() => {
-                    setCategory('accessories');
-                    setMobileMenuOpen(false);
-                  }}
-                  style={{
-                    background: category === 'accessories' 
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                      : 'rgba(30, 41, 59, 0.5)',
-                    color: category === 'accessories' ? 'white' : '#cbd5e1',
-                    border: category === 'accessories' 
-                      ? '2px solid transparent' 
-                      : '2px solid rgba(51, 65, 85, 0.5)',
-                    borderRadius: '12px',
-                    padding: '14px 18px',
-                    justifyContent: 'flex-start',
-                    textAlign: 'left',
-                    transition: 'all 0.2s ease',
-                    transform: category === 'accessories' ? 'translateX(4px)' : 'translateX(0)',
-                    boxShadow: category === 'accessories' 
-                      ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-                      : 'none'
-                  }}
-                  hoverIndicator={{
-                    background: category === 'accessories' 
-                      ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                      : 'rgba(30, 41, 59, 0.8)'
-                  }}
-                >
-                  <Box direction="row" gap="medium" align="center">
-                    <Text size="xlarge" style={{ lineHeight: '1' }}>🛠️</Text>
-                    <Box>
-                      <Text weight={category === 'accessories' ? 700 : 500} size="medium" style={{ lineHeight: '1.2' }}>
-                        Accessories
-                      </Text>
-                      {category === 'accessories' && (
-                        <Text size="xsmall" color="rgba(255, 255, 255, 0.7)" style={{ lineHeight: '1' }}>
-                          Billiard accessories
-                        </Text>
-                      )}
-                    </Box>
-                  </Box>
-                </Button>
-              </Box>
-
-              {/* Cue Type Sub-filters - Only show when Cues category is selected */}
-              {category === 'cues' && (
-                <Box 
-                  gap="xxsmall" 
-                  margin={{ top: 'small', left: 'small' }}
-                  pad={{ left: 'small' }}
-                  border={{ side: 'left', color: 'rgba(59, 130, 246, 0.3)', size: '2px' }}
-                >
-                  <Text size="xsmall" weight={600} color="#94a3b8" style={{ textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '4px' }}>
-                    Cue Type
-                  </Text>
-                  
-                  <Button
-                    data-testid="cue-type-all"
-                    onClick={() => {
-                      setCueType('all');
-                      setMobileMenuOpen(false);
-                    }}
-                    style={{
-                      background: cueType === 'all' 
-                        ? 'rgba(59, 130, 246, 0.3)' 
-                        : 'transparent',
-                      color: cueType === 'all' ? '#60a5fa' : '#94a3b8',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease'
-                    }}
-                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
-                  >
-                    <Text size="small" weight={cueType === 'all' ? 600 : 400}>
-                      All Types
-                    </Text>
-                  </Button>
-                  
-                  <Button
-                    data-testid="cue-type-playing"
-                    onClick={() => {
-                      setCueType('playing');
-                      setMobileMenuOpen(false);
-                    }}
-                    style={{
-                      background: cueType === 'playing' 
-                        ? 'rgba(59, 130, 246, 0.3)' 
-                        : 'transparent',
-                      color: cueType === 'playing' ? '#60a5fa' : '#94a3b8',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease'
-                    }}
-                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
-                  >
-                    <Box direction="row" gap="small" align="center">
-                      <Text size="small">🎯</Text>
-                      <Text size="small" weight={cueType === 'playing' ? 600 : 400}>
-                        Playing Cue
-                      </Text>
-                    </Box>
-                  </Button>
-                  
-                  <Button
-                    data-testid="cue-type-break"
-                    onClick={() => {
-                      setCueType('break');
-                      setMobileMenuOpen(false);
-                    }}
-                    style={{
-                      background: cueType === 'break' 
-                        ? 'rgba(59, 130, 246, 0.3)' 
-                        : 'transparent',
-                      color: cueType === 'break' ? '#60a5fa' : '#94a3b8',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease'
-                    }}
-                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
-                  >
-                    <Box direction="row" gap="small" align="center">
-                      <Text size="small">💥</Text>
-                      <Text size="small" weight={cueType === 'break' ? 600 : 400}>
-                        Break Cue
-                      </Text>
-                    </Box>
-                  </Button>
-                  
-                  <Button
-                    data-testid="cue-type-jump"
-                    onClick={() => {
-                      console.log('[App.js] Setting cueType to: jump');
-                      setCueType('jump');
-                      setMobileMenuOpen(false);
-                    }}
-                    style={{
-                      background: cueType === 'jump' 
-                        ? 'rgba(59, 130, 246, 0.3)' 
-                        : 'transparent',
-                      color: cueType === 'jump' ? '#60a5fa' : '#94a3b8',
-                      border: 'none',
-                      borderRadius: '8px',
-                      padding: '8px 12px',
-                      justifyContent: 'flex-start',
-                      textAlign: 'left',
-                      transition: 'all 0.2s ease'
-                    }}
-                    hoverIndicator={{ background: 'rgba(30, 41, 59, 0.5)' }}
-                  >
-                    <Box direction="row" gap="small" align="center">
-                      <Text size="small">🚀</Text>
-                      <Text size="small" weight={cueType === 'jump' ? 600 : 400}>
-                        Jump Cue
-                      </Text>
-                    </Box>
-                  </Button>
-                </Box>
-              )}
-
-              {/* Filters Section */}
-              <Box 
-                margin={{ top: 'medium' }}
-                pad={{ top: 'medium' }}
-                border={{ side: 'top', color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
-                gap="small"
-              >
-                <Box direction="row" gap="small" align="center">
-                  <Box 
-                    background="rgba(59, 130, 246, 0.2)"
-                    pad="xsmall"
-                    round="small"
-                  >
-                    <Text size="small" style={{ lineHeight: '1' }}>🔍</Text>
-                  </Box>
-                  <Heading level="4" margin="none" style={{ 
-                    fontSize: '14px', 
-                    fontWeight: 600,
-                    color: '#cbd5e1',
-                    letterSpacing: '0.05em',
-                    textTransform: 'uppercase'
-                  }}>
-                    Filters
-                  </Heading>
-                </Box>
-                <Box 
-                  background="rgba(30, 41, 59, 0.5)"
-                  pad="medium"
-                  round="8px"
-                  border={{ color: 'rgba(51, 65, 85, 0.5)', size: '1px' }}
-                  gap="small"
-                >
-                  <Heading level="4" margin="none" style={{ fontSize: '14px', fontWeight: 600, color: '#cbd5e1' }}>
-                    {t('price.range')}
-                  </Heading>
-                  {/* Currency fixed to EUR */}
-                  <Box gap="small">
-                    {/* Preset quick filters */}
-                    <Box direction="row" gap="xsmall" wrap>
-                      {presetRanges.map((p) => (
-                        <Button
-                          key={p.label}
-                          label={<Text size="xsmall" weight={600} color={'brand'}>{p.label.replace('$', currencySymbol)}</Text>}
-                          onClick={() => {
-                            const [min, max] = p.value;
-                            setPriceRange([min, max]);
-                          }}
-                          style={{
-                            background: priceRange[0] === p.value[0] && priceRange[1] === p.value[1]
-                              ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-                              : 'rgba(30,41,59,0.5)',
-                            border: '1px solid rgba(59,130,246,0.3)',
-                            borderRadius: '16px',
-                            padding: '4px 10px'
-                          }}
-                          hoverIndicator={false}
-                        />
-                      ))}
-                    </Box>
-                    {/* Current values */}
-                    <Box direction="row" justify="between" align="center">
-                      <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[0]}</Text>
-                      <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[1]}</Text>
-                    </Box>
-                    {/* Range slider */}
-                    <Box gap="xsmall">
-                      {/* Styled track with highlighted selected range */}
-                      <Box height="6px" round="large" background={{ color: 'rgba(51,65,85,0.6)' }}>
-                        <Box
-                          height="6px"
-                          round="large"
-                          background={{ color: 'brand' }}
-                          style={{
-                            width: `${((priceRange[1] - priceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                            marginLeft: `${((priceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                            transition: 'width 0.1s ease, margin-left 0.1s ease'
-                          }}
-                        />
-                      </Box>
-                      <Box pad={{ horizontal: 'xsmall' }}>
-                        <RangeSelector
-                          direction="horizontal"
-                          min={PRICE_MIN_LIMIT}
-                          max={PRICE_MAX_LIMIT}
-                          step={PRICE_STEP}
-                          values={priceRange}
-                          onChange={setPriceRange}
-                        />
-                      </Box>
-                    </Box>
-                    <Text size="xsmall" color="#94a3b8">Step: {currencySymbol}{PRICE_STEP}</Text>
-                  </Box>
-                </Box>
-              </Box>
-
-              {/* Pro Tip Section */}
-              <Box 
-                background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)"
-                pad="medium"
-                round="12px"
-                border={{ color: 'rgba(59, 130, 246, 0.3)', size: '1px' }}
-                margin={{ top: 'small' }}
-              >
-                <Box direction="row" gap="small" align="start">
-                  <Text size="medium">💡</Text>
-                  <Box>
-                    <Text size="small" weight={600} color="#f1f5f9" style={{ lineHeight: '1.4' }}>
-                      Pro Tip
-                    </Text>
-                    <Text size="xsmall" color="#94a3b8" style={{ lineHeight: '1.5' }}>
-                      Use the search bar above to find specific brands or models quickly!
-                    </Text>
-                  </Box>
-                </Box>
-              </Box>
-            </Box>
+            <DesktopSidebar
+              category={category}
+              setCategory={setCategory}
+              cueType={cueType}
+              setCueType={setCueType}
+              priceRange={priceRange}
+              setPriceRange={setPriceRange}
+              mobileMenuOpen={mobileMenuOpen}
+              setMobileMenuOpen={setMobileMenuOpen}
+              forumCategories={forumCategories}
+              showForumCategories={showForumCategories}
+              setShowForumCategories={setShowForumCategories}
+              PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+              PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+              PRICE_STEP={PRICE_STEP}
+              currencySymbol={currencySymbol}
+              presetRanges={presetRanges}
+            />
           )}
 
           {/* Main Content */}
@@ -1260,6 +837,10 @@ function AppInner() {
               
               <Route path="/coming-soon" element={
                 <ComingSoon category={category} onBack={handleBack} />
+              } />
+              
+              <Route path="/forum" element={
+                <Forum onBack={handleBack} />
               } />
             </Routes>
           </Box>

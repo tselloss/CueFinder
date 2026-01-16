@@ -7,6 +7,7 @@ using CueFinder.Extensions.Images;
 using CueFinder.Extensions.ProblemDetails;
 using CueFinder.Messages.Extensions;
 using CueFinder.Messages.Hubs;
+using CueFinder.Forum.Extensions;
 
 // Configure Npgsql to handle DateTime without timezone issues
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -31,6 +32,7 @@ builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
 builder.Services.AddMessageServices();
+builder.Services.AddForumServices(connectionString);
 
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);
@@ -105,6 +107,8 @@ var app = builder.Build();
 
 // Initialize database
 await app.Services.InitializeDatabaseAsync();
+// Forum database tables created via SQL script (scripts/add-forum-tables.sql)
+// await app.Services.InitializeForumDatabaseAsync();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

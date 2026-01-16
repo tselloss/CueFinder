@@ -13,6 +13,8 @@ public class Post
     
     public Guid CreatedByUserId { get; set; }
     
+    public string CreatedByUsername { get; set; } = "User";
+    
     public Guid? ReplyToPostId { get; set; }
     
     public int LikeCount { get; set; }

@@ -1,9 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Heading, Text, Card, CardBody, Layer, TextArea, Spinner } from 'grommet';
-import { Close, Search, MailOption, Previous, Trash } from 'grommet-icons';
-import Badge from './Badge';
+import { Close, MailOption, Previous, Trash } from 'grommet-icons';
 import * as messageService from '../api/messageService';
-import * as authService from '../api/authService';
+import Badge from './Badge';
 
 export default function Inbox({ onBack }) {
   const [messages, setMessages] = useState([]);
@@ -14,21 +13,10 @@ export default function Inbox({ onBack }) {
   const [sending, setSending] = useState(false);
   const [filterUnread, setFilterUnread] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  const [currentUserId, setCurrentUserId] = useState(null);
 
   useEffect(() => {
     loadInbox();
-    loadCurrentUser();
   }, []);
-
-  const loadCurrentUser = async () => {
-    try {
-      const user = authService.getCurrent();
-      setCurrentUserId(user?.id);
-    } catch (err) {
-      console.error('Error loading current user:', err);
-    }
-  };
 
   const loadInbox = async () => {
     setLoading(true);

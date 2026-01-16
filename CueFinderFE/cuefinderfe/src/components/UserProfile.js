@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
-import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, Grid, CheckBox } from 'grommet';
+import { Box, Button, Heading, Text, Card, CardBody, Form, FormField, TextInput, Tabs, Tab, CheckBox } from 'grommet';
 import { FormPrevious, User, Mail, Phone, MapLocation, Location, Edit } from 'grommet-icons';
 import MyCues from './MyCues';
 import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
@@ -18,8 +18,6 @@ export default function UserProfile({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [selectedAvatar, setSelectedAvatar] = useState(user?.avatar || '👤');
-  const [showAvatarPicker, setShowAvatarPicker] = useState(false);
   
   // Profile form state
   const [profile, setProfile] = useState({
@@ -56,7 +54,6 @@ export default function UserProfile({ onBack }) {
           country: user.country || '',
         },
       });
-      setSelectedAvatar(user.avatar || '👤');
     }
   }, [user]);
 
@@ -379,7 +376,6 @@ export default function UserProfile({ onBack }) {
                                 plain
                                 onClick={() => {
                                   setProfile(p => ({ ...p, avatar }));
-                                  setSelectedAvatar(avatar);
                                 }}
                                 style={{
                                   fontSize: '32px',
