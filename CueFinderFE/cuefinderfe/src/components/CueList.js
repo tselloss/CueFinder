@@ -97,7 +97,7 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
   }
 
   return (
-    <Box width="100%" pad={{ horizontal: 'medium', vertical: 'large', top: 'large' }}>
+    <Box width="100%" pad={{ horizontal: 'medium', vertical: 'large', top: 'medium' }} style={{ marginTop: '12px' }}>
       {/* Grid or List view based on viewMode */}
       {viewMode === 'grid' ? (
         <Grid 
