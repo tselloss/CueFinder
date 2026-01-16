@@ -31,16 +31,16 @@ export default function MobileFiltersBar({
     <Box
       className="mobile-filters-toolbar"
       background="background-front"
-      pad={{ horizontal: 'small', vertical: 'small' }}
+      pad={{ horizontal: 'small', vertical: 'xsmall' }}
       gap="small"
       style={{
         position: 'sticky',
         top: '60px',
         zIndex: 100,
-        borderBottom: '2px solid rgba(59, 130, 246, 0.3)',
-        boxShadow: '0 4px 12px rgba(0, 0, 0, 0.4)',
-        maxHeight: showMobileFilters ? '70vh' : 'auto',
-        overflowY: 'auto',
+        borderBottom: '3px solid #3b82f6',
+        boxShadow: '0 2px 8px rgba(59, 130, 246, 0.2)',
+        maxHeight: 'none',
+        overflowY: 'visible',
         overflowX: 'hidden'
       }}
     >
