@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, SlidersHorizontal } from 'lucide-react';
+import { Search, X, SlidersHorizontal, Plus } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
@@ -23,7 +23,9 @@ export function HeroSearch({
   setPriceRange,
   PRICE_MIN_LIMIT,
   PRICE_MAX_LIMIT,
-  currencySymbol
+  currencySymbol,
+  user,
+  onAddListing
 }) {
   const { t } = useTranslation();
   const [showFilters, setShowFilters] = useState(false);
@@ -48,9 +50,21 @@ export function HeroSearch({
     <div className="w-full max-w-5xl mx-auto px-4 py-8">
       {/* Hero Title */}
       <div className="text-center mb-8">
-        <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-4 bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-          {t('hero.title')}
-        </h1>
+        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+            {t('hero.title')}
+          </h1>
+          {user && onAddListing && (
+            <Button
+              onClick={onAddListing}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Add New Listing
+            </Button>
+          )}
+        </div>
         <p className="text-base md:text-lg text-muted-foreground">
           {t('hero.subtitle')}
         </p>
