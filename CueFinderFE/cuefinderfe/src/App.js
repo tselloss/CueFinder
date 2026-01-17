@@ -374,7 +374,7 @@ function AppInner() {
                 user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               <Route path="/case/:id" element={
-                user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
+                <CueCaseDetail onBack={handleBack} />
               } />
               
               <Route path="/profile" element={
