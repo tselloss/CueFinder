@@ -1,6 +1,5 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button } from 'grommet';
 import CueList from './components/CueList.jsx';
 import CueDetail from './components/CueDetail.jsx';
 import CueFormModal from './components/CueFormModal.jsx';
@@ -244,7 +243,7 @@ function AppInner() {
 
 
   return (
-    <Box fill background="background" style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column' }}>
+    <div className="w-full h-screen min-h-screen bg-background flex flex-col">
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
@@ -285,30 +284,12 @@ function AppInner() {
       )}
 
       {/* Main Content Area with Sidebar */}
-      <Box 
-        flex="grow" 
-        background="background" 
-        style={{ 
-          flexGrow: 1,
-          display: 'flex',
-          flexDirection: 'column',
-          position: 'relative',
-          minHeight: 0
-        }}
-      >
-        <Box 
-          direction="row" 
-          fill="horizontal"
-          style={{
-            flex: 1,
-            minHeight: 0,
-            position: 'relative'
-          }}
-        >
+      <div className="flex-1 bg-background flex flex-col relative overflow-hidden">
+        <div className="flex flex-row flex-1 relative overflow-hidden">
           {/* Mobile Sidebar Overlay */}
           {isHomePage && mobileMenuOpen && (
-            <Box 
-              className="sidebar-overlay"
+            <div 
+              className="sidebar-overlay absolute inset-0 bg-black/50 z-40"
               onClick={() => setMobileMenuOpen(false)}
             />
           )}
@@ -342,19 +323,11 @@ function AppInner() {
           )}
 
           {/* Main Content */}
-          <Box 
-            flex 
-            className="main-content-wrapper"
-            pad={{ horizontal: 'medium', vertical: 'none' }} 
+          <div 
+            className="flex-1 main-content-wrapper overflow-x-hidden overflow-y-auto relative"
             style={{ 
-              flex: 1,
-              maxWidth: isHomePage && sidebarOpen ? 'none' : '1400px', 
-              width: '100%',
-              margin: isHomePage && sidebarOpen ? '0' : '0 auto',
-              position: 'relative',
-              minHeight: 0,
-              overflowX: 'hidden',
-              overflowY: 'auto'
+              maxWidth: isHomePage && sidebarOpen ? 'none' : '1400px',
+              margin: isHomePage && sidebarOpen ? '0' : '0 auto'
             }}
           >
             <Routes>
@@ -411,25 +384,23 @@ function AppInner() {
                 user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
             </Routes>
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Menu Button - Only on home page */}
       {isHomePage && (
-        <Button
-          className="mobile-menu-button"
+        <button
+          className="mobile-menu-button fixed bottom-20 right-4 md:hidden p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg"
           data-testid="mobile-menu-toggle"
-          icon={
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <line x1="3" y1="6" x2="21" y2="6"></line>
-              <line x1="3" y1="12" x2="21" y2="12"></line>
-              <line x1="3" y1="18" x2="21" y2="18"></line>
-            </svg>
-          }
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          plain
-        />
+        >
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <line x1="3" y1="6" x2="21" y2="6"></line>
+            <line x1="3" y1="12" x2="21" y2="12"></line>
+            <line x1="3" y1="18" x2="21" y2="18"></line>
+          </svg>
+        </button>
       )}
 
       <AppFooter />
@@ -442,7 +413,7 @@ function AppInner() {
           onSave={handleModalSave}
         />
       )}
-    </Box>
+    </div>
   );
 }
 

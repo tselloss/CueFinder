@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Box, Button, Card, Typography, CircularProgress, Alert } from 'grommet';
+import { AlertCircle, CheckCircle, Zap } from 'lucide-react';
 
 /**
  * Cache Performance Test Component
@@ -59,156 +59,124 @@ const CacheTestSimple = () => {
   };
 
   return (
-    <Box pad="medium" gap="medium">
-      <Box>
-        <Typography size="xlarge" weight="bold">
+    <div className="p-6 space-y-6">
+      <div>
+        <h2 className="text-2xl font-bold text-white mb-2">
           🧪 Cache Performance Test
-        </Typography>
-        <Typography color="text-weak">
+        </h2>
+        <p className="text-gray-400">
           Click the button to test if backend caching is working
-        </Typography>
-      </Box>
+        </p>
+      </div>
 
-      <Button
-        primary
-        label={loading ? 'Testing...' : 'Run Cache Test'}
+      <button
         onClick={runTest}
         disabled={loading}
-        icon={loading ? <CircularProgress size="small" /> : undefined}
-      />
+        className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white font-medium rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 transition-colors"
+      >
+        {loading ? (
+          <>
+            <div className="animate-spin rounded-full h-4 w-4 border-2 border-white border-t-transparent"></div>
+            Testing...
+          </>
+        ) : (
+          'Run Cache Test'
+        )}
+      </button>
 
       {error && (
-        <Alert type="error" message={`Error: ${error}`} />
+        <div className="p-4 bg-red-900 border border-red-700 rounded-lg flex items-start gap-3">
+          <AlertCircle className="text-red-400 mt-0.5 flex-shrink-0" size={20} />
+          <p className="text-red-200">Error: {error}</p>
+        </div>
       )}
 
       {results && (
-        <Box gap="small">
-          <Card background="light-2" pad="medium">
-            <Box gap="small">
-              <Typography size="medium" weight="bold">
-                📊 Results for {results.endpoint}
-              </Typography>
+        <div className="space-y-4">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h3 className="text-lg font-bold text-white mb-4">
+              📊 Results for {results.endpoint}
+            </h3>
 
-              <Box direction="row" gap="large" wrap>
-                <Box>
-                  <Typography size="small" color="text-weak">
-                    First Request (Database)
-                  </Typography>
-                  <Typography size="xxlarge" weight="bold">
-                    {results.firstDuration}ms
-                  </Typography>
-                </Box>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-4">
+              <div>
+                <p className="text-sm text-gray-400 mb-1">
+                  First Request (Database)
+                </p>
+                <p className="text-2xl font-bold text-white">
+                  {results.firstDuration}ms
+                </p>
+              </div>
 
-                <Box>
-                  <Typography size="small" color="text-weak">
-                    Second Request (Cache)
-                  </Typography>
-                  <Typography 
-                    size="xxlarge" 
-                    weight="bold" 
-                    color={results.isCached ? 'status-ok' : 'status-warning'}
-                  >
-                    {results.secondDuration}ms {results.isCached && '⚡'}
-                  </Typography>
-                </Box>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">
+                  Second Request (Cache)
+                </p>
+                <p className={`text-2xl font-bold flex items-center gap-1 ${results.isCached ? 'text-green-400' : 'text-yellow-400'}`}>
+                  {results.secondDuration}ms {results.isCached && '⚡'}
+                </p>
+              </div>
 
-                <Box>
-                  <Typography size="small" color="text-weak">
-                    Speed Improvement
-                  </Typography>
-                  <Typography size="xxlarge" weight="bold" color="status-ok">
-                    {results.speedup}x
-                  </Typography>
-                </Box>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">
+                  Speed Improvement
+                </p>
+                <p className="text-2xl font-bold text-green-400">
+                  {results.speedup}x
+                </p>
+              </div>
 
-                <Box>
-                  <Typography size="small" color="text-weak">
-                    Performance Gain
-                  </Typography>
-                  <Typography size="xxlarge" weight="bold" color="status-ok">
-                    {results.improvement}%
-                  </Typography>
-                </Box>
-              </Box>
+              <div>
+                <p className="text-sm text-gray-400 mb-1">
+                  Performance Gain
+                </p>
+                <p className="text-2xl font-bold text-green-400">
+                  {results.improvement}%
+                </p>
+              </div>
+            </div>
 
-              <Box 
-                pad="small" 
-                background={results.isCached ? 'status-ok' : 'status-warning'}
-                round="small"
-              >
-                <Typography color="white">
-                  {results.isCached 
-                    ? '✅ Cache is working! Response was served from cache.' 
-                    : '⚠️ Response time suggests data may not be cached. Check backend configuration.'}
-                </Typography>
-              </Box>
-            </Box>
-          </Card>
+            <div className={`p-3 rounded ${results.isCached ? 'bg-green-900 border border-green-700' : 'bg-yellow-900 border border-yellow-700'}`}>
+              <p className={results.isCached ? 'text-green-200' : 'text-yellow-200'}>
+                {results.isCached 
+                  ? '✅ Cache is working! Response was served from cache.' 
+                  : '⚠️ Response time suggests data may not be cached. Check backend configuration.'}
+              </p>
+            </div>
+          </div>
 
-          <Card background="light-1" pad="medium">
-            <Typography size="small" weight="bold">
+          <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+            <h4 className="text-sm font-bold text-white mb-3">
               💡 What These Numbers Mean:
-            </Typography>
-            <ul style={{ margin: '8px 0', paddingLeft: '20px' }}>
+            </h4>
+            <ul className="space-y-2 text-sm text-gray-300">
               <li>
-                <Typography size="small">
-                  <strong>First Request:</strong> Fetched from database (slower)
-                </Typography>
+                <strong>First Request:</strong> Fetched from database (slower)
               </li>
               <li>
-                <Typography size="small">
-                  <strong>Second Request:</strong> Should be from cache (much faster)
-                </Typography>
+                <strong>Second Request:</strong> Should be from cache (much faster)
               </li>
               <li>
-                <Typography size="small">
-                  <strong>Good cache performance:</strong> 10-50x speedup
-                </Typography>
+                <strong>Good cache performance:</strong> 10-50x speedup
               </li>
               <li>
-                <Typography size="small">
-                  <strong>Cached response:</strong> Usually &lt; 20ms
-                </Typography>
+                <strong>Cached response:</strong> Usually &lt; 20ms
               </li>
             </ul>
-          </Card>
-        </Box>
+          </div>
+        </div>
       )}
 
-      <Card background="light-3" pad="medium">
-        <Typography size="small" weight="bold">
+      <div className="bg-slate-800 border border-slate-700 rounded-lg p-6">
+        <h4 className="text-sm font-bold text-white mb-3">
           🔍 How to Test Manually:
-        </Typography>
-        <ol style={{ margin: '8px 0', paddingLeft: '20px' }}>
-          <li>
-            <Typography size="small">
-              Open DevTools (F12) → Network tab
-            </Typography>
-          </li>
-          <li>
-            <Typography size="small">
-              Navigate to any page (e.g., cue details)
-            </Typography>
-          </li>
-          <li>
-            <Typography size="small">
-              Note the API response time (e.g., 150ms)
-            </Typography>
-          </li>
-          <li>
-            <Typography size="small">
-              Refresh the page
-            </Typography>
-          </li>
-          <li>
-            <Typography size="small">
-              Response should be 10-50x faster (e.g., 5ms)
-            </Typography>
-          </li>
+        </h4>
+        <ol className="space-y-2 text-sm text-gray-300 list-decimal list-inside">
+          <li>Open DevTools (F12) → Network tab</li>
+          <li>Navigate to any page (e.g., cue details)</li>
+          <li>Note the API response time (e.g., 150ms)</li>
+          <li>Refresh the page</li>
+          <li>Response should be 10-50x faster (e.g., 5ms)</li>
         </ol>
-      </Card>
-    </Box>
-  );
-};
-
+      </div>
 export default CacheTestSimple;
