@@ -1,9 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Box, Grid, Card, CardBody, Button, Heading, Text, Image, Stack } from 'grommet';
 import { Add, Edit, Trash, StatusGood, StatusCritical } from 'grommet-icons';
+import { Plus } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import CueFormModal from './CueFormModal';
+import { Button as ShadcnButton } from './ui/button';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
@@ -128,23 +130,18 @@ export default function MyCues() {
 
   return (
     <Box gap="large">
-      <Box direction="row" justify="between" align="center">
+      <Box direction="row" justify="between" align="center" style={{ gap: '16px', flexWrap: 'wrap' }}>
         <Heading level="3" margin="none" style={{ fontSize: '28px', fontWeight: 700 }}>
           📋 My Listings
         </Heading>
-        <Button 
-          primary
-          icon={<Add size="18px" />}
-          label={<Text weight={600}>Add New Listing</Text>}
+        <ShadcnButton
           onClick={handleCreateNew}
-          style={{
-            background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-            borderRadius: '8px',
-            padding: '12px 24px',
-            boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
-            border: 'none'
-          }}
-        />
+          size="lg"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold"
+        >
+          <Plus className="mr-2 h-5 w-5" />
+          Add New Listing
+        </ShadcnButton>
       </Box>
 
       {message && (
@@ -173,18 +170,16 @@ export default function MyCues() {
           <Text size="large" color="text-weak" textAlign="center">
             You haven't created any listings yet.
           </Text>
-          <Button
-            primary
-            label={<Text weight={600}>Create Your First Listing</Text>}
-            onClick={handleCreateNew}
-            style={{
-              background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-              borderRadius: '8px',
-              padding: '12px 24px',
-              boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
-              border: 'none'
-            }}
-          />
+          <div style={{ display: 'flex', justifyContent: 'center' }}>
+            <ShadcnButton
+              onClick={handleCreateNew}
+              size="lg"
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold"
+            >
+              <Plus className="mr-2 h-5 w-5" />
+              Create Your First Listing
+            </ShadcnButton>
+          </div>
         </Box>
       ) : (
         <Grid columns="medium" gap="medium">
