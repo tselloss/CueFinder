@@ -6,7 +6,7 @@ import CueList from './components/CueList.jsx';
 import CueDetail from './components/CueDetail.jsx';
 import CueFormModal from './components/CueFormModal.jsx';
 import CueCaseDetail from './components/CueCaseDetail';
-import AdminPage from './components/AdminPage';
+import AdminPage from './components/AdminPage.jsx';
 import LoginPage from './components/LoginPage.jsx';
 import UserProfile from './components/UserProfile.jsx';
 import OAuthCallback from './components/OAuthCallback';
