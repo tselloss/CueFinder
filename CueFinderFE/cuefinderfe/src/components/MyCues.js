@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Box, Grid, Card, CardBody, Button, Heading, Text, Image, Stack } from 'grommet';
-import { Add, Edit, Trash, StatusGood, StatusCritical } from 'grommet-icons';
-import { Plus } from 'lucide-react';
+import { Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import CueFormModal from './CueFormModal';
-import { Button as ShadcnButton } from './ui/button';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Badge } from './ui/badge';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
@@ -122,67 +122,54 @@ export default function MyCues() {
 
   if (loading) {
     return (
-      <Box align="center" justify="center" pad="large">
-        <Text size="large" color="text-weak">Loading your listings...</Text>
-      </Box>
+      <div className="flex items-center justify-center py-12">
+        <p className="text-muted-foreground">Loading your listings...</p>
+      </div>
     );
   }
 
   return (
-    <Box gap="large">
-      <Box direction="row" justify="between" align="center" style={{ gap: '16px', flexWrap: 'wrap' }}>
-        <Heading level="3" margin="none" style={{ fontSize: '28px', fontWeight: 700 }}>
-          📋 My Listings
-        </Heading>
-        <ShadcnButton
+    <div className="space-y-6">
+      <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+        <h2 className="text-2xl md:text-3xl font-bold">📋 My Listings</h2>
+        <Button
           onClick={handleCreateNew}
           size="lg"
-          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold w-full sm:w-auto"
         >
           <Plus className="mr-2 h-5 w-5" />
           Add New Listing
-        </ShadcnButton>
-      </Box>
+        </Button>
+      </div>
 
       {message && (
-        <Box
-          background={message.type === 'success' ? 'status-ok' : 'status-error'}
-          pad="medium"
-          round="medium"
-          elevation="small"
-        >
-          <Text color="white" weight={500}>
-            {message.type === 'success' ? '✅ ' : '⚠️ '}{message.text}
-          </Text>
-        </Box>
+        <div className={`p-4 rounded-lg border ${
+          message.type === 'success'
+            ? 'bg-green-500/10 border-green-500/20 text-green-600'
+            : 'bg-red-500/10 border-red-500/20 text-red-600'
+        }`}>
+          <p className="font-medium">{message.type === 'success' ? '✅ ' : '⚠️ '}{message.text}</p>
+        </div>
       )}
 
-  {myListings.length === 0 ? (
-        <Box 
-          align="center" 
-          justify="center" 
-          pad="xlarge" 
-          gap="medium"
-          background="background-front"
-          round="medium"
-          elevation="small"
-        >
-          <Text size="large" color="text-weak" textAlign="center">
-            You haven't created any listings yet.
-          </Text>
-          <div style={{ display: 'flex', justifyContent: 'center' }}>
-            <ShadcnButton
+      {myListings.length === 0 ? (
+        <Card className="border-2 border-dashed border-primary/20">
+          <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
+            <p className="text-lg text-muted-foreground text-center">
+              You haven't created any listings yet.
+            </p>
+            <Button
               onClick={handleCreateNew}
               size="lg"
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold"
             >
               <Plus className="mr-2 h-5 w-5" />
               Create Your First Listing
-            </ShadcnButton>
-          </div>
-        </Box>
+            </Button>
+          </CardContent>
+        </Card>
       ) : (
-        <Grid columns="medium" gap="medium">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myListings.map(item => (
             <CueCard
               key={item.id}
@@ -192,7 +179,7 @@ export default function MyCues() {
               onToggleSold={() => handleToggleSold(item)}
             />
           ))}
-        </Grid>
+        </div>
       )}
 
       {showCreateModal && (
@@ -202,7 +189,7 @@ export default function MyCues() {
           onSave={handleSaveCue}
         />
       )}
-    </Box>
+    </div>
   );
 }
 
@@ -211,148 +198,89 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
   const imageUrl = getImageUrl(primaryImage);
 
   return (
-    <Card
-      background="background-front"
-      elevation="medium"
-      round="medium"
-      style={{ 
-        border: '1px solid rgba(51, 65, 85, 0.3)',
-        opacity: cue.isSold ? 0.8 : 1
-      }}
-    >
-      <Box height="200px" style={{ position: 'relative', overflow: 'hidden' }}>
-        <Stack fill>
-          <Box fill>
-            <Image
-              src={imageUrl}
-              fit="cover"
-              style={{ 
-                width: '100%', 
-                height: '200px', 
-                objectFit: 'cover',
-                display: 'block'
-              }}
-              onError={(e) => e.target.src = '/placeholder.png'}
-            />
-          </Box>
-          {cue.category && (
-            <Box 
-              background="brand" 
-              pad="xsmall" 
-              round="small"
-              style={{ position: 'absolute', top: '12px', left: '12px' }}
-            >
-              <Text size="small" weight="bold" color="white">{cue.category === 'case' ? 'Case' : 'Cue'}</Text>
-            </Box>
-          )}
-          {cue.isSold && (
-            <Box 
-              background="status-error" 
-              pad="small" 
-              round="small"
-              style={{ position: 'absolute', top: '12px', right: '12px' }}
-            >
-              <Text size="small" weight="bold" color="white">SOLD</Text>
-            </Box>
-          )}
-          {cue.images && cue.images.length > 0 && (
-            <Box 
-              background={{ color: 'black', opacity: 0.7 }}
-              pad="xsmall" 
-              round="small"
-              style={{ position: 'absolute', bottom: '12px', right: '12px' }}
-            >
-              <Text size="small" color="white">📷 {cue.images.length}</Text>
-            </Box>
-          )}
-        </Stack>
-      </Box>
-      
-      <CardBody pad="medium">
-        <Box gap="small">
-          <Text weight="bold" size="large" color="text-strong" truncate style={{ fontSize: '18px' }}>
-            {cue.title}
-          </Text>
-          <Text size="small" color="text-weak" style={{ fontSize: '14px' }}>
-            {cue.brand}
-          </Text>
-          
-          <Box direction="row" justify="between" align="center" margin={{ top: 'small' }}>
-            <Box 
-              background="brand"
-              pad={{ horizontal: 'small', vertical: 'xsmall' }}
-              round="small"
-            >
-              <Text weight="bold" size="large" color="white" style={{ fontSize: '20px' }}>
-                ${cue.price?.toFixed(2)}
-              </Text>
-            </Box>
-            <Box 
-              background="accent-1"
-              pad={{ horizontal: 'small', vertical: 'xsmall' }}
-              round="small"
-            >
-              <Text size="small" weight={500} color="white">
-                {cue.condition}
-              </Text>
-            </Box>
-          </Box>
+    <Card className={`overflow-hidden transition-opacity ${cue.isSold ? 'opacity-70' : ''}`}>
+      {/* Image Container */}
+      <div className="relative h-48 overflow-hidden bg-muted">
+        <img
+          src={imageUrl}
+          alt={cue.title || cue.brand}
+          className="w-full h-full object-cover"
+          onError={(e) => e.target.src = '/placeholder.png'}
+        />
+        
+        {/* Category Badge */}
+        {cue.category && (
+          <Badge className="absolute top-3 left-3 bg-blue-600">
+            {cue.category === 'case' ? 'Case' : 'Cue'}
+          </Badge>
+        )}
+        
+        {/* Sold Badge */}
+        {cue.isSold && (
+          <Badge className="absolute top-3 right-3 bg-red-600">
+            SOLD
+          </Badge>
+        )}
+      </div>
 
-          {cue.viewCount !== undefined && (
-            <Box direction="row" align="center" gap="xsmall">
-              <Text size="small" color="text-weak">👁 {cue.viewCount} views</Text>
-            </Box>
-          )}
-          {cue.location && (
-            <Box direction="row" align="center" gap="xsmall">
-              <Text size="small" color="text-weak">📍 {cue.location}</Text>
-            </Box>
-          )}
-        </Box>
-      </CardBody>
-      
-      <Box 
-        direction="row" 
-        gap="small" 
-        pad="medium" 
-        background="background-back"
-        style={{ borderTop: '1px solid rgba(51, 65, 85, 0.3)' }}
-      >
-        <Button
-          icon={<Edit size="16px" />}
-          label={<Text size="small" weight={500}>Edit</Text>}
-          onClick={onEdit}
-          style={{
-            background: 'rgba(59, 130, 246, 0.1)',
-            border: '1px solid rgba(59, 130, 246, 0.3)',
-            borderRadius: '6px',
-            padding: '6px 12px',
-            flex: 1
-          }}
-        />
-        <Button
-          icon={cue.isSold ? <StatusGood size="16px" /> : <StatusCritical size="16px" />}
-          label={<Text size="small" weight={500}>{cue.isSold ? 'Available' : 'Sold'}</Text>}
-          onClick={onToggleSold}
-          style={{
-            background: cue.isSold ? 'rgba(16, 185, 129, 0.1)' : 'rgba(245, 158, 11, 0.1)',
-            border: `1px solid ${cue.isSold ? 'rgba(16, 185, 129, 0.3)' : 'rgba(245, 158, 11, 0.3)'}`,
-            borderRadius: '6px',
-            padding: '6px 12px',
-            flex: 1
-          }}
-        />
-        <Button
-          icon={<Trash size="16px" />}
-          onClick={onDelete}
-          style={{
-            background: 'rgba(239, 68, 68, 0.1)',
-            border: '1px solid rgba(239, 68, 68, 0.3)',
-            borderRadius: '6px',
-            padding: '6px 12px'
-          }}
-        />
-      </Box>
+      {/* Content */}
+      <CardContent className="p-4 space-y-3">
+        <div>
+          <h3 className="font-semibold text-lg truncate">{cue.title || cue.brand}</h3>
+          <p className="text-sm text-muted-foreground">{cue.brand}</p>
+        </div>
+
+        {/* Condition Badge */}
+        {cue.condition && (
+          <Badge variant="outline" className="w-fit">
+            {cue.condition}
+          </Badge>
+        )}
+
+        {/* Price */}
+        <div className="text-lg font-bold text-primary">
+          €{cue.price?.toFixed(2) || '0.00'}
+        </div>
+
+        {/* Actions */}
+        <div className="flex gap-2 pt-2">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onEdit}
+            className="flex-1"
+          >
+            <Edit2 className="w-4 h-4 mr-1" />
+            Edit
+          </Button>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onToggleSold}
+            className="flex-1"
+          >
+            {cue.isSold ? (
+              <>
+                <CheckCircle className="w-4 h-4 mr-1" />
+                Mark Available
+              </>
+            ) : (
+              <>
+                <AlertCircle className="w-4 h-4 mr-1" />
+                Mark Sold
+              </>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onDelete}
+            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        </div>
+      </CardContent>
     </Card>
   );
 }
