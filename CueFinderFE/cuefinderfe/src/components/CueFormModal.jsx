@@ -228,7 +228,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-3xl max-h-[90vh] sm:max-h-[85vh] overflow-hidden flex flex-col p-3 sm:p-4 md:p-6 rounded-lg">
+      <DialogContent className="w-[95vw] max-w-3xl overflow-hidden flex flex-col p-3 sm:p-4 md:p-6 rounded-lg">
         <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle className="text-lg sm:text-xl md:text-2xl leading-tight">
             {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
