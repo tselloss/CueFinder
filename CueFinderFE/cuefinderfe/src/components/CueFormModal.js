@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Layer, Box, Button, Heading, Form, FormField, TextInput, TextArea, Select } from 'grommet';
-import { Close } from 'grommet-icons';
+import { X } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import { getErrorMessage } from '../utils/errorUtils';
@@ -231,684 +230,607 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   };
 
   return (
-    <Layer
-      onEsc={onClose}
-      onClickOutside={onClose}
-      style={{
-        maxHeight: '90vh',
-        overflow: 'auto'
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 overflow-y-auto"
+      onClick={onClose}
+      onKeyDown={(e) => {
+        if (e.key === 'Escape') onClose();
       }}
+      role="presentation"
     >
-      <Box
-        width="xlarge"
-        pad="medium"
-        gap="small"
-        background="background-front"
-        style={{
-          maxWidth: '1000px',
-          width: '95vw',
-          borderRadius: '16px',
-          border: '1px solid rgba(59, 130, 246, 0.3)'
-        }}
+      <div
+        className="w-[95vw] max-w-4xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-blue-400/30 shadow-2xl p-8 my-8"
+        onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <Box direction="row" justify="between" align="center" pad={{ bottom: 'small' }}>
-          <Heading level="2" margin="none" style={{ fontSize: '24px', fontWeight: 700 }}>
+        <div className="flex justify-between items-center pb-6 border-b border-slate-700">
+          <h2 className="text-2xl font-bold text-white">
             {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
-          </Heading>
-          <Button
-            icon={<Close />}
+          </h2>
+          <button
             onClick={onClose}
-            plain
-            style={{
-              padding: '8px',
-              borderRadius: '8px',
-              background: 'rgba(239, 68, 68, 0.1)',
-              border: '1px solid rgba(239, 68, 68, 0.3)'
-            }}
-            hoverIndicator={{ background: 'rgba(239, 68, 68, 0.2)' }}
-          />
-        </Box>
+            className="p-2 rounded-lg bg-red-500/10 border border-red-500/30 text-red-400 hover:bg-red-500/20 transition-colors"
+            aria-label="Close"
+          >
+            <X size={24} />
+          </button>
+        </div>
 
         {error && (
-          <Box
-            background="status-error"
-            pad="small"
-            round="small"
-            style={{
-              border: '1px solid rgba(239, 68, 68, 0.5)'
-            }}
-          >
-            <text size="small" color="white">{error}</text>
-          </Box>
+          <div className="mt-6 p-4 rounded-lg bg-red-500/10 border border-red-500/50 text-red-400 text-sm">
+            {error}
+          </div>
         )}
 
-        <Form onSubmit={handleSubmit}>
-          <Box gap="small">
+        <form onSubmit={handleSubmit} className="mt-6">
+          <div className="space-y-6">
             {/* DEBUG: Show cue value */}
             {console.log('CueFormModal - cue prop:', cue, 'showing selector:', !cue)}
             
             {/* Product Type Selector - Always show for new listings */}
             {!cue && (
-              <Box
-                background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)"
-                pad="large"
-                round="medium"
-                gap="medium"
-                style={{ 
-                  border: '3px solid rgba(59, 130, 246, 0.6)',
-                  boxShadow: '0 8px 24px rgba(59, 130, 246, 0.2)'
-                }}
+              <div
+                className="p-8 rounded-xl border-4 border-blue-500/60 bg-gradient-to-br from-blue-500/10 to-blue-600/5 shadow-lg"
               >
-                <Box align="center" gap="xsmall">
-                  <Heading level="3" margin="none" style={{ fontSize: '20px', fontWeight: 700, color: '#3b82f6' }}>
+                <div className="text-center mb-8">
+                  <h3 className="text-2xl font-bold text-blue-400 mb-2">
                     🎯 What are you listing?
-                  </Heading>
-                  <text size="small" color="text-weak" textAlign="center">
+                  </h3>
+                  <p className="text-slate-400 text-sm">
                     Choose the type of product you want to sell
-                  </text>
-                </Box>
+                  </p>
+                </div>
                 
-                <Box direction="row" gap="medium">
-                  <Button
-                    fill="horizontal"
+                <div className="grid grid-cols-2 gap-6">
+                  {/* Cue Button */}
+                  <button
+                    type="button"
                     onClick={() => setProductType('cue')}
-                    style={{
-                      background: productType === 'cue' 
-                        ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                        : 'rgba(30, 41, 59, 0.7)',
-                      color: productType === 'cue' ? 'white' : '#cbd5e1',
-                      border: productType === 'cue' 
-                        ? '3px solid #3b82f6' 
-                        : '3px solid rgba(51, 65, 85, 0.8)',
-                      borderRadius: '16px',
-                      padding: '24px 20px',
-                      transition: 'all 0.3s ease',
-                      transform: productType === 'cue' ? 'scale(1.05)' : 'scale(1)',
-                      boxShadow: productType === 'cue' 
-                        ? '0 12px 28px rgba(59, 130, 246, 0.5), inset 0 0 60px rgba(255, 255, 255, 0.1)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}
-                    hoverIndicator={{
-                      background: productType === 'cue' 
-                        ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                        : 'rgba(30, 41, 59, 0.9)'
-                    }}
+                    className={`p-6 rounded-2xl transition-all duration-300 text-center ${
+                      productType === 'cue'
+                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-3 border-blue-400 shadow-lg shadow-blue-500/50 scale-105'
+                        : 'bg-slate-700/70 border-3 border-slate-600/80 hover:bg-slate-700 text-slate-300'
+                    }`}
                   >
-                    <Box align="center" gap="small">
-                      <text style={{ fontSize: '48px', lineHeight: '1' }}>🎱</text>
-                      <Box align="center">
-                        <text weight={700} size="large" style={{ lineHeight: '1.2' }}>
-                          Billiard Cue
-                        </text>
-                        <text size="xsmall" color={productType === 'cue' ? 'rgba(255, 255, 255, 0.8)' : '#94a3b8'} style={{ lineHeight: '1.4' }}>
-                          Pool & Snooker Cues
-                        </text>
-                      </Box>
-                      {productType === 'cue' && (
-                        <Box 
-                          background="rgba(255, 255, 255, 0.2)"
-                          pad="xxsmall"
-                          round="small"
-                          margin={{ top: 'xsmall' }}
-                        >
-                          <text size="xsmall" weight={600}>✓ SELECTED</text>
-                        </Box>
-                      )}
-                    </Box>
-                  </Button>
+                    <div className="text-5xl mb-3">🎱</div>
+                    <div className={`font-bold text-lg ${productType === 'cue' ? 'text-white' : 'text-slate-300'}`}>
+                      Billiard Cue
+                    </div>
+                    <div className={`text-xs mt-1 ${productType === 'cue' ? 'text-white/80' : 'text-slate-400'}`}>
+                      Pool & Snooker Cues
+                    </div>
+                    {productType === 'cue' && (
+                      <div className="mt-3 inline-block bg-white/20 px-2 py-1 rounded text-xs font-semibold text-white">
+                        ✓ SELECTED
+                      </div>
+                    )}
+                  </button>
                   
-                  <Button
-                    fill="horizontal"
+                  {/* Case Button */}
+                  <button
+                    type="button"
                     onClick={() => setProductType('case')}
-                    style={{
-                      background: productType === 'case' 
-                        ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-                        : 'rgba(30, 41, 59, 0.7)',
-                      color: productType === 'case' ? 'white' : '#cbd5e1',
-                      border: productType === 'case' 
-                        ? '3px solid #3b82f6' 
-                        : '3px solid rgba(51, 65, 85, 0.8)',
-                      borderRadius: '16px',
-                      padding: '24px 20px',
-                      transition: 'all 0.3s ease',
-                      transform: productType === 'case' ? 'scale(1.05)' : 'scale(1)',
-                      boxShadow: productType === 'case' 
-                        ? '0 12px 28px rgba(59, 130, 246, 0.5), inset 0 0 60px rgba(255, 255, 255, 0.1)' 
-                        : '0 4px 12px rgba(0, 0, 0, 0.3)'
-                    }}
-                    hoverIndicator={{
-                      background: productType === 'case' 
-                        ? 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)'
-                        : 'rgba(30, 41, 59, 0.9)'
-                    }}
+                    className={`p-6 rounded-2xl transition-all duration-300 text-center ${
+                      productType === 'case'
+                        ? 'bg-gradient-to-br from-blue-500 to-blue-600 border-3 border-blue-400 shadow-lg shadow-blue-500/50 scale-105'
+                        : 'bg-slate-700/70 border-3 border-slate-600/80 hover:bg-slate-700 text-slate-300'
+                    }`}
                   >
-                    <Box align="center" gap="small">
-                      <text style={{ fontSize: '48px', lineHeight: '1' }}>💼</text>
-                      <Box align="center">
-                        <text weight={700} size="large" style={{ lineHeight: '1.2' }}>
-                          Cue Case
-                        </text>
-                        <text size="xsmall" color={productType === 'case' ? 'rgba(255, 255, 255, 0.8)' : '#94a3b8'} style={{ lineHeight: '1.4' }}>
-                          Protective Cases
-                        </text>
-                      </Box>
-                      {productType === 'case' && (
-                        <Box 
-                          background="rgba(255, 255, 255, 0.2)"
-                          pad="xxsmall"
-                          round="small"
-                          margin={{ top: 'xsmall' }}
-                        >
-                          <text size="xsmall" weight={600}>✓ SELECTED</text>
-                        </Box>
-                      )}
-                    </Box>
-                  </Button>
-                </Box>
-              </Box>
+                    <div className="text-5xl mb-3">💼</div>
+                    <div className={`font-bold text-lg ${productType === 'case' ? 'text-white' : 'text-slate-300'}`}>
+                      Cue Case
+                    </div>
+                    <div className={`text-xs mt-1 ${productType === 'case' ? 'text-white/80' : 'text-slate-400'}`}>
+                      Protective Cases
+                    </div>
+                    {productType === 'case' && (
+                      <div className="mt-3 inline-block bg-white/20 px-2 py-1 rounded text-xs font-semibold text-white">
+                        ✓ SELECTED
+                      </div>
+                    )}
+                  </button>
+                </div>
+              </div>
             )}
 
             {/* Basic Info Section */}
-            <Box
-              background="background-back"
-              pad="medium"
-              round="small"
-              gap="small"
-              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
-            >
-              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-600/30 space-y-4">
+              <div className="text-xs font-bold text-blue-400 uppercase tracking-widest">
                 📋 Basic Information
-              </text>
+              </div>
               
-              <Box direction="row" gap="small">
-                <Box flex>
-                  <FormField label="Title *" name="title" required>
-                    <TextInput
-                      name="title"
-                      value={formData.title}
-                      onChange={handleChange}
-                      placeholder="e.g., Predator REVO 12.9"
-                    />
-                  </FormField>
-                </Box>
-                <Box flex>
-                  <FormField label="Brand *" name="brand" required>
-                    <TextInput
-                      name="brand"
-                      value={formData.brand}
-                      onChange={handleChange}
-                      placeholder="e.g., Predator"
-                    />
-                  </FormField>
-                </Box>
-              </Box>
-
-              <Box direction="row" gap="small">
-                <Box flex>
-                  <FormField label="Price (€) *" name="price" required>
-                    <TextInput
-                      name="price"
-                      type="number"
-                      value={formData.price}
-                      onChange={handleChange}
-                      placeholder="0.00"
-                      min="0"
-                      step="0.01"
-                    />
-                  </FormField>
-                </Box>
-                <Box flex>
-                  <FormField label="Condition *" name="condition" required>
-                    <Select
-                      name="condition"
-                      options={['New', 'Excellent', 'Good', 'Fair', 'Poor']}
-                      value={formData.condition}
-                      onChange={({ option }) => setFormData(prev => ({ ...prev, condition: option }))}
-                    />
-                  </FormField>
-                </Box>
-              </Box>
-
-              {productType === 'cue' && (
-                <FormField label="Cue Type *" name="cueType" required>
-                  <Select
-                    name="cueType"
-                    options={['playing', 'break', 'jump']}
-                    value={formData.cueType}
-                    onChange={({ option }) => setFormData(prev => ({ ...prev, cueType: option }))}
-                    labelKey={(option) => {
-                      const labels = { playing: '🎯 Playing Cue', break: '💥 Break Cue', jump: '🚀 Jump Cue' };
-                      return labels[option] || option;
-                    }}
-                    valueKey={{ key: 'value', reduce: true }}
+              {/* Title and Brand Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    Title <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="title"
+                    value={formData.title}
+                    onChange={handleChange}
+                    placeholder="e.g., Predator REVO 12.9"
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
                   />
-                </FormField>
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    Brand <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    name="brand"
+                    value={formData.brand}
+                    onChange={handleChange}
+                    placeholder="e.g., Predator"
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+              </div>
+
+              {/* Price and Condition Row */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    Price (€) <span className="text-red-400">*</span>
+                  </label>
+                  <input
+                    type="number"
+                    name="price"
+                    value={formData.price}
+                    onChange={handleChange}
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    Condition <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    name="condition"
+                    value={formData.condition}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="New">New</option>
+                    <option value="Excellent">Excellent</option>
+                    <option value="Good">Good</option>
+                    <option value="Fair">Fair</option>
+                    <option value="Poor">Poor</option>
+                  </select>
+                </div>
+              </div>
+
+              {/* Cue Type */}
+              {productType === 'cue' && (
+                <div>
+                  <label className="block text-sm font-semibold text-slate-300 mb-2">
+                    Cue Type <span className="text-red-400">*</span>
+                  </label>
+                  <select
+                    name="cueType"
+                    value={formData.cueType}
+                    onChange={handleChange}
+                    className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                    required
+                  >
+                    <option value="playing">🎯 Playing Cue</option>
+                    <option value="break">💥 Break Cue</option>
+                    <option value="jump">🚀 Jump Cue</option>
+                  </select>
+                </div>
               )}
 
-              <FormField label="Location" name="location">
-                <TextInput
+              {/* Location */}
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">
+                  Location
+                </label>
+                <input
+                  type="text"
                   name="location"
                   value={formData.location}
                   onChange={handleChange}
                   placeholder="City, State"
+                  className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                 />
-              </FormField>
-            </Box>
+              </div>
+            </div>
 
             {/* Specifications Section - Conditional based on product type */}
-            <Box
-              background="background-back"
-              pad="medium"
-              round="small"
-              gap="small"
-              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
-            >
-              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-600/30 space-y-4">
+              <div className="text-xs font-bold text-blue-400 uppercase tracking-widest">
                 📏 Specifications
-              </text>
+              </div>
 
               {productType === 'cue' ? (
                 <>
                   {/* Cue Specifications */}
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Weight (oz)" name="weight">
-                        <TextInput
-                          name="weight"
-                          type="number"
-                          value={formData.weight}
-                          onChange={handleChange}
-                          placeholder="18.5"
-                          step="0.1"
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Length (inches)" name="length">
-                        <TextInput
-                          name="length"
-                          type="number"
-                          value={formData.length}
-                          onChange={handleChange}
-                          placeholder="58"
-                          step="0.1"
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Tip Size (mm)" name="tipSize">
-                        <TextInput
-                          name="tipSize"
-                          type="number"
-                          value={formData.tipSize}
-                          onChange={handleChange}
-                          placeholder="12.9"
-                          step="0.1"
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-3 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Weight (oz)
+                      </label>
+                      <input
+                        type="number"
+                        name="weight"
+                        value={formData.weight}
+                        onChange={handleChange}
+                        placeholder="18.5"
+                        step="0.1"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Length (inches)
+                      </label>
+                      <input
+                        type="number"
+                        name="length"
+                        value={formData.length}
+                        onChange={handleChange}
+                        placeholder="58"
+                        step="0.1"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Tip Size (mm)
+                      </label>
+                      <input
+                        type="number"
+                        name="tipSize"
+                        value={formData.tipSize}
+                        onChange={handleChange}
+                        placeholder="12.9"
+                        step="0.1"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Shaft Material" name="shaftMaterial">
-                        <TextInput
-                          name="shaftMaterial"
-                          value={formData.shaftMaterial}
-                          onChange={handleChange}
-                          placeholder="e.g., Carbon Fiber"
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Butt Material" name="buttMaterial">
-                        <TextInput
-                          name="buttMaterial"
-                          value={formData.buttMaterial}
-                          onChange={handleChange}
-                          placeholder="e.g., Maple"
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Shaft Material
+                      </label>
+                      <input
+                        type="text"
+                        name="shaftMaterial"
+                        value={formData.shaftMaterial}
+                        onChange={handleChange}
+                        placeholder="e.g., Carbon Fiber"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Butt Material
+                      </label>
+                      <input
+                        type="text"
+                        name="buttMaterial"
+                        value={formData.buttMaterial}
+                        onChange={handleChange}
+                        placeholder="e.g., Maple"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
                 </>
               ) : (
                 <>
                   {/* Case Specifications */}
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Case Capacity" name="caseCapacity">
-                        <Select
-                          name="caseCapacity"
-                          options={['1x1', '1x2', '2x4', '3x5', '4x8']}
-                          value={formData.caseCapacity}
-                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseCapacity: option }))}
-                          placeholder="Select capacity"
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Case Opening" name="caseOpening">
-                        <Select
-                          name="caseOpening"
-                          options={['Butterfly', 'Top Open', 'Side Open', 'Zipper']}
-                          value={formData.caseOpening}
-                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseOpening: option }))}
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Case Capacity
+                      </label>
+                      <select
+                        name="caseCapacity"
+                        value={formData.caseCapacity}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select capacity</option>
+                        <option value="1x1">1x1</option>
+                        <option value="1x2">1x2</option>
+                        <option value="2x4">2x4</option>
+                        <option value="3x5">3x5</option>
+                        <option value="4x8">4x8</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Case Opening
+                      </label>
+                      <select
+                        name="caseOpening"
+                        value={formData.caseOpening}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="Butterfly">Butterfly</option>
+                        <option value="Top Open">Top Open</option>
+                        <option value="Side Open">Side Open</option>
+                        <option value="Zipper">Zipper</option>
+                      </select>
+                    </div>
+                  </div>
 
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Case Type" name="caseType">
-                        <Select
-                          name="caseType"
-                          options={['Soft', 'Hard', 'Semi-Hard']}
-                          value={formData.caseType}
-                          onChange={({ option }) => setFormData(prev => ({ ...prev, caseType: option }))}
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Color" name="color">
-                        <TextInput
-                          name="color"
-                          value={formData.color}
-                          onChange={handleChange}
-                          placeholder="e.g., Blue, Black"
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Case Type
+                      </label>
+                      <select
+                        name="caseType"
+                        value={formData.caseType}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="Soft">Soft</option>
+                        <option value="Hard">Hard</option>
+                        <option value="Semi-Hard">Semi-Hard</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Color
+                      </label>
+                      <input
+                        type="text"
+                        name="color"
+                        value={formData.color}
+                        onChange={handleChange}
+                        placeholder="e.g., Blue, Black"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Case Material" name="caseMaterial">
-                        <TextInput
-                          name="caseMaterial"
-                          value={formData.caseMaterial}
-                          onChange={handleChange}
-                          placeholder="e.g., Ultra Vinyl, Leather"
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Case Weight" name="caseWeight">
-                        <TextInput
-                          name="caseWeight"
-                          value={formData.caseWeight}
-                          onChange={handleChange}
-                          placeholder="e.g., 3.6 lbs"
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Case Material
+                      </label>
+                      <input
+                        type="text"
+                        name="caseMaterial"
+                        value={formData.caseMaterial}
+                        onChange={handleChange}
+                        placeholder="e.g., Ultra Vinyl, Leather"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Case Weight
+                      </label>
+                      <input
+                        type="text"
+                        name="caseWeight"
+                        value={formData.caseWeight}
+                        onChange={handleChange}
+                        placeholder="e.g., 3.6 lbs"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
 
-                  <FormField label="Outer Dimensions" name="outerDimensions">
-                    <TextInput
+                  <div>
+                    <label className="block text-sm font-semibold text-slate-300 mb-2">
+                      Outer Dimensions
+                    </label>
+                    <input
+                      type="text"
                       name="outerDimensions"
                       value={formData.outerDimensions}
                       onChange={handleChange}
                       placeholder="e.g., 86.36 cm H x 13.97 cm W x 20.32 cm D"
+                      className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
                     />
-                  </FormField>
+                  </div>
 
-                  <Box direction="row" gap="small">
-                    <Box flex>
-                      <FormField label="Pocket Space" name="pocketSpace">
-                        <Select
-                          name="pocketSpace"
-                          options={['None', 'Small', 'Medium', 'Large', 'Very Large']}
-                          value={formData.pocketSpace}
-                          onChange={({ option }) => setFormData(prev => ({ ...prev, pocketSpace: option }))}
-                        />
-                      </FormField>
-                    </Box>
-                    <Box flex>
-                      <FormField label="Handle/Extension Space" name="handleExtensionSpace">
-                        <TextInput
-                          name="handleExtensionSpace"
-                          value={formData.handleExtensionSpace}
-                          onChange={handleChange}
-                          placeholder="e.g., Protection Sleeves Included"
-                        />
-                      </FormField>
-                    </Box>
-                  </Box>
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Pocket Space
+                      </label>
+                      <select
+                        name="pocketSpace"
+                        value={formData.pocketSpace}
+                        onChange={handleChange}
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      >
+                        <option value="">Select option</option>
+                        <option value="None">None</option>
+                        <option value="Small">Small</option>
+                        <option value="Medium">Medium</option>
+                        <option value="Large">Large</option>
+                        <option value="Very Large">Very Large</option>
+                      </select>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-slate-300 mb-2">
+                        Handle/Extension Space
+                      </label>
+                      <input
+                        type="text"
+                        name="handleExtensionSpace"
+                        value={formData.handleExtensionSpace}
+                        onChange={handleChange}
+                        placeholder="e.g., Protection Sleeves Included"
+                        className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
                 </>
               )}
-            </Box>
+            </div>
 
             {/* Description Section */}
-            <Box
-              background="background-back"
-              pad="medium"
-              round="small"
-              gap="small"
-              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
-            >
-              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-600/30 space-y-4">
+              <div className="text-xs font-bold text-blue-400 uppercase tracking-widest">
                 📝 Description
-              </text>
+              </div>
               
-              <FormField name="description">
-                <TextArea
+              <div>
+                <label className="block text-sm font-semibold text-slate-300 mb-2">
+                  Description
+                </label>
+                <textarea
                   name="description"
                   value={formData.description}
                   onChange={handleChange}
                   rows={4}
                   placeholder="Describe the cue's features, condition, and any special notes..."
+                  className="w-full px-4 py-2 bg-slate-700/50 border border-slate-600 rounded-lg text-white placeholder-slate-500 focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500 resize-none"
                 />
-              </FormField>
-            </Box>
+              </div>
+            </div>
 
             {/* Images Section */}
-            <Box
-              background="background-back"
-              pad="medium"
-              round="small"
-              gap="small"
-              style={{ border: '1px solid rgba(51, 65, 85, 0.3)' }}
-            >
-              <text size="small" weight={600} color="brand" style={{ textTransform: 'uppercase', letterSpacing: '0.05em' }}>
-                📷 Images {!cue && <text size="xsmall" color="status-error">*</text>}
-              </text>
+            <div className="p-6 rounded-lg bg-slate-800/50 border border-slate-600/30 space-y-4">
+              <div className="text-xs font-bold text-blue-400 uppercase tracking-widest">
+                📷 Images {!cue && <span className="text-red-400">*</span>}
+              </div>
 
               {/* Existing images */}
               {cue && cue.images && cue.images.length > 0 && (
-                <Box gap="xsmall">
-                  <text size="small" weight={500}>Current Images</text>
-                  <Box direction="row" gap="small" wrap>
+                <div className="space-y-2">
+                  <div className="text-sm font-medium text-slate-300">Current Images</div>
+                  <div className="flex flex-wrap gap-3">
                     {cue.images.map(img => (
-                      <Box
+                      <div
                         key={img.id}
-                        width="120px"
-                        height="120px"
-                        style={{
-                          position: 'relative',
-                          borderRadius: '8px',
-                          overflow: 'hidden',
-                          border: img.isPrimary ? '3px solid #3b82f6' : '1px solid rgba(51, 65, 85, 0.3)'
-                        }}
+                        className={`relative w-32 h-32 rounded-lg overflow-hidden ${
+                          img.isPrimary
+                            ? 'border-4 border-blue-500'
+                            : 'border border-slate-600/30'
+                        }`}
                       >
                         <img
                           src={getImageUrl(img)}
                           alt="Cue"
-                          style={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover'
-                          }}
+                          className="w-full h-full object-cover"
                         />
                         {img.isPrimary && (
-                          <Box
-                            background="brand"
-                            pad="xxsmall"
-                            style={{
-                              position: 'absolute',
-                              top: 0,
-                              left: 0,
-                              fontSize: '10px',
-                              fontWeight: 600
-                            }}
-                          >
-                            <text size="xsmall" color="white">PRIMARY</text>
-                          </Box>
+                          <div className="absolute top-0 left-0 bg-blue-500 px-2 py-1 text-xs font-bold text-white">
+                            PRIMARY
+                          </div>
                         )}
-                        <Box
-                          direction="row"
-                          gap="xxsmall"
-                          style={{
-                            position: 'absolute',
-                            bottom: '4px',
-                            right: '4px'
-                          }}
-                        >
+                        <div className="absolute bottom-1 right-1 flex gap-1">
                           {!img.isPrimary && (
-                            <Button
-                              icon={<text>⭐</text>}
+                            <button
+                              type="button"
                               onClick={() => handleSetPrimaryImage(img.id)}
-                              size="small"
-                              style={{
-                                background: 'rgba(59, 130, 246, 0.9)',
-                                padding: '4px',
-                                borderRadius: '4px'
-                              }}
-                              tip="Set as primary"
-                            />
+                              className="p-1 bg-blue-600 hover:bg-blue-700 rounded text-white text-sm"
+                              title="Set as primary"
+                            >
+                              ⭐
+                            </button>
                           )}
-                          <Button
-                            icon={<text>🗑️</text>}
+                          <button
+                            type="button"
                             onClick={() => handleDeleteExistingImage(img.id)}
-                            size="small"
-                            style={{
-                              background: 'rgba(239, 68, 68, 0.9)',
-                              padding: '4px',
-                              borderRadius: '4px'
-                            }}
-                            tip="Delete image"
-                          />
-                        </Box>
-                      </Box>
+                            className="p-1 bg-red-600 hover:bg-red-700 rounded text-white text-sm"
+                            title="Delete image"
+                          >
+                            🗑️
+                          </button>
+                        </div>
+                      </div>
                     ))}
-                  </Box>
-                </Box>
+                  </div>
+                </div>
               )}
 
               {/* New image upload */}
-              <Box gap="xsmall">
-                <text size="small" weight={500}>
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-slate-300">
                   {cue ? 'Add More Images' : 'Upload Images *'}
-                </text>
+                </div>
                 <input
                   type="file"
                   accept="image/jpeg,image/jpg,image/png,image/gif,image/webp"
                   multiple
                   onChange={handleImageSelect}
-                  style={{
-                    padding: '12px',
-                    borderRadius: '8px',
-                    border: '2px dashed rgba(59, 130, 246, 0.5)',
-                    background: 'rgba(30, 41, 59, 0.5)',
-                    color: '#cbd5e1',
-                    cursor: 'pointer'
-                  }}
+                  className="w-full px-4 py-3 bg-slate-700/50 border-2 border-dashed border-blue-500/50 rounded-lg text-slate-300 placeholder-slate-500 focus:outline-none focus:border-blue-400 cursor-pointer hover:border-blue-500/75"
                 />
-                <text size="xsmall" color="text-weak">
+                <div className="text-xs text-slate-400">
                   JPG, PNG, GIF, WebP - Max 5MB each
-                </text>
+                </div>
 
                 {uploadProgress !== null && (
-                  <Box gap="xxsmall" margin={{ top: 'xsmall' }}>
-                    <text size="small" weight={500}>
+                  <div className="space-y-2 mt-4">
+                    <div className="text-sm font-medium text-slate-300">
                       Uploading images... {uploadProgress}%
-                    </text>
-                    <Box
-                      background="background-back"
-                      height="8px"
-                      round="small"
-                      style={{ border: '1px solid rgba(59, 130, 246, 0.4)' }}
-                    >
-                      <Box
-                        background="brand"
-                        height="8px"
-                        round="small"
-                        width={`${Math.max(0, Math.min(100, uploadProgress))}%`}
-                        style={{ transition: 'width 0.2s ease' }}
+                    </div>
+                    <div className="w-full bg-slate-700/50 h-2 rounded-full border border-blue-500/40 overflow-hidden">
+                      <div
+                        className="h-full bg-gradient-to-r from-blue-500 to-blue-400 transition-all duration-200"
+                        style={{ width: `${Math.max(0, Math.min(100, uploadProgress))}%` }}
                       />
-                    </Box>
-                  </Box>
+                    </div>
+                  </div>
                 )}
                 
                 {imagePreviews.length > 0 && (
-                  <Box gap="xsmall" margin={{ top: 'small' }}>
-                    <text size="small" weight={500}>
+                  <div className="space-y-2 mt-4">
+                    <div className="text-sm font-medium text-slate-300">
                       {imagePreviews.length} new image(s) selected
-                    </text>
-                    <Box direction="row" gap="small" wrap>
+                    </div>
+                    <div className="flex flex-wrap gap-2">
                       {imagePreviews.map((preview, index) => (
-                        <Box
+                        <div
                           key={index}
-                          width="80px"
-                          height="80px"
-                          style={{
-                            borderRadius: '8px',
-                            overflow: 'hidden',
-                            border: '1px solid rgba(59, 130, 246, 0.5)'
-                          }}
+                          className="w-20 h-20 rounded-lg overflow-hidden border border-blue-500/50"
                         >
                           <img
                             src={preview}
                             alt={`Preview ${index + 1}`}
-                            style={{
-                              width: '100%',
-                              height: '100%',
-                              objectFit: 'cover'
-                            }}
+                            className="w-full h-full object-cover"
                           />
-                        </Box>
+                        </div>
                       ))}
-                    </Box>
-                  </Box>
+                    </div>
+                  </div>
                 )}
-              </Box>
-            </Box>
+              </div>
+            </div>
 
             {/* Action Buttons */}
-            <Box direction="row" gap="small" justify="end" margin={{ top: 'small' }}>
-              <Button
-                label="Cancel"
+            <div className="flex justify-end gap-3 pt-4 border-t border-slate-700">
+              <button
+                type="button"
                 onClick={onClose}
                 disabled={loading}
-                style={{
-                  background: 'rgba(239, 68, 68, 0.1)',
-                  border: '2px solid rgba(239, 68, 68, 0.5)',
-                  borderRadius: '8px',
-                  padding: '10px 24px',
-                  color: '#f87171'
-                }}
-              />
-              <Button
+                className="px-6 py-2 rounded-lg bg-red-500/10 border-2 border-red-500/50 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors font-medium"
+              >
+                Cancel
+              </button>
+              <button
                 type="submit"
-                label={
-                  loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')
-                }
                 disabled={loading}
-                primary
-                style={{
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px 24px',
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)'
-                }}
-              />
-            </Box>
-          </Box>
-        </Form>
-      </Box>
-    </Layer>
+                className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/30 font-medium"
+              >
+                {loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')}
+              </button>
+            </div>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }
