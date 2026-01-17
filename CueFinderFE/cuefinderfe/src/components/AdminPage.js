@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Box, Button, Heading, Text, Card, CardBody, DataTable, Grid, TextInput, Tabs, Tab, Tag, Layer, Form, FormField, Select } from 'grommet';
-import { FormPrevious, Trash, Flag, Close, StatusGood, Search, Edit, UserAdmin } from 'grommet-icons';
+import { FormPrevious, Trash, Flag, Close, StatusGood, Edit, UserAdmin } from 'grommet-icons';
+import MaterialInput from './MaterialInput';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
@@ -126,11 +127,12 @@ export default function AdminPage({ onBack }) {
             <CardBody pad="medium">
               <Heading level="3" margin={{ bottom: 'medium' }}>Users</Heading>
               <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
-                <Search size="small" />
-                <TextInput
+                <MaterialInput
                   placeholder="Search users (name or email)"
                   value={userQuery}
                   onChange={(e) => setUserQuery(e.target.value)}
+                  size="small"
+                  style={{ minWidth: '250px' }}
                 />
                 <Tag value={`Total: ${users.length}`} />
                 <Tag value={`Filtered: ${users.filter(u => {
@@ -209,11 +211,12 @@ export default function AdminPage({ onBack }) {
             <CardBody pad="medium">
               <Heading level="3" margin={{ bottom: 'medium' }}>Listings</Heading>
               <Box direction="row" gap="small" align="center" margin={{ bottom: 'small' }}>
-                <Search size="small" />
-                <TextInput
+                <MaterialInput
                   placeholder="Search listings (title or price)"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
+                  size="small"
+                  style={{ minWidth: '250px' }}
                 />
                 <Tag value={`Total: ${listings.length}`} />
                 <Tag value={`Filtered: ${filteredListings.length}`} />
