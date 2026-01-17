@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, TextInput, Button } from 'grommet';
-import { Close, Search } from 'grommet-icons';
+import { Button } from './ui/button';
+import { X, Search } from 'lucide-react';
 
 /**
  * Material Design Input Component
@@ -48,19 +48,19 @@ export default function MaterialInput({
       height: '36px',
       padding: '8px 12px',
       fontSize: '12px',
-      iconSize: '14px'
+      iconSize: 14
     },
     medium: {
       height: '44px',
       padding: '10px 14px',
       fontSize: '14px',
-      iconSize: '18px'
+      iconSize: 18
     },
     large: {
       height: '52px',
       padding: '12px 16px',
       fontSize: '15px',
-      iconSize: '20px'
+      iconSize: 20
     }
   };
 
@@ -80,47 +80,34 @@ export default function MaterialInput({
   };
 
   return (
-    <Box
-      direction="row"
-      align="center"
-      background={getBackgroundColor()}
-      pad={{ horizontal: 'small', vertical: '0px' }}
+    <div
+      className={`flex items-center ${fullWidth ? 'w-full' : 'w-auto'} gap-2 px-3 py-0 rounded-lg border-2 transition-all duration-300 relative z-10 ${
+        disabled ? 'opacity-60 cursor-not-allowed' : 'cursor-text'
+      }`}
       style={{
         height: config.height,
-        width: fullWidth ? '100%' : 'auto',
-        border: `2px solid ${getBorderColor()}`,
-        borderRadius: '8px',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+        backgroundColor: getBackgroundColor(),
+        borderColor: getBorderColor(),
         boxShadow: isFocused
           ? `0 4px 12px rgba(59, 130, 246, 0.15)`
-          : '0 1px 3px rgba(0, 0, 0, 0.08)',
-        opacity: disabled ? 0.6 : 1,
-        cursor: disabled ? 'not-allowed' : 'text',
-        position: 'relative',
-        zIndex: 10
+          : '0 1px 3px rgba(0, 0, 0, 0.08)'
       }}
       onFocus={() => !disabled && setIsFocused(true)}
       onBlur={() => setIsFocused(false)}
-      gap="xsmall"
     >
       {/* Leading Icon */}
       {IconComponent && (
-        <Box
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            flexShrink: 0,
-            color: isFocused ? '#60a5fa' : '#93c5fd',
-            transition: 'color 0.2s ease'
-          }}
+        <div
+          className={`flex items-center justify-center flex-shrink-0 transition-colors ${
+            isFocused ? 'text-blue-400' : 'text-blue-300'
+          }`}
         >
           <IconComponent size={config.iconSize} />
-        </Box>
+        </div>
       )}
 
       {/* Input Field */}
-      <TextInput
+      <input
         type={type}
         placeholder={placeholder}
         value={value}
@@ -132,17 +119,10 @@ export default function MaterialInput({
         pattern={pattern}
         minLength={minLength}
         maxLength={maxLength}
-        plain
+        className="flex-1 min-w-0 border-none bg-transparent outline-none text-slate-100 placeholder-slate-400"
         style={{
           fontSize: config.fontSize,
           fontWeight: 400,
-          border: 'none',
-          background: 'transparent',
-          color: '#f1f5f9',
-          flex: 1,
-          minWidth: 0,
-          padding: 0,
-          outline: 'none',
           ...style
         }}
         {...props}
@@ -151,24 +131,14 @@ export default function MaterialInput({
       {/* Clear Button - Only show when there's text */}
       {value && onClear && !disabled && (
         <Button
-          plain
-          icon={<Close size={config.iconSize} color="#cbd5e1" />}
+          variant="ghost"
+          size="icon"
           onClick={handleClear}
-          style={{
-            padding: '0',
-            minWidth: 'auto',
-            minHeight: 'auto',
-            flexShrink: 0,
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.2)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        />
+          className="h-auto w-auto p-0 flex-shrink-0 hover:scale-110 transition-transform"
+        >
+          <X size={config.iconSize} className="text-slate-300 hover:text-slate-200" />
+        </Button>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,6 +1,7 @@
 import React from 'react';
-import { Box, Grid, Card, CardBody, CardHeader, Image, Text, Button, Stack } from 'grommet';
-import { Apps, List as ListIcon, Image as ImageIcon } from 'grommet-icons';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Grid, LayoutGrid, LayoutList } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 
 // Helper to get full image URL from image object
@@ -24,17 +25,13 @@ const getImageUrl = (images) => {
 };
 
 // Image Placeholder Component
-const ImagePlaceholder = ({ height = '200px' }) => (
-  <Box
-    fill
-    background="light-2"
-    align="center"
-    justify="center"
-    style={{ height }}
-  >
-    <ImageIcon size="large" color="light-4" />
-    <Text size="small" color="dark-4" margin={{ top: 'small' }}>No Image</Text>
-  </Box>
+const ImagePlaceholder = ({ height = 'h-48' }) => (
+  <div className={`w-full ${height} bg-slate-100 flex items-center justify-center rounded-lg`}>
+    <div className="text-center">
+      <Grid className="w-8 h-8 mx-auto text-slate-300 mb-2" />
+      <p className="text-xs text-slate-400">No Image</p>
+    </div>
+  </div>
 );
 
 export default function CueList({ cues, onSelect, onAdd, query, viewMode, setViewMode, category, condition, cueType, sortBy, priceRange }) {
@@ -97,239 +94,178 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
   }
 
   return (
-    <Box 
-      className="cue-list-container"
-      width="100%" 
-      pad={{ horizontal: 'medium', vertical: 'medium' }}
-      style={{ position: 'relative', zIndex: 10 }}
-    >
-      {/* Grid or List view based on viewMode */}
-      {viewMode === 'grid' ? (
-        <Grid 
-          columns={{
-            count: 'fit',
-            size: ['small', 'medium']
-          }}
-          gap="large" 
-          pad={{ vertical: 'small' }}
+    <div className="w-full p-4 md:p-6 relative z-10">
+      {/* View Mode Toggle */}
+      <div className="flex gap-2 mb-6 justify-end">
+        <Button
+          variant={viewMode === 'grid' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('grid')}
+          className="gap-2"
         >
-  {filtered.map((c) => {
+          <LayoutGrid className="w-4 h-4" />
+          <span className="hidden sm:inline">Grid</span>
+        </Button>
+        <Button
+          variant={viewMode === 'list' ? 'default' : 'outline'}
+          size="sm"
+          onClick={() => setViewMode('list')}
+          className="gap-2"
+        >
+          <LayoutList className="w-4 h-4" />
+          <span className="hidden sm:inline">List</span>
+        </Button>
+      </div>
+
+      {/* Grid View */}
+      {viewMode === 'grid' ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6">
+          {filtered.map((c) => {
             const displayPrice = Number(c.price || 0);
-    return (
-            <Card 
-              key={c.id} 
-        onClick={() => onSelect(c)}
-              hoverIndicator
-              background="background-front"
-              elevation="medium"
-              round="medium"
-              style={{ 
-                cursor: 'pointer', 
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                border: '1px solid rgba(51, 65, 85, 0.3)'
-              }}
-            >
-              <CardHeader pad="none" height="200px" style={{ overflow: 'hidden' }}>
-                <Stack anchor="top-right" fill>
-                  <Box fill style={{ position: 'relative' }}>
-                    {getImageUrl(c.images) ? (
-                      <Image
-                        src={getImageUrl(c.images)}
-                        fit="cover"
-                        style={{ 
-                          width: '100%', 
-                          height: '200px', 
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
-                      />
-                    ) : (
-                      <ImagePlaceholder height="200px" />
-                    )}
-                  </Box>
-                  {c.itemType === 'case' && (
-                    <Box background="status-info" pad="xsmall" margin="small" round="small">
-                      <Text size="small" weight="bold" color="white">CASE</Text>
-                    </Box>
-                  )}
-                  {(c.isSold || c.is_sold) ? (
-                    <Box background="status-error" pad="xsmall" margin="small" round="small">
-                      <Text size="small" weight="bold" color="white">SOLD</Text>
-                    </Box>
-                  ) : c.condition ? (
-                    <Box background="accent-1" pad="xsmall" margin="small" round="small">
-                      <Text size="small" weight="bold" color="white">{c.condition}</Text>
-                    </Box>
-                  ) : null}
-                </Stack>
-              </CardHeader>
-              <CardBody pad="medium">
-                <Box gap="small">
-                  <Text weight="bold" size="large" color="text-strong" truncate style={{ fontSize: '18px' }}>
-                    {c.title || c.brand}
-                  </Text>
-                  <Text size="small" color="text-weak" style={{ fontSize: '14px' }}>
-                    {c.brand}
-                  </Text>
-                  <Box direction="row" align="center" gap="xsmall">
-                    <Text size="small" color="text-weak">📍</Text>
-                    <Text size="small" color="text-weak">{c.location || 'Unknown'}</Text>
-                  </Box>
-                  <Box 
-                    background="brand"
-                    pad={{ horizontal: 'small', vertical: 'xsmall' }}
-                    round="small"
-                    width="fit-content"
-                    margin={{ top: 'small' }}
-                  >
-                    <Text weight="bold" size="large" color="white" style={{ fontSize: '24px' }}>
-                      {currencySymbol}{displayPrice.toFixed(0)}
-                    </Text>
-                  </Box>
-                </Box>
-              </CardBody>
-            </Card>
-          )})}
-        </Grid>
-      ) : (
-        <Box gap="large" pad={{ vertical: 'medium' }}>
-  {filtered.map((c) => {
-            const displayPrice = Number(c.price || 0);
-    return (
-            <Card 
-              key={c.id} 
-              direction="row" 
-        onClick={() => onSelect(c)}
-              hoverIndicator
-              background="background-front"
-              pad="medium"
-              elevation="medium"
-              round="medium"
-              style={{ 
-                cursor: 'pointer', 
-                transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-                border: '1px solid rgba(51, 65, 85, 0.3)'
-              }}
-            >
-              <Box 
-                width="180px" 
-                height="120px" 
-                flex={false} 
-                round="small" 
-                overflow="hidden"
-                style={{ position: 'relative' }}
+            return (
+              <Card
+                key={c.id}
+                className="cursor-pointer hover:shadow-lg transition-all border-border/50 overflow-hidden group"
+                onClick={() => onSelect(c)}
               >
-                <Stack fill>
-                  <Box fill>
+                {/* Image Container */}
+                <div className="relative overflow-hidden h-48 bg-slate-100">
+                  {getImageUrl(c.images) ? (
+                    <img
+                      src={getImageUrl(c.images)}
+                      alt={c.title}
+                      className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    />
+                  ) : (
+                    <ImagePlaceholder />
+                  )}
+                  
+                  {/* Badges */}
+                  <div className="absolute top-3 right-3 flex flex-col gap-2">
+                    {c.itemType === 'case' && (
+                      <span className="bg-blue-500 text-white text-xs font-bold px-3 py-1 rounded-md">
+                        CASE
+                      </span>
+                    )}
+                    {(c.isSold || c.is_sold) ? (
+                      <span className="bg-red-500 text-white text-xs font-bold px-3 py-1 rounded-md">
+                        SOLD
+                      </span>
+                    ) : c.condition ? (
+                      <span className="bg-purple-500 text-white text-xs font-bold px-3 py-1 rounded-md">
+                        {c.condition}
+                      </span>
+                    ) : null}
+                  </div>
+                </div>
+
+                {/* Content */}
+                <CardContent className="pt-4 pb-4 space-y-3">
+                  <div>
+                    <h3 className="font-bold text-base md:text-lg truncate">
+                      {c.title || c.brand}
+                    </h3>
+                    <p className="text-sm text-muted-foreground">
+                      {c.brand}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <span>📍</span>
+                    <span className="truncate">{c.location || 'Unknown'}</span>
+                  </div>
+
+                  <div className="bg-blue-500 text-white rounded-md p-3 mt-4">
+                    <p className="font-bold text-xl">
+                      {currencySymbol}{displayPrice.toFixed(0)}
+                    </p>
+                  </div>
+                </CardContent>
+              </Card>
+            );
+          })}
+        </div>
+      ) : (
+        /* List View */
+        <div className="space-y-4">
+          {filtered.map((c) => {
+            const displayPrice = Number(c.price || 0);
+            return (
+              <Card
+                key={c.id}
+                className="cursor-pointer hover:shadow-lg transition-all border-border/50 overflow-hidden"
+                onClick={() => onSelect(c)}
+              >
+                <div className="flex gap-4 p-4 md:p-6">
+                  {/* Image */}
+                  <div className="flex-shrink-0 w-32 h-24 bg-slate-100 rounded-lg overflow-hidden">
                     {getImageUrl(c.images) ? (
-                      <Image
+                      <img
                         src={getImageUrl(c.images)}
-                        fit="cover"
-                        style={{ 
-                          width: '100%', 
-                          height: '120px', 
-                          objectFit: 'cover',
-                          display: 'block'
-                        }}
+                        alt={c.title}
+                        className="w-full h-full object-cover"
                       />
                     ) : (
-                      <ImagePlaceholder height="120px" />
+                      <div className="w-full h-full flex items-center justify-center">
+                        <Grid className="w-6 h-6 text-slate-300" />
+                      </div>
                     )}
-                  </Box>
-                  {c.itemType === 'case' && (
-                    <Box 
-                      background="status-info" 
-                      pad="small" 
-                      align="center" 
-                      justify="center"
-                      style={{ position: 'absolute', top: '8px', left: '8px', borderRadius: '6px' }}
-                    >
-                      <Text size="small" weight="bold" color="white">CASE</Text>
-                    </Box>
-                  )}
-                  {(c.isSold || c.is_sold) ? (
-                    <Box 
-                      background="status-error" 
-                      pad="small" 
-                      align="center" 
-                      justify="center"
-                      style={{ position: 'absolute', top: '8px', right: '8px', borderRadius: '6px' }}
-                    >
-                      <Text size="small" weight="bold" color="white">SOLD</Text>
-                    </Box>
-                  ) : c.condition ? (
-                    <Box 
-                      background="accent-1" 
-                      pad="small" 
-                      align="center" 
-                      justify="center"
-                      style={{ position: 'absolute', top: '8px', right: '8px', borderRadius: '6px' }}
-                    >
-                      <Text size="small" weight="bold" color="white">{c.condition}</Text>
-                    </Box>
-                  ) : null}
-                </Stack>
-              </Box>
-              <Box pad="small" flex gap="xsmall">
-                <Text weight="bold" size="large" color="text-strong" style={{ fontSize: '20px' }}>
-                  {c.title || c.brand}
-                </Text>
-                <Text size="medium" color="text-weak" style={{ fontSize: '14px' }}>
-                  {c.brand}
-                </Text>
-                <Box direction="row" align="center" gap="xsmall">
-                  <Text color="text-weak">📍</Text>
-                  <Text size="small" color="text-weak">{c.location || 'Unknown'}</Text>
-                </Box>
-              </Box>
-              <Box align="end" justify="center" pad="small">
-                <Box 
-                  background="brand"
-                  pad={{ horizontal: 'medium', vertical: 'small' }}
-                  round="medium"
-                >
-                  <Text weight="bold" size="xxlarge" color="white" style={{ fontSize: '28px' }}>
-                    {currencySymbol}{displayPrice.toFixed(0)}
-                  </Text>
-                </Box>
-              </Box>
-            </Card>
-          )})}
-        </Box>
+                  </div>
+
+                  {/* Content */}
+                  <div className="flex-1 space-y-2">
+                    <div className="flex items-start justify-between gap-4">
+                      <div>
+                        <h3 className="font-bold text-base md:text-lg">
+                          {c.title || c.brand}
+                        </h3>
+                        <p className="text-sm text-muted-foreground">
+                          {c.brand}
+                        </p>
+                      </div>
+                      <div className="flex-shrink-0 text-right">
+                        <p className="font-bold text-lg md:text-xl text-blue-500">
+                          {currencySymbol}{displayPrice.toFixed(0)}
+                        </p>
+                      </div>
+                    </div>
+
+                    <div className="flex items-center gap-4 text-sm text-muted-foreground flex-wrap">
+                      <div className="flex items-center gap-1">
+                        <span>📍</span>
+                        <span>{c.location || 'Unknown'}</span>
+                      </div>
+                      {c.condition && (
+                        <span className="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-semibold">
+                          {c.condition}
+                        </span>
+                      )}
+                      {c.itemType === 'case' && (
+                        <span className="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-semibold">
+                          CASE
+                        </span>
+                      )}
+                      {(c.isSold || c.is_sold) && (
+                        <span className="bg-red-100 text-red-700 px-2 py-1 rounded text-xs font-semibold">
+                          SOLD
+                        </span>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </Card>
+            );
+          })}
+        </div>
       )}
 
-      {/* Footer with availability and view mode toggle */}
-      <Box 
-        direction="row" 
-        justify="between" 
-        align="center" 
-        pad="medium" 
-        border={{ side: 'top', color: 'border' }}
-        margin={{ top: 'medium' }}
-        background="background-front"
-        round="small"
-      >
-        <Text size="small" color="text-weak">
-          <Text weight="bold" color="text-strong">{filtered.length}</Text>{' '}
+      {/* Results Info */}
+      <div className="flex justify-between items-center p-4 mt-6 border-t border-border bg-card rounded-lg">
+        <p className="text-sm text-muted-foreground">
+          <span className="font-bold text-foreground">{filtered.length}</span>{' '}
           {category === 'cases' ? 'cases' : category === 'cues' ? 'cues' : 'items'} available
-        </Text>
-        <Box direction="row" gap="xsmall" className="view-toggle-buttons">
-          <Button
-            icon={<Apps color={viewMode === 'grid' ? 'white' : 'text'} />}
-            onClick={() => setViewMode('grid')}
-            primary={viewMode === 'grid'}
-            tip="Grid view"
-            size="small"
-          />
-          <Button
-            icon={<ListIcon color={viewMode === 'list' ? 'white' : 'text'} />}
-            onClick={() => setViewMode('list')}
-            primary={viewMode === 'list'}
-            tip="List view"
-            size="small"
-          />
-        </Box>
-      </Box>
-    </Box>
+        </p>
+      </div>
+    </div>
   );
 }
