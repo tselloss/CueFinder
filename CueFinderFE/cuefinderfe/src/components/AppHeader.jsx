@@ -1,27 +1,16 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
-import { Mail, LogOut, User as UserIcon, Shield, Globe } from 'lucide-react';
+import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu.jsx';
-import { useTranslation } from 'react-i18next';
 
 export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
-  const { i18n } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Forum', path: '/forum' },
     { label: 'Inbox', path: '/inbox', requiresAuth: true }
   ];
-  const languages = [
-    { code: 'en', name: 'English' },
-    { code: 'el', name: 'Ελληνικά' }
-  ];
-
-  const handleLanguageChange = (langCode) => {
-    i18n.changeLanguage(langCode);
-    localStorage.setItem('lang', langCode);
-  };
 
   return (
     <header className="w-full bg-background/90 backdrop-blur border-b border-border sticky top-0 z-50">
@@ -92,28 +81,6 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
-                      <Globe className="h-4 w-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    {languages.map(lang => (
-                      <DropdownMenuItem
-                        key={lang.code}
-                        onClick={() => handleLanguageChange(lang.code)}
-                        className={i18n.language === lang.code ? 'bg-accent' : ''}
-                      >
-                        <span>{lang.name}</span>
-                        {i18n.language === lang.code && (
-                          <span className="ml-auto text-primary">✓</span>
-                        )}
-                      </DropdownMenuItem>
-                    ))}
                   </DropdownMenuContent>
                 </DropdownMenu>
 
