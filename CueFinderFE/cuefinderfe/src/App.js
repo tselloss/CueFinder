@@ -1,7 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button, Header, Heading, Text, Footer, Menu } from 'grommet';
-import { User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
+import { Box, Button } from 'grommet';
 import CueList from './components/CueList.jsx';
 import CueDetail from './components/CueDetail.jsx';
 import CueFormModal from './components/CueFormModal.jsx';
@@ -15,6 +14,8 @@ import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum.jsx';
 import DesktopSidebar from './components/DesktopSidebar';
 import { HeroSearch } from './components/HeroSearch';
+import AppHeader from './components/AppHeader.jsx';
+import AppFooter from './components/AppFooter.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -227,93 +228,7 @@ function AppInner() {
     loadForumCategories();
   }, []);
 
-  const userMenuItems = user
-    ? [
-        {
-          label: (
-            <Box 
-              direction="row" 
-              align="center" 
-              gap="medium" 
-              pad={{ horizontal: 'small', vertical: 'small' }}
-              style={{ transition: 'all 0.2s ease' }}
-            >
-              <Box direction="row" align="center" gap="small" fill="horizontal">
-                <MailOption color="#3b82f6" size="20px" />
-                <Text size="medium" weight={600} color="text-strong">Inbox</Text>
-                {unreadMessageCount > 0 && (
-                  <Box
-                    background="#ef4444"
-                    round="full"
-                    pad={{ horizontal: '8px', vertical: '2px' }}
-                    style={{ minWidth: '24px', textAlign: 'center', marginLeft: 'auto' }}
-                  >
-                    <Text size="xsmall" weight={700} color="white">
-                      {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
-                    </Text>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          ),
-          onClick: () => navigate('/inbox')
-        },
-        {
-          label: (
-            <Box 
-              direction="row" 
-              align="center" 
-              gap="medium" 
-              pad={{ horizontal: 'small', vertical: 'small' }}
-              style={{ transition: 'all 0.2s ease' }}
-            >
-              <User color="#3b82f6" size="20px" />
-              <Text size="medium" weight={600} color="text-strong">{t('actions.profile')}</Text>
-            </Box>
-          ),
-          onClick: () => navigate('/profile')
-        },
-        ...(user.role === 'admin'
-          ? [
-              {
-                label: (
-                  <Box 
-                    direction="row" 
-                    align="center" 
-                    gap="medium" 
-                    pad={{ horizontal: 'small', vertical: 'small' }}
-                    style={{ transition: 'all 0.2s ease' }}
-                  >
-                    <UserAdmin color="#f59e0b" size="20px" />
-                    <Text size="medium" weight={600} color="text-strong">{t('actions.admin')}</Text>
-                  </Box>
-                ),
-                onClick: () => navigate('/admin')
-              }
-            ]
-          : []),
-        {
-          label: (
-            <Box 
-              direction="row" 
-              align="center" 
-              gap="medium" 
-              pad={{ horizontal: 'small', vertical: 'small' }}
-              style={{ 
-                borderTop: '2px solid rgba(59, 130, 246, 0.2)',
-                marginTop: '4px',
-                paddingTop: '12px',
-                transition: 'all 0.2s ease'
-              }}
-            >
-              <Logout color="#ef4444" size="20px" />
-              <Text size="medium" weight={700} color="#ef4444">{t('actions.logout')}</Text>
-            </Box>
-          ),
-          onClick: handleLogout
-        }
-      ]
-    : [];
+  // User menu replaced by Shadcn-styled header actions
 
 
   return (
@@ -327,160 +242,13 @@ function AppInner() {
           animation: pulse 2s infinite;
         }
       `}</style>
-      <Header 
-        background="background-front" 
-        pad={{ horizontal: "medium", vertical: "small" }}
-        elevation="medium"
-        style={{
-          zIndex: 1000,
-          position: 'relative',
-          boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
-          borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
-          flexWrap: 'wrap',
-          justifyContent: 'space-between',
-          alignItems: 'center'
-        }}
-      >
-        <Box direction="row" align="center" gap="small" style={{ minWidth: 0 }}>
-          {/* Sidebar is always open on the home page; toggle removed */}
-          
-          <Heading level="2" margin="none" color="text-strong" style={{ fontWeight: 700, letterSpacing: '-0.5px', fontSize: 'clamp(16px, 3.5vw, 24px)', whiteSpace: 'nowrap' }}>
-            🎱 {t('app.title')}
-          </Heading>
-        </Box>
-        <Box direction="row" align="center" gap="xsmall" wrap style={{ flexShrink: 0, justifyContent: 'flex-end' }}>
-          {/* Language Switcher hidden */}
-          {user ? (
-            <>
-              {/* User Info Display */}
-              <Box 
-                direction="row"
-                align="center"
-                gap="xsmall"
-                background="background-back"
-                pad={{ horizontal: 'small', vertical: 'xsmall' }}
-                round="8px"
-                style={{
-                  border: '2px solid rgba(59, 130, 246, 0.5)',
-                  backdropFilter: 'blur(10px)',
-                  minWidth: 0,
-                  maxWidth: '100%'
-                }}
-              >
-                <Text size="medium" style={{ fontSize: '18px', flexShrink: 0 }}>
-                  {user.avatar || '👤'}
-                </Text>
-                <Box style={{ minWidth: 0 }}>
-                  <Text size="small" color="text-strong" weight={700} style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                    {user.name}
-                  </Text>
-                  {user.role === 'admin' && (
-                    <Text size="xsmall" color="brand" weight={600} style={{ lineHeight: '1' }}>
-                      Admin
-                    </Text>
-                  )}
-                </Box>
-              </Box>
-
-              {/* User Actions Menu */}
-              <Box style={{ position: 'relative', flexShrink: 0 }}>
-                <Menu
-                  a11yTitle="User menu"
-                  icon={<MenuIcon color="white" size="20px" />}
-                  label={<Text size="small" weight={700} color="white" style={{ display: 'none' }}>Menu</Text>}
-                  items={userMenuItems}
-                  dropAlign={{ top: 'bottom', right: 'right' }}
-                  dropProps={{ 
-                    background: 'background-front', 
-                    elevation: 'xlarge', 
-                    round: 'medium',
-                    style: {
-                      border: '2px solid rgba(59, 130, 246, 0.3)',
-                      boxShadow: '0 12px 24px -4px rgba(0, 0, 0, 0.4), 0 0 20px rgba(59, 130, 246, 0.2)',
-                      marginTop: '8px',
-                      minWidth: '220px',
-                      backdropFilter: 'blur(10px)'
-                    }
-                  }}
-                  buttonProps={{
-                    plain: false,
-                    style: {
-                      background: 'linear-gradient(135deg, #2563eb 0%, #1d4ed8 100%)',
-                      borderRadius: '10px',
-                      padding: '10px 14px',
-                      border: 'none',
-                      boxShadow: '0 4px 12px rgba(37, 99, 235, 0.4)',
-                      minWidth: '48px',
-                      transition: 'all 0.2s ease'
-                    },
-                    onMouseEnter: (e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(37, 99, 235, 0.5)';
-                    },
-                    onMouseLeave: (e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(37, 99, 235, 0.4)';
-                    }
-                  }}
-                />
-                {unreadMessageCount > 0 && (
-                  <Box
-                    style={{
-                      position: 'absolute',
-                      top: '-8px',
-                      right: '-8px',
-                      background: '#ef4444',
-                      borderRadius: '50%',
-                      width: '24px',
-                      height: '24px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      fontSize: '12px',
-                      fontWeight: 'bold',
-                      color: 'white',
-                      border: '2px solid white',
-                      animation: 'pulse 2s infinite',
-                      boxShadow: '0 0 12px rgba(239, 68, 68, 0.6)'
-                    }}
-                  >
-                    {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
-                  </Box>
-                )}
-              </Box>
-            </>
-          ) : (
-            <>
-              <Button 
-                primary 
-                label={<Text size="xsmall" weight={700} color="white">{t('actions.signIn')}</Text>}
-                onClick={() => navigate('/login')} 
-                style={{ 
-                  background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  borderRadius: '8px',
-                  padding: '8px 16px',
-                  fontWeight: 700,
-                  boxShadow: '0 4px 12px rgba(59, 130, 246, 0.4)',
-                  border: 'none',
-                  transition: 'all 0.3s ease'
-                }}
-              />
-              <Button 
-                label={<Text size="xsmall" color="text-strong" weight={600}>{t('actions.register')}</Text>}
-                onClick={() => navigate('/register')} 
-                style={{ 
-                  background: 'rgba(59, 130, 246, 0.2)',
-                  border: '2px solid rgba(59, 130, 246, 0.5)',
-                  borderRadius: '8px',
-                  padding: '6px 12px',
-                  transition: 'all 0.3s ease',
-                  backdropFilter: 'blur(10px)'
-                }}
-              />
-            </>
-          )}
-        </Box>
-      </Header>
+      <AppHeader
+        title={t('app.title')}
+        user={user}
+        unreadCount={unreadMessageCount}
+        onNavigate={(path) => navigate(path)}
+        onLogout={handleLogout}
+      />
 
       {/* Hero Section - New Shadcn UI Design - Only show on home page */}
       {isHomePage && (
@@ -649,35 +417,7 @@ function AppInner() {
         />
       )}
 
-      <Footer 
-        background="background-front" 
-        pad="large" 
-        justify="center" 
-        border={{ side: 'top', color: 'border', size: 'small' }}
-        style={{
-          boxShadow: '0 -4px 6px -1px rgba(0, 0, 0, 0.1), 0 -2px 4px -1px rgba(0, 0, 0, 0.06)'
-        }}
-      >
-        <Box align="center" gap="small">
-          <Text size="medium" weight={600} color="text">
-            🎱 CueFinder
-          </Text>
-          <Text size="small" color="text-weak" textAlign="center">
-            Your Premium Billiard Cue Marketplace
-          </Text>
-          <Box direction="row" gap="medium" margin={{ top: 'small' }}>
-            <Text size="small" color="text-weak">© 2026 CueFinder</Text>
-            <Text size="small" color="text-weak">•</Text>
-            <Text size="small" color="brand" weight={500} style={{ cursor: 'pointer' }}>
-              Privacy Policy
-            </Text>
-            <Text size="small" color="text-weak">•</Text>
-            <Text size="small" color="brand" weight={500} style={{ cursor: 'pointer' }}>
-              Terms of Service
-            </Text>
-          </Box>
-        </Box>
-      </Footer>
+      <AppFooter />
 
       {/* Add Cue Modal */}
       {showAddModal && (
