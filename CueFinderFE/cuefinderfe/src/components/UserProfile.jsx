@@ -1,13 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Image, Plus } from 'lucide-react';
+import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Image } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from './ui/card';
 import { Label } from './ui/label';
 import MyCues from './MyCues';
-import CueFormModal from './CueFormModal';
 import { getErrorMessage, isValidationError, formatValidationErrors } from '../utils/errorUtils';
 
 const AVATAR_OPTIONS = [
@@ -23,8 +22,6 @@ export default function UserProfile({ onBack }) {
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
   const [isEditing, setIsEditing] = useState(false);
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingCue, setEditingCue] = useState(null);
   
   const [profile, setProfile] = useState({
     name: user?.name || '',
@@ -113,27 +110,6 @@ export default function UserProfile({ onBack }) {
     }
   };
 
-  const handleAddListing = () => {
-    setEditingCue(null);
-    setShowAddModal(true);
-  };
-
-  const handleModalSave = async () => {
-    setShowAddModal(false);
-    setEditingCue(null);
-    // Refresh the listings if we're on the My Listings tab
-    if (activeTab === 'myListings') {
-      // The MyCues component will handle its own refresh
-      setMessage({ type: 'success', text: 'Listing saved successfully!' });
-      setTimeout(() => setMessage(null), 3000);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowAddModal(false);
-    setEditingCue(null);
-  };
-
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -146,27 +122,17 @@ export default function UserProfile({ onBack }) {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 md:gap-4">
-          <div className="flex items-center gap-2 md:gap-4">
-            <Button
-              variant="outline"
-              size="default"
-              onClick={onBack || (() => navigate('/'))}
-              className="gap-2 flex-shrink-0"
-            >
-              <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-              <span className="hidden sm:inline">Back</span>
-            </Button>
-            <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
-          </div>
+        <div className="flex items-center gap-2 md:gap-4">
           <Button
-            onClick={handleAddListing}
-            size="lg"
-            className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold w-full sm:w-auto"
+            variant="outline"
+            size="default"
+            onClick={onBack || (() => navigate('/'))}
+            className="gap-2 flex-shrink-0"
           >
-            <Plus className="mr-2 h-5 w-5" />
-            Add New Listing
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
         </div>
 
         {/* Message Alert */}
@@ -418,15 +384,6 @@ export default function UserProfile({ onBack }) {
           <MyCues />
         )}
       </div>
-
-      {/* Add/Edit Listing Modal */}
-      {showAddModal && (
-        <CueFormModal
-          cue={editingCue}
-          onClose={handleCloseModal}
-          onSave={handleModalSave}
-        />
-      )}
     </div>
   );
 }
