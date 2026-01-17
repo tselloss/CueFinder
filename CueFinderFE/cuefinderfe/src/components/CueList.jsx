@@ -123,10 +123,10 @@ export default function CueList({
   }
 
   return (
-    <div className="w-full py-6 px-4 md:px-6 relative z-10">
+    <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
       {/* Grid View */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 pb-6">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-6">
           {filtered.map((c) => {
             const displayPrice = Number(c.price || 0);
             const imageUrl = getImageUrl(c.images);
@@ -153,26 +153,26 @@ export default function CueList({
                 </div>
 
                 {/* Content */}
-                <CardContent className="p-4 space-y-3">
+                <CardContent className="p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3">
                   <div>
-                    <h3 className="font-semibold text-base text-foreground truncate group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold text-xs sm:text-base text-foreground truncate group-hover:text-primary transition-colors">
                       {c.title || c.brand}
                     </h3>
-                    <p className="text-sm text-muted-foreground truncate">
+                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
                       {c.brand}
                     </p>
                   </div>
 
                   {/* Location */}
-                  <div className="flex items-center gap-1 text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
                     <span>📍</span>
                     <span className="truncate">{c.location || 'Unknown'}</span>
                   </div>
 
                   {/* Price Badge */}
-                  <div className="inline-block bg-primary text-white px-3 py-1.5 rounded-md font-bold">
-                    <span className="text-sm">{currencySymbol}</span>
-                    <span className="text-lg">{displayPrice.toFixed(0)}</span>
+                  <div className="inline-block bg-primary text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-md font-bold">
+                    <span className="text-xs sm:text-sm">{currencySymbol}</span>
+                    <span className="text-sm sm:text-lg">{displayPrice.toFixed(0)}</span>
                   </div>
                 </CardContent>
               </Card>
@@ -241,30 +241,30 @@ export default function CueList({
       )}
 
       {/* Footer with counter and view toggle */}
-      <div className="flex flex-col sm:flex-row justify-between items-center gap-4 p-4 border-t border-border bg-card/50 rounded-lg mt-4">
-        <div className="text-sm text-muted-foreground">
+      <div className="flex flex-col gap-3 p-2 sm:p-4 border-t border-border bg-card/50 rounded-lg mt-4">
+        <div className="text-xs sm:text-sm text-muted-foreground">
           <span className="font-semibold text-foreground">{filtered.length}</span>
           {' '}
           {category === 'cases' ? 'cases' : category === 'cues' ? 'cues' : 'items'} available
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-1 sm:gap-2 justify-center">
           <Button
             variant={viewMode === 'grid' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('grid')}
-            className="gap-2"
+            className="gap-1 text-xs sm:text-sm px-2 sm:px-4"
           >
-            <Grid className="w-4 h-4" />
-            Grid
+            <Grid className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">Grid</span>
           </Button>
           <Button
             variant={viewMode === 'list' ? 'default' : 'outline'}
             size="sm"
             onClick={() => setViewMode('list')}
-            className="gap-2"
+            className="gap-1 text-xs sm:text-sm px-2 sm:px-4"
           >
-            <ListIcon className="w-4 h-4" />
-            List
+            <ListIcon className="w-3 h-3 sm:w-4 sm:h-4" />
+            <span className="hidden sm:inline">List</span>
           </Button>
         </div>
       </div>
