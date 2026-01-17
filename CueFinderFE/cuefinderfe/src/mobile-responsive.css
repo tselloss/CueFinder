@@ -1,8 +1,25 @@
 /* Mobile Responsive Styles for CueFinder */
 
+/* ============================================
+   MOBILE-FIRST: Base styles for all screens
+   ============================================ */
+
 /* Mobile filters toolbar - show only on mobile */
 .mobile-filters-toolbar {
   display: none !important;
+}
+
+/* Ensure proper base structure */
+body, #root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+#root {
+  display: flex;
+  flex-direction: column;
 }
 
 @media (max-width: 768px) {
@@ -10,13 +27,14 @@
     display: flex !important;
     flex-direction: column !important;
     margin-bottom: 0;
-    padding: 12px 10px !important;
+    padding: 16px 12px !important;
     background: linear-gradient(180deg, rgba(30, 41, 59, 0.98) 0%, rgba(30, 41, 59, 0.95) 100%);
     border-bottom: 3px solid rgba(59, 130, 246, 0.5);
     box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4);
     position: sticky;
     top: 60px;
     z-index: 100;
+    gap: 12px;
   }
 
   /* CueList specific mobile styling */
@@ -206,9 +224,37 @@
     padding: 40px 16px !important;
   }
 
-  /* Hide search bar and filters on mobile - save space */
+  /* Show search bar on mobile with Material Design styling */
   .hero-search-section {
-    display: none !important;
+    display: block !important;
+    width: 100% !important;
+    padding: 0 12px !important;
+  }
+
+  /* Material Design search bar mobile styling */
+  .search-bar-mobile {
+    width: 100% !important;
+    max-width: 100% !important;
+  }
+
+  /* Search input text and placeholder visibility */
+  .search-bar-mobile input,
+  .search-bar-mobile input::placeholder {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  .search-bar-desktop input,
+  .search-bar-desktop input::placeholder {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
+  }
+
+  /* MaterialInput placeholder visibility */
+  .mobile-filters-toolbar input,
+  .mobile-filters-toolbar input::placeholder {
+    color: #e2e8f0 !important;
+    opacity: 1 !important;
   }
 
   /* Hide view mode toggle on mobile - always list view */
@@ -246,6 +292,26 @@
   .filters-row button {
     width: 100% !important;
     min-width: 100% !important;
+  }
+
+  /* Material Design styling for mobile filter selects */
+  .mobile-filters-toolbar select,
+  .mobile-filters-toolbar button[role="button"] {
+    background: rgba(30, 41, 59, 0.9) !important;
+    border: 2px solid rgba(59, 130, 246, 0.3) !important;
+    border-radius: 12px !important;
+    color: #f1f5f9 !important;
+    font-size: 13px !important;
+    padding: 8px 12px !important;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+    min-height: 40px !important;
+  }
+
+  .mobile-filters-toolbar select:focus,
+  .mobile-filters-toolbar button[role="button"]:focus {
+    border-color: rgba(59, 130, 246, 0.6) !important;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1) !important;
+    outline: none !important;
   }
 
   /* Grid layout - single column on mobile */
@@ -490,4 +556,136 @@
 .sidebar-mobile-open,
 .cue-list-container {
   transition: all 0.3s ease;
+}
+
+/* ============================================
+   MATERIAL DESIGN INPUT STYLING (GLOBAL)
+   Consistent TextInput styling across all forms
+   ============================================ */
+
+/* Grommet TextInput wrapper styling */
+.grommet input[type="text"],
+.grommet input[type="email"],
+.grommet input[type="password"],
+.grommet input[type="tel"],
+.grommet input[type="number"],
+.grommet input[type="search"] {
+  background: transparent !important;
+  border: none !important;
+  color: #f1f5f9 !important;
+  font-size: 14px !important;
+  outline: none !important;
+  padding: 0 !important;
+}
+
+/* Grommet TextInput Container - Material Design */
+.grommet > div > div > div input[type="text"],
+.grommet > div > div > div input[type="email"],
+.grommet > div > div > div input[type="password"],
+.grommet > div > div > div input[type="tel"],
+.grommet > div > div > div input[type="number"],
+.grommet > div > div > div input[type="search"] {
+  font-weight: 400;
+}
+
+/* Input placeholder styling - HIGH CONTRAST */
+input::placeholder,
+textarea::placeholder {
+  color: #cbd5e1 !important;
+  opacity: 0.9 !important;
+  font-weight: 400;
+}
+
+input:focus::placeholder,
+textarea:focus::placeholder {
+  color: #94a3b8 !important;
+  opacity: 0.7 !important;
+}
+
+/* FormField styling for consistent form layout */
+.grommet-formfield {
+  margin-bottom: 18px;
+}
+
+.grommet-formfield label {
+  font-size: 14px;
+  font-weight: 600;
+  color: #e2e8f0;
+  margin-bottom: 10px;
+  display: block;
+  letter-spacing: 0.01em;
+}
+
+/* Form inputs - consistent Material Design styling */
+.grommet-box > input,
+.grommet input[type="text"],
+.grommet input[type="email"],
+.grommet input[type="password"],
+.grommet input[type="tel"],
+.grommet input[type="number"],
+.grommet input[type="search"],
+.grommet textarea,
+.grommet select {
+  background: rgba(30, 41, 59, 0.8) !important;
+  border: 2px solid rgba(59, 130, 246, 0.3) !important;
+  border-radius: 8px !important;
+  padding: 12px 16px !important;
+  color: #f1f5f9 !important;
+  font-size: 14px !important;
+  line-height: 1.5 !important;
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+  min-height: 44px !important;
+  box-sizing: border-box !important;
+  font-weight: 400;
+}
+
+/* Focus state for inputs - ENHANCED */
+.grommet input[type="text"]:focus,
+.grommet input[type="email"]:focus,
+.grommet input[type="password"]:focus,
+.grommet input[type="tel"]:focus,
+.grommet input[type="number"]:focus,
+.grommet input[type="search"]:focus,
+.grommet textarea:focus,
+.grommet select:focus {
+  border-color: rgba(59, 130, 246, 0.7) !important;
+  background: rgba(30, 41, 59, 0.95) !important;
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1), 0 4px 12px rgba(59, 130, 246, 0.2) !important;
+  outline: none !important;
+  transform: translateY(-1px);
+}
+
+/* Disabled input state */
+.grommet input:disabled,
+.grommet textarea:disabled {
+  opacity: 0.6 !important;
+  cursor: not-allowed !important;
+  background: rgba(100, 100, 100, 0.1) !important;
+  border-color: rgba(100, 100, 100, 0.3) !important;
+}
+
+/* TextArea specific styling */
+.grommet textarea {
+  font-family: inherit;
+  resize: vertical;
+  min-height: 100px !important;
+}
+
+/* Proper z-index layering for form elements */
+input, 
+textarea,
+select {
+  position: relative;
+  z-index: 10;
+}
+
+/* Ensure form inputs don't overlap */
+.grommet-formfield {
+  position: relative;
+  z-index: auto;
+}
+
+form {
+  position: relative;
+  z-index: 10;
 }

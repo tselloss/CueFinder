@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Button, Heading, Text, Card, CardBody, Layer, TextArea, Spinner } from 'grommet';
 import { Close, MailOption, Previous, Trash } from 'grommet-icons';
+import MaterialInput from './MaterialInput';
 import * as messageService from '../api/messageService';
+import * as authService from '../api/authService';
 import Badge from './Badge';
 
 export default function Inbox({ onBack }) {
@@ -16,7 +18,17 @@ export default function Inbox({ onBack }) {
 
   useEffect(() => {
     loadInbox();
+    loadCurrentUser();
   }, []);
+
+  const loadCurrentUser = async () => {
+    try {
+      // Verify current user context
+      authService.getCurrent();
+    } catch (err) {
+      console.error('Error loading current user:', err);
+    }
+  };
 
   const loadInbox = async () => {
     setLoading(true);
@@ -113,18 +125,12 @@ export default function Inbox({ onBack }) {
 
       {/* Filter & Search */}
       <Box direction="row" gap="small" margin={{ bottom: 'medium' }} align="center">
-        <input
-          type="text"
+        <MaterialInput
           placeholder="Search messages..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          style={{
-            padding: '10px',
-            border: '1px solid #ccc',
-            borderRadius: '4px',
-            flex: 1,
-            maxWidth: '300px'
-          }}
+          size="small"
+          fullWidth
         />
         <Button
           label={filterUnread ? `Unread (${unreadCount})` : 'All'}

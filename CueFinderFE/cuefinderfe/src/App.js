@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import { Box, Button, Header, Heading, Text, TextInput, Select, Footer, Menu } from 'grommet';
-import { Add, Search, User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
+import { Box, Button, Header, Heading, Text, Footer, Menu } from 'grommet';
+import { User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
 import CueList from './components/CueList';
 import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
@@ -13,8 +13,8 @@ import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum';
-import MobileFiltersBar from './components/MobileFiltersBar';
 import DesktopSidebar from './components/DesktopSidebar';
+import { HeroSearch } from './components/HeroSearch';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -47,7 +47,6 @@ function AppInner() {
   const [cueType, setCueType] = useState('all'); // 'all', 'playing', 'break', 'jump'
   const [sortBy, setSortBy] = useState('newest');
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false); // Mobile sidebar toggle
-  const [showMobileFilters, setShowMobileFilters] = useState(true); // Mobile filters collapse
   const sidebarOpen = true; // Always open on home page
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [forumCategories, setForumCategories] = useState([]);
@@ -333,6 +332,8 @@ function AppInner() {
         pad={{ horizontal: "medium", vertical: "small" }}
         elevation="medium"
         style={{
+          zIndex: 1000,
+          position: 'relative',
           boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
           borderBottom: '1px solid rgba(59, 130, 246, 0.3)',
           flexWrap: 'wrap',
@@ -481,269 +482,23 @@ function AppInner() {
         </Box>
       </Header>
 
-      {/* Hero Section with Search Bar - Only show on home page */}
+      {/* Hero Section - New Shadcn UI Design - Only show on home page */}
       {isHomePage && (
-        <Box 
-          background="background-back" 
-          pad={{ vertical: "large", horizontal: "small" }} 
-          align="center"
-          style={{ 
-            boxShadow: '0 4px 6px -1px rgba(0, 0, 0, 0.3)',
-            paddingTop: '60px',
-            paddingBottom: '80px',
-            marginBottom: '40px',
-            position: 'relative',
-            zIndex: 10,
-            borderBottom: '1px solid rgba(59, 130, 246, 0.3)'
-          }}
-        >
-          <Box width="100%" style={{ maxWidth: '900px' }} gap="large" align="center">
-            {/* Hero Text */}
-            <Box align="center" gap="small" pad={{ horizontal: 'small' }}>
-              <Heading 
-                level="1" 
-                margin="none" 
-                textAlign="center" 
-                color="text-strong"
-                style={{ 
-                  fontSize: 'clamp(32px, 5vw, 48px)', 
-                  fontWeight: 700,
-                  textShadow: '0 2px 4px rgba(0, 0, 0, 0.3)'
-                }}
-              >
-                {t('hero.title')}
-              </Heading>
-              <Text size="medium" textAlign="center" color="text-weak" style={{ fontSize: 'clamp(14px, 2.5vw, 18px)' }}>
-                {t('hero.subtitle')}
-              </Text>
-            </Box>
-
-            {/* Search Bar - Directly Below Hero Text */}
-            <Box 
-              className="hero-search-section"
-              width="100%"
-              align="center"
-              pad={{ horizontal: 'small' }}
-            >
-              {/* Main Search Input - Prominent and Simple */}
-              <Box 
-                direction="column" 
-                gap="medium" 
-                align="center"
-                width="100%"
-                style={{ maxWidth: '800px' }}
-              >
-                {/* Primary Search Box with Angular Design */}
-                <Box 
-                  direction="row" 
-                  align="center"
-                  background="background-front"
-                  pad={{ horizontal: 'small', vertical: 'small' }}
-                  round="medium"
-                  elevation="large"
-                  style={{ 
-                    width: '100%',
-                    minHeight: '60px',
-                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.2)',
-                    border: '2px solid rgba(59, 130, 246, 0.4)',
-                    transition: 'all 0.3s ease',
-                    position: 'relative',
-                    zIndex: 20
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.boxShadow = '0 8px 30px rgba(59, 130, 246, 0.3)';
-                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.6)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.boxShadow = '0 4px 20px rgba(0, 0, 0, 0.2)';
-                    e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.4)';
-                  }}
-                >
-                  <Search size="20px" color="#3b82f6" style={{ flexShrink: 0, marginRight: '8px' }} />
-                  <Box flex={{ grow: 1 }} style={{ minWidth: 0 }}>
-                    <TextInput
-                      data-testid="search-input"
-                      name="search"
-                      placeholder="Search for cues, brands..."
-                      value={search}
-                      onChange={(e) => setSearch(e.target.value)}
-                      plain
-                      style={{
-                        fontSize: '15px',
-                        fontWeight: 400,
-                        border: 'none',
-                        background: 'transparent',
-                        padding: '8px 0',
-                        color: '#f1f5f9',
-                        outline: 'none'
-                      }}
-                      onKeyPress={(e) => {
-                        if (e.key === 'Enter') {
-                          // Trigger search on Enter key
-                          console.log('Search triggered:', search);
-                        }
-                      }}
-                    />
-                  </Box>
-                  {search && (
-                    <Button
-                      data-testid="search-clear"
-                      plain
-                      icon={<Text size="large" style={{ lineHeight: 1, color: '#94a3b8' }}>×</Text>}
-                      onClick={() => setSearch('')}
-                      style={{
-                        padding: '4px',
-                        marginLeft: '8px',
-                        marginRight: '8px',
-                        minWidth: 'auto',
-                        opacity: 0.6
-                      }}
-                      hoverIndicator={{ opacity: 1 }}
-                    />
-                  )}
-                  <Button 
-                    primary 
-                    label={<Text weight={700} size="small" color="white">Search</Text>}
-                    onClick={() => console.log('Search clicked:', search)}
-                    style={{ 
-                      background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                      borderRadius: '8px',
-                      padding: '10px 20px',
-                      border: 'none',
-                      boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)',
-                      whiteSpace: 'nowrap',
-                      flexShrink: 0,
-                      transition: 'all 0.2s ease'
-                    }}
-                    hoverIndicator={false}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-1px)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(59, 130, 246, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 2px 8px rgba(59, 130, 246, 0.3)';
-                    }}
-                  />
-                </Box>
-
-                {/* Secondary Filters - Compact Design */}
-                <Box 
-                  direction="row" 
-                  gap="small" 
-                  wrap
-                  align="center"
-                  justify="center"
-                  width="100%"
-                >
-                  <Box direction="row" align="center" gap="xsmall">
-                    <Text size="small" color="text-weak" weight={500}>{t('filters.filterBy')}</Text>
-                  </Box>
-                  <Select
-                    options={[t('filters.condition.all'), t('filters.condition.likeNew'), t('filters.condition.used'), t('filters.condition.fair')]}
-                    value={condition === 'all' ? t('filters.condition.all') : condition}
-                    onChange={({ option }) => setCondition(option === t('filters.condition.all') ? 'all' : option)}
-                    size="small"
-                    style={{ 
-                      minWidth: '130px',
-                      background: 'rgba(30, 41, 59, 0.5)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '8px',
-                      backdropFilter: 'blur(10px)',
-                      padding: '4px 12px'
-                    }}
-                  />
-                  <Select
-                    options={[t('filters.sort.newest'), t('filters.sort.low'), t('filters.sort.high')]}
-                    value={sortBy === 'newest' ? t('filters.sort.newest') : sortBy === 'price_asc' ? t('filters.sort.low') : t('filters.sort.high')}
-                    onChange={({ option }) => {
-                      if (option === t('filters.sort.newest')) setSortBy('newest');
-                      else if (option === t('filters.sort.low')) setSortBy('price_asc');
-                      else setSortBy('price_desc');
-                    }}
-                    size="small"
-                    style={{ 
-                      minWidth: '130px',
-                      background: 'rgba(30, 41, 59, 0.5)',
-                      border: '1px solid rgba(59, 130, 246, 0.3)',
-                      borderRadius: '8px',
-                      backdropFilter: 'blur(10px)',
-                      padding: '4px 12px'
-                    }}
-                  />
-                  {user && (
-                    <Button 
-                      icon={<Add size="16px" />} 
-                      label={<Text weight={600} size="small" color="white">{t('filters.newListing')}</Text>}
-                      onClick={handleAdd}
-                      style={{ 
-                        background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
-                        border: 'none',
-                        borderRadius: '8px',
-                        padding: '8px 18px',
-                        backdropFilter: 'blur(10px)',
-                        boxShadow: '0 2px 8px rgba(34, 197, 94, 0.3)',
-                        transition: 'all 0.2s ease'
-                      }}
-                      hoverIndicator={false}
-                      onMouseEnter={(e) => {
-                        e.currentTarget.style.transform = 'translateY(-1px)';
-                        e.currentTarget.style.boxShadow = '0 4px 12px rgba(34, 197, 94, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.currentTarget.style.transform = 'translateY(0)';
-                        e.currentTarget.style.boxShadow = '0 2px 8px rgba(34, 197, 94, 0.3)';
-                      }}
-                    />
-                  )}
-                </Box>
-
-                {/* Search Tips - Hidden by default, shown on focus */}
-                {search.length > 0 && (
-                  <Box 
-                    background="rgba(30, 41, 59, 0.8)" 
-                    pad="small" 
-                    round="small"
-                    style={{ 
-                      backdropFilter: 'blur(10px)',
-                      border: '1px solid rgba(59, 130, 246, 0.2)'
-                    }}
-                  >
-                    <Text size="xsmall" color="text-weak">
-                      💡 Tip: Press Enter to search or use filters to refine results
-                    </Text>
-                  </Box>
-                )}
-              </Box>
-            </Box>
-          </Box>
-        </Box>
-      )}
-
-      {/* Mobile Filters & Sorting Toolbar - Shows after hero on mobile only */}
-      {isHomePage && (
-        <MobileFiltersBar
-          search={search}
-          setSearch={setSearch}
-          category={category}
-          setCategory={setCategory}
-          cueType={cueType}
-          setCueType={setCueType}
-          condition={condition}
-          setCondition={setCondition}
-          sortBy={sortBy}
-          setSortBy={setSortBy}
-          priceRange={priceRange}
-          setPriceRange={setPriceRange}
-          showMobileFilters={showMobileFilters}
-          setShowMobileFilters={setShowMobileFilters}
-          user={user}
-          onAddListing={handleAdd}
-          PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
-          PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
-          PRICE_STEP={PRICE_STEP}
-          currencySymbol={currencySymbol}
-        />
+        <div className="bg-gradient-to-b from-background via-background to-secondary/20">
+          <HeroSearch
+            search={search}
+            setSearch={setSearch}
+            condition={condition}
+            setCondition={setCondition}
+            sortBy={sortBy}
+            setSortBy={setSortBy}
+            priceRange={priceRange}
+            setPriceRange={setPriceRange}
+            PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+            PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+            currencySymbol={currencySymbol}
+          />
+        </div>
       )}
 
       {/* Main Content Area with Sidebar */}
@@ -782,6 +537,12 @@ function AppInner() {
               setCategory={setCategory}
               cueType={cueType}
               setCueType={setCueType}
+              condition={condition}
+              setCondition={setCondition}
+              sortBy={sortBy}
+              setSortBy={setSortBy}
+              search={search}
+              setSearch={setSearch}
               priceRange={priceRange}
               setPriceRange={setPriceRange}
               mobileMenuOpen={mobileMenuOpen}

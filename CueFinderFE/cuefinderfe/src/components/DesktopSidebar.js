@@ -1,13 +1,20 @@
 import React from 'react';
-import { Box, Button, Heading, Text, RangeSelector } from 'grommet';
+import { Box, Button, Heading, Text } from 'grommet';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
+import SearchAndFilters from './SearchAndFilters';
 
 export default function DesktopSidebar({
   category,
   setCategory,
   cueType,
   setCueType,
+  condition,
+  setCondition,
+  sortBy,
+  setSortBy,
+  search,
+  setSearch,
   priceRange,
   setPriceRange,
   mobileMenuOpen,
@@ -620,118 +627,21 @@ export default function DesktopSidebar({
       )}
 
       {/* Filters Section */}
-      <Box 
-        margin={{ top: 'medium' }}
-        pad={{ top: 'medium' }}
-        border={{ side: 'top', color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
-        gap="small"
-      >
-        <Box direction="row" gap="small" align="center">
-          <Box 
-            background="rgba(59, 130, 246, 0.2)"
-            pad="xsmall"
-            round="small"
-          >
-            <Text size="small" style={{ lineHeight: '1' }}>🔍</Text>
-          </Box>
-          <Heading level="4" margin="none" style={{ 
-            fontSize: '14px', 
-            fontWeight: 600,
-            color: '#cbd5e1',
-            letterSpacing: '0.05em',
-            textTransform: 'uppercase'
-          }}>
-            Filters
-          </Heading>
-        </Box>
-        <Box 
-          background="rgba(30, 41, 59, 0.5)"
-          pad="medium"
-          round="8px"
-          border={{ color: 'rgba(51, 65, 85, 0.5)', size: '1px' }}
-          gap="small"
-        >
-          <Heading level="4" margin="none" style={{ fontSize: '14px', fontWeight: 600, color: '#cbd5e1' }}>
-            {t('price.range')}
-          </Heading>
-          <Box gap="small">
-            {/* Preset quick filters */}
-            <Box direction="row" gap="xsmall" wrap>
-              {presetRanges.map((p) => (
-                <Button
-                  key={p.label}
-                  label={<Text size="xsmall" weight={600} color={'brand'}>{p.label.replace('$', currencySymbol)}</Text>}
-                  onClick={() => {
-                    const [min, max] = p.value;
-                    setPriceRange([min, max]);
-                  }}
-                  style={{
-                    background: priceRange[0] === p.value[0] && priceRange[1] === p.value[1]
-                      ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)'
-                      : 'rgba(30,41,59,0.5)',
-                    border: '1px solid rgba(59,130,246,0.3)',
-                    borderRadius: '16px',
-                    padding: '4px 10px'
-                  }}
-                  hoverIndicator={false}
-                />
-              ))}
-            </Box>
-            {/* Current values */}
-            <Box direction="row" justify="between" align="center">
-              <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[0]}</Text>
-              <Text size="small" color="#cbd5e1" weight={600}>{currencySymbol}{priceRange[1]}</Text>
-            </Box>
-            {/* Range slider */}
-            <Box gap="xsmall">
-              <Box height="6px" round="large" background={{ color: 'rgba(51,65,85,0.6)' }}>
-                <Box
-                  height="6px"
-                  round="large"
-                  background={{ color: 'brand' }}
-                  style={{
-                    width: `${((priceRange[1] - priceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                    marginLeft: `${((priceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                    transition: 'width 0.1s ease, margin-left 0.1s ease'
-                  }}
-                />
-              </Box>
-              <Box pad={{ horizontal: 'xsmall' }}>
-                <RangeSelector
-                  direction="horizontal"
-                  min={PRICE_MIN_LIMIT}
-                  max={PRICE_MAX_LIMIT}
-                  step={PRICE_STEP}
-                  values={priceRange}
-                  onChange={setPriceRange}
-                />
-              </Box>
-            </Box>
-            <Text size="xsmall" color="#94a3b8">Step: {currencySymbol}{PRICE_STEP}</Text>
-          </Box>
-        </Box>
-      </Box>
+      <SearchAndFilters
+        search={search}
+        setSearch={setSearch}
+        condition={condition}
+        setCondition={setCondition}
+        sortBy={sortBy}
+        setSortBy={setSortBy}
+        priceRange={priceRange}
+        setPriceRange={setPriceRange}
+        PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+        PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+        PRICE_STEP={PRICE_STEP}
+        currencySymbol={currencySymbol}
+      />
 
-      {/* Pro Tip Section */}
-      <Box 
-        background="linear-gradient(135deg, rgba(59, 130, 246, 0.1) 0%, rgba(37, 99, 235, 0.05) 100%)"
-        pad="medium"
-        round="12px"
-        border={{ color: 'rgba(59, 130, 246, 0.3)', size: '1px' }}
-        margin={{ top: 'small' }}
-      >
-        <Box direction="row" gap="small" align="start">
-          <Text size="medium">💡</Text>
-          <Box>
-            <Text size="small" weight={600} color="#f1f5f9" style={{ lineHeight: '1.4' }}>
-              Pro Tip
-            </Text>
-            <Text size="xsmall" color="#94a3b8" style={{ lineHeight: '1.5' }}>
-              Use the search bar above to find specific brands or models quickly!
-            </Text>
-          </Box>
-        </Box>
-      </Box>
     </Box>
   );
 }

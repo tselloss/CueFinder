@@ -155,10 +155,10 @@ export default function LoginPage() {
                 >
                   <TextInput
                     id="username"
-                    name="username"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
                     placeholder="Enter username"
+                    required
                   />
                 </FormField>
               </Box>
@@ -168,7 +168,6 @@ export default function LoginPage() {
                   <FormField label="Display name" name="name" required>
                     <TextInput
                       id="name"
-                      name="name"
                       value={name}
                       onChange={(e) => setName(e.target.value)}
                       placeholder="Your name"
