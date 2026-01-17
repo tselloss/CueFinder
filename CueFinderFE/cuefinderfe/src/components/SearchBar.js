@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
-import { Box, TextInput, Button } from 'grommet';
-import { Search, Close } from 'grommet-icons';
+import { Button } from './ui/button';
+import { Search, X } from 'lucide-react';
 
 /**
  * Material Design Search Bar Component
@@ -27,32 +27,15 @@ export default function SearchBar({
   };
 
   return (
-    <Box
-      className={`search-bar-container ${isMobile ? 'search-bar-mobile' : 'search-bar-desktop'}`}
-      direction="row"
-      align="center"
-      background={isMobile ? 'rgba(30, 41, 59, 0.9)' : 'background-front'}
-      pad={isMobile ? { horizontal: 'small', vertical: 'xsmall' } : { horizontal: 'medium', vertical: 'small' }}
-      round={isMobile ? 'small' : 'medium'}
-      border={{
-        color: isFocused 
-          ? 'rgba(59, 130, 246, 0.6)' 
-          : 'rgba(59, 130, 246, 0.3)',
-        size: '2px'
-      }}
-      gap={isMobile ? 'xsmall' : 'small'}
+    <div
+      className={`w-full ${isMobile ? 'max-w-none' : 'max-w-3xl'} transition-all duration-300 flex items-center gap-2 px-3 md:px-4 py-2 md:py-3 rounded-lg border-2 ${
+        isFocused 
+          ? 'border-blue-500 shadow-lg shadow-blue-500/20' 
+          : 'border-blue-300 shadow-md'
+      }`}
       style={{
-        width: '100%',
-        maxWidth: isMobile ? 'none' : '800px',
         minHeight: isMobile ? '40px' : '56px',
-        transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
-        boxShadow: isFocused 
-          ? isMobile 
-            ? '0 2px 8px rgba(59, 130, 246, 0.2)' 
-            : '0 4px 20px rgba(59, 130, 246, 0.25)'
-          : isMobile 
-            ? 'none' 
-            : '0 2px 8px rgba(0, 0, 0, 0.1)',
+        backgroundColor: isMobile ? 'rgba(30, 41, 59, 0.9)' : '#ffffff',
         cursor: 'text'
       }}
       onFocus={() => setIsFocused(true)}
@@ -60,58 +43,36 @@ export default function SearchBar({
     >
       {/* Search Icon */}
       <Search 
-        size={isMobile ? '18px' : '20px'} 
-        color={isFocused ? '#60a5fa' : '#93c5fd'}
-        style={{
-          flexShrink: 0,
-          transition: 'color 0.2s ease',
-        }}
+        size={isMobile ? 18 : 20} 
+        className={`flex-shrink-0 transition-colors ${
+          isFocused ? 'text-blue-500' : 'text-blue-300'
+        }`}
       />
 
       {/* Input Field */}
-      <TextInput
-        className="search-input-field"
+      <input
+        type="text"
         placeholder={placeholder}
         value={value}
         onChange={onChange}
         onFocus={() => setIsFocused(true)}
         onBlur={() => setIsFocused(false)}
-        plain
-        style={{
-          fontSize: isMobile ? '14px' : '15px',
-          fontWeight: 400,
-          border: 'none',
-          background: 'transparent',
-          color: '#f1f5f9',
-          flex: 1,
-          minWidth: 0,
-          padding: 0,
-          outline: 'none'
-        }}
+        className={`flex-1 min-w-0 border-none bg-transparent outline-none text-base md:text-base font-normal transition-colors ${
+          isMobile ? 'text-slate-100' : 'text-foreground'
+        } placeholder-slate-400`}
       />
 
       {/* Clear Button - Only show when there's text */}
       {value && (
         <Button
-          className="search-clear-button"
-          plain
-          icon={<Close size={isMobile ? '16px' : '18px'} color="#cbd5e1" />}
+          variant="ghost"
+          size="icon"
           onClick={handleClear}
-          style={{
-            padding: '0',
-            minWidth: 'auto',
-            minHeight: 'auto',
-            flexShrink: 0,
-            transition: 'all 0.2s ease'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
-          }}
-        />
+          className="flex-shrink-0 h-6 w-6 hover:scale-110 transition-transform"
+        >
+          <X size={isMobile ? 16 : 18} className="text-slate-400 hover:text-slate-600" />
+        </Button>
       )}
-    </Box>
+    </div>
   );
 }

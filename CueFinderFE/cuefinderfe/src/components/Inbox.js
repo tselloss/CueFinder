@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Heading, Text, Card, CardBody, Layer, TextArea, Spinner } from 'grommet';
-import { Close, MailOption, Previous, Trash } from 'grommet-icons';
+import { Button } from './ui/button';
+import { Card, CardContent } from './ui/card';
+import { Mail, ArrowLeft, Trash2, X, Loader2 } from 'lucide-react';
 import MaterialInput from './MaterialInput';
 import * as messageService from '../api/messageService';
 import * as authService from '../api/authService';
@@ -102,162 +103,198 @@ export default function Inbox({ onBack }) {
 
   if (loading) {
     return (
-      <Box fill align="center" justify="center">
-        <Spinner />
-        <Text>Loading inbox...</Text>
-      </Box>
+      <div className="w-full h-screen flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="w-8 h-8 animate-spin text-blue-500" />
+          <p className="text-muted-foreground">Loading inbox...</p>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box fill background="background" pad="medium">
+    <div className="w-full min-h-screen bg-background p-4 md:p-6">
       {/* Header */}
-      <Box direction="row" gap="medium" align="center" margin={{ bottom: 'medium' }}>
-        <Button icon={<Previous />} onClick={onBack} />
-        <Box direction="row" gap="small" align="center">
-          <MailOption size="large" />
-          <Heading level="2" margin="none">Inbox</Heading>
+      <div className="flex gap-4 items-center mb-6">
+        <Button variant="outline" size="icon" onClick={onBack}>
+          <ArrowLeft className="w-4 h-4" />
+        </Button>
+        <div className="flex gap-2 items-center">
+          <Mail className="w-6 h-6 text-blue-500" />
+          <h2 className="text-2xl font-bold">Inbox</h2>
           {unreadCount > 0 && (
-            <Badge background="status-critical" pad="small" round="full" value={unreadCount} />
+            <span className="bg-red-500 text-white text-xs font-bold px-2.5 py-1 rounded-full">
+              {unreadCount}
+            </span>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Filter & Search */}
-      <Box direction="row" gap="small" margin={{ bottom: 'medium' }} align="center">
-        <MaterialInput
-          placeholder="Search messages..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          size="small"
-          fullWidth
-        />
+      <div className="flex gap-2 mb-6 items-center flex-wrap">
+        <div className="flex-1 min-w-[200px]">
+          <MaterialInput
+            placeholder="Search messages..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
         <Button
-          label={filterUnread ? `Unread (${unreadCount})` : 'All'}
+          variant={filterUnread ? 'default' : 'outline'}
           onClick={() => setFilterUnread(!filterUnread)}
-          primary={filterUnread}
-        />
-      </Box>
+        >
+          {filterUnread ? `Unread (${unreadCount})` : 'All'}
+        </Button>
+      </div>
 
       {/* Messages List */}
-      <Box gap="small" style={{ maxWidth: '800px' }}>
+      <div className="space-y-3 max-w-2xl">
         {filteredMessages.length === 0 ? (
-          <Card background="white">
-            <CardBody pad="large" align="center">
-              <Text size="large" color="text-weak">
+          <Card className="bg-white">
+            <CardContent className="p-8 text-center">
+              <p className="text-muted-foreground text-lg">
                 {searchTerm ? 'No messages match your search' : 'No messages yet'}
-              </Text>
-            </CardBody>
+              </p>
+            </CardContent>
           </Card>
         ) : (
           filteredMessages.map((message) => (
             <Card
               key={message.id}
-              background={message.isRead ? 'white' : 'light-1'}
-              style={{ cursor: 'pointer', borderLeft: message.isRead ? 'none' : '4px solid #7D4CDB' }}
+              className={`cursor-pointer transition-all border-l-4 ${
+                message.isRead
+                  ? 'bg-white border-l-transparent'
+                  : 'bg-blue-50 border-l-purple-600'
+              }`}
               onClick={() => {
                 if (!message.isRead) handleMarkAsRead(message.id);
                 setSelectedMessage(message);
               }}
             >
-              <CardBody pad="medium" gap="small">
-                <Box direction="row" gap="small" align="start" justify="between">
-                  <Box gap="xsmall" flex="grow">
-                    <Box direction="row" gap="small" align="center">
-                      <Text weight="bold" size="large">
+              <CardContent className="p-4 space-y-2">
+                <div className="flex gap-2 items-start justify-between">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex gap-2 items-center mb-1">
+                      <p className="font-bold text-base">
                         {message.senderName}
-                      </Text>
+                      </p>
                       {!message.isRead && (
-                        <Badge background="status-warning" label="New" pad="xsmall" round="small" />
+                        <span className="bg-yellow-100 text-yellow-700 text-xs font-bold px-2 py-0.5 rounded">
+                          New
+                        </span>
                       )}
                       {message.cueId && (
-                        <Badge background="light-4" label="About Listing" pad="xsmall" round="small" />
+                        <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-0.5 rounded">
+                          About Listing
+                        </span>
                       )}
-                    </Box>
-                    <Text weight="bold" truncate>
+                    </div>
+                    <p className="font-bold text-sm truncate">
                       {message.subject}
-                    </Text>
-                    <Text color="dark-4" size="small" truncate>
+                    </p>
+                    <p className="text-muted-foreground text-sm truncate">
                       {message.content}
-                    </Text>
-                  </Box>
-                  <Text size="small" color="text-weak">
+                    </p>
+                  </div>
+                  <p className="text-xs text-muted-foreground flex-shrink-0">
                     {new Date(message.createdAt).toLocaleDateString()}
-                  </Text>
-                </Box>
-              </CardBody>
+                  </p>
+                </div>
+              </CardContent>
             </Card>
           ))
         )}
-      </Box>
+      </div>
 
       {/* Message Detail Modal */}
       {selectedMessage && (
-        <Layer onEsc={() => setSelectedMessage(null)} onClickOutside={() => setSelectedMessage(null)}>
-          <Box pad="medium" gap="medium" width="large" overflow="auto">
+        <div
+          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4"
+          onClick={() => setSelectedMessage(null)}
+        >
+          <div
+            className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-auto z-[1000] p-6"
+            onClick={(e) => e.stopPropagation()}
+          >
             {/* Header */}
-            <Box direction="row" justify="between" align="center">
-              <Box flex="grow">
-                <Heading level="4" margin="none">
+            <div className="flex justify-between items-start mb-6">
+              <div className="flex-1">
+                <h3 className="text-xl font-bold">
                   {selectedMessage.senderName}
-                </Heading>
-                <Text size="small" color="text-weak">
+                </h3>
+                <p className="text-sm text-muted-foreground">
                   {new Date(selectedMessage.createdAt).toLocaleString()}
-                </Text>
-              </Box>
-              <Box direction="row" gap="small">
-                <Button 
-                  icon={<Trash color="status-critical" />} 
+                </p>
+              </div>
+              <div className="flex gap-2 flex-shrink-0">
+                <Button
+                  variant="ghost"
+                  size="icon"
                   onClick={() => handleDelete(selectedMessage.id)}
-                  tip="Delete message"
-                />
-                <Button icon={<Close />} onClick={() => setSelectedMessage(null)} />
-              </Box>
-            </Box>
+                  title="Delete message"
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => setSelectedMessage(null)}
+                >
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
 
             {/* Subject & Meta */}
-            <Box gap="xsmall">
-              <Text weight="bold">Subject</Text>
-              <Text>{selectedMessage.subject}</Text>
-            </Box>
+            <div className="mb-4 space-y-2">
+              <p className="font-bold text-sm">Subject</p>
+              <p>{selectedMessage.subject}</p>
+            </div>
 
             {selectedMessage.cueId && (
-              <Box gap="xsmall">
-                <Badge background="light-4" label="Related to a listing" pad="xsmall" round="small" />
-              </Box>
+              <div className="mb-4">
+                <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">
+                  Related to a listing
+                </span>
+              </div>
             )}
 
             {/* Message Content */}
-            <Card background="light-1">
-              <CardBody pad="medium">
-                <Text style={{ whiteSpace: 'pre-wrap' }}>
+            <Card className="bg-blue-50 mb-6">
+              <CardContent className="p-4">
+                <p className="whitespace-pre-wrap">
                   {selectedMessage.content}
-                </Text>
-              </CardBody>
+                </p>
+              </CardContent>
             </Card>
 
             {/* Reply Box */}
-            <Box gap="small" border={{ top: true, color: 'light-4' }} pad={{ top: 'medium' }}>
-              <Text weight="bold">Reply</Text>
-              <TextArea
+            <div className="space-y-3 pt-6 border-t border-border">
+              <p className="font-bold">Reply</p>
+              <textarea
                 placeholder="Type your reply..."
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
                 rows={4}
+                className="w-full px-3 py-2 border border-border rounded-md font-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
               />
-              <Box direction="row" gap="small" justify="end">
-                <Button label="Cancel" onClick={() => setSelectedMessage(null)} />
+              <div className="flex gap-2 justify-end">
+                <Button variant="outline" onClick={() => setSelectedMessage(null)}>
+                  Cancel
+                </Button>
                 <Button
-                  label={sending ? 'Sending...' : 'Reply'}
-                  primary
                   onClick={handleReply}
                   disabled={sending || !replyBody.trim()}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Layer>
+                  className="gap-2"
+                >
+                  {sending && <Loader2 className="w-4 h-4 animate-spin" />}
+                  {sending ? 'Sending...' : 'Reply'}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }
