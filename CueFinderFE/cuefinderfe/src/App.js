@@ -371,7 +371,7 @@ function AppInner() {
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               
               <Route path="/cue/:id" element={
-                user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
+                <CueDetail onBack={handleBack} />
               } />
               <Route path="/case/:id" element={
                 <CueCaseDetail onBack={handleBack} />
