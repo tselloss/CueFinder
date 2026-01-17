@@ -69,6 +69,18 @@ function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Disable body scroll when modal is open
+  useEffect(() => {
+    if (showAddModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'unset';
+    }
+    return () => {
+      document.body.style.overflow = 'unset';
+    };
+  }, [showAddModal]);
+
   // Check if we're on the home page (listings page)
   const isHomePage = location.pathname === '/';
   
