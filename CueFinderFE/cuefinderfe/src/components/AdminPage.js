@@ -1,7 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Trash2, Flag, X, Check, Edit2, User } from 'lucide-react';
-import { Card, CardContent } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
+import { Card, CardContent } from './ui/card';
+import { Button } from './ui/button';
 import MaterialInput from './MaterialInput';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
