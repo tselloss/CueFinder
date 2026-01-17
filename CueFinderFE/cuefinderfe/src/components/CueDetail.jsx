@@ -1,13 +1,11 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import * as cueService from '../api/cueService';
-import ItemDetail from './ItemDetail';
+import ItemDetail from './ItemDetail.jsx';
 
 export default function CueDetail({ onBack }) {
   const { id } = useParams();
   const [cue, setCue] = useState(null);
-
-  // Cue details are public; do not force login here.
 
   useEffect(() => {
     async function load() {

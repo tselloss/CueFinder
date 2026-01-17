@@ -3,7 +3,7 @@ import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-
 import { Box, Button, Header, Heading, Text, Footer, Menu } from 'grommet';
 import { User, Logout, UserAdmin, MailOption, Menu as MenuIcon } from 'grommet-icons';
 import CueList from './components/CueList';
-import CueDetail from './components/CueDetail';
+import CueDetail from './components/CueDetail.jsx';
 import CueFormModal from './components/CueFormModal';
 import CueCaseDetail from './components/CueCaseDetail';
 import AdminPage from './components/AdminPage';
