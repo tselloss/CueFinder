@@ -2,31 +2,17 @@ import React from 'react';
 import { Box, Button, Heading, Text } from 'grommet';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
-import SearchAndFilters from './SearchAndFilters';
 
 export default function DesktopSidebar({
   category,
   setCategory,
   cueType,
   setCueType,
-  condition,
-  setCondition,
-  sortBy,
-  setSortBy,
-  search,
-  setSearch,
-  priceRange,
-  setPriceRange,
   mobileMenuOpen,
   setMobileMenuOpen,
   forumCategories,
   showForumCategories,
-  setShowForumCategories,
-  PRICE_MIN_LIMIT = 0,
-  PRICE_MAX_LIMIT = 10000,
-  PRICE_STEP = 1,
-  currencySymbol = '€',
-  presetRanges = []
+  setShowForumCategories
 }) {
   const { t } = useTranslation();
   const navigate = useNavigate();
@@ -625,22 +611,6 @@ export default function DesktopSidebar({
           </Button>
         </Box>
       )}
-
-      {/* Filters Section */}
-      <SearchAndFilters
-        search={search}
-        setSearch={setSearch}
-        condition={condition}
-        setCondition={setCondition}
-        sortBy={sortBy}
-        setSortBy={setSortBy}
-        priceRange={priceRange}
-        setPriceRange={setPriceRange}
-        PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
-        PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
-        PRICE_STEP={PRICE_STEP}
-        currencySymbol={currencySymbol}
-      />
 
     </Box>
   );
