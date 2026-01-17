@@ -248,6 +248,7 @@ function AppInner() {
         unreadCount={unreadMessageCount}
         onNavigate={(path) => navigate(path)}
         onLogout={handleLogout}
+        currentPath={location.pathname}
       />
 
       {/* Hero Section - New Shadcn UI Design - Only show on home page */}

@@ -1,14 +1,37 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
 import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
 
-export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout }) {
+export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const navLinks = [
+    { label: 'Home', path: '/' },
+    { label: 'Forum', path: '/forum' },
+    { label: 'Inbox', path: '/inbox', requiresAuth: true }
+  ];
+
   return (
-    <header className="w-full bg-background border-b border-border sticky top-0 z-50">
+    <header className="w-full bg-background/90 backdrop-blur border-b border-border sticky top-0 z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
-        <div className="flex items-center gap-2 min-w-0">
+        <div className="flex items-center gap-3 min-w-0">
           <h2 className="font-bold tracking-tight text-foreground text-lg sm:text-xl whitespace-nowrap">🎱 {title}</h2>
+          <nav className="hidden md:flex items-center gap-2">
+            {navLinks.filter(l => !l.requiresAuth || user).map(link => {
+              const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
+              return (
+                <Button
+                  key={link.path}
+                  variant={active ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => onNavigate && onNavigate(link.path)}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+          </nav>
         </div>
         <div className="flex items-center gap-2">
           {user ? (
@@ -43,16 +66,57 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 <Button variant="ghost" size="sm" onClick={() => onLogout && onLogout()}>
                   <LogOut className="mr-2 h-4 w-4" /> Logout
                 </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="md:hidden"
+                  aria-label="Toggle menu"
+                  onClick={() => setMobileOpen(v => !v)}
+                >
+                  <span className="inline-block w-5 h-5">☰</span>
+                </Button>
               </div>
             </>
           ) : (
             <>
               <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/login')}>Sign In</Button>
               <Button variant="outline" size="sm" onClick={() => onNavigate && onNavigate('/register')}>Register</Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                className="md:hidden"
+                aria-label="Toggle menu"
+                onClick={() => setMobileOpen(v => !v)}
+              >
+                <span className="inline-block w-5 h-5">☰</span>
+              </Button>
             </>
           )}
         </div>
       </div>
+      {mobileOpen && (
+        <div className="md:hidden border-t border-border bg-background">
+          <div className="container mx-auto px-4 py-3 flex flex-col gap-2">
+            {navLinks.filter(l => !l.requiresAuth || user).map(link => {
+              const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
+              return (
+                <Button
+                  key={link.path}
+                  variant={active ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => {
+                    onNavigate && onNavigate(link.path);
+                    setMobileOpen(false);
+                  }}
+                  aria-current={active ? 'page' : undefined}
+                >
+                  {link.label}
+                </Button>
+              );
+            })}
+          </div>
+        </div>
+      )}
     </header>
   );
 }
