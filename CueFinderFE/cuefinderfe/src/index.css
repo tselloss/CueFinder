@@ -67,6 +67,60 @@ code {
     monospace;
 }
 
+/* Smooth transitions for interactive elements */
+@layer components {
+  button, a, [role="button"] {
+    @apply transition-all duration-200 ease-in-out;
+  }
+  
+  /* Smooth hover effects for buttons */
+  .group:hover, 
+  button:not(:disabled):hover, 
+  a:hover {
+    @apply transform transition-transform duration-150;
+  }
+  
+  /* Smooth nav link transitions */
+  nav a, [role="navigation"] a {
+    @apply relative;
+  }
+  
+  /* Pulse animation for unread badges */
+  .unread-badge {
+    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  }
+  
+  /* Fade in animation for modals and overlays */
+  @keyframes fadeIn {
+    from {
+      opacity: 0;
+    }
+    to {
+      opacity: 1;
+    }
+  }
+  
+  /* Slide down animation for dropdowns */
+  @keyframes slideDown {
+    from {
+      opacity: 0;
+      transform: translateY(-8px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .fade-in {
+    animation: fadeIn 0.2s ease-in;
+  }
+  
+  .slide-down {
+    animation: slideDown 0.2s ease-out;
+  }
+}
+
 /* Modern Sidebar Animation */
 @keyframes slideIn {
   from {
@@ -96,4 +150,14 @@ code {
 
 ::-webkit-scrollbar-thumb:hover {
   background: rgba(59, 130, 246, 0.7);
+}
+
+/* Pulse animation for loading states */
+@keyframes pulse {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
 }
