@@ -371,10 +371,10 @@ function AppInner() {
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               
               <Route path="/cue/:id" element={
-                <CueDetail onBack={handleBack} />
+                user ? <CueDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               <Route path="/case/:id" element={
-                <CueCaseDetail onBack={handleBack} />
+                user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/profile" element={
@@ -394,7 +394,7 @@ function AppInner() {
               } />
               
               <Route path="/forum" element={
-                <Forum onBack={handleBack} />
+                user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
             </Routes>
           </Box>
