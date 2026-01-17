@@ -228,7 +228,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
   return (
     <Dialog open={true} onOpenChange={onClose}>
-      <DialogContent className="w-[95vw] max-w-3xl overflow-hidden flex flex-col p-3 sm:p-4 md:p-6 rounded-lg">
+      <DialogContent className="w-[95vw] max-w-md sm:max-w-lg overflow-hidden flex flex-col p-3 sm:p-4 md:p-6 rounded-lg">
         <div className="flex items-center justify-between mb-2">
           <button
             onClick={onClose}
