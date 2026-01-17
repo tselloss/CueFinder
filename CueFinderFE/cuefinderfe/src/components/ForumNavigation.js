@@ -1,15 +1,15 @@
 import React, { useState } from 'react';
-import { Box, Button, Text, Layer, ResponsiveContext } from 'grommet';
+import { Button } from './ui/button';
 import { 
   Menu as MenuIcon, 
-  Close, 
-  Chat,
+  X,
+  MessageSquare,
   Home,
   Search as SearchIcon,
   User,
   LogOut,
   Settings
-} from 'grommet-icons';
+} from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 
 const ForumNavigation = ({ 
@@ -20,34 +20,35 @@ const ForumNavigation = ({
 }) => {
   const { user, logout } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const size = React.useContext(ResponsiveContext);
-  const isMobile = size === 'small';
+  
+  // Check if mobile
+  const isMobile = typeof window !== 'undefined' && window.innerWidth < 768;
 
   const navigationItems = [
     {
       label: 'Home',
       icon: Home,
       page: 'home',
-      color: 'brand'
+      color: '#3b82f6'
     },
     {
       label: 'Search',
       icon: SearchIcon,
       page: 'search',
-      color: 'text'
+      color: '#666'
     },
     {
       label: 'Forum',
-      icon: Chat,
+      icon: MessageSquare,
       page: 'forum',
-      color: 'status-ok',
+      color: '#10b981',
       badge: 'New'
     },
     {
       label: 'Profile',
       icon: User,
       page: 'profile',
-      color: 'text'
+      color: '#666'
     }
   ];
 
@@ -59,16 +60,10 @@ const ForumNavigation = ({
   };
 
   const renderDesktopNav = () => (
-    <Box
-      direction="row"
-      align="center"
-      gap="medium"
-      pad={{ horizontal: 'medium' }}
-      background="background-front"
-      elevation="small"
-      round="medium"
+    <div
+      className="flex items-center gap-4 px-4 bg-white rounded-lg border border-blue-200 shadow-sm"
       style={{
-        border: '1px solid rgba(59, 130, 246, 0.2)'
+        borderColor: 'rgba(59, 130, 246, 0.2)'
       }}
     >
       {navigationItems.map(item => {
@@ -76,194 +71,146 @@ const ForumNavigation = ({
         const isActive = currentPage === item.page;
         
         return (
-          <Button
+          <button
             key={item.page}
             onClick={() => handleNavClick(item.page)}
-            plain
-            style={{
-              padding: '8px 12px',
-              borderRadius: '6px',
-              background: isActive 
-                ? 'rgba(59, 130, 246, 0.2)' 
-                : 'transparent',
-              border: isActive 
-                ? '1px solid rgba(59, 130, 246, 0.4)'
-                : 'none',
-              transition: 'all 0.2s ease'
-            }}
-            onMouseEnter={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'rgba(59, 130, 246, 0.1)';
-              }
-            }}
-            onMouseLeave={(e) => {
-              if (!isActive) {
-                e.currentTarget.style.background = 'transparent';
-              }
-            }}
+            className={`px-3 py-2 rounded-md transition-all flex items-center gap-2 ${
+              isActive 
+                ? 'bg-blue-100 border border-blue-400' 
+                : 'hover:bg-blue-50'
+            }`}
           >
-            <Box direction="row" align="center" gap="small">
-              <Icon size="18px" color={item.color} />
-              <Text 
-                size="small" 
-                weight={isActive ? '600' : '500'}
-                color={isActive ? 'brand' : 'text'}
-              >
-                {item.label}
-              </Text>
-              {item.badge && (
-                <Box
-                  background="status-ok"
-                  pad={{ horizontal: 'xsmall' }}
-                  round="full"
-                >
-                  <Text size="xsmall" color="white" weight="bold">
-                    {item.badge}
-                  </Text>
-                </Box>
-              )}
-            </Box>
-          </Button>
+            <Icon size={18} color={item.color} />
+            <span 
+              className={`text-sm ${
+                isActive ? 'font-semibold text-blue-600' : 'font-medium text-gray-700'
+              }`}
+            >
+              {item.label}
+            </span>
+            {item.badge && (
+              <span className="bg-green-500 text-white text-xs font-bold px-2 py-0.5 rounded-full">
+                {item.badge}
+              </span>
+            )}
+          </button>
         );
       })}
-    </Box>
+    </div>
   );
 
   const renderMobileNav = () => (
-    <Box>
-      <Button
-        icon={<MenuIcon size="24px" />}
+    <div>
+      <button
         onClick={() => setMobileMenuOpen(true)}
-        plain
-      />
+        className="p-2 hover:bg-gray-100 rounded-md"
+      >
+        <MenuIcon size={24} />
+      </button>
       
       {mobileMenuOpen && (
-        <Layer
-          onEsc={() => setMobileMenuOpen(false)}
-          onClickOutside={() => setMobileMenuOpen(false)}
-          position="left"
-          full="vertical"
+        <div
+          className="fixed inset-0 z-40 bg-black bg-opacity-50"
+          onClick={() => setMobileMenuOpen(false)}
+        />
+      )}
+      
+      {mobileMenuOpen && (
+        <div
+          className="fixed left-0 top-0 h-screen w-60 bg-white z-50 overflow-y-auto shadow-xl"
           style={{
-            width: '240px'
+            borderRight: '1px solid rgba(59, 130, 246, 0.2)'
           }}
         >
-          <Box
-            background="background-front"
-            fill="vertical"
-            pad="medium"
-            gap="small"
-            border={{ side: 'right', color: 'rgba(59, 130, 246, 0.2)' }}
-          >
-            <Box direction="row" justify="between" align="center" margin={{ bottom: 'medium' }}>
-              <Text weight="600" size="large">Menu</Text>
-              <Button
-                icon={<Close size="20px" />}
-                onClick={() => setMobileMenuOpen(false)}
-                plain
-              />
-            </Box>
+          <div className="flex items-center justify-between p-4 border-b">
+            <h2 className="font-semibold text-lg">Menu</h2>
+            <button
+              onClick={() => setMobileMenuOpen(false)}
+              className="p-1 hover:bg-gray-100 rounded-md"
+            >
+              <X size={20} />
+            </button>
+          </div>
 
+          <div className="space-y-1 p-4">
             {navigationItems.map(item => {
               const Icon = item.icon;
               const isActive = currentPage === item.page;
               
               return (
-                <Button
+                <button
                   key={item.page}
                   onClick={() => handleNavClick(item.page)}
-                  plain
-                  style={{
-                    padding: '12px',
-                    borderRadius: '6px',
-                    background: isActive 
-                      ? 'rgba(59, 130, 246, 0.2)' 
-                      : 'transparent',
-                    textAlign: 'left'
-                  }}
+                  className={`w-full px-3 py-3 rounded-md text-left transition-colors flex items-center gap-3 ${
+                    isActive 
+                      ? 'bg-blue-100' 
+                      : 'hover:bg-gray-100'
+                  }`}
                 >
-                  <Box direction="row" align="center" gap="small">
-                    <Icon size="20px" color={item.color} />
-                    <Text 
-                      size="small" 
-                      weight={isActive ? '600' : '500'}
-                      color={isActive ? 'brand' : 'text'}
-                    >
-                      {item.label}
-                    </Text>
-                  </Box>
-                </Button>
+                  <Icon size={20} color={item.color} />
+                  <span 
+                    className={`text-sm ${
+                      isActive ? 'font-semibold text-blue-600' : 'font-medium text-gray-700'
+                    }`}
+                  >
+                    {item.label}
+                  </span>
+                </button>
               );
             })}
 
-            <Box border={{ side: 'top', color: 'rgba(59, 130, 246, 0.1)' }} 
-                 margin={{ top: 'medium', bottom: 'medium' }} />
+            <div className="border-t my-4" />
 
             {user ? (
-              <Button
+              <button
                 onClick={() => {
                   logout();
                   setMobileMenuOpen(false);
                 }}
-                plain
-                style={{
-                  padding: '12px',
-                  borderRadius: '6px',
-                  textAlign: 'left',
-                  color: '#ef4444'
-                }}
+                className="w-full px-3 py-3 rounded-md text-left transition-colors flex items-center gap-3 text-red-600 hover:bg-red-50"
               >
-                <Box direction="row" align="center" gap="small">
-                  <LogOut size="20px" color="status-critical" />
-                  <Text size="small" color="status-critical">
-                    Logout
-                  </Text>
-                </Box>
-              </Button>
+                <LogOut size={20} />
+                <span className="text-sm font-medium">Logout</span>
+              </button>
             ) : null}
-          </Box>
-        </Layer>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 
   return (
-    <Box
-      direction="row"
-      justify="between"
-      align="center"
-      pad="medium"
-      background="background"
-      border={{ side: 'bottom', color: 'rgba(59, 130, 246, 0.2)' }}
+    <div
+      className="flex items-center justify-between p-4 bg-white border-b"
+      style={{
+        borderBottomColor: 'rgba(59, 130, 246, 0.2)'
+      }}
     >
       {/* Brand/Logo */}
-      <Box direction="row" align="center" gap="small">
-        <Text weight="700" size="large" color="brand">
-          CueFinder
-        </Text>
-      </Box>
+      <div className="flex items-center gap-2">
+        <h1 className="font-bold text-lg text-blue-600">CueFinder</h1>
+      </div>
 
       {/* Navigation */}
       {isMobile ? renderMobileNav() : renderDesktopNav()}
 
       {/* Profile Section */}
       {user && !isMobile && (
-        <Box direction="row" align="center" gap="small">
-          <Text size="small" color="text-weak">
+        <div className="flex items-center gap-3">
+          <span className="text-sm text-gray-600">
             {user.username || user.email}
-          </Text>
-          <Button
-            icon={<Settings size="18px" />}
+          </span>
+          <button
             onClick={() => setProfileOpen(!profileOpen)}
-            plain
-            style={{
-              padding: '8px',
-              borderRadius: '6px',
-              background: profileOpen ? 'rgba(59, 130, 246, 0.2)' : 'transparent'
-            }}
-          />
-        </Box>
+            className={`p-2 rounded-md transition-colors ${
+              profileOpen ? 'bg-blue-100' : 'hover:bg-gray-100'
+            }`}
+          >
+            <Settings size={18} />
+          </button>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

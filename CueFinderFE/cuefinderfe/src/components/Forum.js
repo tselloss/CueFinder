@@ -1,26 +1,16 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useLocation } from 'react-router-dom';
+import { Button } from './ui/button';
 import { 
-  Box, 
-  Heading, 
-  Text, 
-  Button, 
-  TextInput,
-  Card,
-  Layer,
-  TextArea,
-  Select
-} from 'grommet';
-import { 
-  Chat, 
-  Add, 
+  MessageCircle, 
+  Plus, 
   Search, 
   Star, 
-  ChatOption,
-  Close,
+  MessageSquare,
+  X,
   User,
   Clock
-} from 'grommet-icons';
+} from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
 import * as forumService from '../api/forumService';
 
@@ -252,22 +242,14 @@ const Forum = ({ onBack }) => {
   const renderPost = (post, depth = 0) => {
     const depthBg = depth > 0 ? 'rgba(255, 255, 255, 0.02)' : undefined;
     return (
-      <Card
+      <div
         key={post.id}
-        background={depthBg || 'background-front'}
-        pad="medium"
-        elevation="xsmall"
-        style={{
-          borderLeft: '3px solid rgba(59, 130, 246, 0.35)',
-          border: '1px solid rgba(255, 255, 255, 0.05)',
-          borderRadius: '10px',
-          marginLeft: depth * 14,
-          marginBottom: 6,
-          position: 'relative'
-        }}
+        className={`p-4 border-l-2 border-blue-500/35 bg-slate-800/30 rounded-lg mb-1 relative ${depth > 0 ? 'ml-3' : ''}`}
+        style={{ borderLeft: '3px solid rgba(59, 130, 246, 0.35)' }}
       >
         {depth > 0 && (
-          <Box
+          <div
+            className="absolute left-0 top-0 bottom-0 w-0.5 bg-blue-500/15"
             style={{
               position: 'absolute',
               left: -8,
@@ -278,802 +260,453 @@ const Forum = ({ onBack }) => {
             }}
           />
         )}
-        <Box gap="small">
-          <Box direction="row" justify="between" align="center">
-            <Box direction="row" gap="small" align="center">
-              <User size="18px" color="brand" />
-              <Text size="small" weight={700}>
-                {post.createdByUsername || 'User'}
-              </Text>
-              <Text size="xsmall" color="text-weak" title={new Date(post.createdAt).toLocaleString()}>
+        <div className="space-y-2">
+          <div className="flex justify-between items-center gap-2">
+            <div className="flex items-center gap-2">
+              <User size={18} className="text-purple-500" />
+              <span className="text-xs font-bold text-slate-200">{post.createdByUsername || 'User'}</span>
+              <span className="text-xs text-slate-500" title={new Date(post.createdAt).toLocaleString()}>
                 {formatRelativeTime(post.createdAt)}
-              </Text>
-            </Box>
+              </span>
+            </div>
             {post.helpfulCount > 0 && (
-              <Text size="small" weight={600} color="status-ok">
-                ✓ {post.helpfulCount} helpful
-              </Text>
+              <span className="text-xs font-semibold text-green-500">✓ {post.helpfulCount} helpful</span>
             )}
-          </Box>
+          </div>
 
-          <Text>{post.content}</Text>
-          <Box
-            direction="row"
-            gap="medium"
-            margin={{ top: 'small' }}
-            pad={{ vertical: 'xsmall' }}
-            background="rgba(255,255,255,0.015)"
-            round="xsmall"
-          >
-            <Button
-              icon={<Star
-                size="14px"
-                color="text-weak"
-                fill="none"
-              />}
-              label={<Text size="xsmall" weight={600}>{post.likeCount}</Text>}
+          <p className="text-slate-100">{post.content}</p>
+          
+          <div className="flex flex-wrap gap-4 mt-3 p-2 bg-slate-800/50 rounded-sm">
+            <button
               onClick={() => handleLikePost(post.id)}
               disabled={!user}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '0',
-                gap: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.color = '#8b5cf6';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'inherit';
-              }}
-            />
-            <Button
-              icon={<ChatOption size="14px" color="text-weak" />}
-              label={<Text size="xsmall" weight={600}>Reply</Text>}
+              className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-purple-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <Star size={14} className="opacity-50" />
+              {post.likeCount}
+            </button>
+            <button
               onClick={() => handleReplyClick(post)}
               disabled={selectedDiscussion?.isLocked || !user}
-              style={{
-                background: 'transparent',
-                border: 'none',
-                padding: '0',
-                gap: '4px',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                if (!selectedDiscussion?.isLocked) {
-                  e.currentTarget.style.color = '#8b5cf6';
-                }
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.color = 'inherit';
-              }}
-            />
-            <Button
-              label={<Text size="xsmall" weight={600}>Helpful</Text>}
+              className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-purple-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              <MessageSquare size={14} />
+              Reply
+            </button>
+            <button
               onClick={() => handleMarkHelpful(post.id)}
               disabled={!user}
-              style={{
-                background: 'transparent',
-                border: '1px solid rgba(34, 197, 94, 0.3)',
-                borderRadius: '4px',
-                padding: '4px 8px',
-                color: '#22c55e',
-                cursor: 'pointer',
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(34, 197, 94, 0.1)';
-                e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.6)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'transparent';
-                e.currentTarget.style.borderColor = 'rgba(34, 197, 94, 0.3)';
-              }}
-            />
-          </Box>
-        </Box>
+              className="px-2 py-1 text-xs font-semibold text-green-500 border border-green-500/30 rounded hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              Helpful
+            </button>
+          </div>
+        </div>
 
         {post.replies && post.replies.map(child => renderPost(child, depth + 1))}
-      </Card>
+      </div>
     );
   };
 
   return (
-    <Box fill background="background" overflow="auto">
+    <div className="min-h-screen bg-slate-950 overflow-auto">
       {/* Header */}
-      <Box
-        background="background-front"
-        pad={{ horizontal: 'large', vertical: 'medium' }}
-        border={{ side: 'bottom', color: 'rgba(139, 92, 246, 0.3)' }}
-        elevation="medium"
-        style={{
-          boxShadow: '0 4px 12px rgba(139, 92, 246, 0.2)',
-          position: 'sticky',
-          top: 0,
-          zIndex: 10
-        }}
-      >
-        <Box direction="row" justify="between" align="center" gap="medium" wrap>
-          <Box direction="row" align="center" gap="medium" flex="grow">
-            <Box
-              background="linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)"
-              pad="small"
-              round="small"
-              style={{ boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)' }}
-            >
-              <Chat size="32px" color="white" />
-            </Box>
-            <Box>
-              <Heading level="2" margin="none" style={{ color: '#8b5cf6', fontSize: '24px', fontWeight: 700 }}>
-                Community Forum
-              </Heading>
-              <Text size="small" color="text-weak" style={{ marginTop: '4px' }}>
-                Connect with the billiards community
-              </Text>
-            </Box>
-          </Box>
-          <Box direction="row" gap="medium" align="center">
+      <div className="sticky top-0 z-10 bg-slate-900/95 border-b border-purple-500/30 backdrop-blur-sm shadow-lg">
+        <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap max-w-7xl mx-auto">
+          <div className="flex items-center gap-4 flex-1">
+            <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-2 rounded-lg shadow-lg">
+              <MessageCircle size={32} className="text-white" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold text-purple-400">Community Forum</h1>
+              <p className="text-sm text-slate-400 mt-1">Connect with the billiards community</p>
+            </div>
+          </div>
+          <div className="flex gap-3 items-center">
             <Button
-              label={<Text weight={600} size="medium">Back</Text>}
               onClick={onBack}
-              style={{
-                background: 'rgba(139, 92, 246, 0.15)',
-                border: '2px solid rgba(139, 92, 246, 0.4)',
-                borderRadius: '12px',
-                padding: '12px 24px',
-                fontWeight: 600,
-                transition: 'all 0.2s ease'
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.25)';
-                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.6)';
-                e.currentTarget.style.transform = 'translateY(-2px)';
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = 'rgba(139, 92, 246, 0.15)';
-                e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.4)';
-                e.currentTarget.style.transform = 'translateY(0)';
-              }}
-            />
+              className="px-6 py-2 bg-purple-500/15 border border-purple-500/40 text-slate-300 hover:bg-purple-500/25 rounded-lg transition-all hover:-translate-y-0.5"
+            >
+              Back
+            </Button>
             {user && (
               <Button
-                data-testid="new-topic-button"
-                icon={<Add size="20px" />}
-                label={<Text weight={700} size="medium" color="white">New Topic</Text>}
                 onClick={openNewDiscussionModal}
-                style={{
-                  background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                  border: 'none',
-                  borderRadius: '12px',
-                  padding: '12px 28px',
-                  color: 'white',
-                  fontWeight: 700,
-                  boxShadow: '0 6px 16px rgba(139, 92, 246, 0.4)',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.transform = 'translateY(-3px)';
-                  e.currentTarget.style.boxShadow = '0 8px 20px rgba(139, 92, 246, 0.5)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = 'translateY(0)';
-                  e.currentTarget.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.4)';
-                }}
-              />
+                data-testid="new-topic-button"
+                className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold rounded-lg hover:-translate-y-1 shadow-lg hover:shadow-xl transition-all"
+              >
+                <Plus size={20} />
+                New Topic
+              </Button>
             )}
-          </Box>
-        </Box>
-      </Box>
+          </div>
+        </div>
+      </div>
 
       {/* Mobile Sorting Toolbar */}
-      <Box
-        background="rgba(15, 23, 42, 0.95)"
-        pad={{ horizontal: 'medium', vertical: 'small' }}
-        border={{ side: 'bottom', color: 'rgba(139, 92, 246, 0.2)' }}
-        className="mobile-toolbar"
-      >
-        <style>{`
-          .mobile-toolbar {
-            display: flex !important;
-          }
-          @media (min-width: 769px) {
-            .mobile-toolbar {
-              display: none !important;
-            }
-          }
-        `}</style>
-        <Box direction="row" gap="small" align="center" justify="between">
-          <Text size="xsmall" weight={600} color="text-weak">
-            Sort by:
-          </Text>
-          <Box direction="row" gap="xsmall">
-            <Button
-              size="small"
+      <div className="md:hidden bg-slate-800/95 border-b border-purple-500/20 px-4 py-3">
+        <div className="flex items-center justify-between gap-2">
+          <span className="text-xs font-semibold text-slate-400">Sort by:</span>
+          <div className="flex gap-2">
+            <button
               onClick={() => setSortBy('name')}
-              style={{
-                background: sortBy === 'name' ? 'rgba(139, 92, 246, 0.3)' : 'rgba(139, 92, 246, 0.1)',
-                border: sortBy === 'name' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: '8px',
-                padding: '6px 12px',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: sortBy === 'name' ? '#c4b5fd' : '#a78bfa',
-                transition: 'all 0.2s ease'
-              }}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                sortBy === 'name'
+                  ? 'bg-purple-600/40 border border-purple-500/50 text-purple-200'
+                  : 'bg-purple-600/10 border border-purple-500/20 text-purple-300 hover:bg-purple-600/20'
+              }`}
             >
               Name
-            </Button>
-            <Button
-              size="small"
+            </button>
+            <button
               onClick={() => setSortBy('discussions')}
-              style={{
-                background: sortBy === 'discussions' ? 'rgba(139, 92, 246, 0.3)' : 'rgba(139, 92, 246, 0.1)',
-                border: sortBy === 'discussions' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: '8px',
-                padding: '6px 12px',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: sortBy === 'discussions' ? '#c4b5fd' : '#a78bfa',
-                transition: 'all 0.2s ease'
-              }}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                sortBy === 'discussions'
+                  ? 'bg-purple-600/40 border border-purple-500/50 text-purple-200'
+                  : 'bg-purple-600/10 border border-purple-500/20 text-purple-300 hover:bg-purple-600/20'
+              }`}
             >
               Most Active
-            </Button>
-            <Button
-              size="small"
+            </button>
+            <button
               onClick={() => setSortBy('recent')}
-              style={{
-                background: sortBy === 'recent' ? 'rgba(139, 92, 246, 0.3)' : 'rgba(139, 92, 246, 0.1)',
-                border: sortBy === 'recent' ? '1px solid rgba(139, 92, 246, 0.6)' : '1px solid rgba(139, 92, 246, 0.2)',
-                borderRadius: '8px',
-                padding: '6px 12px',
-                fontSize: '11px',
-                fontWeight: 600,
-                color: sortBy === 'recent' ? '#c4b5fd' : '#a78bfa',
-                transition: 'all 0.2s ease'
-              }}
+              className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
+                sortBy === 'recent'
+                  ? 'bg-purple-600/40 border border-purple-500/50 text-purple-200'
+                  : 'bg-purple-600/10 border border-purple-500/20 text-purple-300 hover:bg-purple-600/20'
+              }`}
             >
               Recent
-            </Button>
-          </Box>
-        </Box>
-      </Box>
+            </button>
+          </div>
+        </div>
+      </div>
 
       {/* Main Content */}
-      <Box flex="grow" pad={{ horizontal: 'large', vertical: 'medium' }} gap="medium" style={{ maxWidth: '1400px', margin: '0 auto', width: '100%' }}>
+      <div className="flex-grow px-6 py-6 gap-6 max-w-7xl mx-auto w-full"
+           style={{ 
+             display: 'flex', 
+             flexDirection: 'column',
+             minHeight: 'calc(100vh - 160px)'
+           }}
+      >
         {/* Categories View */}
         {view === 'categories' && (
-          <Box gap="medium" height="100%" style={{ overflow: 'hidden' }}>
-            <Box direction="row" align="center" gap="small">
-              <Box
-                width="4px"
-                height="28px"
-                background="linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%)"
-                round="small"
-                style={{ boxShadow: '0 0 12px rgba(139, 92, 246, 0.4)' }}
-              />
-              <Heading level="3" margin="none" style={{ color: '#8b5cf6', fontSize: '24px', fontWeight: 700 }}>
-                Forum Categories
-              </Heading>
-              <Text size="xsmall" color="text-weak">
-                • Choose a category
-              </Text>
-            </Box>
-            <Box
-              direction="row"
-              wrap
-              gap="small"
-              align="stretch"
-              style={{ 
-                display: 'grid',
-                gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
-                gap: '12px',
-                maxHeight: 'calc(100vh - 280px)',
-                overflow: 'auto'
-              }}
-            >
+          <div className="space-y-4">
+            <div className="flex items-center gap-3">
+              <div className="w-1 h-7 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full shadow-lg" />
+              <h2 className="text-2xl font-bold text-purple-400">Forum Categories</h2>
+              <span className="text-xs text-slate-500">• Choose a category</span>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3 auto-rows-max max-h-[calc(100vh-280px)] overflow-auto">
               {[...categories].sort((a, b) => {
                 if (sortBy === 'name') return a.name.localeCompare(b.name);
                 if (sortBy === 'discussions') return (b.discussionCount || 0) - (a.discussionCount || 0);
                 if (sortBy === 'recent') return new Date(b.modifiedAt || b.createdAt) - new Date(a.modifiedAt || a.createdAt);
                 return 0;
               }).map(category => (
-                <Card
+                <div
                   key={category.id}
-                  background="linear-gradient(135deg, rgba(15, 23, 42, 0.95) 0%, rgba(30, 41, 59, 0.9) 100%)"
-                  pad="none"
-                  elevation="small"
-                  style={{
-                    cursor: 'pointer',
-                    transition: 'all 0.2s ease',
-                    border: '2px solid rgba(139, 92, 246, 0.25)',
-                    borderRadius: '12px',
-                    position: 'relative',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    flexDirection: 'column',
-                    boxShadow: '0 4px 12px rgba(139, 92, 246, 0.15)',
-                    height: 'fit-content'
-                  }}
                   onClick={() => handleCategorySelect(category)}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-4px)';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.6)';
-                    e.currentTarget.style.boxShadow = '0 12px 24px rgba(139, 92, 246, 0.3)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.25)';
-                    e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.15)';
-                  }}
+                  className="cursor-pointer p-4 bg-gradient-to-br from-slate-800 to-slate-900 border-2 border-purple-500/25 rounded-xl hover:border-purple-500/60 hover:-translate-y-1 transition-all shadow-md hover:shadow-xl hover:shadow-purple-500/20 relative overflow-hidden group"
                 >
-                  <Box
-                    style={{
-                      position: 'absolute',
-                      top: 0,
-                      left: 0,
-                      right: 0,
-                      height: '3px',
-                      background: 'linear-gradient(90deg, #8b5cf6 0%, #7c3aed 50%, #6d28d9 100%)',
-                      boxShadow: '0 2px 8px rgba(139, 92, 246, 0.4)'
-                    }}
-                  />
-                  <Box pad="medium" gap="small">
-                    <Box direction="row" align="center" justify="between" gap="small">
-                      <Box direction="row" align="center" gap="xsmall">
-                        <Text style={{ fontSize: '20px' }}>💬</Text>
-                        <Heading level="4" margin="none" style={{ color: '#c4b5fd', fontSize: '16px', fontWeight: 700 }}>
-                          {category.name}
-                        </Heading>
-                      </Box>
-                      <Box 
-                        pad="xxsmall"
-                        background="rgba(139, 92, 246, 0.2)"
-                        round="xsmall"
-                      >
-                        <Text size="xsmall" weight={700} style={{ color: '#c4b5fd' }}>
-                          {category.discussionCount || 0}
-                        </Text>
-                      </Box>
-                    </Box>
-                    <Text size="small" color="text-weak" style={{ lineHeight: '1.5', opacity: 0.85 }}>
-                      {category.description}
-                    </Text>
-                    <Box 
-                      direction="row" 
-                      justify="between" 
-                      align="center" 
-                      margin={{ top: 'small' }} 
-                      pad="xsmall" 
-                      background="rgba(139, 92, 246, 0.05)"
-                      round="xsmall"
-                      style={{ border: '1px solid rgba(139, 92, 246, 0.15)' }}
-                    >
-                      <Text size="xsmall" weight={600} style={{ color: '#a78bfa' }}>
+                  <div className="absolute inset-x-0 top-0 h-0.5 bg-gradient-to-r from-purple-600 via-purple-500 to-purple-600 shadow-md" />
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="flex items-center gap-2">
+                        <span className="text-lg">💬</span>
+                        <h3 className="text-base font-bold text-purple-300">{category.name}</h3>
+                      </div>
+                      <div className="px-2 py-1 bg-purple-500/20 rounded text-xs font-bold text-purple-300">
+                        {category.discussionCount || 0}
+                      </div>
+                    </div>
+                    <p className="text-sm text-slate-400 line-clamp-2">{category.description}</p>
+                    <div className="flex justify-between items-center mt-3 p-2 bg-purple-500/5 rounded text-xs font-semibold border border-purple-500/15">
+                      <span className="text-purple-300/80">
                         {category.discussionCount === 1 ? '1 discussion' : `${category.discussionCount || 0} discussions`}
-                      </Text>
-                      <Text size="xsmall" weight={700} style={{ color: '#c4b5fd' }}>
-                        View →
-                      </Text>
-                    </Box>
-                  </Box>
-                </Card>
+                      </span>
+                      <span className="text-purple-300">View →</span>
+                    </div>
+                  </div>
+                </div>
               ))}
-            </Box>
-          </Box>
+            </div>
+          </div>
         )}
 
         {/* Discussions View */}
         {view === 'discussions' && (
-          <Box gap="large">
-            <Box direction="row" justify="between" align="center" wrap>
-              <Box direction="row" align="center" gap="small">
-                <Box
-                  width="4px"
-                  height="24px"
-                  background="linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%)"
-                  round="xsmall"
-                />
-                <Heading level="3" margin="none" style={{ color: '#8b5cf6' }}>
-                  {selectedCategory?.name}
-                </Heading>
-              </Box>
-              <Box direction="row" gap="small" align="center">
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-6">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full" />
+                <h2 className="text-xl font-bold text-purple-400">{selectedCategory?.name}</h2>
+              </div>
+              <div className="flex gap-2 items-center">
                 {user && (
                   <Button
-                    data-testid="new-topic-button-discussions"
-                    icon={<Add size="18px" />}
-                    label={<Text weight={700} size="small" color="white">New Topic</Text>}
                     onClick={openNewDiscussionModal}
-                    style={{
-                      background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                      border: 'none',
-                      borderRadius: '10px',
-                      padding: '10px 20px',
-                      color: 'white',
-                      fontWeight: 700,
-                      boxShadow: '0 4px 12px rgba(139, 92, 246, 0.4)',
-                      transition: 'all 0.2s ease'
-                    }}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.transform = 'translateY(-2px)';
-                      e.currentTarget.style.boxShadow = '0 6px 16px rgba(139, 92, 246, 0.5)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.transform = 'translateY(0)';
-                      e.currentTarget.style.boxShadow = '0 4px 12px rgba(139, 92, 246, 0.4)';
-                    }}
-                  />
+                    data-testid="new-topic-button-discussions"
+                    className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
+                  >
+                    <Plus size={16} />
+                    New Topic
+                  </Button>
                 )}
                 <Button
-                  icon={<Chat size="16px" />}
                   onClick={() => setView('categories')}
-                  label={<Text weight={600} size="small">All Categories</Text>}
-                  style={{
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '1px solid rgba(139, 92, 246, 0.3)',
-                    borderRadius: '10px',
-                    padding: '10px 16px',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.5)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                    e.currentTarget.style.borderColor = 'rgba(139, 92, 246, 0.3)';
-                  }}
-                />
-              </Box>
-            </Box>
+                  className="flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/30 text-slate-300 hover:bg-purple-600/20 rounded-lg text-sm transition-all"
+                >
+                  <MessageCircle size={16} />
+                  All Categories
+                </Button>
+              </div>
+            </div>
 
-            <TextInput
-              placeholder="Search discussions..."
-              icon={<Search />}
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              style={{
-                borderRadius: '10px',
-                border: '2px solid rgba(139, 92, 246, 0.3)',
-                padding: '12px 16px',
-                fontSize: '14px'
-              }}
-            />
+            <div className="flex items-center gap-2 px-3 py-2 border border-slate-700 rounded-lg bg-slate-800/50">
+              <Search size={18} className="text-slate-400" />
+              <input
+                type="text"
+                placeholder="Search discussions..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="flex-1 bg-transparent outline-none text-slate-100 placeholder-slate-500 text-sm"
+              />
+            </div>
 
-            <Box gap="small">
+            <div className="space-y-2">
               {filteredDiscussions.length > 0 ? (
                 filteredDiscussions.map(discussion => (
-                  <Card
+                  <div
                     key={discussion.id}
-                    background="background-front"
-                    pad="medium"
-                    elevation="small"
-                    style={{
-                      cursor: 'pointer',
-                      border: '1px solid rgba(59, 130, 246, 0.2)',
-                      borderRadius: '8px',
-                      transition: 'all 0.2s ease'
-                    }}
                     onClick={() => loadDiscussionDetail(discussion.id)}
-                    onMouseEnter={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.5)';
-                      e.currentTarget.style.backgroundColor = 'rgba(15, 23, 42, 0.9)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.currentTarget.style.borderColor = 'rgba(59, 130, 246, 0.2)';
-                      e.currentTarget.style.backgroundColor = 'rgb(15, 23, 42)';
-                    }}
+                    className="cursor-pointer p-4 bg-slate-800/50 border border-blue-500/20 rounded-lg hover:border-blue-500/50 hover:bg-slate-800/70 transition-all"
                   >
-                    <Box gap="small">
-                      <Box direction="row" justify="between" align="start">
-                        <Box flex="grow">
-                          <Heading level="4" margin="none" color="brand">
+                    <div className="space-y-2">
+                      <div className="flex justify-between items-start">
+                        <div className="flex-1">
+                          <h3 className="text-base font-bold text-blue-400">
                             {discussion.title}
-                            {discussion.isPinned && <Text size="small"> 📌</Text>}
-                            {discussion.isLocked && <Text size="small"> 🔒</Text>}
-                          </Heading>
-                          <Text size="small" color="text-weak" margin={{ top: 'xsmall' }}>
+                            {discussion.isPinned && <span className="ml-2">📌</span>}
+                            {discussion.isLocked && <span className="ml-2">🔒</span>}
+                          </h3>
+                          <p className="text-sm text-slate-400 mt-1 line-clamp-1">
                             {discussion.content.substring(0, 100)}...
-                          </Text>
-                        </Box>
-                      </Box>
-                      <Box direction="row" justify="between" align="center" margin={{ top: 'small' }}>
-                        <Box direction="row" gap="medium" align="center">
-                          <Text size="xsmall" color="text-weak" weight={600}>
-                            <User size="14px" style={{ marginRight: '4px' }} />
-                            {discussion.createdByUserId}
-                          </Text>
-                          <Text size="xsmall" color="text-weak" weight={600}>
-                            <Clock size="14px" style={{ marginRight: '4px' }} />
-                            {new Date(discussion.createdAt).toLocaleDateString()}
-                          </Text>
-                        </Box>
-                        <Box direction="row" gap="small">
-                          <Text size="xsmall" weight={600}>
-                            💬 {discussion.replyCount}
-                          </Text>
-                          <Text size="xsmall" weight={600}>
-                            👁️ {discussion.viewCount}
-                          </Text>
-                        </Box>
-                      </Box>
-                    </Box>
-                  </Card>
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-3 text-xs">
+                        <div className="flex gap-4">
+                          <span className="text-slate-500 font-semibold">
+                            👤 {discussion.createdByUserId}
+                          </span>
+                          <span className="text-slate-500 font-semibold">
+                            🕐 {new Date(discussion.createdAt).toLocaleDateString()}
+                          </span>
+                        </div>
+                        <div className="flex gap-3">
+                          <span className="font-semibold text-slate-300">💬 {discussion.replyCount}</span>
+                          <span className="font-semibold text-slate-300">👁️ {discussion.viewCount}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
                 ))
               ) : (
-                <Card background="background-front" pad="large" elevation="small">
-                  <Text align="center" color="text-weak">
-                    No discussions found
-                  </Text>
-                </Card>
+                <div className="p-8 bg-slate-800/50 border border-slate-700 rounded-lg text-center">
+                  <p className="text-slate-400">No discussions found</p>
+                </div>
               )}
-            </Box>
-          </Box>
+            </div>
+          </div>
         )}
 
         {/* Discussion Detail View */}
         {view === 'detail' && selectedDiscussion && (
-          <Box gap="medium">
-            <Box direction="row" justify="between" align="start">
-              <Box flex="grow">
-                <Heading level="3" margin="none" color="brand">
+          <div className="space-y-4">
+            <div className="flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-6">
+              <div className="flex-1">
+                <h2 className="text-2xl font-bold text-blue-400">
                   {selectedDiscussion.title}
-                  {selectedDiscussion.isPinned && <Text size="large"> 📌</Text>}
-                  {selectedDiscussion.isLocked && <Text size="large"> 🔒</Text>}
-                </Heading>
-                <Box direction="row" gap="medium" margin={{ top: 'small' }} align="center">
-                  <Text size="small" color="text-weak">
-                    Started by: {selectedDiscussion.createdByUserId}
-                  </Text>
-                  <Text size="small" color="text-weak">
-                    {new Date(selectedDiscussion.createdAt).toLocaleDateString()}
-                  </Text>
-                </Box>
-              </Box>
+                  {selectedDiscussion.isPinned && <span className="ml-2">📌</span>}
+                  {selectedDiscussion.isLocked && <span className="ml-2">🔒</span>}
+                </h2>
+                <div className="flex flex-col md:flex-row gap-3 mt-2 text-sm">
+                  <span className="text-slate-400">Started by: {selectedDiscussion.createdByUserId}</span>
+                  <span className="text-slate-400">{new Date(selectedDiscussion.createdAt).toLocaleDateString()}</span>
+                </div>
+              </div>
               <Button
-                label={<Text weight={600} size="small">Back</Text>}
                 onClick={() => {
                   setView('discussions');
                   setSelectedDiscussion(null);
                 }}
-                style={{
-                  background: 'rgba(59, 130, 246, 0.1)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  borderRadius: '8px',
-                  padding: '8px 12px'
-                }}
-              />
-            </Box>
+                className="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-slate-300 hover:bg-blue-500/20 rounded-lg text-sm transition-all"
+              >
+                Back
+              </Button>
+            </div>
 
-            <Card background="background-front" pad="medium" elevation="small">
-              <Text>{selectedDiscussion.content}</Text>
-            </Card>
+            <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
+              <p className="text-slate-100">{selectedDiscussion.content}</p>
+            </div>
 
-            <Heading level="4" margin="none">Posts ({posts.length})</Heading>
+            <h3 className="text-lg font-bold text-slate-300">Posts ({posts.length})</h3>
 
             {!user && (
-              <Text size="small" color="text-weak" margin={{ bottom: 'small' }}>
-                Sign in to like or reply.
-              </Text>
+              <p className="text-sm text-slate-400">Sign in to like or reply.</p>
             )}
 
-            <Box gap="small">
+            <div className="space-y-2">
               {postTree.map(post => renderPost(post))}
-            </Box>
+            </div>
 
             {!selectedDiscussion.isLocked && user && (
-              <Box margin={{ top: 'medium' }}>
+              <div className="mt-6">
                 <Button
-                  icon={<ChatOption size="16px" />}
-                  label={<Text weight={600} size="small">Post Reply</Text>}
                   onClick={() => {
                     setNewPost({ content: '', replyToPostId: null });
                     setShowNewPostModal(true);
                   }}
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '10px 20px'
-                  }}
-                />
-              </Box>
+                  className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
+                >
+                  <MessageSquare size={16} />
+                  Post Reply
+                </Button>
+              </div>
             )}
-          </Box>
+          </div>
         )}
-      </Box>
+      </div>
 
       {/* New Discussion Modal */}
       {showNewDiscussionModal && (
-        <Layer
-          onEsc={() => setShowNewDiscussionModal(false)}
-          onClickOutside={() => setShowNewDiscussionModal(false)}
-        >
-          <Box 
-            pad="large" 
-            gap="large" 
-            width="large" 
-            background="background-front"
-            style={{
-              border: '2px solid rgba(139, 92, 246, 0.3)',
-              borderRadius: '16px',
-              boxShadow: '0 20px 40px rgba(139, 92, 246, 0.3)'
-            }}
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div 
+            className="bg-slate-900 border-2 border-purple-500/30 rounded-2xl shadow-2xl shadow-purple-500/20 max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
           >
-            <Box direction="row" justify="between" align="center">
-              <Box direction="row" align="center" gap="small">
-                <Box
-                  width="4px"
-                  height="24px"
-                  background="linear-gradient(180deg, #8b5cf6 0%, #7c3aed 100%)"
-                  round="xsmall"
-                />
-                <Heading level="3" margin="none" style={{ color: '#8b5cf6' }}>
-                  Start New Topic
-                </Heading>
-              </Box>
-              <Button
-                icon={<Close size="20px" />}
+            <div className="border-b border-slate-700 p-6 flex justify-between items-center">
+              <div className="flex items-center gap-3">
+                <div className="w-1 h-6 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full" />
+                <h2 className="text-xl font-bold text-purple-400">Start New Topic</h2>
+              </div>
+              <button
                 onClick={() => setShowNewDiscussionModal(false)}
-                plain
-                style={{
-                  padding: '8px',
-                  borderRadius: '8px',
-                  transition: 'all 0.2s ease'
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.background = 'transparent';
-                }}
-              />
-            </Box>
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-slate-400" />
+              </button>
+            </div>
 
-            <Box gap="medium">
-              <Box>
-                <Text weight={600} margin={{ bottom: 'small' }}>Category</Text>
-                <Select
-                  options={categories}
-                  labelKey="name"
-                  valueKey="id"
-                  value={categories.find(c => c.id === newDiscussion.categoryId)}
-                  onChange={({ option }) => setNewDiscussion({ ...newDiscussion, categoryId: option.id })}
-                  placeholder="Select a category"
-                  style={{
-                    background: 'rgba(139, 92, 246, 0.05)',
-                    border: '2px solid rgba(139, 92, 246, 0.3)',
-                    borderRadius: '10px',
-                    padding: '12px'
-                  }}
-                />
-              </Box>
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-slate-300 mb-2 block">Category</label>
+                <select
+                  value={newDiscussion.categoryId}
+                  onChange={(e) => setNewDiscussion({ ...newDiscussion, categoryId: e.target.value })}
+                  className="w-full px-3 py-2 border border-purple-500/30 rounded-lg bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+                >
+                  <option value="">Select a category</option>
+                  {categories.map(c => (
+                    <option key={c.id} value={c.id}>{c.name}</option>
+                  ))}
+                </select>
+              </div>
 
-              <Box>
-                <Text weight={600} margin={{ bottom: 'small' }}>Title</Text>
-                <TextInput
+              <div>
+                <label className="text-sm font-semibold text-slate-300 mb-2 block">Title</label>
+                <input
+                  type="text"
                   placeholder="Discussion title"
                   value={newDiscussion.title}
                   onChange={(e) => setNewDiscussion({ ...newDiscussion, title: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
                 />
-              </Box>
+              </div>
 
-              <Box>
-                <Text weight={600} margin={{ bottom: 'small' }}>Content</Text>
-                <TextArea
+              <div>
+                <label className="text-sm font-semibold text-slate-300 mb-2 block">Content</label>
+                <textarea
                   placeholder="What would you like to discuss?"
                   value={newDiscussion.content}
                   onChange={(e) => setNewDiscussion({ ...newDiscussion, content: e.target.value })}
                   rows={6}
+                  className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
                 />
-              </Box>
+              </div>
 
-              <Box direction="row" gap="medium" justify="end">
+              <div className="flex gap-3 justify-end">
                 <Button
-                  label={<Text weight={600} size="small">Cancel</Text>}
                   onClick={() => setShowNewDiscussionModal(false)}
-                  style={{
-                    background: 'rgba(139, 92, 246, 0.1)',
-                    border: '2px solid rgba(139, 92, 246, 0.3)',
-                    borderRadius: '10px',
-                    padding: '10px 24px',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.2)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.background = 'rgba(139, 92, 246, 0.1)';
-                  }}
-                />
+                  className="px-6 py-2 bg-purple-500/15 border border-purple-500/30 text-slate-300 hover:bg-purple-500/25 rounded-lg transition-all"
+                >
+                  Cancel
+                </Button>
                 <Button
-                  label={<Text weight={600} size="small">Create Topic</Text>}
                   onClick={handleCreateDiscussion}
                   disabled={loading}
-                  style={{
-                    background: 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)',
-                    border: 'none',
-                    borderRadius: '10px',
-                    padding: '10px 24px',
-                    color: 'white',
-                    fontWeight: 600,
-                    boxShadow: '0 4px 8px rgba(139, 92, 246, 0.3)',
-                    transition: 'all 0.2s ease'
-                  }}
-                  onMouseEnter={(e) => {
-                    e.currentTarget.style.transform = 'translateY(-2px)';
-                    e.currentTarget.style.boxShadow = '0 6px 12px rgba(139, 92, 246, 0.4)';
-                  }}
-                  onMouseLeave={(e) => {
-                    e.currentTarget.style.transform = 'translateY(0)';
-                    e.currentTarget.style.boxShadow = '0 4px 8px rgba(139, 92, 246, 0.3)';
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Layer>
+                  className="px-6 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-semibold rounded-lg hover:-translate-y-0.5 shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  Create Topic
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* New Post Modal */}
       {showNewPostModal && (
-        <Layer
-          onEsc={() => setShowNewPostModal(false)}
-          onClickOutside={() => setShowNewPostModal(false)}
-        >
-          <Box pad="large" gap="medium" width="large" background="background-front">
-            <Box direction="row" justify="between" align="center">
-              <Heading level="3" margin="none">Post Reply</Heading>
-              <Button
-                icon={<Close size="20px" />}
+        <div className="fixed inset-0 bg-black/70 flex items-center justify-center p-4 z-50">
+          <div 
+            className="bg-slate-900 border-2 border-slate-700 rounded-2xl shadow-2xl max-w-lg w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="border-b border-slate-700 p-6 flex justify-between items-center">
+              <h2 className="text-xl font-bold text-slate-300">Post Reply</h2>
+              <button
                 onClick={() => setShowNewPostModal(false)}
-                plain
-              />
-            </Box>
+                className="p-2 hover:bg-slate-800 rounded-lg transition-colors"
+              >
+                <X size={20} className="text-slate-400" />
+              </button>
+            </div>
 
-            <Box gap="medium">
-              <Box>
-                <Text weight={600} margin={{ bottom: 'small' }}>Your Reply</Text>
-                <TextArea
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-slate-300 mb-2 block">Your Reply</label>
+                <textarea
                   placeholder="Write your reply here..."
                   value={newPost.content}
                   onChange={(e) => setNewPost({ ...newPost, content: e.target.value })}
                   rows={6}
+                  className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
                 />
-              </Box>
+              </div>
 
-              <Box direction="row" gap="small" justify="end">
+              <div className="flex gap-3 justify-end">
                 <Button
-                  label={<Text weight={600} size="small">Cancel</Text>}
                   onClick={() => setShowNewPostModal(false)}
-                  style={{
-                    background: 'rgba(59, 130, 246, 0.1)',
-                    border: '1px solid rgba(59, 130, 246, 0.3)',
-                    borderRadius: '8px',
-                    padding: '8px 16px'
-                  }}
-                />
+                  className="px-6 py-2 bg-blue-500/10 border border-blue-500/30 text-slate-300 hover:bg-blue-500/20 rounded-lg transition-all"
+                >
+                  Cancel
+                </Button>
                 <Button
-                  label={<Text weight={600} size="small">Post Reply</Text>}
                   onClick={handleCreatePost}
                   disabled={loading}
-                  style={{
-                    background: 'linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9))',
-                    border: 'none',
-                    borderRadius: '8px',
-                    padding: '8px 16px'
-                  }}
-                />
-              </Box>
-            </Box>
-          </Box>
-        </Layer>
+                  className="px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold rounded-lg hover:-translate-y-0.5 shadow-lg hover:shadow-xl transition-all disabled:opacity-50"
+                >
+                  Post Reply
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 };
 

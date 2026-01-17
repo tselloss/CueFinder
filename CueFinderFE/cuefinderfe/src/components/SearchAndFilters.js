@@ -12,9 +12,9 @@
  * Mobile: Collapsible with temporary state (Apply/Reset pattern)
  */
 import React, { useState, useEffect } from 'react';
-import { Box, Button, Text, Select, RangeSelector } from 'grommet';
-import { FormDown, FormUp, FormClose, Search as SearchIcon } from 'grommet-icons';
 import { useTranslation } from 'react-i18next';
+import { Button } from './ui/button';
+import { Search, ChevronDown, ChevronUp, X } from 'lucide-react';
 import './SearchAndFilters.css';
 
 export default function SearchAndFilters({
@@ -97,229 +97,280 @@ export default function SearchAndFilters({
   // Desktop version - always visible
   if (!isMobile) {
     return (
-      <Box className="search-filters-desktop" gap="medium">
+      <div className="search-filters-desktop space-y-4">
         {/* Search */}
-        <Box className="filter-section">
-          <Box className="search-input-wrapper">
-            <SearchIcon size="18px" color="#94a3b8" />
+        <div className="filter-section">
+          <div className="search-input-wrapper flex items-center gap-2 px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50">
+            <Search size={18} className="text-slate-400" />
             <input
               type="text"
               placeholder={t('filters.search') || "Search..."}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="search-input"
+              className="search-input flex-1 bg-transparent outline-none text-slate-100 placeholder-slate-500"
             />
             {search && (
               <button 
                 onClick={() => setSearch('')}
-                className="clear-search-btn"
+                className="clear-search-btn p-1 hover:bg-slate-700/50 rounded"
               >
-                <FormClose size="16px" />
+                <X size={16} className="text-slate-400" />
               </button>
             )}
-          </Box>
-        </Box>
+          </div>
+        </div>
 
         {/* Condition Filter */}
-        <Box className="filter-section">
-          <Text className="filter-label">
+        <div className="filter-section">
+          <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">
             {t('filters.condition.label') || 'Condition'}
-          </Text>
-          <Select
-            options={[
-              t('filters.condition.all') || 'All',
-              t('filters.condition.likeNew') || 'Like New',
-              t('filters.condition.used') || 'Used',
-              t('filters.condition.fair') || 'Fair'
-            ]}
+          </label>
+          <select
             value={condition === 'all' ? (t('filters.condition.all') || 'All') : condition}
-            onChange={({ option }) => setCondition(option === (t('filters.condition.all') || 'All') ? 'all' : option)}
-            className="filter-select"
-          />
-        </Box>
+            onChange={(e) => setCondition(e.target.value === (t('filters.condition.all') || 'All') ? 'all' : e.target.value)}
+            className="filter-select w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+          >
+            <option>{t('filters.condition.all') || 'All'}</option>
+            <option>{t('filters.condition.likeNew') || 'Like New'}</option>
+            <option>{t('filters.condition.used') || 'Used'}</option>
+            <option>{t('filters.condition.fair') || 'Fair'}</option>
+          </select>
+        </div>
 
         {/* Sort By Filter */}
-        <Box className="filter-section">
-          <Text className="filter-label">
+        <div className="filter-section">
+          <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">
             {t('filters.sortBy.label') || 'Sort By'}
-          </Text>
-          <Select
-            options={[
-              t('filters.sortBy.newest') || 'Newest',
-              t('filters.sortBy.priceLow') || 'Price: Low',
-              t('filters.sortBy.priceHigh') || 'Price: High'
-            ]}
+          </label>
+          <select
             value={sortBy}
-            onChange={({ option }) => setSortBy(option)}
-            className="filter-select"
-          />
-        </Box>
+            onChange={(e) => setSortBy(e.target.value)}
+            className="filter-select w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+          >
+            <option>{t('filters.sortBy.newest') || 'Newest'}</option>
+            <option>{t('filters.sortBy.priceLow') || 'Price: Low'}</option>
+            <option>{t('filters.sortBy.priceHigh') || 'Price: High'}</option>
+          </select>
+        </div>
 
         {/* Price Range Filter */}
-        <Box className="filter-section">
-          <Text className="filter-label">
+        <div className="filter-section">
+          <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">
             {t('price.range') || 'Price Range'}
-          </Text>
-          <Box className="price-range-box">
-            <Box direction="row" justify="between" className="price-values">
-              <Text size="13px" weight={600}>{currencySymbol}{priceRange[0]}</Text>
-              <Text size="13px" weight={600}>{currencySymbol}{priceRange[1]}</Text>
-            </Box>
-            <Box className="range-track">
-              <Box className="range-fill" style={{
-                width: `${((priceRange[1] - priceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                marginLeft: `${((priceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
-              }} />
-            </Box>
-            <RangeSelector
-              direction="horizontal"
-              min={PRICE_MIN_LIMIT}
-              max={PRICE_MAX_LIMIT}
-              step={PRICE_STEP}
-              values={priceRange}
-              onChange={setPriceRange}
-            />
-          </Box>
-        </Box>
+          </label>
+          <div className="price-range-box space-y-3">
+            <div className="price-values flex justify-between">
+              <span className="text-xs font-semibold text-slate-300">{currencySymbol}{priceRange[0]}</span>
+              <span className="text-xs font-semibold text-slate-300">{currencySymbol}{priceRange[1]}</span>
+            </div>
+            <div className="range-track relative h-1 bg-slate-700 rounded-full">
+              <div 
+                className="range-fill absolute h-full bg-purple-500 rounded-full" 
+                style={{
+                  width: `${((priceRange[1] - priceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
+                  marginLeft: `${((priceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
+                }}
+              />
+            </div>
+            <div className="flex gap-4">
+              <div className="flex-1">
+                <label className="text-xs text-slate-500 mb-1 block">Min</label>
+                <input
+                  type="range"
+                  min={PRICE_MIN_LIMIT}
+                  max={PRICE_MAX_LIMIT}
+                  step={PRICE_STEP}
+                  value={priceRange[0]}
+                  onChange={(e) => {
+                    const newMin = Math.min(parseInt(e.target.value), priceRange[1]);
+                    setPriceRange([newMin, priceRange[1]]);
+                  }}
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+              </div>
+              <div className="flex-1">
+                <label className="text-xs text-slate-500 mb-1 block">Max</label>
+                <input
+                  type="range"
+                  min={PRICE_MIN_LIMIT}
+                  max={PRICE_MAX_LIMIT}
+                  step={PRICE_STEP}
+                  value={priceRange[1]}
+                  onChange={(e) => {
+                    const newMax = Math.max(parseInt(e.target.value), priceRange[0]);
+                    setPriceRange([priceRange[0], newMax]);
+                  }}
+                  className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                />
+              </div>
+            </div>
+          </div>
+        </div>
 
         {/* Reset Button */}
         {hasActiveFilters && (
           <Button
-            label={<Text size="13px" weight={600}>Reset Filters</Text>}
             onClick={handleResetFilters}
-            className="reset-btn"
-          />
+            className="w-full text-xs font-semibold py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+          >
+            Reset Filters
+          </Button>
         )}
-      </Box>
+      </div>
     );
   }
 
   // Mobile version - collapsible
   return (
-    <Box className="search-filters-mobile">
+    <div className="search-filters-mobile space-y-3">
       {/* Search Bar - Always Visible */}
-      <Box className="mobile-search-bar">
-        <Box className="search-input-wrapper">
-          <SearchIcon size="18px" color="#94a3b8" />
+      <div className="mobile-search-bar">
+        <div className="search-input-wrapper flex items-center gap-2 px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50">
+          <Search size={18} className="text-slate-400" />
           <input
             type="text"
             placeholder={t('filters.search') || "Search..."}
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="search-input"
+            className="search-input flex-1 bg-transparent outline-none text-slate-100 placeholder-slate-500"
           />
           {search && (
             <button 
               onClick={() => setSearch('')}
-              className="clear-search-btn"
+              className="clear-search-btn p-1 hover:bg-slate-700/50 rounded"
             >
-              <FormClose size="16px" />
+              <X size={16} className="text-slate-400" />
             </button>
           )}
-        </Box>
-      </Box>
+        </div>
+      </div>
 
       {/* Filter Toggle */}
-      <Box className="mobile-filter-toggle" direction="row" gap="8px">
+      <div className="mobile-filter-toggle flex gap-2">
         <Button
-          icon={showFilters ? <FormUp size="18px" /> : <FormDown size="18px" />}
-          label={
-            <Box direction="row" gap="6px" align="center">
-              <Text size="13px" weight={600}>
-                {showFilters ? 'Hide Filters' : 'Filters'}
-              </Text>
-              {hasActiveFilters && (
-                <Box className="active-indicator">●</Box>
-              )}
-            </Box>
-          }
           onClick={() => setShowFilters(!showFilters)}
-          className={`filter-toggle-btn ${showFilters ? 'active' : ''}`}
-        />
+          className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 text-xs font-semibold rounded-lg transition-all ${
+            showFilters
+              ? 'bg-purple-600/40 border border-purple-500/50 text-purple-200'
+              : 'bg-slate-700/50 border border-slate-600 text-slate-300 hover:bg-slate-700'
+          }`}
+        >
+          {showFilters ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+          <span>{showFilters ? 'Hide Filters' : 'Filters'}</span>
+          {hasActiveFilters && <span className="ml-auto text-lg">●</span>}
+        </Button>
         
         {hasActiveFilters && (
           <Button
-            icon={<FormClose size="18px" />}
             onClick={handleClearAllFilters}
-            className="clear-filters-btn"
-          />
+            className="p-2 bg-slate-700/50 hover:bg-slate-700 border border-slate-600 rounded-lg"
+          >
+            <X size={16} className="text-slate-400" />
+          </Button>
         )}
-      </Box>
+      </div>
 
       {/* Collapsible Filters */}
       {showFilters && (
-        <Box className="mobile-filters-content">
+        <div className="mobile-filters-content space-y-4 p-3 bg-slate-800/30 rounded-lg border border-slate-700/50">
           {/* Condition */}
-          <Box className="filter-section">
-            <Text className="filter-label">CONDITION</Text>
-            <Select
-              options={[
-                t('filters.condition.all') || 'All',
-                t('filters.condition.likeNew') || 'Like New',
-                t('filters.condition.used') || 'Used',
-                t('filters.condition.fair') || 'Fair'
-              ]}
+          <div className="filter-section">
+            <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">CONDITION</label>
+            <select
               value={tempCondition === 'all' ? (t('filters.condition.all') || 'All') : tempCondition}
-              onChange={({ option }) => setTempCondition(option === (t('filters.condition.all') || 'All') ? 'all' : option)}
-              className="filter-select"
-            />
-          </Box>
+              onChange={(e) => setTempCondition(e.target.value === (t('filters.condition.all') || 'All') ? 'all' : e.target.value)}
+              className="filter-select w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+            >
+              <option>{t('filters.condition.all') || 'All'}</option>
+              <option>{t('filters.condition.likeNew') || 'Like New'}</option>
+              <option>{t('filters.condition.used') || 'Used'}</option>
+              <option>{t('filters.condition.fair') || 'Fair'}</option>
+            </select>
+          </div>
 
           {/* Sort By */}
-          <Box className="filter-section">
-            <Text className="filter-label">SORT BY</Text>
-            <Select
-              options={[
-                t('filters.sortBy.newest') || 'Newest',
-                t('filters.sortBy.priceLow') || 'Price: Low',
-                t('filters.sortBy.priceHigh') || 'Price: High'
-              ]}
+          <div className="filter-section">
+            <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">SORT BY</label>
+            <select
               value={tempSortBy}
-              onChange={({ option }) => setTempSortBy(option)}
-              className="filter-select"
-            />
-          </Box>
+              onChange={(e) => setTempSortBy(e.target.value)}
+              className="filter-select w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-900/50 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+            >
+              <option>{t('filters.sortBy.newest') || 'Newest'}</option>
+              <option>{t('filters.sortBy.priceLow') || 'Price: Low'}</option>
+              <option>{t('filters.sortBy.priceHigh') || 'Price: High'}</option>
+            </select>
+          </div>
 
           {/* Price Range */}
-          <Box className="filter-section">
-            <Text className="filter-label">PRICE RANGE</Text>
-            <Box className="price-range-box">
-              <Box direction="row" justify="between" className="price-values">
-                <Text size="13px" weight={600}>{currencySymbol}{tempPriceRange[0]}</Text>
-                <Text size="13px" weight={600}>{currencySymbol}{tempPriceRange[1]}</Text>
-              </Box>
-              <Box className="range-track">
-                <Box className="range-fill" style={{
-                  width: `${((tempPriceRange[1] - tempPriceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                  marginLeft: `${((tempPriceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
-                }} />
-              </Box>
-              <RangeSelector
-                direction="horizontal"
-                min={PRICE_MIN_LIMIT}
-                max={PRICE_MAX_LIMIT}
-                step={PRICE_STEP}
-                values={tempPriceRange}
-                onChange={setTempPriceRange}
-              />
-            </Box>
-          </Box>
+          <div className="filter-section">
+            <label className="filter-label text-xs font-semibold text-slate-400 mb-2 block">PRICE RANGE</label>
+            <div className="price-range-box space-y-3">
+              <div className="price-values flex justify-between">
+                <span className="text-xs font-semibold text-slate-300">{currencySymbol}{tempPriceRange[0]}</span>
+                <span className="text-xs font-semibold text-slate-300">{currencySymbol}{tempPriceRange[1]}</span>
+              </div>
+              <div className="range-track relative h-1 bg-slate-700 rounded-full">
+                <div 
+                  className="range-fill absolute h-full bg-purple-500 rounded-full" 
+                  style={{
+                    width: `${((tempPriceRange[1] - tempPriceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
+                    marginLeft: `${((tempPriceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
+                  }}
+                />
+              </div>
+              <div className="flex gap-4">
+                <div className="flex-1">
+                  <label className="text-xs text-slate-500 mb-1 block">Min</label>
+                  <input
+                    type="range"
+                    min={PRICE_MIN_LIMIT}
+                    max={PRICE_MAX_LIMIT}
+                    step={PRICE_STEP}
+                    value={tempPriceRange[0]}
+                    onChange={(e) => {
+                      const newMin = Math.min(parseInt(e.target.value), tempPriceRange[1]);
+                      setTempPriceRange([newMin, tempPriceRange[1]]);
+                    }}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                </div>
+                <div className="flex-1">
+                  <label className="text-xs text-slate-500 mb-1 block">Max</label>
+                  <input
+                    type="range"
+                    min={PRICE_MIN_LIMIT}
+                    max={PRICE_MAX_LIMIT}
+                    step={PRICE_STEP}
+                    value={tempPriceRange[1]}
+                    onChange={(e) => {
+                      const newMax = Math.max(parseInt(e.target.value), tempPriceRange[0]);
+                      setTempPriceRange([tempPriceRange[0], newMax]);
+                    }}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-purple-500"
+                  />
+                </div>
+              </div>
+            </div>
+          </div>
 
           {/* Action Buttons */}
-          <Box direction="row" gap="8px" className="filter-actions">
+          <div className="filter-actions flex gap-2">
             <Button
-              label={<Text size="13px" weight={600}>Reset</Text>}
               onClick={handleResetFilters}
-              className="reset-btn"
-            />
+              className="flex-1 text-xs font-semibold py-2 bg-slate-700/50 hover:bg-slate-700 text-slate-300"
+            >
+              Reset
+            </Button>
             <Button
-              label={<Text size="13px" weight={700}>Apply</Text>}
               onClick={handleApplyFilters}
-              className="apply-btn"
-            />
-          </Box>
-        </Box>
+              className="flex-1 text-xs font-bold py-2 bg-purple-600 hover:bg-purple-700 text-white"
+            >
+              Apply
+            </Button>
+          </div>
+        </div>
       )}
-    </Box>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Button, Text, Select, RangeSelector } from 'grommet';
-import { Add, FormClose, FormDown, FormUp } from 'grommet-icons';
+import { Button } from './ui/button';
+import { Plus, X, ChevronDown, ChevronUp } from 'lucide-react';
 import { useTranslation } from 'react-i18next';
 import MaterialInput from './MaterialInput';
 
@@ -32,6 +32,8 @@ export default function MobileFiltersBar({
   const [tempCondition, setTempCondition] = React.useState(condition);
   const [tempSortBy, setTempSortBy] = React.useState(sortBy);
   const [tempPriceRange, setTempPriceRange] = React.useState(priceRange);
+  const [tempMinPrice, setTempMinPrice] = React.useState(priceRange[0]);
+  const [tempMaxPrice, setTempMaxPrice] = React.useState(priceRange[1]);
   
   // Check if any filters are active
   const hasActiveFilters = condition !== 'all' || 
@@ -42,7 +44,7 @@ export default function MobileFiltersBar({
   const handleApplyFilters = () => {
     setCondition(tempCondition);
     setSortBy(tempSortBy);
-    setPriceRange(tempPriceRange);
+    setPriceRange([tempMinPrice, tempMaxPrice]);
     setShowMobileFilters(false);
   };
   
@@ -51,7 +53,8 @@ export default function MobileFiltersBar({
     const defaultSortBy = t('filters.sortBy.newest') || 'Newest First';
     setTempCondition('all');
     setTempSortBy(defaultSortBy);
-    setTempPriceRange([PRICE_MIN_LIMIT, PRICE_MAX_LIMIT]);
+    setTempMinPrice(PRICE_MIN_LIMIT);
+    setTempMaxPrice(PRICE_MAX_LIMIT);
   };
   
   // Clear all filters
@@ -67,28 +70,22 @@ export default function MobileFiltersBar({
     if (showMobileFilters) {
       setTempCondition(condition);
       setTempSortBy(sortBy);
-      setTempPriceRange(priceRange);
+      setTempMinPrice(priceRange[0]);
+      setTempMaxPrice(priceRange[1]);
     }
   }, [showMobileFilters, condition, sortBy, priceRange]);
 
   return (
     <>
-      <Box
-        className="mobile-filters-toolbar"
-        pad="16px"
-        gap="12px"
-        background="linear-gradient(180deg, rgba(15, 23, 42, 0.98) 0%, rgba(15, 23, 42, 0.95) 100%)"
-        border={{ side: 'bottom', color: 'rgba(59, 130, 246, 0.3)', size: '2px' }}
+      <div
+        className="mobile-filters-toolbar space-y-3 p-4 bg-gradient-to-b from-slate-900 to-slate-800 border-b-2 sticky top-60 z-100 shadow-lg"
         style={{
-          position: 'sticky',
-          top: '60px',
-          zIndex: 100,
-          boxShadow: '0 4px 12px rgba(0, 0, 0, 0.3)'
+          borderBottomColor: 'rgba(59, 130, 246, 0.3)'
         }}
       >
         {/* Search Bar - Always Visible */}
-        <Box direction="row" gap="8px" align="center">
-          <Box flex="grow">
+        <div className="flex gap-2 items-center">
+          <div className="flex-grow">
             <MaterialInput
               placeholder={t('filters.search') || "Search..."}
               value={search}
@@ -97,206 +94,194 @@ export default function MobileFiltersBar({
               icon="search"
               style={{ width: '100%' }}
             />
-          </Box>
+          </div>
           
           {user && (
             <Button
-              icon={<Add size="20px" color="white" />}
               onClick={onAddListing}
+              className="flex-shrink-0"
               style={{
                 background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                border: 'none',
-                borderRadius: '10px',
                 padding: '10px',
                 minWidth: '44px',
                 height: '44px',
+                borderRadius: '10px',
                 boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
               }}
-            />
+            >
+              <Plus size={20} color="white" />
+            </Button>
           )}
-        </Box>
+        </div>
 
         {/* Filter Toggle & Active Indicator */}
-        <Box direction="row" gap="8px" align="center">
-          <Button
-            icon={showMobileFilters ? <FormUp size="18px" /> : <FormDown size="18px" />}
-            label={
-              <Box direction="row" gap="6px" align="center">
-                <Text size="13px" weight={600}>
-                  {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
-                </Text>
-                {hasActiveFilters && (
-                  <Box 
-                    background="#3b82f6" 
-                    round="full" 
-                    pad={{ horizontal: '6px', vertical: '2px' }}
-                  >
-                    <Text size="11px" weight={700} color="white">●</Text>
-                  </Box>
-                )}
-              </Box>
-            }
+        <div className="flex gap-2 items-center">
+          <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}
+            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm h-11 transition-colors"
             style={{
-              flex: 1,
               background: showMobileFilters 
                 ? 'rgba(59, 130, 246, 0.2)'
                 : 'rgba(30, 41, 59, 0.8)',
               border: showMobileFilters
                 ? '2px solid rgba(59, 130, 246, 0.5)'
                 : '2px solid rgba(51, 65, 85, 0.5)',
-              borderRadius: '10px',
-              padding: '10px 14px',
-              height: '44px'
+              color: showMobileFilters ? '#3b82f6' : '#94a3b8'
             }}
-          />
+          >
+            {showMobileFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+            {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
+            {hasActiveFilters && (
+              <span className="inline-flex items-center justify-center w-5 h-5 bg-blue-500 rounded-full text-white text-xs font-bold">
+                ●
+              </span>
+            )}
+          </button>
           
           {hasActiveFilters && (
-            <Button
-              icon={<FormClose size="18px" color="#f87171" />}
+            <button
               onClick={handleClearAllFilters}
+              className="p-3 rounded-lg h-11 transition-colors flex-shrink-0"
               style={{
                 background: 'rgba(239, 68, 68, 0.15)',
                 border: '2px solid rgba(239, 68, 68, 0.3)',
-                borderRadius: '10px',
-                padding: '10px',
-                minWidth: '44px',
-                height: '44px'
               }}
-            />
+            >
+              <X size={18} color="#f87171" />
+            </button>
           )}
-        </Box>
+        </div>
 
         {/* Collapsible Filters */}
         {showMobileFilters && (
-          <Box 
-            gap="12px" 
-            pad="12px"
-            background="rgba(15, 23, 42, 0.6)"
-            round="10px"
-            border={{ color: 'rgba(59, 130, 246, 0.2)', size: '1px' }}
+          <div 
+            className="space-y-3 p-3 rounded-lg border"
+            style={{
+              background: 'rgba(15, 23, 42, 0.6)',
+              borderColor: 'rgba(59, 130, 246, 0.2)'
+            }}
           >
             {/* Condition */}
-            <Box>
-              <Text size="11px" weight={600} color="#94a3b8" margin={{ bottom: '6px' }}>
-                CONDITION
-              </Text>
-              <Select
-                options={[
-                  t('filters.condition.all') || 'All',
-                  t('filters.condition.likeNew') || 'Like New',
-                  t('filters.condition.used') || 'Used',
-                  t('filters.condition.fair') || 'Fair'
-                ]}
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-2 uppercase">Condition</label>
+              <select
                 value={tempCondition === 'all' ? (t('filters.condition.all') || 'All') : tempCondition}
-                onChange={({ option }) => setTempCondition(option === (t('filters.condition.all') || 'All') ? 'all' : option)}
-                style={{
-                  background: 'rgba(30, 41, 59, 0.9)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  borderRadius: '8px',
-                  color: '#e2e8f0',
-                  padding: '10px 12px',
-                  fontSize: '14px'
-                }}
-              />
-            </Box>
+                onChange={(e) => setTempCondition(e.target.value === (t('filters.condition.all') || 'All') ? 'all' : e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 bg-slate-800 border border-blue-300 border-opacity-30 focus:outline-none focus:border-opacity-60"
+              >
+                <option>{t('filters.condition.all') || 'All'}</option>
+                <option>{t('filters.condition.likeNew') || 'Like New'}</option>
+                <option>{t('filters.condition.used') || 'Used'}</option>
+                <option>{t('filters.condition.fair') || 'Fair'}</option>
+              </select>
+            </div>
 
             {/* Sort By */}
-            <Box>
-              <Text size="11px" weight={600} color="#94a3b8" margin={{ bottom: '6px' }}>
-                SORT BY
-              </Text>
-              <Select
-                options={[
-                  t('filters.sortBy.newest') || 'Newest',
-                  t('filters.sortBy.priceLow') || 'Price: Low',
-                  t('filters.sortBy.priceHigh') || 'Price: High'
-                ]}
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-2 uppercase">Sort By</label>
+              <select
                 value={tempSortBy}
-                onChange={({ option }) => setTempSortBy(option)}
-                style={{
-                  background: 'rgba(30, 41, 59, 0.9)',
-                  border: '1px solid rgba(59, 130, 246, 0.3)',
-                  borderRadius: '8px',
-                  color: '#e2e8f0',
-                  padding: '10px 12px',
-                  fontSize: '14px'
-                }}
-              />
-            </Box>
+                onChange={(e) => setTempSortBy(e.target.value)}
+                className="w-full px-3 py-2 rounded-lg text-sm text-slate-200 bg-slate-800 border border-blue-300 border-opacity-30 focus:outline-none focus:border-opacity-60"
+              >
+                <option>{t('filters.sortBy.newest') || 'Newest'}</option>
+                <option>{t('filters.sortBy.priceLow') || 'Price: Low'}</option>
+                <option>{t('filters.sortBy.priceHigh') || 'Price: High'}</option>
+              </select>
+            </div>
 
             {/* Price Range */}
-            <Box>
-              <Text size="11px" weight={600} color="#94a3b8" margin={{ bottom: '6px' }}>
-                PRICE RANGE
-              </Text>
-              <Box 
-                pad="12px"
-                background="rgba(30, 41, 59, 0.5)"
-                round="8px"
-                gap="10px"
+            <div>
+              <label className="text-xs font-semibold text-slate-400 block mb-2 uppercase">Price Range</label>
+              <div 
+                className="p-3 rounded-lg space-y-3"
+                style={{
+                  background: 'rgba(30, 41, 59, 0.5)'
+                }}
               >
-                <Box direction="row" justify="between">
-                  <Text size="13px" color="#cbd5e1" weight={600}>
-                    {currencySymbol}{tempPriceRange[0]}
-                  </Text>
-                  <Text size="13px" color="#cbd5e1" weight={600}>
-                    {currencySymbol}{tempPriceRange[1]}
-                  </Text>
-                </Box>
-                <Box height="4px" round="full" background="rgba(51,65,85,0.6)">
-                  <Box
-                    height="4px"
-                    round="full"
-                    background="#3b82f6"
+                <div className="flex justify-between">
+                  <span className="text-sm font-semibold text-slate-300">
+                    {currencySymbol}{tempMinPrice}
+                  </span>
+                  <span className="text-sm font-semibold text-slate-300">
+                    {currencySymbol}{tempMaxPrice}
+                  </span>
+                </div>
+                
+                {/* Visual Range Bar */}
+                <div className="h-1 rounded-full bg-slate-700 relative">
+                  <div
+                    className="h-1 rounded-full bg-blue-500 absolute"
                     style={{
-                      width: `${((tempPriceRange[1] - tempPriceRange[0]) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
-                      marginLeft: `${((tempPriceRange[0] - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
+                      width: `${((tempMaxPrice - tempMinPrice) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`,
+                      marginLeft: `${((tempMinPrice - PRICE_MIN_LIMIT) / (PRICE_MAX_LIMIT - PRICE_MIN_LIMIT)) * 100}%`
                     }}
                   />
-                </Box>
-                <RangeSelector
-                  direction="horizontal"
-                  min={PRICE_MIN_LIMIT}
-                  max={PRICE_MAX_LIMIT}
-                  step={PRICE_STEP}
-                  values={tempPriceRange}
-                  onChange={setTempPriceRange}
-                />
-              </Box>
-            </Box>
+                </div>
+                
+                {/* Min Price Slider */}
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Min: {currencySymbol}{tempMinPrice}</label>
+                  <input
+                    type="range"
+                    min={PRICE_MIN_LIMIT}
+                    max={tempMaxPrice}
+                    step={PRICE_STEP}
+                    value={tempMinPrice}
+                    onChange={(e) => {
+                      const newMin = Math.min(parseInt(e.target.value), tempMaxPrice - PRICE_STEP);
+                      setTempMinPrice(newMin);
+                    }}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  />
+                </div>
+                
+                {/* Max Price Slider */}
+                <div>
+                  <label className="text-xs text-slate-400 block mb-1">Max: {currencySymbol}{tempMaxPrice}</label>
+                  <input
+                    type="range"
+                    min={tempMinPrice}
+                    max={PRICE_MAX_LIMIT}
+                    step={PRICE_STEP}
+                    value={tempMaxPrice}
+                    onChange={(e) => {
+                      const newMax = Math.max(parseInt(e.target.value), tempMinPrice + PRICE_STEP);
+                      setTempMaxPrice(newMax);
+                    }}
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer accent-blue-500"
+                  />
+                </div>
+              </div>
+            </div>
 
             {/* Actions */}
-            <Box direction="row" gap="8px" margin={{ top: '8px' }}>
-              <Button
-                label={<Text size="13px" weight={600}>Reset</Text>}
+            <div className="flex gap-2 mt-3">
+              <button
                 onClick={handleResetFilters}
+                className="flex-1 px-3 py-2.5 rounded-lg text-sm font-semibold transition-colors h-10"
                 style={{
-                  flex: 1,
                   background: 'rgba(30, 41, 59, 0.6)',
                   border: '1px solid rgba(100, 116, 139, 0.3)',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  height: '40px'
+                  color: '#94a3b8'
                 }}
-              />
-              <Button
-                label={<Text size="13px" weight={700} color="white">Apply</Text>}
+              >
+                Reset
+              </button>
+              <button
                 onClick={handleApplyFilters}
+                className="flex-1 px-3 py-2.5 rounded-lg text-sm font-bold text-white transition-colors h-10"
                 style={{
-                  flex: 2,
                   background: 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)',
-                  border: 'none',
-                  borderRadius: '8px',
-                  padding: '10px',
-                  height: '40px',
                   boxShadow: '0 2px 8px rgba(59, 130, 246, 0.3)'
                 }}
-              />
-            </Box>
-          </Box>
+              >
+                Apply
+              </button>
+            </div>
+          </div>
         )}
-      </Box>
+      </div>
     </>
   );
 }
