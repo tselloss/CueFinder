@@ -122,17 +122,17 @@ export default function UserProfile({ onBack }) {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2 md:gap-4">
           <Button
             variant="outline"
-            size="lg"
+            size="default"
             onClick={onBack || (() => navigate('/'))}
-            className="gap-2"
+            className="gap-2 flex-shrink-0"
           >
-            <ArrowLeft className="h-5 w-5" />
-            Back
+            <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
+            <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-3xl md:text-4xl font-bold">My Profile</h1>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
         </div>
 
         {/* Message Alert */}
@@ -149,10 +149,10 @@ export default function UserProfile({ onBack }) {
         )}
 
         {/* Tabs */}
-        <div className="flex gap-2 border-b border-border">
+        <div className="flex gap-2 border-b border-border overflow-x-auto">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2 md:py-3 font-medium transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'profile'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -162,7 +162,7 @@ export default function UserProfile({ onBack }) {
           </button>
           <button
             onClick={() => setActiveTab('myListings')}
-            className={`px-6 py-3 font-medium transition-colors ${
+            className={`px-4 md:px-6 py-2 md:py-3 font-medium transition-colors whitespace-nowrap text-sm md:text-base ${
               activeTab === 'myListings'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -176,20 +176,20 @@ export default function UserProfile({ onBack }) {
         {activeTab === 'profile' ? (
           <Card className="border-2 border-primary/20">
             <CardHeader>
-              <div className="flex items-center justify-between">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <CardTitle className="text-2xl">Account Information</CardTitle>
+                  <CardTitle className="text-xl md:text-2xl">Account Information</CardTitle>
                   <CardDescription>
                     {isEditing ? 'Update your profile details' : 'View your account details'}
                   </CardDescription>
                 </div>
                 {!isEditing ? (
-                  <Button onClick={() => setIsEditing(true)} className="gap-2">
+                  <Button onClick={() => setIsEditing(true)} className="gap-2 w-full sm:w-auto">
                     <Edit className="h-4 w-4" />
                     Edit Profile
                   </Button>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex gap-2 w-full sm:w-auto">
                     <Button
                       variant="outline"
                       onClick={() => {
@@ -210,18 +210,18 @@ export default function UserProfile({ onBack }) {
                           },
                         });
                       }}
-                      className="gap-2"
+                      className="gap-2 flex-1 sm:flex-initial"
                     >
                       <X className="h-4 w-4" />
-                      Cancel
+                      <span className="hidden sm:inline">Cancel</span>
                     </Button>
                     <Button
                       onClick={handleSaveProfile}
                       disabled={loading}
-                      className="gap-2"
+                      className="gap-2 flex-1 sm:flex-initial"
                     >
                       <Save className="h-4 w-4" />
-                      {loading ? 'Saving...' : 'Save Changes'}
+                      {loading ? 'Saving...' : 'Save'}
                     </Button>
                   </div>
                 )}
@@ -235,16 +235,16 @@ export default function UserProfile({ onBack }) {
                   <Image className="h-4 w-4" />
                   Profile Avatar
                 </Label>
-                <div className="flex items-center gap-4">
-                  <div className="text-6xl">{profile.avatar}</div>
+                <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+                  <div className="text-5xl md:text-6xl">{profile.avatar}</div>
                   {isEditing && (
-                    <div className="grid grid-cols-8 gap-2">
+                    <div className="grid grid-cols-6 sm:grid-cols-8 gap-2 w-full sm:w-auto">
                       {AVATAR_OPTIONS.map((emoji) => (
                         <button
                           key={emoji}
                           type="button"
                           onClick={() => handleProfileChange('avatar', emoji)}
-                          className={`text-2xl p-2 rounded-md hover:bg-accent transition-colors ${
+                          className={`text-xl md:text-2xl p-1.5 md:p-2 rounded-md hover:bg-accent transition-colors ${
                             profile.avatar === emoji ? 'bg-accent ring-2 ring-primary' : ''
                           }`}
                         >
@@ -269,7 +269,7 @@ export default function UserProfile({ onBack }) {
                     placeholder="Enter your name"
                   />
                 ) : (
-                  <p className="text-lg">{profile.name || 'Not set'}</p>
+                  <p className="text-base md:text-lg break-words">{profile.name || 'Not set'}</p>
                 )}
               </div>
 
@@ -287,7 +287,7 @@ export default function UserProfile({ onBack }) {
                     placeholder="your@email.com"
                   />
                 ) : (
-                  <p className="text-lg">{profile.email || 'Not set'}</p>
+                  <p className="text-base md:text-lg break-all">{profile.email || 'Not set'}</p>
                 )}
               </div>
 
@@ -305,23 +305,23 @@ export default function UserProfile({ onBack }) {
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
                       placeholder="+1234567890"
                     />
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-start space-x-2">
                       <input
                         type="checkbox"
                         id="hidePhone"
                         checked={profile.hidePhone}
                         onChange={(e) => handleProfileChange('hidePhone', e.target.checked)}
-                        className="h-4 w-4 rounded border-input"
+                        className="h-4 w-4 rounded border-input mt-0.5 flex-shrink-0"
                       />
-                      <label htmlFor="hidePhone" className="text-sm text-muted-foreground">
+                      <label htmlFor="hidePhone" className="text-xs md:text-sm text-muted-foreground leading-tight">
                         Hide phone number from public listings
                       </label>
                     </div>
                   </div>
                 ) : (
-                  <p className="text-lg">
+                  <p className="text-base md:text-lg">
                     {profile.phone || 'Not set'}
-                    {profile.hidePhone && <span className="text-sm text-muted-foreground ml-2">(Hidden)</span>}
+                    {profile.hidePhone && <span className="text-xs md:text-sm text-muted-foreground ml-2">(Hidden)</span>}
                   </p>
                 )}
               </div>
@@ -339,7 +339,7 @@ export default function UserProfile({ onBack }) {
                       onChange={(e) => handleProfileChange('address.street', e.target.value)}
                       placeholder="Street address"
                     />
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         value={profile.address.city}
                         onChange={(e) => handleProfileChange('address.city', e.target.value)}
@@ -351,7 +351,7 @@ export default function UserProfile({ onBack }) {
                         placeholder="State"
                       />
                     </div>
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         value={profile.address.postalCode}
                         onChange={(e) => handleProfileChange('address.postalCode', e.target.value)}
@@ -365,8 +365,8 @@ export default function UserProfile({ onBack }) {
                     </div>
                   </div>
                 ) : (
-                  <div className="text-lg space-y-1">
-                    <p>{profile.address.street || 'Street not set'}</p>
+                  <div className="text-base md:text-lg space-y-1">
+                    <p className="break-words">{profile.address.street || 'Street not set'}</p>
                     <p>
                       {profile.address.city && profile.address.state 
                         ? `${profile.address.city}, ${profile.address.state}` 
