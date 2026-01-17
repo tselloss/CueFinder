@@ -1,6 +1,6 @@
 import React from 'react';
-import { Box, Button, Heading, Text } from 'grommet';
-import { Previous } from 'grommet-icons';
+import { Button } from './ui/button.jsx';
+import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export default function ComingSoon({ category, onBack }) {
@@ -37,51 +37,41 @@ export default function ComingSoon({ category, onBack }) {
   };
 
   return (
-    <Box fill background="background" pad={{ horizontal: 'medium', vertical: 'medium' }}>
+    <div className="w-full min-h-screen bg-background px-4 py-6 flex flex-col">
       <Button 
-        icon={<Previous />} 
-        label="Back"
+        variant="ghost" 
         onClick={handleBack}
-        plain
-        style={{ marginBottom: '24px' }}
-      />
-      
-      <Box 
-        align="center" 
-        justify="center" 
-        fill 
-        gap="large"
-        style={{ minHeight: '60vh' }}
+        className="mb-6 w-fit"
       >
-        <Text size="120px" style={{ lineHeight: '1' }}>
+        <ArrowLeft className="mr-2 h-4 w-4" />
+        Back
+      </Button>
+      
+      <div className="flex-grow flex flex-col items-center justify-center gap-8 min-h-60vh">
+        <div className="text-9xl">
           {getCategoryEmoji()}
-        </Text>
+        </div>
         
-        <Heading level="2" textAlign="center" margin="none">
+        <h2 className="text-3xl font-bold text-center">
           {getCategoryName()}
-        </Heading>
+        </h2>
         
-        <Box align="center" gap="small">
-          <Text size="xlarge" color="text-weak" textAlign="center">
+        <div className="text-center space-y-3 max-w-lg">
+          <div className="text-2xl text-muted-foreground">
             Coming Soon
-          </Text>
-          <Text size="large" color="text-weak" textAlign="center" width="large">
+          </div>
+          <div className="text-lg text-muted-foreground">
             We're working hard to bring you {getCategoryName()}. 
             Check back soon for exciting new listings!
-          </Text>
-        </Box>
+          </div>
+        </div>
 
-        <Box 
-          gap="small" 
-          direction="row" 
-          align="center" 
-          margin={{ top: 'medium' }}
-        >
-          <Box width="12px" height="12px" round="full" background="brand" />
-          <Box width="12px" height="12px" round="full" background="brand" style={{ opacity: 0.6 }} />
-          <Box width="12px" height="12px" round="full" background="brand" style={{ opacity: 0.3 }} />
-        </Box>
-      </Box>
-    </Box>
+        <div className="flex items-center gap-3 mt-4">
+          <div className="w-3 h-3 rounded-full bg-primary" />
+          <div className="w-3 h-3 rounded-full bg-primary opacity-60" />
+          <div className="w-3 h-3 rounded-full bg-primary opacity-30" />
+        </div>
+      </div>
+    </div>
   );
 }
