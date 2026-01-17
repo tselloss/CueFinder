@@ -147,6 +147,11 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
                       <ImagePlaceholder height="200px" />
                     )}
                   </Box>
+                  {c.itemType === 'case' && (
+                    <Box background="status-info" pad="xsmall" margin="small" round="small">
+                      <Text size="small" weight="bold" color="white">CASE</Text>
+                    </Box>
+                  )}
                   {(c.isSold || c.is_sold) ? (
                     <Box background="status-error" pad="xsmall" margin="small" round="small">
                       <Text size="small" weight="bold" color="white">SOLD</Text>
@@ -231,6 +236,17 @@ export default function CueList({ cues, onSelect, onAdd, query, viewMode, setVie
                       <ImagePlaceholder height="120px" />
                     )}
                   </Box>
+                  {c.itemType === 'case' && (
+                    <Box 
+                      background="status-info" 
+                      pad="small" 
+                      align="center" 
+                      justify="center"
+                      style={{ position: 'absolute', top: '8px', left: '8px', borderRadius: '6px' }}
+                    >
+                      <Text size="small" weight="bold" color="white">CASE</Text>
+                    </Box>
+                  )}
                   {(c.isSold || c.is_sold) ? (
                     <Box 
                       background="status-error" 
