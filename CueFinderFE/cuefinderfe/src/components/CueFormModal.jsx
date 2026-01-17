@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Upload, Trash2, Star } from 'lucide-react';
+import { Upload, Trash2, Star, ArrowLeft } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
 import { getErrorMessage } from '../utils/errorUtils';
@@ -229,6 +229,15 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   return (
     <Dialog open={true} onOpenChange={onClose}>
       <DialogContent className="w-[95vw] max-w-3xl overflow-hidden flex flex-col p-3 sm:p-4 md:p-6 rounded-lg">
+        <div className="flex items-center justify-between mb-2">
+          <button
+            onClick={onClose}
+            className="flex items-center gap-1 sm:gap-2 px-2 sm:px-3 py-1.5 sm:py-2 text-sm sm:text-base rounded-md hover:bg-accent transition-colors"
+          >
+            <ArrowLeft className="w-4 h-4 sm:w-5 sm:h-5" />
+            <span className="hidden sm:inline">Back</span>
+          </button>
+        </div>
         <DialogHeader className="flex-shrink-0 pb-2">
           <DialogTitle className="text-lg sm:text-xl md:text-2xl leading-tight">
             {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
