@@ -1,15 +1,27 @@
 import React, { useState } from 'react';
 import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
-import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
+import { Mail, LogOut, User as UserIcon, Shield, Globe } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu.jsx';
+import { useTranslation } from 'react-i18next';
 
 export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
+  const { i18n } = useTranslation();
   const [mobileOpen, setMobileOpen] = useState(false);
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Forum', path: '/forum' },
     { label: 'Inbox', path: '/inbox', requiresAuth: true }
   ];
+  const languages = [
+    { code: 'en', name: 'English' },
+    { code: 'el', name: 'Ελληνικά' }
+  ];
+
+  const handleLanguageChange = (langCode) => {
+    i18n.changeLanguage(langCode);
+    localStorage.setItem('lang', langCode);
+  };
 
   return (
     <header className="w-full bg-background/90 backdrop-blur border-b border-border sticky top-0 z-50">
@@ -47,7 +59,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
               </div>
 
               <div className="flex items-center gap-2">
-                <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/inbox')} className="relative">
+                <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/inbox')} className="relative hidden sm:inline-flex">
                   <Mail className="mr-2 h-4 w-4" /> Inbox
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 rounded-full unread-badge">
@@ -55,17 +67,56 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     </Badge>
                   )}
                 </Button>
-                <Button variant="outline" size="sm" onClick={() => onNavigate && onNavigate('/profile')}>
-                  <UserIcon className="mr-2 h-4 w-4" /> Profile
-                </Button>
-                {user.role === 'admin' && (
-                  <Button variant="outline" size="sm" onClick={() => onNavigate && onNavigate('/admin')}>
-                    <Shield className="mr-2 h-4 w-4" /> Admin
-                  </Button>
-                )}
-                <Button variant="ghost" size="sm" onClick={() => onLogout && onLogout()}>
-                  <LogOut className="mr-2 h-4 w-4" /> Logout
-                </Button>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <UserIcon className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56">
+                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onNavigate && onNavigate('/profile')}>
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Profile</span>
+                    </DropdownMenuItem>
+                    {user.role === 'admin' && (
+                      <DropdownMenuItem onClick={() => onNavigate && onNavigate('/admin')}>
+                        <Shield className="mr-2 h-4 w-4" />
+                        <span>Admin Dashboard</span>
+                      </DropdownMenuItem>
+                    )}
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => onLogout && onLogout()} className="text-destructive">
+                      <LogOut className="mr-2 h-4 w-4" />
+                      <span>Logout</span>
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm">
+                      <Globe className="h-4 w-4" />
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end">
+                    {languages.map(lang => (
+                      <DropdownMenuItem
+                        key={lang.code}
+                        onClick={() => handleLanguageChange(lang.code)}
+                        className={i18n.language === lang.code ? 'bg-accent' : ''}
+                      >
+                        <span>{lang.name}</span>
+                        {i18n.language === lang.code && (
+                          <span className="ml-auto text-primary">✓</span>
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </DropdownMenuContent>
+                </DropdownMenu>
+
                 <Button
                   variant="ghost"
                   size="sm"
