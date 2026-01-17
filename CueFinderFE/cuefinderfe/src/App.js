@@ -278,6 +278,8 @@ function AppInner() {
             PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
             PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
             currencySymbol={currencySymbol}
+            user={user}
+            onAddListing={handleAdd}
           />
         </div>
       )}
