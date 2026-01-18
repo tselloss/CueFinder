@@ -99,29 +99,29 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="w-full min-h-screen flex items-start justify-center bg-background p-4 md:p-8 overflow-auto">
-      <Card className="w-full max-w-3xl bg-card border border-border/50 shadow-lg">
-        <CardContent className="p-6 md:p-8">
+    <div className="w-full min-h-screen flex items-center justify-center bg-background p-2 sm:p-4 md:p-8 overflow-auto">
+      <Card className="w-full max-w-3xl bg-card border border-border/50 shadow-lg max-h-[95vh] overflow-y-auto">
+        <CardContent className="p-4 sm:p-6 md:p-8">
           {/* Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-3xl md:text-4xl font-bold mb-2 text-foreground">
+          <div className="text-center mb-4 sm:mb-6">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold mb-2 text-foreground">
               {isRegister ? '🎱 Create Account' : '🎱 Sign In'}
             </h1>
-            <p className="text-muted-foreground text-base md:text-lg">
+            <p className="text-muted-foreground text-sm sm:text-base md:text-lg">
               {isRegister ? 'Join the CueFinder community' : 'Welcome back to CueFinder'}
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
-            <div className="bg-red-50 border border-red-200 rounded-lg p-4 mb-6">
-              <p className="text-red-700 font-semibold">⚠️ {error}</p>
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3 sm:p-4 mb-4 sm:mb-6">
+              <p className="text-red-700 font-semibold text-sm sm:text-base">⚠️ {error}</p>
             </div>
           )}
 
-          <form onSubmit={submit} className="space-y-4 md:space-y-5">
+          <form onSubmit={submit} className="space-y-3 sm:space-y-4 md:space-y-5">
             {/* Username & Name */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
               <div>
                 <label className="block text-sm font-bold mb-2 flex items-center gap-2">
                   <User className="w-4 h-4" />
@@ -353,11 +353,11 @@ export default function LoginPage() {
             )}
 
             {/* Submit Button */}
-            <div className="pt-4">
+            <div className="pt-2 sm:pt-3">
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-11 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white font-bold text-base shadow-md gap-2"
+                className="w-full h-9 sm:h-11 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm sm:text-base font-bold shadow-md gap-2"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isRegister ? (codeSent ? 'Verify & Complete' : 'Create Account') : 'Sign In'}
@@ -365,7 +365,7 @@ export default function LoginPage() {
             </div>
 
             {/* Toggle Register/Login */}
-            <div className="pt-4 border-t border-border text-center">
+            <div className="pt-2 sm:pt-3 border-t border-border text-center">
               <button
                 type="button"
                 onClick={() => {
@@ -374,7 +374,7 @@ export default function LoginPage() {
                   setCode('');
                   setVerificationToken('');
                 }}
-                className="text-sm text-blue-600 hover:text-blue-700 font-semibold"
+                className="text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-semibold"
               >
                 {isRegister ? '← Back to Sign In' : "Don't have an account? Register →"}
               </button>

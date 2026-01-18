@@ -126,7 +126,7 @@ export default function CueList({
     <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
       {/* Grid View */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-6">
+        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-8">
           {filtered.map((c) => {
             const displayPrice = Number(c.price || 0);
             const imageUrl = getImageUrl(c.images);
@@ -153,7 +153,7 @@ export default function CueList({
                 </div>
 
                 {/* Content */}
-                <CardContent className="p-2 sm:p-3 md:p-4 space-y-2 sm:space-y-3">
+                <CardContent className="p-3 sm:p-3 md:p-4 space-y-2 flex-1 flex flex-col">
                   <div>
                     <h3 className="font-semibold text-xs sm:text-base text-foreground truncate group-hover:text-primary transition-colors">
                       {c.title || c.brand}
@@ -183,7 +183,7 @@ export default function CueList({
 
       {/* List View */}
       {viewMode === 'list' && (
-        <div className="space-y-3 pb-6">
+        <div className="space-y-2 sm:space-y-3 pb-8">
           {filtered.map((c) => {
             const displayPrice = Number(c.price || 0);
             const imageUrl = getImageUrl(c.images);
@@ -195,9 +195,9 @@ export default function CueList({
                 onClick={() => onSelect(c)}
                 className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50"
               >
-                <div className="flex gap-4 p-4">
+                <div className="flex gap-2 sm:gap-4 p-2 sm:p-3 md:p-4">
                   {/* Image Container */}
-                  <div className="relative w-24 h-24 flex-shrink-0 bg-muted rounded-md overflow-hidden group hover:bg-muted/80 transition-colors">
+                  <div className="relative w-20 h-20 sm:w-24 sm:h-24 flex-shrink-0 bg-muted rounded-md overflow-hidden group hover:bg-muted/80 transition-colors">
                     {imageUrl ? (
                       <img
                         src={imageUrl}
@@ -211,7 +211,7 @@ export default function CueList({
                   </div>
 
                   {/* Content */}
-                  <div className="flex-1 flex flex-col justify-between">
+                  <div className="flex-1 flex flex-col gap-1 sm:gap-2 justify-between min-w-0">
                     <div>
                       <h3 className="font-semibold text-lg text-foreground hover:text-primary transition-colors">
                         {c.title || c.brand}

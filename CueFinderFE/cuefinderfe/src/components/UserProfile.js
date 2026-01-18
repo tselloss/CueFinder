@@ -151,26 +151,26 @@ export default function UserProfile({ onBack }) {
       )}
 
       <div>
-        <div className="flex gap-4 mb-6 border-b border-gray-200">
+        <div className="flex gap-1 sm:gap-2 mb-6 border-b border-gray-200/50 bg-card/50 rounded-t-lg p-1">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold rounded-t-lg transition-all duration-200 ${
               activeTab === 'profile'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-800'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
             }`}
           >
-            ⚙️ Profile Settings
+            ⚙️ <span className="hidden sm:inline">Profile Settings</span><span className="sm:hidden">Profile</span>
           </button>
           <button
             onClick={() => setActiveTab('myListings')}
-            className={`px-6 py-3 font-semibold border-b-2 transition-colors ${
+            className={`px-4 sm:px-6 py-2 sm:py-3 font-semibold rounded-t-lg transition-all duration-200 ${
               activeTab === 'myListings'
-                ? 'border-blue-500 text-blue-600'
-                : 'border-transparent text-gray-600 hover:text-gray-800'
+                ? 'bg-primary text-white shadow-md'
+                : 'text-muted-foreground hover:text-foreground hover:bg-background/50'
             }`}
           >
-            📋 My Listings
+            📋 <span className="hidden sm:inline">My Listings</span><span className="sm:hidden">Listings</span>
           </button>
         </div>
         {activeTab === 'profile' && (
