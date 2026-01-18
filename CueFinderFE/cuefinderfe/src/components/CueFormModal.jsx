@@ -237,17 +237,17 @@ export default function CueFormModal({ cue, onClose, onSave }) {
           {/* Close Button */}
           <button
             onClick={onClose}
-            className="absolute top-4 right-4 p-2 hover:bg-accent rounded-md transition-colors z-10 text-foreground/60 hover:text-foreground"
+            className="absolute top-3 right-3 p-1.5 hover:bg-accent rounded-md transition-colors z-10 text-foreground/60 hover:text-foreground"
           >
-            <X className="w-6 h-6" />
+            <X className="w-5 h-5" />
           </button>
 
           {/* Header */}
-          <div className="sticky top-0 bg-gradient-to-b from-card to-card/50 border-b border-border p-4 sm:p-6 pr-14">
-            <h2 className="text-2xl sm:text-3xl font-bold text-foreground">
-              {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
+          <div className="sticky top-0 bg-card border-b border-border p-3 sm:p-4 pr-12">
+            <h2 className="text-lg sm:text-xl font-bold text-foreground">
+              {cue ? 'Edit Listing' : 'Create New Listing'}
             </h2>
-            <p className="text-sm sm:text-base text-muted-foreground mt-2">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               {productType === 'cue' 
                 ? 'Share details about your billiard cue'
                 : 'Share details about your cue case'}
@@ -255,49 +255,49 @@ export default function CueFormModal({ cue, onClose, onSave }) {
           </div>
 
           {/* Content */}
-          <form onSubmit={handleSubmit} className="p-4 sm:p-6 space-y-5 sm:space-y-6">
+          <form onSubmit={handleSubmit} className="p-3 sm:p-4 space-y-4">
             {error && (
-              <div className="p-3 sm:p-4 rounded-lg bg-destructive/10 border border-destructive/30 text-sm sm:text-base text-destructive font-medium">
+              <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/30 text-sm text-destructive font-medium">
                 {error}
               </div>
             )}
 
             {/* Product Type Selector - Only for new listings */}
             {!cue && (
-              <div className="space-y-3">
-                <h3 className="font-semibold text-base sm:text-lg text-foreground">🎯 What are you listing?</h3>
-                <div className="grid grid-cols-2 gap-2 sm:gap-3">
+              <div className="space-y-2">
+                <h3 className="font-semibold text-sm sm:text-base text-foreground">What are you listing?</h3>
+                <div className="grid grid-cols-2 gap-2">
                   <button
                     type="button"
                     onClick={() => setProductType('cue')}
-                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
+                    className={`p-3 rounded-lg border-2 transition-all ${
                       productType === 'cue'
-                        ? 'border-primary bg-primary/15 shadow-md'
+                        ? 'border-primary bg-primary/10 shadow-sm'
                         : 'border-border/50 bg-card hover:border-primary/50 hover:bg-primary/5'
                     }`}
                   >
-                    <div className="text-3xl sm:text-4xl mb-2">🎱</div>
-                    <div className="font-semibold text-sm sm:text-base text-foreground">Billiard Cue</div>
-                    <div className="text-xs sm:text-sm text-muted-foreground mt-1">Pool & Snooker</div>
+                    <div className="text-2xl sm:text-3xl mb-1">🎱</div>
+                    <div className="font-semibold text-xs sm:text-sm text-foreground">Billiard Cue</div>
+                    <div className="text-xs text-muted-foreground">Pool & Snooker</div>
                     {productType === 'cue' && (
-                      <div className="mt-2 text-xs font-bold text-primary">✓ SELECTED</div>
+                      <div className="mt-1 text-xs font-bold text-primary">✓ SELECTED</div>
                     )}
                   </button>
                   <button
                     type="button"
                     onClick={() => setProductType('case')}
-                    className={`p-3 sm:p-4 rounded-xl border-2 transition-all ${
+                    className={`p-3 rounded-lg border-2 transition-all ${
                       productType === 'case'
 
-                        ? 'border-primary bg-primary/10'
+                        ? 'border-primary bg-primary/10 shadow-sm'
                         : 'border-border bg-card hover:border-primary/50'
                     }`}
                   >
-                    <div className="text-lg sm:text-2xl md:text-3xl mb-0.5 sm:mb-1 md:mb-2">💼</div>
-                    <div className="font-semibold text-xs sm:text-base">Cue Case</div>
-                    <div className="text-xs text-muted-foreground hidden sm:block">Protective Cases</div>
+                    <div className="text-2xl sm:text-3xl mb-1">💼</div>
+                    <div className="font-semibold text-xs sm:text-sm">Cue Case</div>
+                    <div className="text-xs text-muted-foreground">Protective Cases</div>
                     {productType === 'case' && (
-                      <div className="mt-0.5 sm:mt-1 md:mt-2 text-xs font-bold text-primary">✓ SELECTED</div>
+                      <div className="mt-1 text-xs font-bold text-primary">✓ SELECTED</div>
                     )}
                   </button>
                 </div>
@@ -306,13 +306,13 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
             {/* Basic Information */}
             <Card className="border-border/50 shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg sm:text-xl text-foreground">📋 Basic Information</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg text-foreground">Basic Information</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+              <CardContent className="space-y-3">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="title" className="text-sm sm:text-base font-semibold mb-2">Title *</Label>
+                    <Label htmlFor="title" className="text-xs sm:text-sm font-semibold mb-1.5">Title *</Label>
                     <Input
                       id="title"
                       name="title"
@@ -320,11 +320,11 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                       onChange={handleChange}
                       placeholder="e.g., Predator REVO 1"
                       required
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-10 text-sm"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="brand" className="text-sm sm:text-base font-semibold mb-2">Brand *</Label>
+                    <Label htmlFor="brand" className="text-xs sm:text-sm font-semibold mb-1.5">Brand *</Label>
                     <Input
                       id="brand"
                       name="brand"
@@ -332,14 +332,14 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                       onChange={handleChange}
                       placeholder="e.g., Predator"
                       required
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-10 text-sm"
                     />
                   </div>
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 sm:gap-4">
+                <div className="grid grid-cols-2 gap-3">
                   <div>
-                    <Label htmlFor="price" className="text-sm sm:text-base font-semibold mb-2">Price (€) *</Label>
+                    <Label htmlFor="price" className="text-xs sm:text-sm font-semibold mb-1.5">Price (€) *</Label>
                     <Input
                       id="price"
                       name="price"
@@ -350,13 +350,13 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                       min="0"
                       step="0.01"
                       required
-                      className="h-10 sm:h-11 text-base"
+                      className="h-9 sm:h-10 text-sm"
                     />
                   </div>
                   <div>
-                    <Label htmlFor="condition" className="text-sm sm:text-base font-semibold mb-2">Condition *</Label>
+                    <Label htmlFor="condition" className="text-xs sm:text-sm font-semibold mb-1.5">Condition *</Label>
                     <Select value={formData.condition} onValueChange={(value) => setFormData(prev => ({ ...prev, condition: value }))}>
-                      <SelectTrigger id="condition" className="h-10 sm:h-11 text-base">
+                      <SelectTrigger id="condition" className="h-9 sm:h-10 text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
@@ -370,29 +370,29 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
                 {productType === 'cue' && (
                   <div>
-                    <Label htmlFor="cueType" className="text-sm sm:text-base font-semibold mb-2">Cue Type *</Label>
+                    <Label htmlFor="cueType" className="text-xs sm:text-sm font-semibold mb-1.5">Cue Type *</Label>
                     <Select value={formData.cueType} onValueChange={(value) => setFormData(prev => ({ ...prev, cueType: value }))}>
-                      <SelectTrigger id="cueType" className="h-10 sm:h-11 text-base">
+                      <SelectTrigger id="cueType" className="h-9 sm:h-10 text-sm">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="playing">🎯 Playing Cue</SelectItem>
-                        <SelectItem value="break">💥 Break Cue</SelectItem>
-                        <SelectItem value="jump">🚀 Jump Cue</SelectItem>
+                        <SelectItem value="playing">Playing Cue</SelectItem>
+                        <SelectItem value="break">Break Cue</SelectItem>
+                        <SelectItem value="jump">Jump Cue</SelectItem>
                       </SelectContent>
                     </Select>
                   </div>
                 )}
 
                 <div>
-                  <Label htmlFor="location" className="text-sm sm:text-base font-semibold mb-2">Location</Label>
+                  <Label htmlFor="location" className="text-xs sm:text-sm font-semibold mb-1.5">Location</Label>
                   <Input
                     id="location"
                     name="location"
                     value={formData.location}
                     onChange={handleChange}
                     placeholder="City, State"
-                    className="h-10 sm:h-11 text-base"
+                    className="h-9 sm:h-10 text-sm"
                   />
                 </div>
               </CardContent>
@@ -400,15 +400,15 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
             {/* Specifications */}
             <Card className="border-border/50 shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg sm:text-xl text-foreground">📏 Specifications</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg text-foreground">Specifications</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
+              <CardContent className="space-y-3">
                 {productType === 'cue' ? (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
                       <div>
-                        <Label htmlFor="weight" className="text-sm sm:text-base font-semibold mb-2">Weight (oz)</Label>
+                        <Label htmlFor="weight" className="text-xs sm:text-sm font-semibold mb-1.5">Weight (oz)</Label>
                         <Input
                           id="weight"
                           name="weight"
@@ -417,11 +417,11 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                           onChange={handleChange}
                           placeholder="18.5"
                           step="0.1"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="length" className="text-sm sm:text-base font-semibold mb-2">Length (inches)</Label>
+                        <Label htmlFor="length" className="text-xs sm:text-sm font-semibold mb-1.5">Length (inches)</Label>
                         <Input
                           id="length"
                           name="length"
@@ -430,11 +430,11 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                           onChange={handleChange}
                           placeholder="58"
                           step="0.1"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="tipSize" className="text-sm sm:text-base font-semibold mb-2">Tip Size (mm)</Label>
+                        <Label htmlFor="tipSize" className="text-xs sm:text-sm font-semibold mb-1.5">Tip Size (mm)</Label>
                         <Input
                           id="tipSize"
                           name="tipSize"
@@ -443,43 +443,43 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                           onChange={handleChange}
                           placeholder="12.9"
                           step="0.1"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="shaftMaterial" className="text-sm sm:text-base font-semibold mb-2">Shaft Material</Label>
+                        <Label htmlFor="shaftMaterial" className="text-xs sm:text-sm font-semibold mb-1.5">Shaft Material</Label>
                         <Input
                           id="shaftMaterial"
                           name="shaftMaterial"
                           value={formData.shaftMaterial}
                           onChange={handleChange}
                           placeholder="e.g., Carbon Fiber"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="buttMaterial" className="text-sm sm:text-base font-semibold mb-2">Butt Material</Label>
+                        <Label htmlFor="buttMaterial" className="text-xs sm:text-sm font-semibold mb-1.5">Butt Material</Label>
                         <Input
                           id="buttMaterial"
                           name="buttMaterial"
                           value={formData.buttMaterial}
                           onChange={handleChange}
                           placeholder="e.g., Maple"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                     </div>
                   </>
                 ) : (
                   <>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="caseCapacity" className="text-sm sm:text-base font-semibold mb-2">Case Capacity</Label>
+                        <Label htmlFor="caseCapacity" className="text-xs sm:text-sm font-semibold mb-1.5">Case Capacity</Label>
                         <Select value={formData.caseCapacity} onValueChange={(value) => setFormData(prev => ({ ...prev, caseCapacity: value }))}>
-                          <SelectTrigger id="caseCapacity" className="h-10 sm:h-11 text-base">
+                          <SelectTrigger id="caseCapacity" className="h-9 sm:h-10 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -490,9 +490,9 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="caseOpening" className="text-sm sm:text-base font-semibold mb-2">Case Opening</Label>
+                        <Label htmlFor="caseOpening" className="text-xs sm:text-sm font-semibold mb-1.5">Case Opening</Label>
                         <Select value={formData.caseOpening} onValueChange={(value) => setFormData(prev => ({ ...prev, caseOpening: value }))}>
-                          <SelectTrigger id="caseOpening" className="h-10 sm:h-11 text-base">
+                          <SelectTrigger id="caseOpening" className="h-9 sm:h-10 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -504,11 +504,11 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                       <div>
-                        <Label htmlFor="caseType" className="text-sm sm:text-base font-semibold mb-2">Case Type</Label>
+                        <Label htmlFor="caseType" className="text-xs sm:text-sm font-semibold mb-1.5">Case Type</Label>
                         <Select value={formData.caseType} onValueChange={(value) => setFormData(prev => ({ ...prev, caseType: value }))}>
-                          <SelectTrigger id="caseType" className="h-10 sm:h-11 text-base">
+                          <SelectTrigger id="caseType" className="h-9 sm:h-10 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -519,59 +519,59 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="color" className="text-sm sm:text-base font-semibold mb-2">Color</Label>
+                        <Label htmlFor="color" className="text-xs sm:text-sm font-semibold mb-1.5">Color</Label>
                         <Input
                           id="color"
                           name="color"
                           value={formData.color}
                           onChange={handleChange}
                           placeholder="e.g., Blue, Black"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="caseMaterial" className="text-sm sm:text-base font-semibold mb-2">Material</Label>
+                        <Label htmlFor="caseMaterial" className="text-xs sm:text-sm font-semibold mb-1.5">Material</Label>
                         <Input
                           id="caseMaterial"
                           name="caseMaterial"
                           value={formData.caseMaterial}
                           onChange={handleChange}
                           placeholder="e.g., Ultra Vinyl"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="caseWeight" className="text-sm sm:text-base font-semibold mb-2">Weight</Label>
+                        <Label htmlFor="caseWeight" className="text-xs sm:text-sm font-semibold mb-1.5">Weight</Label>
                         <Input
                           id="caseWeight"
                           name="caseWeight"
                           value={formData.caseWeight}
                           onChange={handleChange}
                           placeholder="e.g., 3.6 lbs"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                       <div>
-                        <Label htmlFor="outerDimensions" className="text-sm sm:text-base font-semibold mb-2">Dimensions</Label>
+                        <Label htmlFor="outerDimensions" className="text-xs sm:text-sm font-semibold mb-1.5">Dimensions</Label>
                         <Input
                           id="outerDimensions"
                           name="outerDimensions"
                           value={formData.outerDimensions}
                           onChange={handleChange}
                           placeholder="e.g., 86x14x20 cm"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                     </div>
 
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <div>
-                        <Label htmlFor="pocketSpace" className="text-sm sm:text-base font-semibold mb-2">Pocket Space</Label>
+                        <Label htmlFor="pocketSpace" className="text-xs sm:text-sm font-semibold mb-1.5">Pocket Space</Label>
                         <Select value={formData.pocketSpace} onValueChange={(value) => setFormData(prev => ({ ...prev, pocketSpace: value }))}>
-                          <SelectTrigger id="pocketSpace" className="h-10 sm:h-11 text-base">
+                          <SelectTrigger id="pocketSpace" className="h-9 sm:h-10 text-sm">
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -582,14 +582,14 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                         </Select>
                       </div>
                       <div>
-                        <Label htmlFor="handleExtensionSpace" className="text-sm sm:text-base font-semibold mb-2">Extension Space</Label>
+                        <Label htmlFor="handleExtensionSpace" className="text-xs sm:text-sm font-semibold mb-1.5">Extension Space</Label>
                         <Input
                           id="handleExtensionSpace"
                           name="handleExtensionSpace"
                           value={formData.handleExtensionSpace}
                           onChange={handleChange}
                           placeholder="e.g., Sleeves Included"
-                          className="h-10 sm:h-11 text-base"
+                          className="h-9 sm:h-10 text-sm"
                         />
                       </div>
                     </div>
@@ -600,8 +600,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
             {/* Description */}
             <Card className="border-border/50 shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg sm:text-xl text-foreground">📝 Description</CardTitle>
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg text-foreground">Description</CardTitle>
               </CardHeader>
               <CardContent>
                 <Textarea
@@ -610,24 +610,24 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                   onChange={handleChange}
                   placeholder="Describe the cue's features, condition, and any special notes..."
                   rows={4}
-                  className="resize-none text-base min-h-[120px] sm:min-h-[140px]"
+                  className="resize-none text-sm min-h-[100px] sm:min-h-[120px]"
                 />
               </CardContent>
             </Card>
 
             {/* Images */}
             <Card className="border-border/50 shadow-none">
-              <CardHeader className="pb-3">
-                <CardTitle className="text-lg sm:text-xl text-foreground">
-                  📷 Images {!cue && <span className="text-destructive ml-1">*</span>}
+              <CardHeader className="pb-2">
+                <CardTitle className="text-base sm:text-lg text-foreground">
+                  Images {!cue && <span className="text-destructive ml-1">*</span>}
                 </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3 sm:space-y-4">
+              <CardContent className="space-y-3">
                 {/* Existing Images */}
                 {cue && cue.images && cue.images.length > 0 && (
-                  <div className="space-y-2 sm:space-y-3">
-                    <h4 className="text-sm sm:text-base font-semibold text-foreground">Current Images</h4>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-3">
+                  <div className="space-y-2">
+                    <h4 className="text-xs sm:text-sm font-semibold text-foreground">Current Images</h4>
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                       {cue.images.map(img => (
                         <div
                           key={img.id}
@@ -670,8 +670,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                 )}
 
                 {/* New Image Upload */}
-                <div className="space-y-3">
-                  <label className="text-sm sm:text-base font-semibold text-foreground">
+                <div className="space-y-2">
+                  <label className="text-xs sm:text-sm font-semibold text-foreground">
                     {cue ? 'Add More Images' : 'Upload Images *'}
                   </label>
                   <div className="relative">
@@ -685,25 +685,25 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                     />
                     <label
                       htmlFor="image-upload"
-                      className="block p-6 sm:p-8 border-2 border-dashed border-primary/50 rounded-lg cursor-pointer hover:bg-primary/5 transition-colors bg-card/50"
+                      className="block p-5 sm:p-6 border-2 border-dashed border-primary/50 rounded-lg cursor-pointer hover:bg-primary/5 transition-colors bg-card/50"
                     >
-                      <div className="flex flex-col items-center justify-center gap-2">
-                        <Upload className="w-6 h-6 sm:w-8 sm:h-8 text-primary" />
-                        <span className="text-base sm:text-lg font-semibold text-foreground">Click to upload images</span>
-                        <span className="text-xs sm:text-sm text-muted-foreground">or drag and drop</span>
+                      <div className="flex flex-col items-center justify-center gap-1.5">
+                        <Upload className="w-5 h-5 sm:w-6 sm:h-6 text-primary" />
+                        <span className="text-sm sm:text-base font-semibold text-foreground">Click to upload images</span>
+                        <span className="text-xs text-muted-foreground">or drag and drop</span>
                       </div>
                     </label>
                   </div>
-                  <p className="text-xs sm:text-sm text-muted-foreground">
+                  <p className="text-xs text-muted-foreground">
                     JPG, PNG, GIF, WebP - Max 5MB each
                   </p>
 
                   {uploadProgress !== null && (
-                    <div className="space-y-2">
-                      <div className="text-sm sm:text-base font-semibold text-foreground">
+                    <div className="space-y-1.5">
+                      <div className="text-xs sm:text-sm font-semibold text-foreground">
                         Uploading images... {uploadProgress}%
                       </div>
-                      <div className="w-full h-3 bg-muted rounded-full overflow-hidden">
+                      <div className="w-full h-2 bg-muted rounded-full overflow-hidden">
                         <div
                           className="h-full bg-primary transition-all duration-200"
                           style={{ width: `${Math.max(0, Math.min(100, uploadProgress))}%` }}
@@ -713,11 +713,11 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                   )}
 
                   {imagePreviews.length > 0 && (
-                    <div className="space-y-3">
-                      <div className="text-sm sm:text-base font-semibold text-foreground">
+                    <div className="space-y-2">
+                      <div className="text-xs sm:text-sm font-semibold text-foreground">
                         {imagePreviews.length} new image(s) selected
                       </div>
-                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2 sm:gap-3">
+                      <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
                         {imagePreviews.map((preview, index) => (
                           <div
                             key={index}
@@ -738,24 +738,24 @@ export default function CueFormModal({ cue, onClose, onSave }) {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 pt-3 sm:pt-4 sticky bottom-0 bg-card border-t border-border -mx-4 sm:-mx-6 px-4 sm:px-6 py-3 sm:py-4">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2 sticky bottom-0 bg-card border-t border-border -mx-3 sm:-mx-4 px-3 sm:px-4 py-3">
               <Button
                 type="button"
                 variant="outline"
                 onClick={onClose}
                 disabled={loading}
-                className="w-full sm:w-auto h-11 sm:h-12 text-base font-semibold"
+                className="w-full sm:w-auto h-9 sm:h-10 text-sm font-semibold"
               >
                 Cancel
               </Button>
               <Button
                 type="submit"
                 disabled={loading}
-                className="gap-2 w-full sm:w-auto h-11 sm:h-12 text-base font-semibold"
+                className="gap-2 w-full sm:w-auto h-9 sm:h-10 text-sm font-semibold"
               >
                 {loading ? (
                   <>
-                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
                     Saving...
                   </>
                 ) : (
