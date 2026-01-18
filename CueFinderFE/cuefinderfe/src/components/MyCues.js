@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
-import CueFormModal from './CueFormModal';
+import CueFormModal from './CueFormModal.jsx';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
