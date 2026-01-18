@@ -134,11 +134,10 @@ export default function MyCues() {
         <h2 className="text-2xl md:text-3xl font-bold">📋 My Listings</h2>
         <Button
           onClick={handleCreateNew}
-          size="lg"
-          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-12 px-6 text-base font-semibold w-full sm:w-auto"
+          className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold w-full sm:w-auto"
         >
-          <Plus className="mr-2 h-5 w-5" />
-          Add New Listing
+          <Plus className="mr-2 h-4 w-4" />
+          <span className="hidden sm:inline">Add New Listing</span><span className="sm:hidden">Add Listing</span>
         </Button>
       </div>
 
