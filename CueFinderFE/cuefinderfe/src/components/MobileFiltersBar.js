@@ -111,16 +111,11 @@ export default function MobileFiltersBar({
         <div className="flex gap-2 items-center">
           <button
             onClick={() => setShowMobileFilters(!showMobileFilters)}
-            className="flex-1 flex items-center justify-center gap-2 px-4 py-3 rounded-lg font-semibold text-sm h-11 transition-colors"
-            style={{
-              background: showMobileFilters 
-                ? 'rgba(59, 130, 246, 0.2)'
-                : 'rgba(30, 41, 59, 0.8)',
-              border: showMobileFilters
-                ? '2px solid rgba(59, 130, 246, 0.5)'
-                : '2px solid rgba(51, 65, 85, 0.5)',
-              color: showMobileFilters ? '#3b82f6' : '#94a3b8'
-            }}
+            className={`flex-1 flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg font-semibold text-sm h-10 transition-colors ${
+              showMobileFilters 
+                ? 'bg-blue-500/20 border-2 border-blue-500/50 text-blue-500'
+                : 'bg-slate-800/80 border-2 border-slate-700/50 text-slate-400'
+            }`}
           >
             {showMobileFilters ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
             {showMobileFilters ? 'Hide Filters' : 'Show Filters'}
@@ -134,13 +129,9 @@ export default function MobileFiltersBar({
           {hasActiveFilters && (
             <button
               onClick={handleClearAllFilters}
-              className="p-3 rounded-lg h-11 transition-colors flex-shrink-0"
-              style={{
-                background: 'rgba(239, 68, 68, 0.15)',
-                border: '2px solid rgba(239, 68, 68, 0.3)',
-              }}
+              className="p-2.5 rounded-lg h-10 transition-colors flex-shrink-0 bg-red-500/15 border-2 border-red-500/30"
             >
-              <X size={18} color="#f87171" />
+              <X size={18} className="text-red-400" />
             </button>
           )}
         </div>

@@ -357,7 +357,7 @@ export default function LoginPage() {
               <Button
                 type="submit"
                 disabled={loading}
-                className="w-full h-9 sm:h-11 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm sm:text-base font-bold shadow-md gap-2"
+                className="w-full h-10 bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white text-sm sm:text-base font-bold shadow-md gap-2"
               >
                 {loading && <Loader2 className="w-4 h-4 animate-spin" />}
                 {isRegister ? (codeSent ? 'Verify & Complete' : 'Create Account') : 'Sign In'}

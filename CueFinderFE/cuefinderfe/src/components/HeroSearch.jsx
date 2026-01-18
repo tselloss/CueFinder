@@ -80,7 +80,7 @@ export function HeroSearch({
               placeholder={t('search.placeholder', 'Search for cues, brands...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-10 h-12 text-base border-2 focus:border-primary"
+              className="pl-10 pr-10 h-10 text-sm sm:text-base border-2 focus:border-primary"
             />
             {search && (
               <button
@@ -120,7 +120,7 @@ export function HeroSearch({
                   {t('filter.condition', 'Condition')}
                 </label>
                 <Select value={condition} onValueChange={setCondition}>
-                  <SelectTrigger className="h-11">
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -139,7 +139,7 @@ export function HeroSearch({
                   {t('filter.sortBy', 'Sort By')}
                 </label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-11">
+                  <SelectTrigger className="h-10">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>

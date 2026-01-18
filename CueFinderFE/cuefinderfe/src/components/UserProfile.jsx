@@ -152,7 +152,7 @@ export default function UserProfile({ onBack }) {
         <div className="flex gap-2 border-b border-border overflow-x-auto">
           <button
             onClick={() => setActiveTab('profile')}
-            className={`px-4 md:px-6 py-2 md:py-3 font-medium transition-colors whitespace-nowrap text-sm md:text-base ${
+            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm ${
               activeTab === 'profile'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted-foreground hover:text-foreground'
@@ -162,7 +162,7 @@ export default function UserProfile({ onBack }) {
           </button>
           <button
             onClick={() => setActiveTab('myListings')}
-            className={`px-4 md:px-6 py-2 md:py-3 font-medium transition-colors whitespace-nowrap text-sm md:text-base ${
+            className={`px-4 py-2 font-medium transition-colors whitespace-nowrap text-sm ${
               activeTab === 'myListings'
                 ? 'border-b-2 border-primary text-primary'
                 : 'text-muted-foreground hover:text-foreground'
