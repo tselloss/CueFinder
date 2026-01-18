@@ -119,12 +119,12 @@ export default function CueForm({ onCancel, onSave }) {
             photos
             <small>Upload one or more photos (preview shown)</small>
             <input name="photos" type="file" accept="image/*" multiple onChange={handleFiles} />
-            <div style={{display:'flex', gap:8, marginTop:8, flexWrap:'wrap'}}>
+            <div className="flex gap-2 mt-2 flex-wrap">
               {previews.length ? previews.map((p,idx)=> (
-                <div key={idx} style={{width:70, height:70, borderRadius:6, overflow:'hidden', background:'#f3f4f6', display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0}}>
-                  <img src={p.data} alt={p.name} style={{width:'100%', height:'100%', objectFit:'cover'}} />
+                <div key={idx} className="w-[70px] h-[70px] rounded-md overflow-hidden bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  <img src={p.data} alt={p.name} className="w-full h-full object-cover" />
                 </div>
-              )) : <div style={{color:'#64748b', fontSize:'0.9rem'}}>No photos selected</div>}
+              )) : <div className="text-slate-500 text-sm">No photos selected</div>}
             </div>
           </label>
 
@@ -152,7 +152,7 @@ export default function CueForm({ onCancel, onSave }) {
             <input name="location" value={form.location} onChange={change} />
           </label>
 
-          <label style={{display:'flex', alignItems:'center', gap:8}}>
+          <label className="flex items-center gap-2">
             <input name="is_sold" type="checkbox" checked={form.is_sold} onChange={(e)=> setForm(f=>({...f, is_sold: e.target.checked}))} />
             <div>
               is_sold
