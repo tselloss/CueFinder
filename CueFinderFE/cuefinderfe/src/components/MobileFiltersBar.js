@@ -99,17 +99,10 @@ export default function MobileFiltersBar({
           {user && (
             <Button
               onClick={onAddListing}
-              className="flex-shrink-0"
-              style={{
-                background: 'linear-gradient(135deg, #10b981 0%, #059669 100%)',
-                padding: '10px',
-                minWidth: '44px',
-                height: '44px',
-                borderRadius: '10px',
-                boxShadow: '0 2px 8px rgba(16, 185, 129, 0.3)'
-              }}
+              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm font-semibold flex-shrink-0"
             >
-              <Plus size={20} color="white" />
+              <Plus className="h-4 w-4 sm:mr-2" />
+              <span className="hidden sm:inline">Add Listing</span>
             </Button>
           )}
         </div>
