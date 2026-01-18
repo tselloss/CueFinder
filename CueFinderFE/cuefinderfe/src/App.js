@@ -243,7 +243,7 @@ function AppInner() {
 
 
   return (
-    <div className="w-full h-screen min-h-screen bg-background flex flex-col">
+    <div className="w-full h-screen bg-background flex flex-col">
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
