@@ -181,9 +181,9 @@ export default function ItemDetail({
                               <button
                                 key={idx}
                                 onClick={() => setImageIndex(idx)}
-                                className={`w-2 h-2 rounded-full transition-all ${
+                                className={`w-1 h-1 rounded-full transition-all ${
                                   idx === imageIndex 
-                                    ? 'bg-primary w-8' 
+                                    ? 'bg-primary w-4' 
                                     : 'bg-muted-foreground/40 hover:bg-muted-foreground/60'
                                 }`}
                               />

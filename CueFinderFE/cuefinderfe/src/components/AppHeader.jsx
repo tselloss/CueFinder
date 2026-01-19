@@ -26,7 +26,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
   };
 
   return (
-    <header className="w-full bg-background border-b border-border">
+    <header className="fixed top-0 left-0 right-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-b border-border z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
           <h2 className="font-bold tracking-tight text-foreground text-lg sm:text-xl whitespace-nowrap">🎱 {title}</h2>
@@ -50,7 +50,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <div className="flex items-center gap-2 rounded-md border border-primary/40 bg-background/60 backdrop-blur px-2 py-1">
+              <div className="hidden sm:flex items-center gap-2 rounded-md border border-primary/40 bg-background/60 backdrop-blur px-2 py-1">
                 <span className="text-xl">{user.avatar || '👤'}</span>
                 <div className="min-w-0">
                   <div className="text-sm font-semibold truncate">{user.name}</div>
@@ -60,7 +60,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 </div>
               </div>
 
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1 sm:gap-2">
                 <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/inbox')} className="relative hidden sm:inline-flex">
                   <Mail className="mr-2 h-4 w-4" /> Inbox
                   {unreadCount > 0 && (
@@ -126,8 +126,8 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
         </div>
       </div>
       {mobileOpen && (
-        <div className="md:hidden border-t border-border bg-background">
-          <div className="container mx-auto px-4 py-3 flex flex-col gap-2">
+        <div className="md:hidden absolute left-0 right-0 top-full border-t border-border bg-background shadow-lg">
+          <div className="px-4 py-3 flex flex-col gap-2">
             {navLinks.filter(l => !l.requiresAuth || user).map(link => {
               const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
               return (

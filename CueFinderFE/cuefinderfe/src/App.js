@@ -262,7 +262,7 @@ function AppInner() {
       />
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex-1 bg-background flex flex-col relative overflow-hidden">
+      <div className="flex-1 bg-background flex flex-col relative overflow-hidden pt-[60px]">
         <div className="flex flex-row flex-1 relative overflow-hidden">
           {/* Mobile Sidebar Overlay */}
           {isHomePage && mobileMenuOpen && (
