@@ -12,7 +12,6 @@ import Inbox from './components/Inbox.jsx';
 import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum.jsx';
 import DesktopSidebar from './components/DesktopSidebar';
-import { HeroSearch } from './components/HeroSearch';
 import AppHeader from './components/AppHeader.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
