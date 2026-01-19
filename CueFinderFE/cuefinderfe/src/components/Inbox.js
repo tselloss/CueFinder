@@ -269,14 +269,15 @@ export default function Inbox({ onBack }) {
             </Card>
 
             {/* Reply Box */}
-            <div className="space-y-3 pt-6 border-t border-border">
-              <p className="font-bold">Reply</p>
-              <textarea
-                placeholder="Type your reply..."
+            <div className="space-y-4 pt-6 border-t border-border">
+              <MaterialInput
+                label="Reply Message"
+                type="textarea"
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
-                rows={4}
-                className="w-full px-3 py-2 border border-border rounded-md font-base focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2"
+                placeholder="Type your reply..."
+                rows={6}
+                required
               />
               <div className="flex gap-2 justify-end">
                 <Button variant="outline" onClick={() => setSelectedMessage(null)}>
