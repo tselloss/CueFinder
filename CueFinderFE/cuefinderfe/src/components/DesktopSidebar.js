@@ -1,6 +1,5 @@
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useTranslation } from 'react-i18next';
 
 export default function DesktopSidebar({
   category,
@@ -13,7 +12,6 @@ export default function DesktopSidebar({
   showForumCategories,
   setShowForumCategories
 }) {
-  const { t } = useTranslation();
   const navigate = useNavigate();
 
   return (
