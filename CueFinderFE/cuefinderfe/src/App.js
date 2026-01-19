@@ -403,7 +403,8 @@ function AppInner() {
         </button>
       )}
 
-      <AppFooter />
+      {/* Footer only shown on non-home pages */}
+      {!isHomePage && <AppFooter />}
 
       {/* Add Cue Modal */}
       {showAddModal && (

@@ -3,6 +3,7 @@ import { Grid, List as ListIcon, ImageIcon } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
+import AppFooter from './AppFooter.jsx';
 
 // Helper to get full image URL from image object
 const getImageUrl = (images) => {
@@ -268,6 +269,9 @@ export default function CueList({
           </Button>
         </div>
       </div>
+
+      {/* App Footer - appears after all listings */}
+      <AppFooter />
     </div>
   );
 }
