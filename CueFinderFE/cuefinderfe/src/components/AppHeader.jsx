@@ -79,18 +79,30 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuLabel>Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onNavigate && onNavigate('/profile')}>
+                    <DropdownMenuItem onClick={() => {
+                      setDropdownOpen(false);
+                      setMobileOpen(false);
+                      onNavigate && onNavigate('/profile');
+                    }}>
                       <UserIcon className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
                     {user.role === 'admin' && (
-                      <DropdownMenuItem onClick={() => onNavigate && onNavigate('/admin')}>
+                      <DropdownMenuItem onClick={() => {
+                        setDropdownOpen(false);
+                        setMobileOpen(false);
+                        onNavigate && onNavigate('/admin');
+                      }}>
                         <Shield className="mr-2 h-4 w-4" />
                         <span>Admin Dashboard</span>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => onLogout && onLogout()} className="text-destructive">
+                    <DropdownMenuItem onClick={() => {
+                      setDropdownOpen(false);
+                      setMobileOpen(false);
+                      onLogout && onLogout();
+                    }} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Logout</span>
                     </DropdownMenuItem>
