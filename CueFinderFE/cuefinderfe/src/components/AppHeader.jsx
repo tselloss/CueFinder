@@ -6,11 +6,24 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel,
 
 export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [dropdownOpen, setDropdownOpen] = useState(false);
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Forum', path: '/forum' },
     { label: 'Inbox', path: '/inbox', requiresAuth: true }
   ];
+
+  // Handle mobile menu toggle - close dropdown if open
+  const handleMobileToggle = () => {
+    if (dropdownOpen) setDropdownOpen(false);
+    setMobileOpen(v => !v);
+  };
+
+  // Handle dropdown toggle - close mobile menu if open
+  const handleDropdownChange = (open) => {
+    if (open && mobileOpen) setMobileOpen(false);
+    setDropdownOpen(open);
+  };
 
   return (
     <header className="w-full bg-background border-b border-border">
@@ -57,7 +70,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   )}
                 </Button>
 
-                <DropdownMenu>
+                <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
                       <UserIcon className="h-4 w-4" />
@@ -89,7 +102,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   size="sm"
                   className="md:hidden"
                   aria-label="Toggle menu"
-                  onClick={() => setMobileOpen(v => !v)}
+                  onClick={handleMobileToggle}
                 >
                   <span className="inline-block w-5 h-5">☰</span>
                 </Button>
@@ -104,7 +117,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 size="sm"
                 className="md:hidden"
                 aria-label="Toggle menu"
-                onClick={() => setMobileOpen(v => !v)}
+                onClick={handleMobileToggle}
               >
                 <span className="inline-block w-5 h-5">☰</span>
               </Button>
