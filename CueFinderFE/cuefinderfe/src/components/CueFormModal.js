@@ -262,8 +262,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
-          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6">
+        <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden min-h-0">
+          <div className="flex-1 overflow-y-auto px-6 py-4 space-y-6 min-h-[400px]">
             {/* DEBUG: Show cue value */}
             {console.log('CueFormModal - cue prop:', cue, 'showing selector:', !cue)}
             
@@ -809,25 +809,26 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                 )}
               </div>
             </div>
+          </div>
 
-            {/* Action Buttons - Fixed at bottom */}
-            <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-slate-700 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-              <button
-                type="button"
-                onClick={onClose}
-                disabled={loading}
-                className="px-6 py-2 rounded-lg bg-red-500/10 border-2 border-red-500/50 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors font-medium"
-              >
-                Cancel
-              </button>
-              <button
-                type="submit"
-                disabled={loading}
-                className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/30 font-medium"
-              >
-                {loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')}
-              </button>
-            </div>
+          {/* Action Buttons - Fixed at bottom outside scrollable area */}
+          <div className="flex-shrink-0 flex justify-end gap-3 px-6 py-4 border-t border-slate-700 bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+            <button
+              type="button"
+              onClick={onClose}
+              disabled={loading}
+              className="px-6 py-2 rounded-lg bg-red-500/10 border-2 border-red-500/50 text-red-400 hover:bg-red-500/20 disabled:opacity-50 transition-colors font-medium"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/30 font-medium"
+            >
+              {loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')}
+            </button>
+          </div>
         </form>
       </div>
     </div>
