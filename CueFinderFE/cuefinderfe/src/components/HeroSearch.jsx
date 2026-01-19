@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
-import { Search, X, SlidersHorizontal, Plus } from 'lucide-react';
+import { Search, X, Plus, ChevronDown, ChevronUp } from 'lucide-react';
 import { Button } from './ui/button';
 import { Input } from './ui/input';
 import { Card, CardContent } from './ui/card';
@@ -28,11 +28,18 @@ export function HeroSearch({
   onAddListing
 }) {
   const { t } = useTranslation();
-  const [showFilters, setShowFilters] = useState(false);
+  const [showFilters, setShowFilters] = useState(window.innerWidth > 768); // Hidden by default on mobile, visible on desktop
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
 
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth <= 768);
+    const handleResize = () => {
+      const mobile = window.innerWidth <= 768;
+      setIsMobile(mobile);
+      // On desktop, always show filters; on mobile, keep current state
+      if (!mobile) {
+        setShowFilters(true);
+      }
+    };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
@@ -100,8 +107,8 @@ export function HeroSearch({
               className="w-full"
               onClick={() => setShowFilters(!showFilters)}
             >
-              <SlidersHorizontal className="mr-2 h-5 w-5" />
-              {t('filters.title', 'Filters')}
+              {showFilters ? <ChevronUp className="mr-2 h-5 w-5" /> : <ChevronDown className="mr-2 h-5 w-5" />}
+              {showFilters ? t('filters.hide', 'Hide Filters') : t('filters.show', 'Show Filters')}
               {hasActiveFilters && (
                 <span className="ml-2 flex h-2 w-2">
                   <span className="animate-ping absolute inline-flex h-2 w-2 rounded-full bg-primary opacity-75"></span>
