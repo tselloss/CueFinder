@@ -28,21 +28,21 @@ export function HeroSearch({
   onAddListing
 }) {
   const { t } = useTranslation();
-  const [showFilters, setShowFilters] = useState(window.innerWidth > 768); // Hidden by default on mobile, visible on desktop
   const [isMobile, setIsMobile] = useState(window.innerWidth <= 768);
+  const [showFilters, setShowFilters] = useState(window.innerWidth > 768); // Hidden on mobile, visible on desktop
 
   useEffect(() => {
     const handleResize = () => {
       const mobile = window.innerWidth <= 768;
       setIsMobile(mobile);
       // On desktop, always show filters; on mobile, keep current state
-      if (!mobile) {
+      if (!mobile && !showFilters) {
         setShowFilters(true);
       }
     };
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
-  }, []);
+  }, [showFilters]);
 
   const hasActiveFilters = condition !== 'all' || sortBy !== 'newest' || 
     priceRange[0] !== PRICE_MIN_LIMIT || priceRange[1] !== PRICE_MAX_LIMIT;
@@ -99,7 +99,7 @@ export function HeroSearch({
             )}
           </div>
 
-          {/* Mobile Filter Toggle */}
+          {/* Mobile Filter Toggle - Only on mobile */}
           {isMobile && (
             <Button
               variant="outline"
@@ -118,7 +118,7 @@ export function HeroSearch({
             </Button>
           )}
 
-          {/* Filters Section */}
+          {/* Filters Section - Always visible on desktop, toggleable on mobile */}
           {(showFilters || !isMobile) && (
             <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
               {/* Condition Filter */}
