@@ -229,9 +229,11 @@ export default function CueList({
 
                   {/* Price */}
                   <div className="flex items-center justify-end flex-shrink-0">
-                    <div className="bg-primary text-white px-4 py-2 rounded-md text-center">
-                      <div className="text-sm font-medium">{currencySymbol}</div>
-                      <div className="text-2xl font-bold">{displayPrice.toFixed(0)}</div>
+                    <div className="bg-primary text-white px-3 py-2 rounded-md">
+                      <div className="flex items-baseline gap-1">
+                        <span className="text-base font-medium">{currencySymbol}</span>
+                        <span className="text-xl font-bold">{displayPrice.toFixed(0)}</span>
+                      </div>
                     </div>
                   </div>
                 </div>
