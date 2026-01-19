@@ -262,27 +262,6 @@ function AppInner() {
         currentPath={location.pathname}
       />
 
-      {/* Hero Section - New Shadcn UI Design - Only show on home page */}
-      {isHomePage && (
-        <div className="bg-gradient-to-b from-background via-background to-secondary/20">
-          <HeroSearch
-            search={search}
-            setSearch={setSearch}
-            condition={condition}
-            setCondition={setCondition}
-            sortBy={sortBy}
-            setSortBy={setSortBy}
-            priceRange={priceRange}
-            setPriceRange={setPriceRange}
-            PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
-            PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
-            currencySymbol={currencySymbol}
-            user={user}
-            onAddListing={handleAdd}
-          />
-        </div>
-      )}
-
       {/* Main Content Area with Sidebar */}
       <div className="flex-1 bg-background flex flex-col relative overflow-hidden">
         <div className="flex flex-row flex-1 relative overflow-hidden">
@@ -344,6 +323,14 @@ function AppInner() {
                   cueType={cueType}
                   sortBy={sortBy}
                   priceRange={priceRange}
+                  search={search}
+                  setSearch={setSearch}
+                  setCondition={setCondition}
+                  setSortBy={setSortBy}
+                  setPriceRange={setPriceRange}
+                  PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+                  PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+                  user={user}
                 />
               } />
               

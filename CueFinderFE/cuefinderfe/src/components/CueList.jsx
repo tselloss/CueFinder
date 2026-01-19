@@ -3,6 +3,7 @@ import { Grid, List as ListIcon, ImageIcon } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
+import { HeroSearch } from './HeroSearch';
 import AppFooter from './AppFooter.jsx';
 
 // Helper to get full image URL from image object
@@ -65,7 +66,15 @@ export default function CueList({
   condition, 
   cueType, 
   sortBy, 
-  priceRange 
+  priceRange,
+  search,
+  setSearch,
+  setCondition,
+  setSortBy,
+  setPriceRange,
+  PRICE_MIN_LIMIT,
+  PRICE_MAX_LIMIT,
+  user
 }) {
   const currencySymbol = '€';
 
@@ -124,7 +133,28 @@ export default function CueList({
   }
 
   return (
-    <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
+    <div className="w-full relative z-10">
+      {/* Hero Section - Now part of scrolling content */}
+      <div className="bg-gradient-to-b from-background via-background to-secondary/20 py-4 sm:py-6 px-2 sm:px-4 md:px-6">
+        <HeroSearch
+          search={search}
+          setSearch={setSearch}
+          condition={condition}
+          setCondition={setCondition}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+          PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
+          currencySymbol={currencySymbol}
+          user={user}
+          onAddListing={onAdd}
+        />
+      </div>
+
+      {/* Listings Content */}
+      <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
       {/* Grid View */}
       {viewMode === 'grid' && (
         <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-8">
@@ -274,6 +304,7 @@ export default function CueList({
 
       {/* App Footer - appears after all listings */}
       <AppFooter />
+      </div>
     </div>
   );
 }
