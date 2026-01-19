@@ -305,15 +305,15 @@ export default function UserProfile({ onBack }) {
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
                       placeholder="+1234567890"
                     />
-                    <div className="flex items-start space-x-2">
+                    <div className="flex items-center space-x-3 mt-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       <input
                         type="checkbox"
                         id="hidePhone"
                         checked={profile.hidePhone}
                         onChange={(e) => handleProfileChange('hidePhone', e.target.checked)}
-                        className="h-4 w-4 rounded border-input mt-0.5 flex-shrink-0"
+                        className="h-5 w-5 rounded border-2 border-input checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer transition-all"
                       />
-                      <label htmlFor="hidePhone" className="text-xs md:text-sm text-muted-foreground leading-tight">
+                      <label htmlFor="hidePhone" className="text-sm font-medium text-foreground cursor-pointer select-none flex-1">
                         Hide phone number from public listings
                       </label>
                     </div>
