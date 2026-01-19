@@ -70,13 +70,13 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   )}
                 </Button>
 
-                <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange}>
+                <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange} modal={true}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm">
                       <UserIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
+                  <DropdownMenuContent align="end" className="w-56 z-[60]">
                     <DropdownMenuLabel>Account</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
