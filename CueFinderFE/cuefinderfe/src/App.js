@@ -242,7 +242,7 @@ function AppInner() {
 
 
   return (
-    <div className="w-full h-screen bg-background flex flex-col">
+    <div className="w-full min-h-screen bg-background flex flex-col">
       <style>{`
         @keyframes pulse {
           0%, 100% { opacity: 1; }
@@ -262,8 +262,8 @@ function AppInner() {
       />
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex-1 bg-background flex flex-col relative overflow-hidden pt-[60px]">
-        <div className="flex flex-row flex-1 relative overflow-hidden">
+      <div className="flex-1 bg-background flex flex-col relative pt-[60px]">
+        <div className="flex flex-row flex-1 relative">
           {/* Mobile Sidebar Overlay */}
           {isHomePage && mobileMenuOpen && (
             <div 
@@ -302,7 +302,7 @@ function AppInner() {
 
           {/* Main Content */}
           <div 
-            className="flex-1 main-content-wrapper overflow-x-hidden overflow-y-auto relative"
+            className="flex-1 main-content-wrapper overflow-x-hidden relative"
             style={{ 
               maxWidth: isHomePage && sidebarOpen ? 'none' : '1400px',
               margin: isHomePage && sidebarOpen ? '0' : '0 auto'
@@ -389,8 +389,8 @@ function AppInner() {
         </button>
       )}
 
-      {/* Footer only shown on non-home pages */}
-      {!isHomePage && <AppFooter />}
+      {/* App Footer - shown on all pages */}
+      <AppFooter />
 
       {/* Add Cue Modal */}
       {showAddModal && (
