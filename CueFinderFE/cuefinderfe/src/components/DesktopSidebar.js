@@ -27,18 +27,18 @@ export default function DesktopSidebar({
       }}
     >
       {/* Sidebar Header */}
-      <div className="flex flex-row justify-between items-center pb-2 border-b border-blue-500/20">
+      <div className="flex flex-row justify-between items-center pb-3 border-b border-blue-500/20">
         <div className="flex flex-row gap-2 items-center">
           <div 
-            className="bg-gradient-to-br from-blue-500 to-blue-700 p-1 rounded-md"
+            className="bg-gradient-to-br from-blue-500 to-blue-700 p-1.5 rounded-md"
             style={{ 
               boxShadow: '0 4px 12px rgba(59, 130, 246, 0.3)'
             }}
           >
-            <span className="text-base leading-none">📋</span>
+            <span className="text-lg leading-none">📋</span>
           </div>
-          <h3 className="text-lg font-bold text-slate-100" style={{ letterSpacing: '-0.02em' }}>
-            {t('categories.all')}
+          <h3 className="text-xl font-bold text-slate-100" style={{ letterSpacing: '-0.02em' }}>
+            All Items
           </h3>
         </div>
         {/* Close button for mobile */}
@@ -53,50 +53,45 @@ export default function DesktopSidebar({
         </button>
       </div>
       
-      {/* Category Buttons */}
-      <div className="gap-1 mt-2 flex flex-col">
+      {/* Main Category Buttons */}
+      <div className="gap-1.5 mt-1 flex flex-col">
         <button
           data-testid="sidebar-category-all"
           onClick={() => {
             setCategory('all');
             setMobileMenuOpen(false);
           }}
-          className="w-full flex flex-row gap-4 items-center justify-start text-left p-3.5 rounded-lg transition-all duration-200 text-left"
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
             background: category === 'all' 
               ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
+              : 'rgba(30, 41, 59, 0.6)',
             color: category === 'all' ? 'white' : '#cbd5e1',
             border: category === 'all' 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: category === 'all' ? 'translateX(4px)' : 'translateX(0)',
+              ? '1px solid rgba(59, 130, 246, 0.5)' 
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: category === 'all' ? 'translateX(2px)' : 'translateX(0)',
             boxShadow: category === 'all' 
-              ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+              ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)' 
               : 'none'
           }}
           onMouseEnter={(e) => {
             if (category !== 'all') {
               e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
             }
           }}
           onMouseLeave={(e) => {
             if (category !== 'all') {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <span className="text-2xl leading-none">🎱</span>
-          <div className="flex flex-col">
-            <span className={`text-base leading-snug ${category === 'all' ? 'font-bold' : 'font-medium'}`}>
-              {t('categories.all')}
-            </span>
-            {category === 'all' && (
-              <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Browse everything
-              </span>
-            )}
-          </div>
+          <span className="text-xl leading-none">🎱</span>
+          <span className={`text-sm ${category === 'all' ? 'font-semibold' : 'font-medium'}`}>
+            All Items
+          </span>
         </button>
         
         <button
@@ -104,38 +99,40 @@ export default function DesktopSidebar({
           onClick={() => {
             setCategory('cues');
           }}
-          className="w-full flex flex-row gap-4 items-center justify-start text-left p-3.5 rounded-lg transition-all duration-200"
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
             background: category === 'cues' 
               ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
+              : 'rgba(30, 41, 59, 0.6)',
             color: category === 'cues' ? 'white' : '#cbd5e1',
             border: category === 'cues' 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: category === 'cues' ? 'translateX(4px)' : 'translateX(0)',
+              ? '1px solid rgba(59, 130, 246, 0.5)' 
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: category === 'cues' ? 'translateX(2px)' : 'translateX(0)',
             boxShadow: category === 'cues' 
-              ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+              ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)' 
               : 'none'
           }}
           onMouseEnter={(e) => {
             if (category !== 'cues') {
               e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
             }
           }}
           onMouseLeave={(e) => {
             if (category !== 'cues') {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <span className="text-2xl leading-none">🎯</span>
+          <span className="text-xl leading-none">🎯</span>
           <div className="flex flex-col">
-            <span className={`text-base leading-snug ${category === 'cues' ? 'font-bold' : 'font-medium'}`}>
-              {t('categories.cues')}
+            <span className={`text-sm ${category === 'cues' ? 'font-semibold' : 'font-medium'}`}>
+              Cues
             </span>
             {category === 'cues' && (
-              <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
+              <span className="text-xs leading-none opacity-70">
                 Pool & snooker cues
               </span>
             )}
@@ -148,42 +145,37 @@ export default function DesktopSidebar({
             setCategory('cases');
             setMobileMenuOpen(false);
           }}
-          className="w-full flex flex-row gap-4 items-center justify-start text-left p-3.5 rounded-lg transition-all duration-200"
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
             background: category === 'cases' 
               ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
+              : 'rgba(30, 41, 59, 0.6)',
             color: category === 'cases' ? 'white' : '#cbd5e1',
             border: category === 'cases' 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: category === 'cases' ? 'translateX(4px)' : 'translateX(0)',
+              ? '1px solid rgba(59, 130, 246, 0.5)' 
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: category === 'cases' ? 'translateX(2px)' : 'translateX(0)',
             boxShadow: category === 'cases' 
-              ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+              ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)' 
               : 'none'
           }}
           onMouseEnter={(e) => {
             if (category !== 'cases') {
               e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
             }
           }}
           onMouseLeave={(e) => {
             if (category !== 'cases') {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <span className="text-2xl leading-none">💼</span>
-          <div className="flex flex-col">
-            <span className={`text-base leading-snug ${category === 'cases' ? 'font-bold' : 'font-medium'}`}>
-              {t('categories.cases')}
-            </span>
-            {category === 'cases' && (
-              <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Protective cases
-              </span>
-            )}
-          </div>
+          <span className="text-xl leading-none">💼</span>
+          <span className={`text-sm ${category === 'cases' ? 'font-semibold' : 'font-medium'}`}>
+            Cases
+          </span>
         </button>
 
         <button
@@ -192,42 +184,37 @@ export default function DesktopSidebar({
             setCategory('tables');
             setMobileMenuOpen(false);
           }}
-          className="w-full flex flex-row gap-4 items-center justify-start text-left p-3.5 rounded-lg transition-all duration-200"
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
             background: category === 'tables' 
               ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
+              : 'rgba(30, 41, 59, 0.6)',
             color: category === 'tables' ? 'white' : '#cbd5e1',
             border: category === 'tables' 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: category === 'tables' ? 'translateX(4px)' : 'translateX(0)',
+              ? '1px solid rgba(59, 130, 246, 0.5)' 
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: category === 'tables' ? 'translateX(2px)' : 'translateX(0)',
             boxShadow: category === 'tables' 
-              ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+              ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)' 
               : 'none'
           }}
           onMouseEnter={(e) => {
             if (category !== 'tables') {
               e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
             }
           }}
           onMouseLeave={(e) => {
             if (category !== 'tables') {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <span className="text-2xl leading-none">🪑</span>
-          <div className="flex flex-col">
-            <span className={`text-base leading-snug ${category === 'tables' ? 'font-bold' : 'font-medium'}`}>
-              Billiard Tables
-            </span>
-            {category === 'tables' && (
-              <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Pool & billiard tables
-              </span>
-            )}
-          </div>
+          <span className="text-xl leading-none">🪑</span>
+          <span className={`text-sm ${category === 'tables' ? 'font-semibold' : 'font-medium'}`}>
+            Billiard Tables
+          </span>
         </button>
 
         <button
@@ -236,112 +223,89 @@ export default function DesktopSidebar({
             setCategory('accessories');
             setMobileMenuOpen(false);
           }}
-          className="w-full flex flex-row gap-4 items-center justify-start text-left p-3.5 rounded-lg transition-all duration-200"
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
             background: category === 'accessories' 
               ? 'linear-gradient(135deg, #3b82f6 0%, #2563eb 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
+              : 'rgba(30, 41, 59, 0.6)',
             color: category === 'accessories' ? 'white' : '#cbd5e1',
             border: category === 'accessories' 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: category === 'accessories' ? 'translateX(4px)' : 'translateX(0)',
+              ? '1px solid rgba(59, 130, 246, 0.5)' 
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: category === 'accessories' ? 'translateX(2px)' : 'translateX(0)',
             boxShadow: category === 'accessories' 
-              ? '0 8px 20px rgba(59, 130, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
+              ? '0 4px 12px rgba(59, 130, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)' 
               : 'none'
           }}
           onMouseEnter={(e) => {
             if (category !== 'accessories') {
               e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
             }
           }}
           onMouseLeave={(e) => {
             if (category !== 'accessories') {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
             }
           }}
         >
-          <span className="text-2xl leading-none">🛠️</span>
-          <div className="flex flex-col">
-            <span className={`text-base leading-snug ${category === 'accessories' ? 'font-bold' : 'font-medium'}`}>
-              Accessories
-            </span>
-            {category === 'accessories' && (
-              <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                Billiard accessories
-              </span>
-            )}
-          </div>
+          <span className="text-xl leading-none">🛠️</span>
+          <span className={`text-sm ${category === 'accessories' ? 'font-semibold' : 'font-medium'}`}>
+            Accessories
+          </span>
         </button>
       </div>
 
-      {/* Forum Section */}
-      <div className="gap-1 mt-4 pt-4 border-t border-blue-500/20 flex flex-col">
-        <div className="flex flex-row gap-2 items-center px-2 pb-1">
-          <span className="text-xs font-semibold uppercase" style={{ color: '#94a3b8', letterSpacing: '0.05em' }}>
-            Community
+      {/* Community Section */}
+      <div className="gap-1.5 mt-3 pt-3 border-t border-blue-500/20 flex flex-col">
+        <div className="flex flex-row gap-2 items-center px-1 pb-1.5">
+          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+            COMMUNITY
           </span>
         </div>
         <button
           data-testid="sidebar-forum"
           onClick={(e) => {
             e.stopPropagation();
+            navigate('/forum');
             setShowForumCategories(!showForumCategories);
             setMobileMenuOpen(false);
           }}
-          className="w-full flex flex-row justify-between items-center text-left p-3.5 rounded-lg transition-all duration-200"
+          className="w-full flex flex-row justify-between items-center text-left p-3 rounded-lg transition-all duration-200"
           style={{
-            background: showForumCategories 
-              ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)' 
-              : 'rgba(30, 41, 59, 0.5)',
-            color: showForumCategories ? 'white' : '#cbd5e1',
-            border: showForumCategories 
-              ? '2px solid transparent' 
-              : '2px solid rgba(51, 65, 85, 0.5)',
-            transform: showForumCategories ? 'translateX(4px)' : 'translateX(0)',
-            boxShadow: showForumCategories 
-              ? '0 8px 20px rgba(139, 92, 246, 0.3), inset 0 0 20px rgba(255, 255, 255, 0.1)' 
-              : 'none'
+            background: 'rgba(30, 41, 59, 0.6)',
+            color: '#cbd5e1',
+            border: '1px solid rgba(51, 65, 85, 0.4)',
           }}
           onMouseEnter={(e) => {
-            if (!showForumCategories) {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
-            }
+            e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+            e.currentTarget.style.transform = 'translateX(2px)';
           }}
           onMouseLeave={(e) => {
-            if (!showForumCategories) {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
-            }
+            e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+            e.currentTarget.style.transform = 'translateX(0)';
           }}
         >
-          <div className="flex flex-row gap-4 items-center">
-            <span className="text-2xl leading-none">💬</span>
-            <div className="flex flex-col">
-              <span className={`text-base leading-snug ${showForumCategories ? 'font-bold' : 'font-medium'}`}>
-                Forum
-              </span>
-              {showForumCategories && (
-                <span className="text-xs leading-none" style={{ color: 'rgba(255, 255, 255, 0.7)' }}>
-                  Select category
-                </span>
-              )}
-            </div>
+          <div className="flex flex-row gap-3 items-center">
+            <span className="text-xl leading-none">💬</span>
+            <span className="text-sm font-medium">
+              Forum
+            </span>
           </div>
           {forumCategories.length > 0 && (
-            <div onClick={(e) => e.stopPropagation()}>
-              <span 
-                style={{ 
-                  transform: showForumCategories ? 'rotate(180deg)' : 'rotate(0)', 
-                  transition: 'transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1)',
-                  display: 'flex',
-                  alignItems: 'center',
-                  color: '#a78bfa',
-                  fontWeight: 700
-                }}
-              >
-                ▼
-              </span>
-            </div>
+            <span 
+              style={{ 
+                transform: showForumCategories ? 'rotate(180deg)' : 'rotate(0)', 
+                transition: 'transform 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                color: '#94a3b8',
+                fontSize: '12px'
+              }}
+            >
+              ▼
+            </span>
           )}
         </button>
 
@@ -426,15 +390,12 @@ export default function DesktopSidebar({
 
       {/* Cue Type Sub-filters - Only show when Cues category is selected */}
       {category === 'cues' && (
-        <div 
-          className="gap-0.5 mt-2 ml-2 pl-2 border-l-2 flex flex-col"
-          style={{ 
-            borderColor: 'rgba(59, 130, 246, 0.3)'
-          }}
-        >
-          <span className="text-xs font-semibold uppercase" style={{ color: '#94a3b8', letterSpacing: '0.05em', marginBottom: '4px' }}>
-            Cue Type
-          </span>
+        <div className="gap-1.5 mt-3 pt-3 border-t border-blue-500/20 flex flex-col">
+          <div className="flex flex-row gap-2 items-center px-1 pb-1.5">
+            <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+              CUE TYPE
+            </span>
+          </div>
           
           <button
             data-testid="cue-type-all"
@@ -442,19 +403,25 @@ export default function DesktopSidebar({
               setCueType('all');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex flex-row items-center justify-start text-left px-3 py-2 rounded-lg text-sm transition-all"
+            className="w-full flex flex-row items-center justify-start text-left px-3 py-2.5 rounded-lg text-sm transition-all"
             style={{
               background: cueType === 'all' 
-                ? 'rgba(59, 130, 246, 0.3)' 
+                ? 'rgba(59, 130, 246, 0.25)' 
                 : 'transparent',
               color: cueType === 'all' ? '#60a5fa' : '#94a3b8',
               border: 'none',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              if (cueType !== 'all') {
+                e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+                e.currentTarget.style.color = '#cbd5e1';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = cueType === 'all' ? 'rgba(59, 130, 246, 0.3)' : 'transparent';
+              if (cueType !== 'all') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#94a3b8';
+              }
             }}
           >
             <span className={cueType === 'all' ? 'font-semibold' : 'font-normal'}>
@@ -468,22 +435,28 @@ export default function DesktopSidebar({
               setCueType('playing');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex flex-row gap-2 items-center justify-start text-left px-3 py-2 rounded-lg text-sm transition-all"
+            className="w-full flex flex-row gap-2.5 items-center justify-start text-left px-3 py-2.5 rounded-lg text-sm transition-all"
             style={{
               background: cueType === 'playing' 
-                ? 'rgba(59, 130, 246, 0.3)' 
+                ? 'rgba(59, 130, 246, 0.25)' 
                 : 'transparent',
               color: cueType === 'playing' ? '#60a5fa' : '#94a3b8',
               border: 'none',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              if (cueType !== 'playing') {
+                e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+                e.currentTarget.style.color = '#cbd5e1';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = cueType === 'playing' ? 'rgba(59, 130, 246, 0.3)' : 'transparent';
+              if (cueType !== 'playing') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#94a3b8';
+              }
             }}
           >
-            <span>🎯</span>
+            <span className="text-base">🎯</span>
             <span className={cueType === 'playing' ? 'font-semibold' : 'font-normal'}>
               Playing Cue
             </span>
@@ -495,22 +468,28 @@ export default function DesktopSidebar({
               setCueType('break');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex flex-row gap-2 items-center justify-start text-left px-3 py-2 rounded-lg text-sm transition-all"
+            className="w-full flex flex-row gap-2.5 items-center justify-start text-left px-3 py-2.5 rounded-lg text-sm transition-all"
             style={{
               background: cueType === 'break' 
-                ? 'rgba(59, 130, 246, 0.3)' 
+                ? 'rgba(59, 130, 246, 0.25)' 
                 : 'transparent',
               color: cueType === 'break' ? '#60a5fa' : '#94a3b8',
               border: 'none',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              if (cueType !== 'break') {
+                e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+                e.currentTarget.style.color = '#cbd5e1';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = cueType === 'break' ? 'rgba(59, 130, 246, 0.3)' : 'transparent';
+              if (cueType !== 'break') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#94a3b8';
+              }
             }}
           >
-            <span>💥</span>
+            <span className="text-base">💥</span>
             <span className={cueType === 'break' ? 'font-semibold' : 'font-normal'}>
               Break Cue
             </span>
@@ -522,22 +501,28 @@ export default function DesktopSidebar({
               setCueType('jump');
               setMobileMenuOpen(false);
             }}
-            className="w-full flex flex-row gap-2 items-center justify-start text-left px-3 py-2 rounded-lg text-sm transition-all"
+            className="w-full flex flex-row gap-2.5 items-center justify-start text-left px-3 py-2.5 rounded-lg text-sm transition-all"
             style={{
               background: cueType === 'jump' 
-                ? 'rgba(59, 130, 246, 0.3)' 
+                ? 'rgba(59, 130, 246, 0.25)' 
                 : 'transparent',
               color: cueType === 'jump' ? '#60a5fa' : '#94a3b8',
               border: 'none',
             }}
             onMouseEnter={(e) => {
-              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+              if (cueType !== 'jump') {
+                e.currentTarget.style.background = 'rgba(30, 41, 59, 0.5)';
+                e.currentTarget.style.color = '#cbd5e1';
+              }
             }}
             onMouseLeave={(e) => {
-              e.currentTarget.style.background = cueType === 'jump' ? 'rgba(59, 130, 246, 0.3)' : 'transparent';
+              if (cueType !== 'jump') {
+                e.currentTarget.style.background = 'transparent';
+                e.currentTarget.style.color = '#94a3b8';
+              }
             }}
           >
-            <span>🚀</span>
+            <span className="text-base">🚀</span>
             <span className={cueType === 'jump' ? 'font-semibold' : 'font-normal'}>
               Jump Cue
             </span>
