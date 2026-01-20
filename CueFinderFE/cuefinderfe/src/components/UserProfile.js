@@ -130,7 +130,7 @@ export default function UserProfile({ onBack }) {
 
   return (
     <div className="w-full bg-background p-6 lg:p-8">
-      <div className="flex items-center gap-4 mb-8">
+      <div className="flex items-center gap-4 mb-12 pb-6">
         <Button
           onClick={onBack}
           variant="outline"
