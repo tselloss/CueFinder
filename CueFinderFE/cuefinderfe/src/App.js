@@ -259,6 +259,7 @@ function AppInner() {
         onNavigate={(path) => navigate(path)}
         onLogout={handleLogout}
         currentPath={location.pathname}
+        onMobileMenuToggle={() => setMobileMenuOpen(v => !v)}
       />
 
       {/* Main Content Area with Sidebar */}

@@ -4,7 +4,7 @@ import { Badge } from './ui/badge.jsx';
 import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu.jsx';
 
-export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
+export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/', onMobileMenuToggle }) {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const navLinks = [
@@ -17,6 +17,10 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
   const handleMobileToggle = () => {
     if (dropdownOpen) setDropdownOpen(false);
     setMobileOpen(v => !v);
+    // Also toggle parent-controlled sidebar/menu if provided (home page case)
+    if (typeof onMobileMenuToggle === 'function') {
+      onMobileMenuToggle();
+    }
   };
 
   // Handle dropdown toggle - close mobile menu if open
