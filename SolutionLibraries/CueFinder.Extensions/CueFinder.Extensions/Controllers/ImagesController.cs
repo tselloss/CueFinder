@@ -1,11 +1,13 @@
 using CueFinder.Database.Models;
-using CueFinder.Extensions.Controllers;
+using CueFinder.Extensions.Images;
+using CueFinder.Auth.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Security.Claims;
 
-namespace CueFinder.Extensions.Images;
+namespace CueFinder.Extensions.Controllers;
 
 /// <summary>
 /// API controller for image upload and management.
@@ -118,7 +120,7 @@ public class ImagesController : ControllerBase
                     message = "Some files failed to upload",
                     successful = responses.Count(r => r.Success),
                     failed = failedUploads.Count,
-                    errors = failedUploads.Select(r => r.ErrorMessage).ToList()
+                    errors = failedUploads.Select(r => r.ErrorMessage ?? "Unknown error").ToList()
                 });
             }
 
