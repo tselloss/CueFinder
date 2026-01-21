@@ -13,13 +13,19 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
     { label: 'Inbox', path: '/inbox', requiresAuth: true }
   ];
 
-  // Handle mobile menu toggle
+  // Handle mobile menu toggle - close dropdown when opening mobile menu
   const handleMobileToggle = () => {
+    if (!mobileNavOpen) {
+      setDropdownOpen(false); // Close dropdown when opening mobile nav
+    }
     setMobileNavOpen(v => !v);
   };
 
-  // Handle dropdown toggle
+  // Handle dropdown toggle - close mobile menu when opening dropdown
   const handleDropdownChange = (open) => {
+    if (open) {
+      setMobileNavOpen(false); // Close mobile nav when opening dropdown
+    }
     setDropdownOpen(open);
   };
 
@@ -48,9 +54,9 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
         <div className="flex items-center gap-2">
           {user ? (
             <>
-              <div className="hidden sm:flex items-center gap-2 rounded-md border border-primary/40 bg-background/60 backdrop-blur px-2 py-1">
-                <span className="text-xl">{user.avatar || '👤'}</span>
-                <div className="min-w-0">
+              <div className="hidden sm:flex items-center gap-2 rounded-md border border-primary/40 bg-background/60 backdrop-blur px-2 py-1 min-w-0">
+                <span className="text-xl flex-shrink-0">{user.avatar || '👤'}</span>
+                <div className="min-w-0 max-w-[120px] lg:max-w-[200px]">
                   <div className="text-sm font-semibold truncate">{user.name}</div>
                   {user.role === 'admin' && (
                     <div className="text-xs text-primary font-medium leading-none">Admin</div>
@@ -60,7 +66,11 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
 
               <div className="flex items-center gap-1 sm:gap-2">
                 {/* Desktop Inbox Button */}
-                <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/inbox')} className="relative hidden sm:inline-flex">
+                <Button variant="default" size="sm" onClick={() => {
+                  onNavigate && onNavigate('/inbox');
+                  setDropdownOpen(false);
+                  setMobileNavOpen(false);
+                }} className="relative hidden sm:inline-flex">
                   <Mail className="mr-2 h-4 w-4" /> Inbox
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 rounded-full unread-badge">
@@ -73,7 +83,11 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 <Button 
                   variant="outline" 
                   size="sm"
-                  onClick={() => onNavigate && onNavigate('/inbox')} 
+                  onClick={() => {
+                    onNavigate && onNavigate('/inbox');
+                    setDropdownOpen(false);
+                    setMobileNavOpen(false);
+                  }} 
                   className="sm:hidden relative"
                   title={unreadCount > 0 ? `${unreadCount} unread messages` : 'Inbox'}
                 >
@@ -87,7 +101,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
 
                 <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange} modal={true}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm">
+                    <Button variant="outline" size="sm" className="flex-shrink-0">
                       <UserIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
@@ -124,33 +138,46 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 <Button
                   variant="ghost"
                   size="sm"
-                  className="md:hidden"
+                  className="md:hidden flex-shrink-0"
                   aria-label="Toggle menu"
                   onClick={handleMobileToggle}
                 >
-                  <span className="inline-block w-5 h-5">☰</span>
+                  <span className="inline-block w-5 h-5">{mobileNavOpen ? '✕' : '☰'}</span>
                 </Button>
               </div>
             </>
           ) : (
             <>
-              <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/login')}>Sign In</Button>
-              <Button variant="outline" size="sm" onClick={() => onNavigate && onNavigate('/register')}>Register</Button>
+              <Button variant="default" size="sm" onClick={() => {
+                onNavigate && onNavigate('/login');
+                setMobileNavOpen(false);
+              }} className="hidden sm:inline-flex">Sign In</Button>
+              <Button variant="outline" size="sm" onClick={() => {
+                onNavigate && onNavigate('/register');
+                setMobileNavOpen(false);
+              }} className="hidden sm:inline-flex">Register</Button>
+              
+              {/* Mobile Sign In/Register */}
+              <Button variant="default" size="sm" onClick={() => {
+                onNavigate && onNavigate('/login');
+                setMobileNavOpen(false);
+              }} className="sm:hidden">Sign In</Button>
+              
               <Button
                 variant="ghost"
                 size="sm"
-                className="md:hidden"
+                className="md:hidden flex-shrink-0"
                 aria-label="Toggle menu"
                 onClick={handleMobileToggle}
               >
-                <span className="inline-block w-5 h-5">☰</span>
+                <span className="inline-block w-5 h-5">{mobileNavOpen ? '✕' : '☰'}</span>
               </Button>
             </>
           )}
         </div>
       </div>
       {mobileNavOpen && (
-        <div className="md:hidden absolute left-0 right-0 top-full border-t border-border bg-background shadow-lg">
+        <div className="md:hidden absolute left-0 right-0 top-full border-t border-border bg-background shadow-lg animate-in slide-in-from-top-2 duration-200">
           <div className="px-4 py-3 flex flex-col gap-2">
             {navLinks.filter(l => !l.requiresAuth || user).map(link => {
               const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));
@@ -164,6 +191,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     setMobileNavOpen(false);
                   }}
                   aria-current={active ? 'page' : undefined}
+                  className="justify-start"
                 >
                   {link.label}
                 </Button>
