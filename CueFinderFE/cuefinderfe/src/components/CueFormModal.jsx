@@ -738,7 +738,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
             </Card>
 
             {/* Action Buttons */}
-            <div className="flex flex-col-reverse sm:flex-row gap-2 pt-2 sticky bottom-0 bg-card border-t border-border -mx-3 sm:-mx-4 px-3 sm:px-4 py-3">
+            <div className="flex flex-col-reverse sm:flex-row gap-2 pt-4 border-t border-border px-1 sm:px-0">
               <Button
                 type="button"
                 variant="outline"
