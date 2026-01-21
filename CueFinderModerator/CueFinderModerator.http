@@ -1,0 +1,6 @@
+@CueFinderModerator_HostAddress = http://localhost:5195
+
+GET {{CueFinderModerator_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
