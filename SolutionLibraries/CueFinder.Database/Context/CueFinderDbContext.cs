@@ -23,6 +23,9 @@ namespace CueFinder.Database.Context
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
         public DbSet<Transaction> Transactions { get; set; } = null!;
         public DbSet<PhoneVerificationToken> PhoneVerificationTokens { get; set; } = null!;
+        public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
+        public DbSet<ModerationQueue> ModerationQueues { get; set; } = null!;
+        public DbSet<UserReport> UserReports { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -466,6 +469,117 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => new { e.CueCaseId, e.IsPrimary })
                     .HasDatabaseName("IX_CueCaseImage_Primary");
+            });
+
+            // FlaggedImage entity configuration
+            modelBuilder.Entity<FlaggedImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ImageHash)
+                    .IsRequired()
+                    .HasMaxLength(256);
+
+                entity.Property(e => e.FileName)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.StoragePath)
+                    .IsRequired()
+                    .HasMaxLength(1000);
+
+                entity.Property(e => e.FlagReason)
+                    .HasMaxLength(50)
+                    .HasDefaultValue("other");
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("pending");
+
+                entity.Property(e => e.FlaggedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.AdminUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.AdminUserId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.ImageHash)
+                    .HasDatabaseName("IX_FlaggedImage_Hash");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_FlaggedImage_Status");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_FlaggedImage_UserId");
+
+                entity.HasIndex(e => new { e.CueId, e.Status })
+                    .HasDatabaseName("IX_FlaggedImage_CueStatus");
+
+                entity.HasIndex(e => new { e.CueCaseId, e.Status })
+                    .HasDatabaseName("IX_FlaggedImage_CasesStatus");
+            });
+
+            // ModerationQueue entity configuration
+            modelBuilder.Entity<ModerationQueue>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Priority)
+                    .HasDefaultValue(2);
+
+                entity.Property(e => e.AddedToQueueAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasOne(e => e.FlaggedImage)
+                    .WithMany()
+                    .HasForeignKey(e => e.FlaggedImageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.ReviewingAdmin)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReviewingAdminId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasIndex(e => e.Priority)
+                    .HasDatabaseName("IX_ModerationQueue_Priority");
+
+                entity.HasIndex(e => e.IsBeingReviewed)
+                    .HasDatabaseName("IX_ModerationQueue_BeingReviewed");
+            });
+
+            // UserReport entity configuration
+            modelBuilder.Entity<UserReport>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ReportReason)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.ReportedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasOne(e => e.ReportingUser)
+                    .WithMany()
+                    .HasForeignKey(e => e.ReportingUserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.FlaggedImage)
+                    .WithMany()
+                    .HasForeignKey(e => e.FlaggedImageId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.ReportingUserId)
+                    .HasDatabaseName("IX_UserReport_ReportingUserId");
+
+                entity.HasIndex(e => e.FlaggedImageId)
+                    .HasDatabaseName("IX_UserReport_FlaggedImageId");
             });
         }
     }
