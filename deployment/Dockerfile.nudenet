@@ -6,16 +6,22 @@ WORKDIR /app
 RUN apt-get update && apt-get install -y \
     gcc \
     python3-dev \
+    libxcb1 \
+    libxkbcommon0 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements
-COPY nudenet_requirements.txt .
+COPY deployment/nudenet_requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r nudenet_requirements.txt
 
 # Copy service code
-COPY nudenet_service.py .
+COPY deployment/nudenet_service.py .
 
 # Expose port
 EXPOSE 8000
