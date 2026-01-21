@@ -1,4 +1,6 @@
+using CueFinder.Auth.Extensions;
 using CueFinder.Database.Models;
+using CueFinder.Extensions.Images;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -117,7 +119,7 @@ public class ImagesController : ControllerBase
                     message = "Some files failed to upload",
                     successful = responses.Count(r => r.Success),
                     failed = failedUploads.Count,
-                    errors = failedUploads.Select(r => r.ErrorMessage).ToList()
+                    errors = failedUploads.Select(r => r.ErrorMessage!).ToList()
                 });
             }
 
