@@ -45,6 +45,12 @@ namespace CueFinder.Forum.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsLocked")
                         .HasColumnType("boolean");
 
@@ -53,6 +59,19 @@ namespace CueFinder.Forum.Migrations
 
                     b.Property<DateTime?>("LastReplyAt")
                         .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("ModeratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
@@ -252,14 +271,33 @@ namespace CueFinder.Forum.Migrations
                     b.Property<Guid>("DiscussionId")
                         .HasColumnType("uuid");
 
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
                     b.Property<int>("HelpfulCount")
                         .HasColumnType("integer");
 
                     b.Property<bool>("IsEdited")
                         .HasColumnType("boolean");
 
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean");
+
                     b.Property<int>("LikeCount")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid?>("ModeratedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime>("ModifiedAt")
                         .HasColumnType("timestamp without time zone");
