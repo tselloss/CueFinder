@@ -55,7 +55,9 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.Forum", "CueFinde
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum", "..\SolutionLibraries\CueFinder.Forum\CueFinder.Forum.csproj", "{58CE5F44-CA54-4C4C-ACE2-D106FF053A7C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.Forum.Tests", "..\tests\UnitTests\CueFinder.Forum.Tests\CueFinder.Forum.Tests.csproj", "{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum.Tests", "..\tests\UnitTests\CueFinder.Forum.Tests\CueFinder.Forum.Tests.csproj", "{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinderModerator", "..\CueFinderModerator\CueFinderModerator.csproj", "{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -131,6 +133,10 @@ Global
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

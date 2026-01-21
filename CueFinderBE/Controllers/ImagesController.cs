@@ -1,11 +1,10 @@
 using CueFinder.Database.Models;
-using CueFinder.Extensions.Controllers;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 
-namespace CueFinder.Extensions.Images;
+namespace CueFinderBE.Controllers;
 
 /// <summary>
 /// API controller for image upload and management.

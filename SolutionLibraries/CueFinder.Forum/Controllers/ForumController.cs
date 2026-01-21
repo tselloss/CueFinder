@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 using CueFinder.Forum.Data;
 using CueFinder.Forum.Models;
 using CueFinder.Database.Context;
@@ -7,7 +8,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 
-namespace CueFinderBE.Controllers;
+namespace CueFinder.Forum.Controllers;
 
 [ApiController]
 [Route("api/forum")]
