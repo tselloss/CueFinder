@@ -5,6 +5,7 @@ using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Images;
 using CueFinder.Extensions.ProblemDetails;
+using CueFinder.Extensions.Moderation;
 using CueFinder.Messages.Extensions;
 using CueFinder.Messages.Hubs;
 using CueFinder.Forum.Extensions;
@@ -39,6 +40,9 @@ builder.Services.AddCueFinderCaching(builder.Configuration);
 
 // Add image upload/storage services
 builder.Services.AddCueFinderImageServices(builder.Configuration);
+
+// Add moderation services
+builder.Services.AddModerationServices();
 
 // Add ProblemDetails support with exception details in Development
 builder.Services.AddCueFinderProblemDetails(
