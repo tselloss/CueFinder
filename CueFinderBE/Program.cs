@@ -9,6 +9,7 @@ using CueFinder.Extensions.Moderation;
 using CueFinder.Messages.Extensions;
 using CueFinder.Messages.Hubs;
 using CueFinder.Forum.Extensions;
+using CueFinderBE.Services;
 
 // Configure Npgsql to handle DateTime without timezone issues
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -41,8 +42,20 @@ builder.Services.AddCueFinderCaching(builder.Configuration);
 // Add image upload/storage services
 builder.Services.AddCueFinderImageServices(builder.Configuration);
 
-// Add moderation services
+// Add moderation services (local - can be replaced with HTTP client if needed)
 builder.Services.AddModerationServices();
+
+// Add HTTP Moderation Client for calling CueFinderModerator microservice
+var moderationServiceUrl = builder.Configuration["ModerationServiceUrl"] ?? "http://localhost:5001";
+builder.Services.AddHttpClient<IHttpModerationClient, HttpModerationClient>(client =>
+{
+    client.BaseAddress = new Uri(moderationServiceUrl);
+    client.Timeout = TimeSpan.FromSeconds(30);
+})
+.ConfigureHttpClient(client =>
+{
+    client.DefaultRequestHeaders.Add("Accept", "application/json");
+});
 
 // Add ProblemDetails support with exception details in Development
 builder.Services.AddCueFinderProblemDetails(
