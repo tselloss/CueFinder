@@ -88,6 +88,33 @@ services:
       - cuefinder-network
     restart: unless-stopped
 
+  moderator:
+    build:
+      context: .
+      dockerfile: CueFinderModerator/Dockerfile
+    container_name: cuefinder-moderator
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Development
+      - ConnectionStrings__DefaultConnection=Host=cuefinder-postgres;Port=5432;Database=cuefinder;Username=postgres;Password=admin;SslMode=Disable;
+      - JwtSettings__SecretKey=your-super-secret-jwt-key-change-this-in-production-must-be-at-least-32-characters
+      - JwtSettings__Issuer=CueFinder
+      - JwtSettings__Audience=CueFinderUsers
+      - JwtSettings__ExpirationMinutes=60
+      - Moderation__NudeNetUrl=http://nudenet:8000
+    ports:
+      - "5001:5001"
+    depends_on:
+      postgres:
+        condition: service_healthy
+      nudenet:
+        condition: service_healthy
+    volumes:
+      - ./uploads:/app/uploads
+      - ./uploads/moderation:/app/uploads/moderation
+    networks:
+      - cuefinder-network
+    restart: unless-stopped
+
   frontend:
     build:
       context: ./CueFinderFE/cuefinderfe
