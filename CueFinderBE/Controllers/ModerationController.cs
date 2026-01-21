@@ -206,7 +206,7 @@ namespace CueFinderBE.Controllers
             if (existing != null)
                 return BadRequest(new { message = "Already reported" });
 
-            var report = new Database.Models.UserReport
+            var report = new CueFinder.Database.Models.UserReport
             {
                 ReportingUserId = reportingUserId,
                 FlaggedImageId = flagId,

@@ -69,5 +69,36 @@ namespace CueFinder.Database.Models
         /// Message type (inquiry, offer, accepted, rejected, etc.)
         /// </summary>
         public string MessageType { get; set; } = "message"; // message, inquiry, offer, negotiation, accepted, rejected
+
+        // Moderation properties
+        /// <summary>
+        /// Whether this message has been flagged for moderation
+        /// </summary>
+        public bool IsFlagged { get; set; } = false;
+
+        /// <summary>
+        /// Reason for flagging (spam, inappropriate, harassment, etc.)
+        /// </summary>
+        public string? FlagReason { get; set; }
+
+        /// <summary>
+        /// Moderation status: approved, pending, rejected, hidden
+        /// </summary>
+        public string ModerationStatus { get; set; } = "approved";
+
+        /// <summary>
+        /// ID of moderator who reviewed this message
+        /// </summary>
+        public int? ModeratedByUserId { get; set; }
+
+        /// <summary>
+        /// Timestamp when the message was moderated
+        /// </summary>
+        public DateTime? ModeratedAt { get; set; }
+
+        /// <summary>
+        /// Moderator notes about this message
+        /// </summary>
+        public string? ModerationNotes { get; set; }
     }
 }

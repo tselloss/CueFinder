@@ -3,6 +3,8 @@ using System.Text;
 using CueFinder.Database.Context;
 using CueFinder.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 
 namespace CueFinder.Extensions.Moderation
 {
