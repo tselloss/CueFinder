@@ -33,6 +33,28 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
+  nudenet:
+    build:
+      context: ./deployment
+      dockerfile: Dockerfile.nudenet
+    container_name: cuefinder-nudenet
+    ports:
+      - "8001:8000"
+    volumes:
+      - nudenet_cache:/root/.cache
+      - ./uploads/moderation:/tmp/moderation
+    networks:
+      - cuefinder-network
+    restart: unless-stopped
+    environment:
+      - PYTHONUNBUFFERED=1
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
   backend:
     build:
       context: .
@@ -51,13 +73,17 @@ services:
       - JwtSettings__Issuer=CueFinder
       - JwtSettings__Audience=CueFinderUsers
       - JwtSettings__ExpirationMinutes=60
+      - Moderation__NudeNetUrl=http://nudenet:8000
     ports:
       - "5000:5000"
     depends_on:
       postgres:
         condition: service_healthy
+      nudenet:
+        condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
+      - ./uploads/moderation:/app/uploads/moderation
     networks:
       - cuefinder-network
     restart: unless-stopped
@@ -88,4 +114,5 @@ volumes:
   postgres_data:
     driver: local
   pgadmin_data:
+    driver: local  nudenet_cache:
     driver: local
