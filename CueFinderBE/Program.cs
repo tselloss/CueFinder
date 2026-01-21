@@ -111,8 +111,9 @@ var app = builder.Build();
 
 // Initialize database
 await app.Services.InitializeDatabaseAsync();
-// Forum database tables created via SQL script (scripts/add-forum-tables.sql)
-// await app.Services.InitializeForumDatabaseAsync();
+
+// Initialize Forum database with auto-migrations
+await app.Services.InitializeForumDatabaseAsync();
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
