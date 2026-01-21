@@ -217,11 +217,22 @@ function AppInner() {
       }
     };
 
+    // Load immediately when user changes
     loadUnreadCount();
     
-    // Refresh unread count every 30 seconds when user is logged in
-    const interval = setInterval(loadUnreadCount, 30000);
-    return () => clearInterval(interval);
+    // Also refresh when user navigates back to home or other pages
+    const handleFocus = () => {
+      loadUnreadCount();
+    };
+    
+    window.addEventListener('focus', handleFocus);
+    
+    // Refresh unread count every 10 seconds when user is logged in (faster polling)
+    const interval = setInterval(loadUnreadCount, 10000);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', handleFocus);
+    };
   }, [user]);
 
   // Load forum categories on mount
