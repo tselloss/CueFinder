@@ -114,5 +114,6 @@ volumes:
   postgres_data:
     driver: local
   pgadmin_data:
-    driver: local  nudenet_cache:
+    driver: local
+  nudenet_cache:
     driver: local
