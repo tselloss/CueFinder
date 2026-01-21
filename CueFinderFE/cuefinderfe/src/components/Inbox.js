@@ -209,88 +209,97 @@ export default function Inbox({ onBack }) {
       {/* Message Detail Modal */}
       {selectedMessage && (
         <div
-          className="fixed inset-0 bg-black/50 flex items-center justify-center z-[999] p-4"
+          className="fixed inset-0 bg-black/60 flex items-center justify-center z-[999] p-4"
           onClick={() => setSelectedMessage(null)}
         >
           <div
-            className="bg-white rounded-lg shadow-lg w-full max-w-2xl max-h-[90vh] overflow-auto z-[1000] p-6"
+            className="bg-[#0a0e1a] text-white rounded-lg shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-auto z-[1000] border border-gray-700"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Header */}
-            <div className="flex justify-between items-start mb-6">
+            <div className="flex justify-between items-start p-6 pb-4 border-b border-gray-700">
               <div className="flex-1">
-                <h3 className="text-xl font-bold">
+                <h3 className="text-xl font-bold text-white">
                   {selectedMessage.senderName}
                 </h3>
-                <p className="text-sm text-muted-foreground">
+                <p className="text-sm text-gray-400">
                   {new Date(selectedMessage.createdAt).toLocaleString()}
                 </p>
               </div>
-              <div className="flex gap-2 flex-shrink-0">
+              <div className="flex gap-2">
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => handleDelete(selectedMessage.id)}
+                  className="text-gray-400 hover:text-red-500 hover:bg-red-500/20 -mt-1"
                   title="Delete message"
                 >
-                  <Trash2 className="w-4 h-4 text-red-500" />
+                  <Trash2 className="w-5 h-5" />
                 </Button>
                 <Button
                   variant="ghost"
                   size="icon"
                   onClick={() => setSelectedMessage(null)}
+                  className="text-gray-400 hover:text-white hover:bg-gray-700 -mt-1"
                 >
-                  <X className="w-4 h-4" />
+                  <X className="w-5 h-5" />
                 </Button>
               </div>
             </div>
 
-            {/* Subject & Meta */}
-            <div className="mb-4 space-y-2">
-              <p className="font-bold text-sm">Subject</p>
-              <p>{selectedMessage.subject}</p>
-            </div>
-
-            {selectedMessage.cueId && (
-              <div className="mb-4">
-                <span className="bg-gray-200 text-gray-700 text-xs font-bold px-2 py-1 rounded">
-                  Related to a listing
-                </span>
+            <div className="p-6">
+              {/* Subject & Meta */}
+              <div className="mb-4 space-y-2">
+                <p className="font-bold text-sm text-white">Subject</p>
+                <p className="text-gray-300">{selectedMessage.subject}</p>
               </div>
-            )}
 
-            {/* Message Content */}
-            <Card className="bg-blue-50 mb-6">
-              <CardContent className="p-4">
-                <p className="whitespace-pre-wrap">
+              {selectedMessage.cueId && (
+                <div className="mb-4">
+                  <span className="bg-gray-700 text-gray-200 text-xs font-semibold px-3 py-1 rounded">
+                    Related to a listing
+                  </span>
+                </div>
+              )}
+
+              {/* Message Content */}
+              <div className="bg-[#141824] rounded-lg p-4 mb-6 border border-gray-700">
+                <p className="whitespace-pre-wrap text-gray-300">
                   {selectedMessage.content}
                 </p>
-              </CardContent>
-            </Card>
+              </div>
 
-            {/* Reply Box */}
-            <div className="space-y-4 pt-6 border-t border-border">
-              <MaterialInput
-                label="Reply Message"
-                type="textarea"
-                value={replyBody}
-                onChange={(e) => setReplyBody(e.target.value)}
-                placeholder="Type your reply..."
-                rows={6}
-                required
-              />
-              <div className="flex gap-2 justify-end">
-                <Button variant="outline" onClick={() => setSelectedMessage(null)}>
-                  Cancel
-                </Button>
-                <Button
-                  onClick={handleReply}
-                  disabled={sending || !replyBody.trim()}
-                  className="gap-2"
-                >
-                  {sending && <Loader2 className="w-4 h-4 animate-spin" />}
-                  {sending ? 'Sending...' : 'Reply'}
-                </Button>
+              {/* Reply Box */}
+              <div className="space-y-4 pt-6 border-t border-gray-700">
+                <p className="font-semibold text-base text-white mb-3">Reply</p>
+                <div className="space-y-2">
+                  <label className="text-sm text-gray-300 font-medium">Your Message</label>
+                  <textarea
+                    value={replyBody}
+                    onChange={(e) => setReplyBody(e.target.value)}
+                    placeholder="Type your reply..."
+                    rows={6}
+                    required
+                    className="w-full px-4 py-3 bg-[#141824] border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all resize-none"
+                  />
+                </div>
+                <div className="flex flex-col gap-3 pt-2">
+                  <Button
+                    onClick={handleReply}
+                    disabled={sending || !replyBody.trim()}
+                    className="gap-2 w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-700 disabled:text-gray-500 text-white font-semibold py-3 rounded-lg transition-colors"
+                  >
+                    {sending && <Loader2 className="w-4 h-4 animate-spin" />}
+                    {sending ? 'Sending...' : 'Reply'}
+                  </Button>
+                  <Button 
+                    variant="ghost" 
+                    onClick={() => setSelectedMessage(null)}
+                    className="w-full text-gray-300 hover:text-white hover:bg-gray-800 border border-gray-700 hover:border-gray-600 font-medium py-3 rounded-lg transition-all"
+                  >
+                    Cancel
+                  </Button>
+                </div>
               </div>
             </div>
           </div>

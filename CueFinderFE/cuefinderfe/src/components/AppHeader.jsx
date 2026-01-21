@@ -4,28 +4,22 @@ import { Badge } from './ui/badge.jsx';
 import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu.jsx';
 
-export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/', onMobileMenuToggle }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
+export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const navLinks = [
     { label: 'Home', path: '/' },
     { label: 'Forum', path: '/forum' },
     { label: 'Inbox', path: '/inbox', requiresAuth: true }
   ];
 
-  // Handle mobile menu toggle - close dropdown if open
+  // Handle mobile menu toggle
   const handleMobileToggle = () => {
-    if (dropdownOpen) setDropdownOpen(false);
-    setMobileOpen(v => !v);
-    // Also toggle parent-controlled sidebar/menu if provided (home page case)
-    if (typeof onMobileMenuToggle === 'function') {
-      onMobileMenuToggle();
-    }
+    setMobileNavOpen(v => !v);
   };
 
-  // Handle dropdown toggle - close mobile menu if open
+  // Handle dropdown toggle
   const handleDropdownChange = (open) => {
-    if (open && mobileOpen) setMobileOpen(false);
     setDropdownOpen(open);
   };
 
@@ -85,7 +79,6 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
                       setDropdownOpen(false);
-                      setMobileOpen(false);
                       onNavigate && onNavigate('/profile');
                     }}>
                       <UserIcon className="mr-2 h-4 w-4" />
@@ -94,7 +87,6 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     {user.role === 'admin' && (
                       <DropdownMenuItem onClick={() => {
                         setDropdownOpen(false);
-                        setMobileOpen(false);
                         onNavigate && onNavigate('/admin');
                       }}>
                         <Shield className="mr-2 h-4 w-4" />
@@ -104,7 +96,6 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
                       setDropdownOpen(false);
-                      setMobileOpen(false);
                       onLogout && onLogout();
                     }} className="text-destructive">
                       <LogOut className="mr-2 h-4 w-4" />
@@ -141,7 +132,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
           )}
         </div>
       </div>
-      {mobileOpen && (
+      {mobileNavOpen && (
         <div className="md:hidden absolute left-0 right-0 top-full border-t border-border bg-background shadow-lg">
           <div className="px-4 py-3 flex flex-col gap-2">
             {navLinks.filter(l => !l.requiresAuth || user).map(link => {
@@ -153,7 +144,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   size="sm"
                   onClick={() => {
                     onNavigate && onNavigate(link.path);
-                    setMobileOpen(false);
+                    setMobileNavOpen(false);
                   }}
                   aria-current={active ? 'page' : undefined}
                 >

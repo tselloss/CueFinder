@@ -312,8 +312,8 @@ const Forum = ({ onBack }) => {
     <div className="min-h-screen bg-slate-950 overflow-auto">
       {/* Header */}
       <div className="sticky top-0 z-10 bg-slate-900/95 border-b border-purple-500/30 backdrop-blur-sm shadow-lg">
-        <div className="px-6 py-4 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 flex-wrap max-w-7xl mx-auto">
-          <div className="flex items-center gap-4 flex-1">
+        <div className="px-8 py-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6 flex-wrap max-w-7xl mx-auto">
+          <div className="flex items-center gap-6 flex-1">
             <div className="bg-gradient-to-br from-purple-600 to-purple-700 p-2 rounded-lg shadow-lg">
               <MessageCircle size={32} className="text-white" />
             </div>
@@ -383,7 +383,7 @@ const Forum = ({ onBack }) => {
       </div>
 
       {/* Main Content */}
-      <div className="flex-grow px-6 py-6 gap-6 max-w-7xl mx-auto w-full"
+      <div className="flex-grow px-8 py-8 gap-8 max-w-7xl mx-auto w-full"
            style={{ 
              display: 'flex', 
              flexDirection: 'column',
@@ -392,8 +392,8 @@ const Forum = ({ onBack }) => {
       >
         {/* Categories View */}
         {view === 'categories' && (
-          <div className="space-y-4">
-            <div className="flex items-center gap-3">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
               <div className="w-1 h-7 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full shadow-lg" />
               <h2 className="text-2xl font-bold text-purple-400">Forum Categories</h2>
               <span className="text-xs text-slate-500">• Choose a category</span>
