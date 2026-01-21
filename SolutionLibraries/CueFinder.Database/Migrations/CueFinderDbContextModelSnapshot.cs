@@ -58,6 +58,12 @@ namespace CueFinder.Database.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsSold")
                         .HasColumnType("boolean");
 
@@ -71,6 +77,19 @@ namespace CueFinder.Database.Migrations
 
                     b.Property<int?>("ManufactureYear")
                         .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ModeratedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<decimal>("Price")
                         .HasPrecision(10, 2)
@@ -182,9 +201,15 @@ namespace CueFinder.Database.Migrations
                         .HasMaxLength(2000)
                         .HasColumnType("character varying(2000)");
 
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
                     b.Property<string>("HandleExtensionSpace")
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean");
 
                     b.Property<bool>("IsSold")
                         .HasColumnType("boolean");
@@ -193,6 +218,19 @@ namespace CueFinder.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(200)
                         .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ModeratedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<string>("OuterDimensions")
                         .HasMaxLength(200)
@@ -328,6 +366,94 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("CueImages");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.FlaggedImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<double?>("AIConfidenceScore")
+                        .HasColumnType("double precision");
+
+                    b.Property<string>("AdminNotes")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("AdminUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CueCaseId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("CueId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<string>("FlagReason")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasDefaultValue("other");
+
+                    b.Property<DateTime>("FlaggedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("ImageHash")
+                        .IsRequired()
+                        .HasMaxLength(256)
+                        .HasColumnType("character varying(256)");
+
+                    b.Property<bool>("IsAIFlagged")
+                        .HasColumnType("boolean");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("pending");
+
+                    b.Property<string>("StoragePath")
+                        .IsRequired()
+                        .HasMaxLength(1000)
+                        .HasColumnType("character varying(1000)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AdminUserId");
+
+                    b.HasIndex("ImageHash")
+                        .HasDatabaseName("IX_FlaggedImage_Hash");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_FlaggedImage_Status");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_FlaggedImage_UserId");
+
+                    b.HasIndex("CueCaseId", "Status")
+                        .HasDatabaseName("IX_FlaggedImage_CasesStatus");
+
+                    b.HasIndex("CueId", "Status")
+                        .HasDatabaseName("IX_FlaggedImage_CueStatus");
+
+                    b.ToTable("FlaggedImages");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Message", b =>
                 {
                     b.Property<int>("Id")
@@ -349,6 +475,12 @@ namespace CueFinder.Database.Migrations
                     b.Property<int?>("CueId")
                         .HasColumnType("integer");
 
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFlagged")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean");
 
@@ -356,6 +488,19 @@ namespace CueFinder.Database.Migrations
                         .IsRequired()
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ModeratedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.Property<DateTime?>("ReadAt")
                         .HasColumnType("timestamp without time zone");
@@ -384,6 +529,54 @@ namespace CueFinder.Database.Migrations
                         .HasDatabaseName("IX_Message_Sender_Recipient");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.ModerationQueue", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("AddedToQueueAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("FlaggedImageId")
+                        .HasColumnType("integer");
+
+                    b.Property<bool>("IsBeingReviewed")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("Priority")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(2);
+
+                    b.Property<DateTime?>("ReviewStartedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ReviewingAdminId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("UserReportCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlaggedImageId");
+
+                    b.HasIndex("IsBeingReviewed")
+                        .HasDatabaseName("IX_ModerationQueue_BeingReviewed");
+
+                    b.HasIndex("Priority")
+                        .HasDatabaseName("IX_ModerationQueue_Priority");
+
+                    b.HasIndex("ReviewingAdminId");
+
+                    b.ToTable("ModerationQueues");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.PhoneVerificationToken", b =>
@@ -651,6 +844,12 @@ namespace CueFinder.Database.Migrations
                     b.Property<string>("Address")
                         .HasColumnType("text");
 
+                    b.Property<string>("BanReason")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime?>("BannedAt")
+                        .HasColumnType("timestamp without time zone");
+
                     b.Property<string>("Bio")
                         .HasColumnType("text");
 
@@ -676,7 +875,13 @@ namespace CueFinder.Database.Migrations
                     b.Property<string>("ExternalProviderId")
                         .HasColumnType("text");
 
+                    b.Property<bool>("HidePhone")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("IsActive")
+                        .HasColumnType("boolean");
+
+                    b.Property<bool>("IsBanned")
                         .HasColumnType("boolean");
 
                     b.Property<bool>("IsEmailVerified")
@@ -757,6 +962,41 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("Users");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.UserReport", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("FlaggedImageId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ReportReason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<DateTime>("ReportedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("ReportingUserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FlaggedImageId")
+                        .HasDatabaseName("IX_UserReport_FlaggedImageId");
+
+                    b.HasIndex("ReportingUserId")
+                        .HasDatabaseName("IX_UserReport_ReportingUserId");
+
+                    b.ToTable("UserReports");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Cue", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.User", "User")
@@ -801,6 +1041,24 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("Cue");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.FlaggedImage", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "AdminUser")
+                        .WithMany()
+                        .HasForeignKey("AdminUserId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AdminUser");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Message", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.Cue", "Cue")
@@ -825,6 +1083,24 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("Recipient");
 
                     b.Navigation("Sender");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.ModerationQueue", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.FlaggedImage", "FlaggedImage")
+                        .WithMany()
+                        .HasForeignKey("FlaggedImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", "ReviewingAdmin")
+                        .WithMany()
+                        .HasForeignKey("ReviewingAdminId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("FlaggedImage");
+
+                    b.Navigation("ReviewingAdmin");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.PhoneVerificationToken", b =>
@@ -909,6 +1185,25 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("Cue");
 
                     b.Navigation("Seller");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.UserReport", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.FlaggedImage", "FlaggedImage")
+                        .WithMany()
+                        .HasForeignKey("FlaggedImageId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", "ReportingUser")
+                        .WithMany()
+                        .HasForeignKey("ReportingUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("FlaggedImage");
+
+                    b.Navigation("ReportingUser");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.Cue", b =>
