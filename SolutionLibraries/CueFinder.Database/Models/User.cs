@@ -125,6 +125,21 @@ namespace CueFinder.Database.Models
     public bool IsActive { get; set; } = true;
 
     /// <summary>
+    /// Whether the user is banned
+    /// </summary>
+    public bool IsBanned { get; set; } = false;
+
+    /// <summary>
+    /// Reason for the ban
+    /// </summary>
+    public string? BanReason { get; set; }
+
+    /// <summary>
+    /// Timestamp when the user was banned
+    /// </summary>
+    public DateTime? BannedAt { get; set; }
+
+    /// <summary>
     /// Whether the user accepted the terms and conditions
     /// </summary>
     public bool AcceptedTerms { get; set; } = false;

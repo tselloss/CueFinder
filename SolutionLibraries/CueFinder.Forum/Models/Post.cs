@@ -23,6 +23,19 @@ public class Post
     
     public bool IsEdited { get; set; }
     
+    // Moderation properties
+    public bool IsFlagged { get; set; } = false;
+    
+    public string? FlagReason { get; set; }
+    
+    public string ModerationStatus { get; set; } = "approved"; // approved, pending, rejected, hidden
+    
+    public Guid? ModeratedByUserId { get; set; }
+    
+    public DateTime? ModeratedAt { get; set; }
+    
+    public string? ModerationNotes { get; set; }
+    
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
     
     public DateTime ModifiedAt { get; set; } = DateTime.UtcNow;
