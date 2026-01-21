@@ -59,12 +59,29 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
               </div>
 
               <div className="flex items-center gap-1 sm:gap-2">
+                {/* Desktop Inbox Button */}
                 <Button variant="default" size="sm" onClick={() => onNavigate && onNavigate('/inbox')} className="relative hidden sm:inline-flex">
                   <Mail className="mr-2 h-4 w-4" /> Inbox
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 rounded-full unread-badge">
                       {unreadCount > 99 ? '99+' : unreadCount}
                     </Badge>
+                  )}
+                </Button>
+
+                {/* Mobile Inbox Icon with Badge */}
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => onNavigate && onNavigate('/inbox')} 
+                  className="sm:hidden relative"
+                  title={unreadCount > 0 ? `${unreadCount} unread messages` : 'Inbox'}
+                >
+                  <Mail className="h-4 w-4" />
+                  {unreadCount > 0 && (
+                    <span className="absolute -top-2 -right-2 flex items-center justify-center w-5 h-5 rounded-full bg-red-500 text-white text-xs font-bold animate-pulse">
+                      {unreadCount > 9 ? '9+' : unreadCount}
+                    </span>
                   )}
                 </Button>
 
