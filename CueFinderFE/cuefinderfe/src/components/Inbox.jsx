@@ -227,14 +227,6 @@ export default function Inbox({ onBack }) {
                     {new Date(selectedMessage.createdAt).toLocaleString()}
                   </p>
                 </div>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => handleDelete(selectedMessage.id)}
-                  className="text-destructive hover:text-destructive"
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
               </div>
             </DialogHeader>
 
@@ -292,6 +284,14 @@ export default function Inbox({ onBack }) {
                     Reply
                   </>
                 )}
+              </Button>
+              <Button
+                variant="destructive"
+                onClick={() => handleDelete(selectedMessage.id)}
+                className="gap-2"
+              >
+                <Trash2 className="w-4 h-4" />
+                Delete
               </Button>
             </DialogFooter>
           </DialogContent>
