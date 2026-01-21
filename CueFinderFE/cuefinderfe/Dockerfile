@@ -28,6 +28,9 @@ RUN apk add --no-cache curl
 # Copy built files
 COPY --from=build /app/build /usr/share/nginx/html
 
+# Copy public static files (HTML, images, etc)
+COPY --from=build /app/public /usr/share/nginx/html
+
 # Copy nginx config for serving static React files
 COPY nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
