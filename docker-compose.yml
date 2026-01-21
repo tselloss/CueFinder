@@ -33,15 +33,15 @@ services:
     volumes:
       - pgadmin_data:/var/lib/pgadmin
 
-  nudenet:
+  opennsfw:
     build:
       context: ./deployment
       dockerfile: Dockerfile.nudenet
-    container_name: cuefinder-nudenet
+    container_name: cuefinder-opennsfw
     ports:
       - "8001:8000"
     volumes:
-      - nudenet_cache:/root/.cache
+      - opennsfw_cache:/app/.opennsfw2
       - ./uploads/moderation:/tmp/moderation
     networks:
       - cuefinder-network
@@ -73,13 +73,13 @@ services:
       - JwtSettings__Issuer=CueFinder
       - JwtSettings__Audience=CueFinderUsers
       - JwtSettings__ExpirationMinutes=60
-      - Moderation__NudeNetUrl=http://nudenet:8000
+      - Moderation__NudeNetUrl=http://opennsfw:8000
     ports:
       - "5000:5000"
     depends_on:
       postgres:
         condition: service_healthy
-      nudenet:
+      opennsfw:
         condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
@@ -100,13 +100,13 @@ services:
       - JwtSettings__Issuer=CueFinder
       - JwtSettings__Audience=CueFinderUsers
       - JwtSettings__ExpirationMinutes=60
-      - Moderation__NudeNetUrl=http://nudenet:8000
+      - Moderation__NudeNetUrl=http://opennsfw:8000
     ports:
       - "5001:5001"
     depends_on:
       postgres:
         condition: service_healthy
-      nudenet:
+      opennsfw:
         condition: service_healthy
     volumes:
       - ./uploads:/app/uploads
@@ -142,5 +142,5 @@ volumes:
     driver: local
   pgadmin_data:
     driver: local
-  nudenet_cache:
+  opennsfw_cache:
     driver: local
