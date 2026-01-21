@@ -130,6 +130,37 @@ namespace CueFinder.Database.Models
         /// </summary>
         public DateTime UpdatedAt { get; set; }
 
+        // Moderation properties
+        /// <summary>
+        /// Whether this case listing has been flagged for moderation
+        /// </summary>
+        public bool IsFlagged { get; set; } = false;
+
+        /// <summary>
+        /// Reason for flagging (spam, inappropriate, scam, etc.)
+        /// </summary>
+        public string? FlagReason { get; set; }
+
+        /// <summary>
+        /// Moderation status: approved, pending, rejected, hidden
+        /// </summary>
+        public string ModerationStatus { get; set; } = "approved";
+
+        /// <summary>
+        /// ID of moderator who reviewed this listing
+        /// </summary>
+        public int? ModeratedByUserId { get; set; }
+
+        /// <summary>
+        /// Timestamp when the listing was moderated
+        /// </summary>
+        public DateTime? ModeratedAt { get; set; }
+
+        /// <summary>
+        /// Moderator notes about this listing
+        /// </summary>
+        public string? ModerationNotes { get; set; }
+
         /// <summary>
         /// Images associated with this case
         /// </summary>
