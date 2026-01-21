@@ -12,7 +12,7 @@ export default function LoginPage() {
   const { login, register, sendSms, verifySms } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [name, setName] = useState('');
@@ -257,7 +257,15 @@ export default function LoginPage() {
                         required
                       />
                       <label htmlFor="terms" className="text-sm text-muted-foreground leading-tight">
-                        {t('auth.terms', 'I accept the terms and conditions')}
+                        {t('registration.terms.accept', 'I accept the')}{' '}
+                        <a
+                          href={i18n.language === 'gr' ? '/terms-gr.html' : '/terms-en.html'}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="font-semibold text-primary hover:underline"
+                        >
+                          {t('registration.terms.link', 'Terms and Conditions')}
+                        </a>
                       </label>
                     </div>
                   </>
