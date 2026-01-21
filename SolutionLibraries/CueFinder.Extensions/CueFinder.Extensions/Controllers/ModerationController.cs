@@ -1,10 +1,13 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Logging;
 using CueFinder.Extensions.Moderation;
 using CueFinder.Database.Context;
 using Microsoft.EntityFrameworkCore;
 
-namespace CueFinderBE.Controllers
+namespace CueFinder.Extensions.Controllers
 {
     /// <summary>
     /// API endpoints for image moderation
