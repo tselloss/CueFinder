@@ -12,145 +12,139 @@ namespace CueFinder.Database.Migrations
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.AddColumn<string>(
-                name: "BanReason",
-                table: "Users",
-                type: "text",
-                nullable: true);
+            // Add columns to Users table if they don't exist
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Users' AND column_name='BanReason') THEN
+                        ALTER TABLE ""Users"" ADD COLUMN ""BanReason"" text;
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "BannedAt",
-                table: "Users",
-                type: "timestamp without time zone",
-                nullable: true);
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Users' AND column_name='BannedAt') THEN
+                        ALTER TABLE ""Users"" ADD COLUMN ""BannedAt"" timestamp without time zone;
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "HidePhone",
-                table: "Users",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Users' AND column_name='HidePhone') THEN
+                        ALTER TABLE ""Users"" ADD COLUMN ""HidePhone"" boolean NOT NULL DEFAULT FALSE;
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsBanned",
-                table: "Users",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Users' AND column_name='IsBanned') THEN
+                        ALTER TABLE ""Users"" ADD COLUMN ""IsBanned"" boolean NOT NULL DEFAULT FALSE;
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<string>(
-                name: "FlagReason",
-                table: "Messages",
-                type: "text",
-                nullable: true);
+            // Add columns to Messages table if they don't exist
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='FlagReason') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""FlagReason"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='IsFlagged') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""IsFlagged"" boolean NOT NULL DEFAULT FALSE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='ModeratedAt') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""ModeratedAt"" timestamp without time zone;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='ModeratedByUserId') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""ModeratedByUserId"" integer;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='ModerationNotes') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""ModerationNotes"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Messages' AND column_name='ModerationStatus') THEN
+                        ALTER TABLE ""Messages"" ADD COLUMN ""ModerationStatus"" text NOT NULL DEFAULT '';
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<bool>(
-                name: "IsFlagged",
-                table: "Messages",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
+            // Add columns to Cues table if they don't exist
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='FlagReason') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""FlagReason"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='IsFlagged') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""IsFlagged"" boolean NOT NULL DEFAULT FALSE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='ModeratedAt') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""ModeratedAt"" timestamp without time zone;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='ModeratedByUserId') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""ModeratedByUserId"" integer;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='ModerationNotes') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""ModerationNotes"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='Cues' AND column_name='ModerationStatus') THEN
+                        ALTER TABLE ""Cues"" ADD COLUMN ""ModerationStatus"" text NOT NULL DEFAULT '';
+                    END IF;
+                END $$;
+            ");
 
-            migrationBuilder.AddColumn<DateTime>(
-                name: "ModeratedAt",
-                table: "Messages",
-                type: "timestamp without time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ModeratedByUserId",
-                table: "Messages",
-                type: "integer",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationNotes",
-                table: "Messages",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationStatus",
-                table: "Messages",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "FlagReason",
-                table: "Cues",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsFlagged",
-                table: "Cues",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "ModeratedAt",
-                table: "Cues",
-                type: "timestamp without time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ModeratedByUserId",
-                table: "Cues",
-                type: "integer",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationNotes",
-                table: "Cues",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationStatus",
-                table: "Cues",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
-
-            migrationBuilder.AddColumn<string>(
-                name: "FlagReason",
-                table: "CueCases",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<bool>(
-                name: "IsFlagged",
-                table: "CueCases",
-                type: "boolean",
-                nullable: false,
-                defaultValue: false);
-
-            migrationBuilder.AddColumn<DateTime>(
-                name: "ModeratedAt",
-                table: "CueCases",
-                type: "timestamp without time zone",
-                nullable: true);
-
-            migrationBuilder.AddColumn<int>(
-                name: "ModeratedByUserId",
-                table: "CueCases",
-                type: "integer",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationNotes",
-                table: "CueCases",
-                type: "text",
-                nullable: true);
-
-            migrationBuilder.AddColumn<string>(
-                name: "ModerationStatus",
-                table: "CueCases",
-                type: "text",
-                nullable: false,
-                defaultValue: "");
+            // Add columns to CueCases table if they don't exist
+            migrationBuilder.Sql(@"
+                DO $$ 
+                BEGIN
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='FlagReason') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""FlagReason"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='IsFlagged') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""IsFlagged"" boolean NOT NULL DEFAULT FALSE;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='ModeratedAt') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""ModeratedAt"" timestamp without time zone;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='ModeratedByUserId') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""ModeratedByUserId"" integer;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='ModerationNotes') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""ModerationNotes"" text;
+                    END IF;
+                    IF NOT EXISTS (SELECT 1 FROM information_schema.columns 
+                                  WHERE table_name='CueCases' AND column_name='ModerationStatus') THEN
+                        ALTER TABLE ""CueCases"" ADD COLUMN ""ModerationStatus"" text NOT NULL DEFAULT '';
+                    END IF;
+                END $$;
+            ");
 
             migrationBuilder.CreateTable(
                 name: "FlaggedImages",

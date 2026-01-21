@@ -30,6 +30,10 @@ WORKDIR /app
 # Copy published application
 COPY --from=publish /app/publish .
 
+# Set environment variables for ASP.NET Core
+ENV ASPNETCORE_URLS=http://+:5001
+ENV ASPNETCORE_ENVIRONMENT=Production
+
 # Expose port
 EXPOSE 5001
 
