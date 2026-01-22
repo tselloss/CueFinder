@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, Image as ImageIcon } from 'lucide-react';
+import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle } from 'lucide-react';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
