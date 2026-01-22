@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package } from 'lucide-react';
+import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, Image as ImageIcon } from 'lucide-react';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
@@ -12,6 +12,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '.
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from './ui/dialog';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
+import { Alert, AlertDescription } from './ui/alert';
 
 export default function AdminPage({ onBack }) {
   const [users, setUsers] = useState([]);
@@ -53,7 +54,8 @@ export default function AdminPage({ onBack }) {
       title: x.title || `${x.brand ?? ''} ${x.model ?? ''}`.trim() || `Cue #${x.id}`,
       price: Number(x.price ?? 0),
       itemType: 'cue',
-      flagged: x.flagged || false,
+      flagged: x.isFlagged || x.flagged || false,
+      userId: x.userId,
     }));
     const caseItems = (cases || []).map(x => ({
       id: x.id,
@@ -61,10 +63,18 @@ export default function AdminPage({ onBack }) {
       title: x.title || `${x.brand ?? ''} ${x.type ?? ''}`.trim() || `Case #${x.id}`,
       price: Number(x.price ?? 0),
       itemType: 'case',
-      flagged: x.flagged || false,
+      flagged: x.isFlagged || x.flagged || false,
+      userId: x.userId,
     }));
     return [...cueItems, ...caseItems];
   }, [cues, cases]);
+
+  const flaggedListings = useMemo(() => listings.filter(l => l.flagged), [listings]);
+
+  const usersWithFlaggedContent = useMemo(() => {
+    const flaggedUserIds = new Set(flaggedListings.map(l => l.userId).filter(Boolean));
+    return users.filter(u => flaggedUserIds.has(u.id));
+  }, [users, flaggedListings]);
 
   const filteredListings = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -145,6 +155,67 @@ export default function AdminPage({ onBack }) {
 
       {/* Main Content */}
       <div className="container mx-auto px-4 py-6">
+        {/* Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Users</p>
+                  <p className="text-2xl font-bold">{users.length}</p>
+                </div>
+                <Users className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card>
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Total Listings</p>
+                  <p className="text-2xl font-bold">{listings.length}</p>
+                </div>
+                <Package className="w-8 h-8 text-muted-foreground" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-orange-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Flagged Content</p>
+                  <p className="text-2xl font-bold text-orange-500">{flaggedListings.length}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-red-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Users w/ Flags</p>
+                  <p className="text-2xl font-bold text-red-500">{usersWithFlaggedContent.length}</p>
+                </div>
+                <Flag className="w-8 h-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
+        {/* Flagged Content Alert */}
+        {flaggedListings.length > 0 && (
+          <Alert className="mb-6 border-orange-500/50 bg-orange-50 dark:bg-orange-950">
+            <AlertTriangle className="h-4 w-4 text-orange-500" />
+            <AlertDescription className="text-orange-700 dark:text-orange-300">
+              <strong>{flaggedListings.length} listing(s)</strong> flagged for review. 
+              {usersWithFlaggedContent.length > 0 && (
+                <span> <strong>{usersWithFlaggedContent.length} user(s)</strong> have uploaded flagged content.</span>
+              )}
+            </AlertDescription>
+          </Alert>
+        )}
+
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Users Section */}
           <Card>
@@ -189,7 +260,12 @@ export default function AdminPage({ onBack }) {
                         <TableRow key={user.id}>
                           <TableCell>
                             <div>
-                              <div className="font-medium">{user.name}</div>
+                              <div className="flex items-center gap-2">
+                                <span className="font-medium">{user.name}</span>
+                                {usersWithFlaggedContent.some(u => u.id === user.id) && (
+                                  <Flag className="w-4 h-4 text-orange-500" title="Has flagged content" />
+                                )}
+                              </div>
                               <div className="text-sm text-muted-foreground">{user.email}</div>
                             </div>
                           </TableCell>
