@@ -1,4 +1,5 @@
 using CueFinder.Auth.Extensions;
+using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
@@ -20,7 +21,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container and load controllers from shared libraries (e.g., moderation)
 builder.Services
     .AddControllers()
-    .AddApplicationPart(typeof(ModerationController).Assembly);
+    .AddApplicationPart(typeof(ModerationController).Assembly)
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
@@ -169,6 +174,9 @@ app.UseStaticFiles(new StaticFileOptions
 // Add exception handler and status code pages for ProblemDetails
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+// Add rate limiting middleware (before authentication)
+app.UseRateLimiting(requestLimit: 5, timeWindowSeconds: 60);
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

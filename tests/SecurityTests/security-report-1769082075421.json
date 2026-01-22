@@ -1,0 +1,19 @@
+{
+  "timestamp": "2026-01-22T11:41:15.421Z",
+  "target": "http://localhost:5000",
+  "vulnerabilities": [
+    {
+      "severity": "MEDIUM",
+      "endpoint": "http://localhost:5000/api/auth/login",
+      "description": "No rate limiting detected. 100/100 requests succeeded",
+      "payload": "Rapid requests",
+      "timestamp": "2026-01-22T11:41:15.405Z"
+    }
+  ],
+  "summary": {
+    "total": 1,
+    "critical": 0,
+    "high": 0,
+    "medium": 1
+  }
+}
