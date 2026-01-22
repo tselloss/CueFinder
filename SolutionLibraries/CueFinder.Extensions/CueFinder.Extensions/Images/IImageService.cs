@@ -30,4 +30,8 @@ public interface IImageService
 
     Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile file);
     string GetImageUrl(string fileName);
+    Task<bool> HasFlaggedImagesAsync(int cueId);
+    Task<bool> DeleteCueIfFlaggedAsync(int cueId, int userId);
+    Task<bool> HasFlaggedCueCaseImagesAsync(int cueCaseId);
+    Task<bool> DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId);
 }

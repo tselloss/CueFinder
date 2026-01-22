@@ -19,20 +19,20 @@ public class ImageService : IImageService
     private readonly ILogger<ImageService> _logger;
     private readonly ImageStorageSettings _settings;
     private readonly IWebHostEnvironment _webHostEnvironment;
-    private readonly IModerationService _moderationService;
+    private readonly IModerationService? _moderationService;
 
     public ImageService(
         CueFinderDbContext context,
         ILogger<ImageService> logger,
         IOptions<ImageStorageSettings> settings,
         IWebHostEnvironment webHostEnvironment,
-        IModerationService moderationService)
+        IModerationService? moderationService = null)
     {
         _context = context;
         _logger = logger;
         _settings = settings.Value;
-        _moderationService = moderationService;
         _webHostEnvironment = webHostEnvironment;
+        _moderationService = moderationService;
     }
 
     private string GetCueFolderPath(int cueId)
@@ -150,6 +150,41 @@ public class ImageService : IImageService
 
             _context.CueImages.Add(cueImage);
             await _context.SaveChangesAsync();
+
+            // Scan image for inappropriate content if moderation service is available
+            if (_moderationService != null)
+            {
+                try
+                {
+                    _logger.LogInformation(
+                        "Scanning uploaded image for cue {CueId}, User {UserId}, FilePath: {FilePath}",
+                        request.CueId, userId, filePath);
+
+                    var scanResult = await _moderationService.ScanImageAsync(filePath, userId, request.CueId);
+                    
+                    if (scanResult.IsUnsafe)
+                    {
+                        _logger.LogWarning(
+                            "Image flagged for cue {CueId}: {Reason}, Confidence: {Score}",
+                            request.CueId, scanResult.FlagReason, scanResult.ConfidenceScore);
+
+                        // Delete the cue and all its images
+                        await DeleteCueIfFlaggedAsync(request.CueId, userId);
+
+                        return new ImageUploadResponse
+                        {
+                            Success = false,
+                            ErrorMessage = "Image violates content policy. Listing has been removed.",
+                            UploadedAt = DateTime.UtcNow
+                        };
+                    }
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error scanning image for cue {CueId}", request.CueId);
+                    // Continue - don't block upload if scanning fails
+                }
+            }
 
             _logger.LogInformation("Image uploaded successfully for cue {CueId} by user {UserId}", request.CueId, userId);
 
@@ -413,5 +448,100 @@ public class ImageService : IImageService
     public string GetImageUrl(string fileName)
     {
         return $"{_settings.ImageUrlBase}/{fileName}";
+    }
+
+    public async Task<bool> HasFlaggedImagesAsync(int cueId)
+    {
+        return await _context.FlaggedImages
+            .AnyAsync(fi => fi.CueId == cueId && fi.Status == "pending");
+    }
+
+    public async Task<bool> DeleteCueIfFlaggedAsync(int cueId, int userId)
+    {
+        try
+        {
+            var hasFlaggedImages = await HasFlaggedImagesAsync(cueId);
+            if (!hasFlaggedImages)
+            {
+                return false;
+            }
+
+            // Get the cue
+            var cue = await _context.Cues
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.Id == cueId);
+
+            if (cue == null)
+            {
+                _logger.LogWarning("Cue {CueId} not found for flagged deletion", cueId);
+                return false;
+            }
+
+            // Delete all images
+            await DeleteCueImagesInternalAsync(cueId);
+
+            // Delete the cue itself
+            _context.Cues.Remove(cue);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("Cue {CueId} deleted due to flagged images", cueId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting flagged cue {CueId}", cueId);
+            return false;
+        }
+    }
+
+    public async Task<bool> HasFlaggedCueCaseImagesAsync(int cueCaseId)
+    {
+        return await _context.FlaggedImages
+            .AnyAsync(fi => fi.CueCaseId == cueCaseId && fi.Status == "pending");
+    }
+
+    public async Task<bool> DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId)
+    {
+        try
+        {
+            var hasFlaggedImages = await HasFlaggedCueCaseImagesAsync(cueCaseId);
+            if (!hasFlaggedImages)
+            {
+                return false;
+            }
+
+            // Get the cue case
+            var cueCase = await _context.CueCases
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.Id == cueCaseId);
+
+            if (cueCase == null)
+            {
+                _logger.LogWarning("CueCase {CueCaseId} not found for flagged deletion", cueCaseId);
+                return false;
+            }
+
+            // Delete all images for the case
+            var images = await _context.CueCaseImages
+                .Where(ci => ci.CueCaseId == cueCaseId)
+                .ToListAsync();
+
+            foreach (var image in images)
+            {
+                _context.CueCaseImages.Remove(image);
+            }
+
+            // Delete the cue case itself
+            _context.CueCases.Remove(cueCase);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("CueCase {CueCaseId} deleted due to flagged images", cueCaseId);
+            return true;
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting flagged cue case {CueCaseId}", cueCaseId);
+            return false;
+        }
     }
 }

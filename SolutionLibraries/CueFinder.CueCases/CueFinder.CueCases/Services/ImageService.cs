@@ -2,6 +2,7 @@ using CueFinder.CueCases.Interfaces;
 using CueFinder.CueCases.Models;
 using CueFinder.Database.Context;
 using CueFinder.Database.Models;
+using CueFinder.Extensions.Moderation;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -16,11 +17,13 @@ public class ImageService : IImageService
     private readonly CueFinderDbContext _context;
     private readonly ILogger<ImageService> _logger;
     private readonly string _uploadPath;
+    private readonly IModerationService? _moderationService;
 
-    public ImageService(CueFinderDbContext context, ILogger<ImageService> logger)
+    public ImageService(CueFinderDbContext context, ILogger<ImageService> logger, IModerationService? moderationService = null)
     {
         _context = context;
         _logger = logger;
+        _moderationService = moderationService;
         
         // Set upload path
         // Use shared uploads volume (works in Docker and locally)
@@ -85,6 +88,40 @@ public class ImageService : IImageService
 
             _context.CueCaseImages.Add(caseImage);
             await _context.SaveChangesAsync();
+
+            // Scan image for inappropriate content if moderation service is available
+            if (_moderationService != null)
+            {
+                try
+                {
+                    _logger.LogInformation(
+                        "Scanning uploaded image for cue case {CueCaseId}, User {UserId}, FilePath: {FilePath}",
+                        cueCaseId, userId, filePath);
+
+                    var scanResult = await _moderationService.ScanImageAsync(filePath, userId, null, cueCaseId);
+                    
+                    if (scanResult.IsUnsafe)
+                    {
+                        _logger.LogWarning(
+                            "Image flagged for cue case {CueCaseId}: {Reason}, Confidence: {Score}",
+                            cueCaseId, scanResult.FlagReason, scanResult.ConfidenceScore);
+
+                        // Delete the cue case and all its images
+                        await DeleteCueCaseIfFlaggedAsync(cueCaseId, userId);
+
+                        throw new InvalidOperationException("Image violates content policy. Listing has been removed.");
+                    }
+                }
+                catch (InvalidOperationException)
+                {
+                    throw; // Re-throw to caller
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogError(ex, "Error scanning image for cue case {CueCaseId}", cueCaseId);
+                    // Continue - don't block upload if scanning fails
+                }
+            }
 
             uploadedImages.Add(new CueCaseImageDto
             {
@@ -224,5 +261,45 @@ public class ImageService : IImageService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Deleted {Count} images for cue case {CueCaseId}", images.Count, cueCaseId);
+    }
+
+    private async Task DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId)
+    {
+        try
+        {
+            // Check if there are flagged images
+            var hasFlaggedImages = await _context.FlaggedImages
+                .AnyAsync(fi => fi.CueCaseId == cueCaseId && fi.Status == "pending");
+
+            if (!hasFlaggedImages)
+            {
+                return;
+            }
+
+            // Get the cue case
+            var cueCase = await _context.CueCases
+                .Include(c => c.Images)
+                .FirstOrDefaultAsync(c => c.Id == cueCaseId);
+
+            if (cueCase == null)
+            {
+                _logger.LogWarning("CueCase {CueCaseId} not found for flagged deletion", cueCaseId);
+                return;
+            }
+
+            // Delete all images for the case
+            await DeleteCueCaseImagesInternalAsync(cueCaseId);
+
+            // Delete the cue case itself
+            _context.CueCases.Remove(cueCase);
+            await _context.SaveChangesAsync();
+
+            _logger.LogInformation("CueCase {CueCaseId} deleted due to flagged images", cueCaseId);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting flagged cue case {CueCaseId}", cueCaseId);
+            throw;
+        }
     }
 }
