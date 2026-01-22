@@ -12,6 +12,14 @@ namespace CueFinder.Database.Context
         {
         }
 
+        protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+        {
+            base.OnConfiguring(optionsBuilder);
+            // Configure query splitting behavior to avoid slow queries with multiple includes
+            optionsBuilder.ConfigureWarnings(w => 
+                w.Ignore(Microsoft.EntityFrameworkCore.Diagnostics.RelationalEventId.MultipleCollectionIncludeWarning));
+        }
+
         // DbSets for all entities
         public DbSet<User> Users { get; set; } = null!;
         public DbSet<Cue> Cues { get; set; } = null!;

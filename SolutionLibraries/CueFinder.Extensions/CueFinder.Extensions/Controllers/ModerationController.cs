@@ -216,26 +216,35 @@ namespace CueFinder.Extensions.Controllers
             [FromQuery] int skip = 0,
             [FromQuery] int take = 50)
         {
-            var bannedUsers = await _context.Users
+            var bannedUserIds = await _context.Users
                 .Where(u => u.IsBanned)
-                .OrderByDescending(u => u.CreatedAt)
-                .Skip(skip)
-                .Take(take)
-                .Select(u => new
-                {
-                    id = u.Id,
-                    username = u.Username,
-                    email = u.Email,
-                    display_name = u.Name,
-                    is_banned = u.IsBanned,
-                    created_at = u.CreatedAt,
-                    flagged_images_count = _context.FlaggedImages.Count(f => f.UserId == u.Id),
-                    rejected_images_count = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "rejected"),
-                    pending_flags_count = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "pending")
-                })
+                .Select(u => u.Id)
                 .ToListAsync();
 
-            var totalBanned = await _context.Users.CountAsync(u => u.IsBanned);
+            var bannedUsers = bannedUserIds
+                .Skip(skip)
+                .Take(take)
+                .Select(userId => {
+                    var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                    var flagCount = _context.FlaggedImages.Count(f => f.UserId == userId);
+                    var rejectedCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "rejected");
+                    var pendingCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "pending");
+                    return new
+                    {
+                        id = user.Id,
+                        username = user.Username,
+                        email = user.Email,
+                        display_name = user.Name,
+                        is_banned = user.IsBanned,
+                        created_at = user.CreatedAt,
+                        flagged_images_count = flagCount,
+                        rejected_images_count = rejectedCount,
+                        pending_flags_count = pendingCount
+                    };
+                })
+                .ToList();
+
+            var totalBanned = bannedUserIds.Count;
 
             return Ok(new
             {
@@ -255,38 +264,55 @@ namespace CueFinder.Extensions.Controllers
             [FromQuery] int skip = 0,
             [FromQuery] int take = 50)
         {
-            var usersWithFlags = await _context.Users
-                .Where(u => _context.FlaggedImages.Any(f => f.UserId == u.Id))
-                .OrderByDescending(u => _context.FlaggedImages.Count(f => f.UserId == u.Id))
+            // Get user IDs with flagged images, ordered by flag count
+            var userIdsWithFlags = await _context.FlaggedImages
+                .GroupBy(f => f.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
                 .Skip(skip)
                 .Take(take)
-                .Select(u => new
-                {
-                    id = u.Id,
-                    username = u.Username,
-                    email = u.Email,
-                    display_name = u.Name,
-                    is_banned = u.IsBanned,
-                    created_at = u.CreatedAt,
-                    total_flags = _context.FlaggedImages.Count(f => f.UserId == u.Id),
-                    pending_flags = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "pending"),
-                    rejected_flags = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "rejected"),
-                    approved_flags = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "approved"),
-                    flagged_images = _context.FlaggedImages
-                        .Where(f => f.UserId == u.Id)
-                        .OrderByDescending(f => f.FlaggedAt)
-                        .Take(5)
-                        .Select(f => new
-                        {
-                            id = f.Id,
-                            reason = f.FlagReason,
-                            confidence = f.AIConfidenceScore,
-                            status = f.Status,
-                            flagged_at = f.FlaggedAt
-                        })
-                        .ToList()
-                })
+                .Select(x => x.UserId)
                 .ToListAsync();
+
+            var usersWithFlags = new List<dynamic>();
+            foreach (var userId in userIdsWithFlags)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null) continue;
+
+                var totalFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId);
+                var pendingFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "pending");
+                var rejectedFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "rejected");
+                var approvedFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "approved");
+                var recentFlags = await _context.FlaggedImages
+                    .Where(f => f.UserId == userId)
+                    .OrderByDescending(f => f.FlaggedAt)
+                    .Take(5)
+                    .Select(f => new
+                    {
+                        id = f.Id,
+                        reason = f.FlagReason,
+                        confidence = f.AIConfidenceScore,
+                        status = f.Status,
+                        flagged_at = f.FlaggedAt
+                    })
+                    .ToListAsync();
+
+                usersWithFlags.Add(new
+                {
+                    id = user.Id,
+                    username = user.Username,
+                    email = user.Email,
+                    display_name = user.Name,
+                    is_banned = user.IsBanned,
+                    created_at = user.CreatedAt,
+                    total_flags = totalFlags,
+                    pending_flags = pendingFlags,
+                    rejected_flags = rejectedFlags,
+                    approved_flags = approvedFlags,
+                    flagged_images = recentFlags
+                });
+            }
 
             var totalUsersWithFlags = await _context.Users
                 .CountAsync(u => _context.FlaggedImages.Any(f => f.UserId == u.Id));
