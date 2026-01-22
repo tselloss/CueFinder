@@ -137,7 +137,7 @@ export default function AdminPage({ onBack }) {
             </Button>
             <div className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold mt-2">Admin Dashboard</h1>
             </div>
           </div>
         </div>
