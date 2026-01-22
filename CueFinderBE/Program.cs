@@ -21,7 +21,11 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container and load controllers from shared libraries (e.g., moderation)
 builder.Services
     .AddControllers()
-    .AddApplicationPart(typeof(ModerationController).Assembly);
+    .AddApplicationPart(typeof(ModerationController).Assembly)
+    .AddJsonOptions(options =>
+    {
+        options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
+    });
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();
