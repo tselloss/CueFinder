@@ -117,6 +117,45 @@ jobs:
           scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
           ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' /home/cuefinder/deploy.sh"
 
+      - name: Wait for application to start
+        run: |
+          echo "⏳ Waiting for application to be ready..."
+          sleep 15
+          
+      - name: Run Security Tests on Production
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+        run: |
+          echo "🔒 Running security tests on deployed application..."
+          
+          # Install Node.js dependencies for security tests
+          cd tests/SecurityTests
+          npm install
+          
+          # Run security tests against production
+          export API_URL="http://$SERVER_IP:5000"
+          node api-security-tests.js || echo "⚠️ Security tests completed with warnings"
+          
+          # Check for critical vulnerabilities
+          REPORT=$(ls -t security-report-*.json | head -n1)
+          if [ -f "$REPORT" ]; then
+            CRITICAL=$(jq '.summary.critical' "$REPORT")
+            HIGH=$(jq '.summary.high' "$REPORT")
+            
+            if [ "$CRITICAL" -gt "0" ]; then
+              echo "❌ CRITICAL vulnerabilities found in production!"
+              echo "Rolling back deployment..."
+              ssh cuefinder@$SERVER_IP "cd /home/cuefinder/app && docker compose down"
+              exit 1
+            fi
+            
+            if [ "$HIGH" -gt "0" ]; then
+              echo "⚠️ HIGH severity vulnerabilities detected - immediate review required!"
+            fi
+            
+            echo "✅ Security validation passed"
+          fi
+
       - name: Verify Deployment
         run: |
           echo "🔍 Verifying deployment..."

@@ -1,4 +1,5 @@
 using CueFinder.Auth.Extensions;
+using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
@@ -169,6 +170,9 @@ app.UseStaticFiles(new StaticFileOptions
 // Add exception handler and status code pages for ProblemDetails
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+// Add rate limiting middleware (before authentication)
+app.UseRateLimiting(requestLimit: 5, timeWindowSeconds: 60);
 
 app.UseHttpsRedirection();
 app.UseAuthentication();
