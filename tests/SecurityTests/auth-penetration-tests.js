@@ -8,10 +8,21 @@ const jwt = require('jsonwebtoken');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:5000';
 
+// Create axios instance with timeout
+const axiosInstance = axios.create({
+    timeout: 10000,
+    maxRedirects: 5,
+    validateStatus: () => true
+});
+
 class AuthenticationPentester {
     constructor() {
         this.results = [];
         this.vulnerabilities = [];
+    }
+    
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     log(message, type = 'INFO') {
@@ -37,13 +48,13 @@ class AuthenticationPentester {
         const password = 'AuthTest123!';
 
         try {
-            await axios.post(`${BASE_URL}/api/auth/register`, {
+            await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
                 username: email,
                 password,
                 name: `Auth Tester ${role}`
             });
 
-            const loginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+            const loginResponse = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
                 username: email,
                 password
             });
@@ -111,7 +122,7 @@ class AuthenticationPentester {
 
             // Test 5: Token reuse after logout (if logout endpoint exists)
             try {
-                await axios.post(`${BASE_URL}/api/auth/logout`, {}, {
+                await axiosInstance.post(`${BASE_URL}/api/auth/logout`, {}, {
                     headers: { 'Authorization': `Bearer ${user.token}` }
                 });
 
@@ -136,7 +147,7 @@ class AuthenticationPentester {
 
     async testTokenAtEndpoint(token, testName) {
         try {
-            const response = await axios.get(`${BASE_URL}/api/users/me`, {
+            const response = await axiosInstance.get(`${BASE_URL}/api/users/me`, {
                 headers: { 'Authorization': `Bearer ${token}` },
                 validateStatus: () => true
             });
@@ -191,7 +202,7 @@ class AuthenticationPentester {
 
         // Test modifying other users' data
         try {
-            const response = await axios.put(
+            const response = await axiosInstance.put(
                 `${BASE_URL}/api/users/1`,
                 { displayName: 'Hacked', role: 'admin' },
                 {
@@ -211,7 +222,7 @@ class AuthenticationPentester {
 
         // Test role manipulation in update profile
         try {
-            const response = await axios.put(
+            const response = await axiosInstance.put(
                 `${BASE_URL}/api/users/me`,
                 { role: 'admin', isAdmin: true },
                 {
@@ -242,7 +253,7 @@ class AuthenticationPentester {
         // Test 1: Session fixation
         const fixedToken = 'fixed_session_token_12345';
         try {
-            const response = await axios.get(`${BASE_URL}/api/users/me`, {
+            const response = await axiosInstance.get(`${BASE_URL}/api/users/me`, {
                 headers: { 'Authorization': `Bearer ${fixedToken}` },
                 validateStatus: () => true
             });
@@ -257,12 +268,12 @@ class AuthenticationPentester {
         }
 
         // Test 2: Concurrent sessions
-        const login1 = await axios.post(`${BASE_URL}/api/auth/login`, {
+        const login1 = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
             username: user.email,
             password: user.password
         });
 
-        const login2 = await axios.post(`${BASE_URL}/api/auth/login`, {
+        const login2 = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
             username: user.email,
             password: user.password
         });
@@ -277,7 +288,7 @@ class AuthenticationPentester {
 
         // Test 3: Token in URL (if applicable)
         try {
-            const response = await axios.get(
+            const response = await axiosInstance.get(
                 `${BASE_URL}/api/users/me?token=${user.token}`,
                 { validateStatus: () => true }
             );
@@ -311,7 +322,7 @@ class AuthenticationPentester {
         for (const password of weakPasswords) {
             try {
                 const username = `weakpass${Date.now()}`;
-                const response = await axios.post(`${BASE_URL}/api/auth/register`, {
+                const response = await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
                     username,
                     password,
                     name: 'Weak Pass Test'
@@ -331,7 +342,7 @@ class AuthenticationPentester {
         let resetSuccessCount = 0;
         for (let i = 0; i < 20; i++) {
             try {
-                const response = await axios.post(
+                const response = await axiosInstance.post(
                     `${BASE_URL}/api/auth/forgot-password`,
                     { email: 'test@test.com' },
                     { validateStatus: () => true }
@@ -362,7 +373,7 @@ class AuthenticationPentester {
         const password = 'BruteForce123!';
 
         // Create user
-        await axios.post(`${BASE_URL}/api/auth/register`, {
+        await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
             username,
             password,
             name: 'Brute Force Test'
@@ -374,7 +385,7 @@ class AuthenticationPentester {
 
         for (let i = 0; i < 30; i++) {
             try {
-                const response = await axios.post(
+                const response = await axiosInstance.post(
                     `${BASE_URL}/api/auth/login`,
                     { username, password: 'wrongpassword' },
                     { validateStatus: () => true }
@@ -405,7 +416,7 @@ class AuthenticationPentester {
 
         try {
             // Test CORS with malicious origin
-            const response = await axios.get(`${BASE_URL}/api/users/me`, {
+            const response = await axiosInstance.get(`${BASE_URL}/api/users/me`, {
                 headers: { 'Origin': 'http://evil.com' },
                 validateStatus: () => true
             });
@@ -420,7 +431,7 @@ class AuthenticationPentester {
             // Test CSRF token requirement
             const user = await this.createTestUser();
             if (user) {
-                const csrfResponse = await axios.post(
+                const csrfResponse = await axiosInstance.post(
                     `${BASE_URL}/api/listings`,
                     { title: 'CSRF Test', price: 100 },
                     {
