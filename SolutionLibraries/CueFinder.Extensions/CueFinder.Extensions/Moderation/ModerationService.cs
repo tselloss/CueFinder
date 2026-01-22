@@ -124,6 +124,10 @@ namespace CueFinder.Extensions.Moderation
                 if (aiResult.IsUnsafe)
                 {
                     // Flag and add to moderation queue
+                    _logger.LogWarning(
+                        "Flagging image for user {UserId}: {ImagePath}, Reason: {Reason}, Score: {Score}, CueId: {CueId}, CueCaseId: {CueCaseId}",
+                        userId, imagePath, aiResult.FlagReason, aiResult.ConfidenceScore, cueId, cueCaseId);
+
                     var flaggedImage = new FlaggedImage
                     {
                         ImageHash = imageHash,
@@ -140,6 +144,10 @@ namespace CueFinder.Extensions.Moderation
 
                     _context.FlaggedImages.Add(flaggedImage);
                     await _context.SaveChangesAsync();
+
+                    _logger.LogInformation(
+                        "Image flagged and saved to database: FlagId={FlagId}, UserId={UserId}, ImageHash={ImageHash}",
+                        flaggedImage.Id, flaggedImage.UserId, imageHash);
 
                     // Add to moderation queue
                     var priority = aiResult.ConfidenceScore > 0.85 ? 1 : aiResult.ConfidenceScore > 0.7 ? 2 : 3;

@@ -153,6 +153,204 @@ namespace CueFinder.Extensions.Controllers
         }
 
         /// <summary>
+        /// [ADMIN] Get all flagged images with user information
+        /// </summary>
+        [HttpGet("flagged-images")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetAllFlaggedImages(
+            [FromQuery] string? status = null,
+            [FromQuery] int skip = 0,
+            [FromQuery] int take = 50)
+        {
+            var query = _context.FlaggedImages
+                .Include(f => f.User)
+                .AsQueryable();
+
+            if (!string.IsNullOrEmpty(status))
+            {
+                query = query.Where(f => f.Status == status);
+            }
+
+            var total = await query.CountAsync();
+            var flags = await query
+                .OrderByDescending(f => f.FlaggedAt)
+                .Skip(skip)
+                .Take(take)
+                .Select(f => new
+                {
+                    id = f.Id,
+                    user_id = f.UserId,
+                    user_name = f.User != null ? f.User.Username : "Unknown",
+                    user_email = f.User != null ? f.User.Email : null,
+                    user_is_banned = f.User != null ? f.User.IsBanned : false,
+                    image_hash = f.ImageHash,
+                    file_name = f.FileName,
+                    storage_path = f.StoragePath,
+                    cue_id = f.CueId,
+                    cue_case_id = f.CueCaseId,
+                    flag_reason = f.FlagReason,
+                    ai_confidence = f.AIConfidenceScore,
+                    is_ai_flagged = f.IsAIFlagged,
+                    status = f.Status,
+                    flagged_at = f.FlaggedAt,
+                    reviewed_at = f.ReviewedAt,
+                    admin_notes = f.AdminNotes
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                total,
+                skip,
+                take,
+                items = flags
+            });
+        }
+
+        /// <summary>
+        /// [ADMIN] Get banned users with their flagged content count
+        /// </summary>
+        [HttpGet("banned-users")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetBannedUsers(
+            [FromQuery] int skip = 0,
+            [FromQuery] int take = 50)
+        {
+            var bannedUserIds = await _context.Users
+                .Where(u => u.IsBanned)
+                .Select(u => u.Id)
+                .ToListAsync();
+
+            var bannedUsers = bannedUserIds
+                .Skip(skip)
+                .Take(take)
+                .Select(userId => {
+                    var user = _context.Users.FirstOrDefault(u => u.Id == userId);
+                    var flagCount = _context.FlaggedImages.Count(f => f.UserId == userId);
+                    var rejectedCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "rejected");
+                    var pendingCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "pending");
+                    return new
+                    {
+                        id = user.Id,
+                        username = user.Username,
+                        email = user.Email,
+                        display_name = user.Name,
+                        is_banned = user.IsBanned,
+                        created_at = user.CreatedAt,
+                        flagged_images_count = flagCount,
+                        rejected_images_count = rejectedCount,
+                        pending_flags_count = pendingCount
+                    };
+                })
+                .ToList();
+
+            var totalBanned = bannedUserIds.Count;
+
+            return Ok(new
+            {
+                total = totalBanned,
+                skip,
+                take,
+                items = bannedUsers
+            });
+        }
+
+        /// <summary>
+        /// [ADMIN] Get users with flagged content (not necessarily banned)
+        /// </summary>
+        [HttpGet("users-with-flags")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetUsersWithFlags(
+            [FromQuery] int skip = 0,
+            [FromQuery] int take = 50)
+        {
+            // Get user IDs with flagged images, ordered by flag count
+            var userIdsWithFlags = await _context.FlaggedImages
+                .GroupBy(f => f.UserId)
+                .Select(g => new { UserId = g.Key, Count = g.Count() })
+                .OrderByDescending(x => x.Count)
+                .Skip(skip)
+                .Take(take)
+                .Select(x => x.UserId)
+                .ToListAsync();
+
+            var usersWithFlags = new List<dynamic>();
+            foreach (var userId in userIdsWithFlags)
+            {
+                var user = await _context.Users.FirstOrDefaultAsync(u => u.Id == userId);
+                if (user == null) continue;
+
+                var totalFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId);
+                var pendingFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "pending");
+                var rejectedFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "rejected");
+                var approvedFlags = await _context.FlaggedImages.CountAsync(f => f.UserId == userId && f.Status == "approved");
+                var recentFlags = await _context.FlaggedImages
+                    .Where(f => f.UserId == userId)
+                    .OrderByDescending(f => f.FlaggedAt)
+                    .Take(5)
+                    .Select(f => new
+                    {
+                        id = f.Id,
+                        reason = f.FlagReason,
+                        confidence = f.AIConfidenceScore,
+                        status = f.Status,
+                        flagged_at = f.FlaggedAt
+                    })
+                    .ToListAsync();
+
+                usersWithFlags.Add(new
+                {
+                    id = user.Id,
+                    username = user.Username,
+                    email = user.Email,
+                    display_name = user.Name,
+                    is_banned = user.IsBanned,
+                    created_at = user.CreatedAt,
+                    total_flags = totalFlags,
+                    pending_flags = pendingFlags,
+                    rejected_flags = rejectedFlags,
+                    approved_flags = approvedFlags,
+                    flagged_images = recentFlags
+                });
+            }
+
+            var totalUsersWithFlags = await _context.Users
+                .CountAsync(u => _context.FlaggedImages.Any(f => f.UserId == u.Id));
+
+            return Ok(new
+            {
+                total = totalUsersWithFlags,
+                skip,
+                take,
+                items = usersWithFlags
+            });
+        }
+
+        /// <summary>
+        /// [ADMIN] Get moderation statistics
+        /// </summary>
+        [HttpGet("stats")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetModerationStats()
+        {
+            var stats = new
+            {
+                total_flagged_images = await _context.FlaggedImages.CountAsync(),
+                pending_flags = await _context.FlaggedImages.CountAsync(f => f.Status == "pending"),
+                approved_flags = await _context.FlaggedImages.CountAsync(f => f.Status == "approved"),
+                rejected_flags = await _context.FlaggedImages.CountAsync(f => f.Status == "rejected"),
+                total_banned_users = await _context.Users.CountAsync(u => u.IsBanned),
+                users_with_flags = await _context.Users.CountAsync(u => _context.FlaggedImages.Any(f => f.UserId == u.Id)),
+                ai_flagged_count = await _context.FlaggedImages.CountAsync(f => f.IsAIFlagged),
+                user_reported_count = await _context.UserReports.CountAsync(),
+                moderation_queue_size = await _context.ModerationQueues.CountAsync(q => !q.IsBeingReviewed),
+                high_priority_queue = await _context.ModerationQueues.CountAsync(q => q.Priority == 1 && !q.IsBeingReviewed)
+            };
+
+            return Ok(stats);
+        }
+
+        /// <summary>
         /// [ADMIN] Approve flagged image
         /// </summary>
         [HttpPost("approve/{flagId}")]
