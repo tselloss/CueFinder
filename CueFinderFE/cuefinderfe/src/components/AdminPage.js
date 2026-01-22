@@ -203,23 +203,23 @@ export default function AdminPage({ onBack }) {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Name</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Role</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Status</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Actions</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Name</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Role</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Status</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {paginatedUsers.map((user) => (
                       <tr key={user.id} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3">
                           <div>
-                            <p className="font-bold text-gray-900">{user.name}</p>
-                            <p className="text-gray-500 text-xs">{user.email}</p>
+                            <p className="font-bold text-gray-900 text-xs sm:text-sm">{user.name}</p>
+                            <p className="text-gray-500 text-[10px] sm:text-xs">{user.email}</p>
                           </div>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-flex items-center gap-2 px-2.5 py-1 rounded text-xs font-medium ${
+                        <td className="px-2 sm:px-4 py-3">
+                          <span className={`inline-flex items-center gap-1 sm:gap-2 px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-medium ${
                             user.role === 'admin'
                               ? 'bg-blue-100 text-blue-700'
                               : 'bg-gray-100 text-gray-700'
@@ -228,8 +228,8 @@ export default function AdminPage({ onBack }) {
                             {user.role}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <span className={`inline-block px-2.5 py-1 rounded text-xs font-medium text-white ${
+                        <td className="px-2 sm:px-4 py-3">
+                          <span className={`inline-block px-1.5 sm:px-2.5 py-0.5 sm:py-1 rounded text-[10px] sm:text-xs font-medium text-white ${
                             user.isActive === false
                               ? 'bg-red-500'
                               : 'bg-green-500'
@@ -237,28 +237,28 @@ export default function AdminPage({ onBack }) {
                             {user.isActive === false ? 'INACTIVE' : 'ACTIVE'}
                           </span>
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
+                        <td className="px-2 sm:px-4 py-3">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => setEditingUser({ ...user })}
                               title="Edit"
-                              className="w-8 h-8 p-0"
+                              className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
                             >
-                              <Edit2 className="w-4 h-4" />
+                              <Edit2 className="w-4 h-4 sm:w-4 sm:h-4" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => toggleBan(user)}
                               title={user.isActive === false ? 'Activate' : 'Disable'}
-                              className="w-8 h-8 p-0"
+                              className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
                             >
                               {user.isActive === false ? (
-                                <Check className="w-4 h-4 text-green-600" />
+                                <Check className="w-4 h-4 sm:w-4 sm:h-4 text-green-600" />
                               ) : (
-                                <X className="w-4 h-4 text-red-600" />
+                                <X className="w-4 h-4 sm:w-4 sm:h-4 text-red-600" />
                               )}
                             </Button>
                             <Button
@@ -266,9 +266,9 @@ export default function AdminPage({ onBack }) {
                               size="sm"
                               onClick={() => deleteUser(user.id)}
                               title="Delete"
-                              className="w-8 h-8 p-0"
+                              className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
                             >
-                              <Trash2 className="w-4 h-4 text-red-600" />
+                              <Trash2 className="w-4 h-4 sm:w-4 sm:h-4 text-red-600" />
                             </Button>
                           </div>
                         </td>
@@ -281,7 +281,7 @@ export default function AdminPage({ onBack }) {
               {/* Users Pagination */}
               {userTotalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-xs sm:text-sm text-gray-600">
                     Page {userPage} of {userTotalPages}
                   </div>
                   <div className="flex gap-2">
@@ -290,6 +290,7 @@ export default function AdminPage({ onBack }) {
                       size="sm"
                       onClick={() => setUserPage(prev => Math.max(1, prev - 1))}
                       disabled={userPage === 1}
+                      className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation text-xs sm:text-sm"
                     >
                       Previous
                     </Button>
@@ -298,6 +299,7 @@ export default function AdminPage({ onBack }) {
                       size="sm"
                       onClick={() => setUserPage(prev => Math.min(userTotalPages, prev + 1))}
                       disabled={userPage === userTotalPages}
+                      className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation text-xs sm:text-sm"
                     >
                       Next
                     </Button>
@@ -338,7 +340,7 @@ export default function AdminPage({ onBack }) {
                         setActiveTab(tab);
                         setListingPage(1);
                       }}
-                      className={`px-4 py-2 font-medium text-sm border-b-2 transition-colors ${
+                      className={`px-3 sm:px-4 py-2 min-h-[44px] sm:min-h-0 font-medium text-xs sm:text-sm border-b-2 transition-colors touch-manipulation ${
                         activeTab === tab
                           ? 'border-blue-600 text-blue-600'
                           : 'border-transparent text-gray-600 hover:text-gray-900'
@@ -355,54 +357,54 @@ export default function AdminPage({ onBack }) {
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b border-gray-200">
                     <tr>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Title</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Price (€)</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Status</th>
-                      <th className="px-4 py-3 text-left font-bold text-gray-900">Actions</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Title</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Price (€)</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Status</th>
+                      <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">Actions</th>
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-gray-200">
                     {paginatedListings.map((item) => (
                       <tr key={item.uid} className="hover:bg-gray-50">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
-                            <span className="inline-block px-2 py-1 bg-gray-200 text-gray-700 text-xs font-bold rounded">
+                        <td className="px-2 sm:px-4 py-3">
+                          <div className="flex items-center gap-1 sm:gap-2">
+                            <span className="inline-block px-1 sm:px-2 py-0.5 sm:py-1 bg-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold rounded">
                               {item.itemType.toUpperCase()}
                             </span>
-                            <span className="font-bold text-gray-900">{item.title}</span>
+                            <span className="font-bold text-gray-900 text-xs sm:text-sm">{item.title}</span>
                           </div>
                         </td>
-                        <td className="px-4 py-3 text-gray-600">
+                        <td className="px-2 sm:px-4 py-3 text-gray-600 text-xs sm:text-sm">
                           €{Number(item.price || 0).toFixed(2)}
                         </td>
-                        <td className="px-4 py-3">
+                        <td className="px-2 sm:px-4 py-3">
                           {item.flagged ? (
-                            <span className="inline-block px-2.5 py-1 bg-orange-500 text-white text-xs font-medium rounded">
+                            <span className="inline-block px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-orange-500 text-white text-[10px] sm:text-xs font-medium rounded">
                               FLAGGED
                             </span>
                           ) : (
-                            <span className="text-gray-400 text-xs">—</span>
+                            <span className="text-gray-400 text-[10px] sm:text-xs">—</span>
                           )}
                         </td>
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-2">
+                        <td className="px-2 sm:px-4 py-3">
+                          <div className="flex items-center gap-1 sm:gap-2">
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => flagListing(item)}
                               title="Flag"
-                              className="w-8 h-8 p-0"
+                              className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
                             >
-                              <Flag className="w-4 h-4 text-orange-600" />
+                              <Flag className="w-4 h-4 sm:w-4 sm:h-4 text-orange-600" />
                             </Button>
                             <Button
                               variant="outline"
                               size="sm"
                               onClick={() => removeListing(item)}
                               title="Delete"
-                              className="w-8 h-8 p-0"
+                              className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
                             >
-                              <Trash2 className="w-4 h-4 text-red-600" />
+                              <Trash2 className="w-4 h-4 sm:w-4 sm:h-4 text-red-600" />
                             </Button>
                           </div>
                         </td>
@@ -415,7 +417,7 @@ export default function AdminPage({ onBack }) {
               {/* Listings Pagination */}
               {listingTotalPages > 1 && (
                 <div className="flex items-center justify-between mt-4">
-                  <div className="text-sm text-gray-600">
+                  <div className="text-xs sm:text-sm text-gray-600">
                     Page {listingPage} of {listingTotalPages}
                   </div>
                   <div className="flex gap-2">
@@ -424,6 +426,7 @@ export default function AdminPage({ onBack }) {
                       size="sm"
                       onClick={() => setListingPage(prev => Math.max(1, prev - 1))}
                       disabled={listingPage === 1}
+                      className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation text-xs sm:text-sm"
                     >
                       Previous
                     </Button>
@@ -432,6 +435,7 @@ export default function AdminPage({ onBack }) {
                       size="sm"
                       onClick={() => setListingPage(prev => Math.min(listingTotalPages, prev + 1))}
                       disabled={listingPage === listingTotalPages}
+                      className="min-w-[44px] min-h-[44px] sm:min-w-0 sm:min-h-0 touch-manipulation text-xs sm:text-sm"
                     >
                       Next
                     </Button>
