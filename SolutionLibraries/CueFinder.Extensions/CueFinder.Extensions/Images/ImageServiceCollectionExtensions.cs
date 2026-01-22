@@ -1,3 +1,4 @@
+using CueFinder.Extensions.Controllers;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -12,6 +13,8 @@ public static class ImageServiceCollectionExtensions
     {
         services.Configure<ImageStorageSettings>(configuration.GetSection("ImageStorage"));
         services.AddScoped<IImageService, ImageService>();
+        services.AddScoped<ImagesController>();
+
         return services;
     }
 }
