@@ -124,6 +124,12 @@ export async function uploadCueCaseImages(cueCaseId, files, onProgress) {
     return response.data;
   } catch (error) {
     console.error('Error uploading cue case images:', error);
+    // Check if it's an NSFW rejection
+    if (error.response?.data?.errorMessage) {
+      const nsfwError = new Error(error.response.data.errorMessage);
+      nsfwError.isNSFW = true;
+      throw nsfwError;
+    }
     throw error;
   }
 }

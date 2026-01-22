@@ -219,6 +219,8 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         }
       }
 
+      // Success - close the form
+      onClose();
       onSave();
     } catch (error) {
       console.error('Error saving listing:', error);
