@@ -3,12 +3,13 @@ using CueFinder.CueCases.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
+using CueFinder.Extensions.Controllers;
 using CueFinder.Extensions.Images;
-using CueFinder.Extensions.ProblemDetails;
 using CueFinder.Extensions.Moderation;
+using CueFinder.Extensions.ProblemDetails;
+using CueFinder.Forum.Extensions;
 using CueFinder.Messages.Extensions;
 using CueFinder.Messages.Hubs;
-using CueFinder.Forum.Extensions;
 using CueFinderBE.Services;
 
 // Configure Npgsql to handle DateTime without timezone issues
@@ -16,8 +17,10 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container
-builder.Services.AddControllers();
+// Add services to the container and load controllers from shared libraries (e.g., moderation)
+builder.Services
+    .AddControllers()
+    .AddApplicationPart(typeof(ModerationController).Assembly);
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddSignalR();

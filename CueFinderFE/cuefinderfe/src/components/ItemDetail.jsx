@@ -205,7 +205,7 @@ export default function ItemDetail({
             {/* Title & Price */}
             <div>
               <div className="flex items-start gap-3 mb-2">
-                <h1 className="text-3xl md:text-4xl font-bold text-foreground">
+                <h1 className="text-3xl md:text-4xl font-bold text-foreground mt-2">
                   {item.brand} {item.title}
                 </h1>
                 {(item.isSold || item.is_sold) && (

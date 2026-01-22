@@ -13,7 +13,8 @@ namespace CueFinder.Extensions.Controllers
     /// API endpoints for image moderation
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    // Use an explicit prefix to avoid clashing with the app-level moderation controller
+    [Route("api/ext/[controller]")]
     public class ModerationController : ControllerBase
     {
         private readonly IModerationService _moderationService;
@@ -43,14 +44,19 @@ namespace CueFinder.Extensions.Controllers
             if (file == null || file.Length == 0)
                 return BadRequest(new { message = "No file provided" });
 
-            // Get user ID from claims
-            var userIdClaim = User.FindFirst("sub")?.Value ?? User.FindFirst("nameid")?.Value;
+            // Get user ID from claims (handle standard and JWT "sub")
+            var userIdClaim = User.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+                               ?? User.FindFirst("sub")?.Value
+                               ?? User.FindFirst("nameid")?.Value;
             if (!int.TryParse(userIdClaim, out var userId))
                 return Unauthorized(new { message = "Invalid user context" });
 
             // Validate file type
             var allowedMimes = new[] { "image/jpeg", "image/png", "image/webp", "image/gif" };
-            if (!allowedMimes.Contains(file.ContentType))
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".gif" };
+            var contentType = file.ContentType?.ToLowerInvariant() ?? string.Empty;
+            var extension = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedMimes.Contains(contentType) && !allowedExtensions.Contains(extension))
                 return BadRequest(new { message = "Invalid file type. Allowed: JPEG, PNG, WebP, GIF" });
 
             // Validate file size (5MB max)
@@ -80,12 +86,15 @@ namespace CueFinder.Extensions.Controllers
                     if (System.IO.File.Exists(tempPath))
                         System.IO.File.Delete(tempPath);
 
-                    return BadRequest(new
+                    return new ObjectResult(new
                     {
                         message = "Image rejected - violates content policy",
                         flag_reason = scanResult.FlagReason,
                         confidence = scanResult.ConfidenceScore
-                    });
+                    })
+                    {
+                        StatusCode = 403
+                    };
                 }
 
                 // Image passed - move to public storage or return temp path

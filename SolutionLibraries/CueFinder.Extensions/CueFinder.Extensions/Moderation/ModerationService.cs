@@ -189,7 +189,12 @@ namespace CueFinder.Extensions.Moderation
                 if (!response.IsSuccessStatusCode)
                 {
                     _logger.LogWarning($"NudeNet service returned {response.StatusCode}");
-                    return new ModerationResult { IsUnsafe = false }; // Fail open, allow upload
+                    return new ModerationResult
+                    {
+                        IsUnsafe = true,
+                        FlagReason = "service_error",
+                        ConfidenceScore = 1.0
+                    }; // Fail closed
                 }
 
                 var content = await response.Content.ReadAsStringAsync();
@@ -223,8 +228,13 @@ namespace CueFinder.Extensions.Moderation
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "NudeNet service call failed, allowing upload");
-                return new ModerationResult { IsUnsafe = false }; // Fail open
+                _logger.LogError(ex, "NudeNet service call failed, blocking upload");
+                return new ModerationResult
+                {
+                    IsUnsafe = true,
+                    FlagReason = "scan_error",
+                    ConfidenceScore = 1.0
+                }; // Fail closed
             }
         }
 
