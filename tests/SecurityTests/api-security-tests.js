@@ -8,10 +8,18 @@ const FormData = require('form-data');
 
 const BASE_URL = process.env.API_URL || 'http://localhost:5000';
 
+// Create axios instance with timeout
+const axiosInstance = axios.create({
+    timeout: 10000, // 10 second timeout
+    maxRedirects: 5,
+    validateStatus: () => true // Don't throw on any status
+});
+
 class APISecurityTester {
     constructor() {
         this.results = [];
         this.vulnerabilities = [];
+        this.rateLimitHit = false;
     }
 
     log(message, type = 'INFO') {
@@ -51,19 +59,39 @@ class APISecurityTester {
         ];
 
         // Test login endpoint
+        let testedCount = 0;
         for (const payload of sqlPayloads) {
             try {
-                const response = await axios.post(`${BASE_URL}/api/auth/login`, {
+                this.log(`Testing payload ${++testedCount}/${sqlPayloads.length}: ${payload.substring(0, 30)}...`, 'DEBUG');
+                
+                const response = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
                     username: payload,
                     password: payload
-                }, { validateStatus: () => true });
+                });
+
+                // Check for rate limiting
+                if (response.status === 429) {
+                    this.log('⚠️  Rate limiting detected - waiting 60 seconds...', 'WARN');
+                    this.rateLimitHit = true;
+                    await this.sleep(60000);
+                    continue;
+                }
 
                 if (response.status === 200 || response.data?.token) {
                     this.logVulnerability('CRITICAL', '/api/auth/login', 
                         'SQL Injection in login endpoint', payload);
                 }
+                
+                // Small delay between requests to avoid rate limiting
+                await this.sleep(500);
             } catch (error) {
-                // Expected to fail
+                if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+                    this.log(`⚠️  Request timeout for payload: ${payload.substring(0, 30)}`, 'WARN');
+                } else if (error.code === 'ECONNREFUSED') {
+                    this.log('❌ Cannot connect to server - is it running?', 'ERROR');
+                    break;
+                }
+                // Other errors are expected
             }
         }
 
@@ -75,12 +103,20 @@ class APISecurityTester {
         ];
 
         for (const endpoint of searchEndpoints) {
+            this.log(`Testing endpoint: ${endpoint}`, 'DEBUG');
+            let endpointTestedCount = 0;
+            
             for (const payload of sqlPayloads) {
                 try {
-                    const response = await axios.get(`${BASE_URL}${endpoint}`, {
-                        params: { query: payload, search: payload },
-                        validateStatus: () => true
+                    const response = await axiosInstance.get(`${BASE_URL}${endpoint}`, {
+                        params: { query: payload, search: payload }
                     });
+
+                    if (response.status === 429) {
+                        this.log('⚠️  Rate limiting detected - waiting 60 seconds...', 'WARN');
+                        await this.sleep(60000);
+                        continue;
+                    }
 
                     // Check for SQL error messages in response
                     const body = JSON.stringify(response.data).toLowerCase();
@@ -89,13 +125,28 @@ class APISecurityTester {
                         this.logVulnerability('HIGH', endpoint, 
                             'SQL error exposed in response', payload);
                     }
+                    
+                    endpointTestedCount++;
+                    if (endpointTestedCount % 5 === 0) {
+                        this.log(`  Tested ${endpointTestedCount}/${sqlPayloads.length} payloads`, 'DEBUG');
+                    }
+                    
+                    await this.sleep(300);
                 } catch (error) {
-                    // Expected
+                    if (error.code === 'ECONNABORTED' || error.code === 'ETIMEDOUT') {
+                        this.log(`⚠️  Timeout for ${endpoint}`, 'WARN');
+                    }
+                    // Expected errors
                 }
             }
         }
 
         this.log('SQL Injection Tests Completed', 'TEST');
+    }
+    
+    // Helper method for delays
+    sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
     }
 
     // Authentication Bypass Tests
@@ -145,7 +196,7 @@ class APISecurityTester {
 
         for (const token of malformedTokens) {
             try {
-                const response = await axios.get(`${BASE_URL}/api/users/me`, {
+                const response = await axiosInstance.get(`${BASE_URL}/api/users/me`, {
                     headers: { 'Authorization': token },
                     validateStatus: () => true
                 });
@@ -179,7 +230,7 @@ class APISecurityTester {
         // Register user with XSS in username
         for (const payload of xssPayloads) {
             try {
-                const response = await axios.post(`${BASE_URL}/api/auth/register`, {
+                const response = await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
                     username: `test${Date.now()}`,
                     password: 'Test123!',
                     name: payload
@@ -201,7 +252,7 @@ class APISecurityTester {
         // Test buffer overflow with extremely long strings
         const longString = 'A'.repeat(100000);
         try {
-            await axios.post(`${BASE_URL}/api/auth/register`, {
+            await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
                 email: `test${Date.now()}@test.com`,
                 password: longString,
                 username: longString,
@@ -227,7 +278,7 @@ class APISecurityTester {
 
         for (let i = 0; i < requests; i++) {
             try {
-                const response = await axios.post(endpoint, {
+                const response = await axiosInstance.post(endpoint, {
                     email: 'test@test.com',
                     password: 'wrong'
                 }, { validateStatus: () => true });
@@ -258,13 +309,13 @@ class APISecurityTester {
         const testPassword = 'PenTest123!';
 
         try {
-            await axios.post(`${BASE_URL}/api/auth/register`, {
+            await axiosInstance.post(`${BASE_URL}/api/auth/register`, {
                 username: testEmail,
                 password: testPassword,
                 name: 'Pen Tester'
             });
 
-            const loginResponse = await axios.post(`${BASE_URL}/api/auth/login`, {
+            const loginResponse = await axiosInstance.post(`${BASE_URL}/api/auth/login`, {
                 username: testEmail,
                 password: testPassword
             });
@@ -275,7 +326,7 @@ class APISecurityTester {
             const userIds = [1, 2, 3, 4, 5, 100, 999];
             for (const userId of userIds) {
                 try {
-                    const response = await axios.get(`${BASE_URL}/api/users/${userId}`, {
+                    const response = await axiosInstance.get(`${BASE_URL}/api/users/${userId}`, {
                         headers: { 'Authorization': `Bearer ${token}` },
                         validateStatus: () => true
                     });
@@ -293,7 +344,7 @@ class APISecurityTester {
             const listingIds = [1, 2, 3, 4, 5];
             for (const listingId of listingIds) {
                 try {
-                    const deleteResponse = await axios.delete(
+                    const deleteResponse = await axiosInstance.delete(
                         `${BASE_URL}/api/listings/${listingId}`, 
                         {
                             headers: { 'Authorization': `Bearer ${token}` },

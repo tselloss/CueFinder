@@ -1,0 +1,11 @@
+{
+  "timestamp": "2026-01-22T12:20:18.974Z",
+  "target": "http://localhost:5000",
+  "vulnerabilities": [],
+  "summary": {
+    "total": 0,
+    "critical": 0,
+    "high": 0,
+    "medium": 0
+  }
+}
