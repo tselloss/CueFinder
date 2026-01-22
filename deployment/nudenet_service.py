@@ -65,7 +65,8 @@ async def scan_image(file: UploadFile = File(...)):
         logger.info("Scanning image: %s", file.filename)
 
         safe_score, nsfw_score = predict_scores(content)
-        is_unsafe = nsfw_score > 0.6
+        # Lowered threshold to catch borderline explicit content
+        is_unsafe = nsfw_score > 0.5
 
         logger.info(
             "Image %s: unsafe=%.2f, safe=%.2f",

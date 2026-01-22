@@ -1,3 +1,4 @@
+using CueFinder.Extensions.Controllers;
 using CueFinder.Extensions.Moderation;
 using Microsoft.Extensions.DependencyInjection;
 
@@ -14,6 +15,7 @@ namespace CueFinder.Extensions.Moderation
         public static IServiceCollection AddModerationServices(this IServiceCollection services)
         {
             services.AddScoped<IModerationService, ModerationService>();
+            services.AddScoped<ModerationController>();
             services.AddHttpClient();
             return services;
         }

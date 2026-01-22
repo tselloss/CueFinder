@@ -1,3 +1,4 @@
+#if false // disabled: use moderation controller from SolutionLibraries (CueFinder.Extensions) to avoid route duplication
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using CueFinder.Extensions.Moderation;
@@ -10,7 +11,8 @@ namespace CueFinderBE.Controllers
     /// API endpoints for image moderation
     /// </summary>
     [ApiController]
-    [Route("api/[controller]")]
+    // Backend moderation controller: keep route unique to avoid clashes with extensions library
+    [Route("api/app/[controller]")]
     public class ModerationController : ControllerBase
     {
         private readonly IModerationService _moderationService;
@@ -246,3 +248,4 @@ namespace CueFinderBE.Controllers
         }
     }
 }
+#endif
