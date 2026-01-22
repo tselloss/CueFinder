@@ -625,9 +625,9 @@ export default function CueFormModal({ cue, onClose, onSave }) {
               <CardContent className="space-y-3">
                 {/* Existing Images */}
                 {cue && cue.images && cue.images.length > 0 && (
-                  <div className="space-y-2">
+                  <div className="space-y-3">
                     <h4 className="text-xs sm:text-sm font-semibold text-foreground">Current Images</h4>
-                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2">
+                    <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-6 gap-2.5 sm:gap-3 pb-1">
                       {cue.images.map(img => (
                         <div
                           key={img.id}
@@ -645,22 +645,22 @@ export default function CueFormModal({ cue, onClose, onSave }) {
                               PRIMARY
                             </div>
                           )}
-                          <div className="absolute bottom-1.5 right-1.5 flex gap-1">
+                          <div className="absolute bottom-1.5 right-1.5 flex gap-2">
                             {!img.isPrimary && (
                               <button
                                 type="button"
                                 onClick={() => handleSetPrimaryImage(img.id)}
-                                className="bg-primary/90 p-1.5 rounded-md hover:bg-primary transition-colors"
+                                className="bg-primary/90 p-2 rounded-md hover:bg-primary transition-colors shadow-sm"
                               >
-                                <Star className="w-4 h-4 text-white" />
+                                <Star className="w-5 h-5 text-white" />
                               </button>
                             )}
                             <button
                               type="button"
                               onClick={() => handleDeleteExistingImage(img.id)}
-                              className="bg-destructive/90 p-1.5 rounded-md hover:bg-destructive transition-colors"
+                              className="bg-destructive/90 p-2 rounded-md hover:bg-destructive transition-colors shadow-sm"
                             >
-                              <Trash2 className="w-4 h-4 text-white" />
+                              <Trash2 className="w-5 h-5 text-white" />
                             </button>
                           </div>
                         </div>
