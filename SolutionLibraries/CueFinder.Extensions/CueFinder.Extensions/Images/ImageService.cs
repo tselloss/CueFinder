@@ -1,5 +1,6 @@
 using CueFinder.Database.Context;
 using CueFinder.Database.Models;
+using CueFinder.Extensions.Moderation;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.EntityFrameworkCore;
@@ -18,16 +19,19 @@ public class ImageService : IImageService
     private readonly ILogger<ImageService> _logger;
     private readonly ImageStorageSettings _settings;
     private readonly IWebHostEnvironment _webHostEnvironment;
+    private readonly IModerationService _moderationService;
 
     public ImageService(
         CueFinderDbContext context,
         ILogger<ImageService> logger,
         IOptions<ImageStorageSettings> settings,
-        IWebHostEnvironment webHostEnvironment)
+        IWebHostEnvironment webHostEnvironment,
+        IModerationService moderationService)
     {
         _context = context;
         _logger = logger;
         _settings = settings.Value;
+        _moderationService = moderationService;
         _webHostEnvironment = webHostEnvironment;
     }
 
@@ -92,6 +96,31 @@ public class ImageService : IImageService
             {
                 await request.File.CopyToAsync(stream);
             }
+
+            // NSFW Check
+            _logger.LogInformation("Checking image for NSFW content: {FilePath}", filePath);
+            var moderationResult = await _moderationService.ScanImageAsync(filePath, userId, request.CueId);
+            
+            if (moderationResult.IsUnsafe)
+            {
+                _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}", 
+                    filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
+                
+                // Delete the uploaded file
+                if (File.Exists(filePath))
+                {
+                    File.Delete(filePath);
+                }
+                
+                return new ImageUploadResponse
+                {
+                    Success = false,
+                    ErrorMessage = $"Image rejected: {moderationResult.FlagReason}. Confidence: {moderationResult.ConfidenceScore:P0}",
+                    UploadedAt = DateTime.UtcNow
+                };
+            }
+            
+            _logger.LogInformation("Image passed NSFW check: {FilePath}", filePath);
 
             var imageUrl = $"{GetCueFolderUrl(request.CueId)}/{fileName}";
             var contentType = request.File.ContentType;
