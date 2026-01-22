@@ -318,7 +318,7 @@ const Forum = ({ onBack }) => {
               </Button>
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-6 h-6 text-primary" />
-                <h1 className="text-2xl font-bold">Forum</h1>
+                <h1 className="text-2xl font-bold mt-2">Forum</h1>
               </div>
             </div>
             {view !== 'categories' && user && (

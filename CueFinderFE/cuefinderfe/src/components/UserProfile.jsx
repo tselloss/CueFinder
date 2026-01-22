@@ -132,7 +132,7 @@ export default function UserProfile({ onBack }) {
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mt-2">My Profile</h1>
         </div>
 
         {/* Message Alert */}
