@@ -79,7 +79,7 @@ const ModerationDashboard = () => {
 
   return (
     <div className="moderation-dashboard p-6 bg-gray-50">
-      <h1 className="text-3xl font-bold mb-6">Moderation Dashboard</h1>
+      <h1 className="text-3xl font-bold mb-6 mt-2">Moderation Dashboard</h1>
 
       {loading && <p className="text-gray-600">Loading...</p>}
 
