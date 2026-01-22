@@ -31,6 +31,7 @@ public class CueService : ICueService
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
+            .AsSplitQuery()
             .Where(c => !c.IsSold);
 
         // Apply filters
@@ -67,6 +68,7 @@ public class CueService : ICueService
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
+            .AsSplitQuery()
             .Where(c => c.Id == cueId)
             .Where(c => !c.IsSold)
             .FirstOrDefaultAsync();
@@ -87,6 +89,7 @@ public class CueService : ICueService
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
+            .AsSplitQuery()
             .Where(c => c.UserId == userId && !c.IsSold)
             .OrderByDescending(c => c.CreatedAt)
             .ToListAsync();

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
@@ -48,6 +48,31 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
+  const [toast, setToast] = useState(null);
+<<<<<<< Updated upstream
+=======
+  const toastTimeoutRef = useRef(null);
+
+  const clearToastTimeout = () => {
+    if (toastTimeoutRef.current) {
+      clearTimeout(toastTimeoutRef.current);
+      toastTimeoutRef.current = null;
+    }
+  };
+
+  const showToast = (type, message, duration = 3000) => {
+    clearToastTimeout();
+    setToast({ type, message });
+    toastTimeoutRef.current = setTimeout(() => {
+      setToast(null);
+      toastTimeoutRef.current = null;
+    }, duration);
+  };
+
+  useEffect(() => {
+    return () => clearToastTimeout();
+  }, []);
+>>>>>>> Stashed changes
 
   useEffect(() => {
     if (cue) {
@@ -147,7 +172,15 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     try {
       // Validate images are provided for new listings
       if (!cue && images.length === 0) {
+<<<<<<< Updated upstream
         setError(`Please upload at least one image for your ${productType} listing.`);
+        setToast({ type: 'error', message: 'Please add at least one image.' });
+        setTimeout(() => setToast(null), 3000);
+=======
+        const msg = `Please upload at least one image for your ${productType} listing.`;
+        setError(msg);
+        showToast('error', msg);
+>>>>>>> Stashed changes
         setLoading(false);
         return;
       }
@@ -219,12 +252,31 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         }
       }
 
-      // Success - close the form
-      onClose();
-      onSave();
+<<<<<<< Updated upstream
+      // Show success toast for 3 seconds, then close the form
+      setToast({ type: 'success', message: 'Listing saved successfully.' });
+      setTimeout(() => {
+        setToast(null);
+        onSave();
+        onClose();
+      }, 3000);
+=======
+      showToast('success', 'Listing saved successfully!');
+      setTimeout(() => {
+        onSave();
+        onClose();
+      }, 1500);
+>>>>>>> Stashed changes
     } catch (error) {
       console.error('Error saving listing:', error);
-      setError(getErrorMessage(error, 'Failed to save listing. Please try again.'));
+      const friendlyError = getErrorMessage(error, 'Failed to save listing. Please try again.');
+      setError(friendlyError);
+<<<<<<< Updated upstream
+      setToast({ type: 'error', message: friendlyError });
+      setTimeout(() => setToast(null), 3000);
+=======
+      showToast('error', friendlyError);
+>>>>>>> Stashed changes
     } finally {
       setLoading(false);
       setUploadProgress(null);
@@ -240,6 +292,25 @@ export default function CueFormModal({ cue, onClose, onSave }) {
       }}
       role="presentation"
     >
+      {toast && (
+        <div
+<<<<<<< Updated upstream
+          className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-lg shadow-xl border text-sm font-semibold ${
+            toast.type === 'success'
+              ? 'bg-green-600/90 border-green-400 text-white'
+              : 'bg-red-600/90 border-red-400 text-white'
+=======
+          className={`fixed top-6 right-6 z-[60] px-6 py-4 rounded-lg shadow-2xl border-2 text-base font-semibold animate-slide-in-right ${
+            toast.type === 'success'
+              ? 'bg-green-600 border-green-400 text-white'
+              : 'bg-red-600 border-red-400 text-white'
+>>>>>>> Stashed changes
+          }`}
+        >
+          {toast.message}
+        </div>
+      )}
+
       <div
         className="w-full max-w-4xl bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 rounded-2xl border border-blue-400/30 shadow-2xl flex flex-col max-h-[90vh] my-8"
         onClick={(e) => e.stopPropagation()}
@@ -828,7 +899,14 @@ export default function CueFormModal({ cue, onClose, onSave }) {
               disabled={loading}
               className="px-6 py-2 rounded-lg bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-600 hover:to-blue-700 disabled:opacity-50 transition-all shadow-lg shadow-blue-500/30 font-medium"
             >
-              {loading ? 'Saving...' : (cue ? 'Update Listing' : 'Create Listing')}
+              {loading ? (
+                <span className="flex items-center gap-2">
+                  <span className="h-4 w-4 border-2 border-white/60 border-t-transparent rounded-full animate-spin" aria-label="Saving" />
+                  Saving...
+                </span>
+              ) : (
+                cue ? 'Update Listing' : 'Create Listing'
+              )}
             </button>
           </div>
         </form>
