@@ -6,17 +6,23 @@ import axios from 'axios';
  */
 const ModerationDashboard = () => {
   const [flags, setFlags] = useState([]);
+  const [rejectedImages, setRejectedImages] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedFlag, setSelectedFlag] = useState(null);
   const [adminNotes, setAdminNotes] = useState('');
   const [banUser, setBanUser] = useState(false);
   const [actionInProgress, setActionInProgress] = useState(false);
+  const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'rejected'
 
   // Fetch pending flags on mount
   useEffect(() => {
     fetchPendingFlags();
+    fetchRejectedImages();
     // Refresh every 30 seconds
-    const interval = setInterval(fetchPendingFlags, 30000);
+    const interval = setInterval(() => {
+      fetchPendingFlags();
+      fetchRejectedImages();
+    }, 30000);
     return () => clearInterval(interval);
   }, []);
 
@@ -31,6 +37,17 @@ const ModerationDashboard = () => {
       console.error('Error fetching flags:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const fetchRejectedImages = async () => {
+    try {
+      const response = await axios.get('/api/moderation/rejected', {
+        headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+      });
+      setRejectedImages(response.data.items || []);
+    } catch (error) {
+      console.error('Error fetching rejected images:', error);
     }
   };
 
@@ -81,37 +98,85 @@ const ModerationDashboard = () => {
     <div className="moderation-dashboard p-6 bg-gray-50">
       <h1 className="text-3xl font-bold mb-6 mt-2">Moderation Dashboard</h1>
 
+      {/* Tabs */}
+      <div className="flex gap-4 mb-6">
+        <button
+          onClick={() => setActiveTab('pending')}
+          className={`px-6 py-2 rounded-lg font-semibold transition ${
+            activeTab === 'pending'
+              ? 'bg-blue-500 text-white'
+              : 'bg-white text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          Pending ({flags.length})
+        </button>
+        <button
+          onClick={() => setActiveTab('rejected')}
+          className={`px-6 py-2 rounded-lg font-semibold transition ${
+            activeTab === 'rejected'
+              ? 'bg-blue-500 text-white'
+              : 'bg-white text-gray-600 hover:bg-gray-100'
+          }`}
+        >
+          Rejected ({rejectedImages.length})
+        </button>
+      </div>
+
       {loading && <p className="text-gray-600">Loading...</p>}
 
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Flags List */}
         <div className="lg:col-span-1 bg-white rounded-lg shadow p-4">
           <h2 className="text-xl font-semibold mb-4">
-            Pending ({flags.length})
+            {activeTab === 'pending' ? `Pending (${flags.length})` : `Rejected (${rejectedImages.length})`}
           </h2>
           <div className="space-y-2 max-h-96 overflow-y-auto">
-            {flags.length === 0 ? (
-              <p className="text-gray-500">No pending flags</p>
+            {activeTab === 'pending' ? (
+              flags.length === 0 ? (
+                <p className="text-gray-500">No pending flags</p>
+              ) : (
+                flags.map(flag => (
+                  <button
+                    key={flag.id}
+                    onClick={() => setSelectedFlag(flag)}
+                    className={`w-full text-left p-3 rounded transition ${
+                      selectedFlag?.id === flag.id
+                        ? 'bg-blue-100 border-l-4 border-blue-500'
+                        : 'bg-gray-100 hover:bg-gray-200'
+                    }`}
+                  >
+                    <div className="text-sm font-semibold">{flag.reason}</div>
+                    <div className="text-xs text-gray-600">
+                      User: {flag.user_name} ({flag.user_id})
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Confidence: {(flag.confidence * 100).toFixed(0)}%
+                    </div>
+                  </button>
+                ))
+              )
             ) : (
-              flags.map(flag => (
-                <button
-                  key={flag.id}
-                  onClick={() => setSelectedFlag(flag)}
-                  className={`w-full text-left p-3 rounded transition ${
-                    selectedFlag?.id === flag.id
-                      ? 'bg-blue-100 border-l-4 border-blue-500'
-                      : 'bg-gray-100 hover:bg-gray-200'
-                  }`}
-                >
-                  <div className="text-sm font-semibold">{flag.reason}</div>
-                  <div className="text-xs text-gray-600">
-                    User: {flag.user_name} ({flag.user_id})
+              rejectedImages.length === 0 ? (
+                <p className="text-gray-500">No rejected images</p>
+              ) : (
+                rejectedImages.map(item => (
+                  <div
+                    key={item.id}
+                    className="p-3 bg-red-50 border-l-4 border-red-500 rounded"
+                  >
+                    <div className="text-sm font-semibold text-red-700">{item.reason}</div>
+                    <div className="text-xs text-gray-600">
+                      User: {item.user_name}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Rejected: {new Date(item.flagged_at).toLocaleDateString()}
+                    </div>
+                    <div className="text-xs text-gray-600">
+                      Confidence: {(item.confidence * 100).toFixed(0)}%
+                    </div>
                   </div>
-                  <div className="text-xs text-gray-600">
-                    Confidence: {(flag.confidence * 100).toFixed(0)}%
-                  </div>
-                </button>
-              ))
+                ))
+              )
             )}
           </div>
         </div>

@@ -117,6 +117,11 @@ jobs:
           scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
           ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' /home/cuefinder/deploy.sh"
 
+      - name: Wait for application to start
+        run: |
+          echo "⏳ Waiting for application to be ready..."
+          sleep 15
+
       - name: Verify Deployment
         run: |
           echo "🔍 Verifying deployment..."
