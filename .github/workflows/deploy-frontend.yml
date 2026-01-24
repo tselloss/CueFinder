@@ -139,14 +139,15 @@ jobs:
           # Create backup of current build
           if [ -d "/var/www/cuefinder/current" ]; then
             TIMESTAMP=$(date +%s)
-            mv /var/www/cuefinder/current "/var/www/cuefinder/backup-$TIMESTAMP"
+            sudo mv /var/www/cuefinder/current "/var/www/cuefinder/backup-$TIMESTAMP"
             echo "  Backed up previous build"
           fi
           
           # Deploy new build (atomic operation)
           echo "📦 Deploying new build..."
-          mkdir -p /var/www/cuefinder
-          cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
+          sudo mkdir -p /var/www/cuefinder
+          sudo cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
+          sudo chown -R cuefinder:cuefinder /var/www/cuefinder
           
           # Verify deployment
           if [ -f "/var/www/cuefinder/current/index.html" ]; then
@@ -159,7 +160,7 @@ jobs:
           
           # Cleanup old backups (keep only 3 latest)
           echo "🧹 Cleaning up old backups..."
-          ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
+          sudo ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r sudo rm -rf
           DEPLOY_SCRIPT
 
           chmod +x deploy-frontend.sh
