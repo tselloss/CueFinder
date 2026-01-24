@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using CueFinder.Forum.Data;
@@ -100,6 +101,7 @@ public class ForumController : ControllerBase
     }
 
     [HttpPost("discussions")]
+    [Authorize]
     public async Task<ActionResult<DiscussionResponseDto>> CreateDiscussion([FromBody] CreateDiscussionDto dto)
     {
         try
@@ -126,6 +128,12 @@ public class ForumController : ControllerBase
 
             // Get user identity from claims (supports GUID or int IDs)
             var userId = GetUserIdFromClaims();
+            
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed. Please sign in again.");
+            }
+            
             var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "User";
 
             var discussion = new Discussion
@@ -394,6 +402,7 @@ public class ForumController : ControllerBase
     }
 
     [HttpPost("posts")]
+    [Authorize]
     public async Task<ActionResult<PostResponseDto>> CreatePost([FromBody] CreatePostDto dto)
     {
         try
@@ -420,6 +429,12 @@ public class ForumController : ControllerBase
 
             // Get user identity from claims (supports GUID or int IDs)
             var userId = GetUserIdFromClaims();
+            
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed. Please sign in again.");
+            }
+            
             var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "User";
 
             // Validate parent post when replying
