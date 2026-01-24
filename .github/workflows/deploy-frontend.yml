@@ -3,16 +3,13 @@ name: Deploy Frontend
 # Trigger on:
 # - Changes to frontend code
 # - Manual trigger
-# DISABLED: Use deploy.yml instead
-# on:
-#   push:
-#     branches:
-#       - release
-#     paths:
-#       - 'CueFinderFE/**'
-#       - '.github/workflows/deploy-frontend.yml'
-#   workflow_dispatch:
 on:
+  push:
+    branches:
+      - release
+    paths:
+      - 'CueFinderFE/**'
+      - '.github/workflows/deploy-frontend.yml'
   workflow_dispatch:
 
 jobs:
