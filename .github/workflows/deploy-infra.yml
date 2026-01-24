@@ -165,6 +165,7 @@ jobs:
             echo "🗄️  Running database migrations..."
             
             # Create backup before migrations
+            mkdir -p /backups
             BACKUP_FILE="/backups/cuefinder_backup_$(date +%Y%m%d_%H%M%S).sql"
             docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "$BACKUP_FILE"
             echo "   Backup created: $BACKUP_FILE"
