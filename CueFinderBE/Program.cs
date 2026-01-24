@@ -137,11 +137,11 @@ await app.Services.InitializeDatabaseAsync();
 try
 {
     await app.Services.InitializeForumDatabaseAsync();
-    Console.WriteLine("✅ Forum database initialized successfully");
 }
 catch (Exception ex)
 {
-    Console.WriteLine($"⚠️ Forum database already initialized: {ex.Message}");
+    // Log but don't crash - forum may already be initialized
+    Console.WriteLine($"⚠️ Forum initialization note: {ex.Message}");
 }
 
 // Configure the HTTP request pipeline
