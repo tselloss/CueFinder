@@ -1,9 +1,8 @@
 name: Deploy to Production
 
+# DISABLED: Use specialized workflows (deploy-backend.yml, deploy-frontend.yml, deploy-infra.yml)
+# This is kept as a manual backup deployment method
 on:
-  push:
-    branches:
-      - release
   workflow_dispatch:
 
 jobs:
