@@ -38,8 +38,8 @@ export default function LoginPage() {
     try {
       if (isRegister) {
         if (!codeSent) {
-          if (!phone) throw new Error('Please provide mobile phone for verification');
-          if (!acceptedTerms) throw new Error(t('registration.terms.required'));
+          if (!phone) throw new Error('📱 Mobile phone number is required for account verification');
+          if (!acceptedTerms) throw new Error(t('registration.terms.required', '✅ You must accept the Terms and Conditions to create an account'));
           
           await register(username, password, name, phone, email, address, acceptedTerms);
           const response = await sendSms(phone, 'SMS');
@@ -49,14 +49,14 @@ export default function LoginPage() {
           return;
         }
 
-        if (codeSent && !code) throw new Error('Enter verification code');
+        if (codeSent && !code) throw new Error('🔢 Please enter the 6-digit verification code sent to your phone');
         const result = await verifySms(verificationToken, code);
         
         if (result.verified) {
           const from = location.state?.from?.pathname || '/';
           navigate(from, { replace: true });
         } else {
-          throw new Error('Verification failed');
+          throw new Error('❌ Verification code is incorrect. Please check the code and try again.');
         }
       } else {
         await login(username, password);

@@ -43,7 +43,7 @@ export default function MyCues() {
       setMyListings(combined);
     } catch (error) {
       console.error('Error loading my cues:', error);
-      showMessage('error', 'Failed to load your cue listings: ' + (error.message || 'Unknown error'));
+      showMessage('error', '❌ Unable to load your listings. Please refresh the page or try again later.');
     } finally {
       setLoading(false);
     }
@@ -72,7 +72,7 @@ export default function MyCues() {
 
   const handleDelete = async (item) => {
     const itemType = item.category === 'case' ? 'case' : 'cue';
-    if (!window.confirm(`Are you sure you want to delete this ${itemType} listing?`)) {
+    if (!window.confirm(`⚠️ Delete ${itemType} listing?\n\nThis will permanently remove your listing and cannot be undone.`)) {
       return;
     }
 
@@ -83,9 +83,9 @@ export default function MyCues() {
         await cueService.deleteCue(item.id);
       }
       setMyListings(myListings.filter(c => c.id !== item.id));
-      showMessage('success', `${itemType.charAt(0).toUpperCase() + itemType.slice(1)} listing deleted successfully`);
+      showMessage('success', `✅ Your ${itemType} listing has been deleted successfully`);
     } catch (error) {
-      showMessage('error', `Failed to delete ${itemType} listing`);
+      showMessage('error', `❌ Unable to delete your ${itemType} listing. Please try again.`);
     }
   };
 
@@ -102,9 +102,9 @@ export default function MyCues() {
         });
       }
       setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
-      showMessage('success', `Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
+      showMessage('success', `✅ Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
     } catch (error) {
-      showMessage('error', 'Failed to update listing status');
+      showMessage('error', '❌ Unable to update listing status. Please try again.');
     }
   };
 
@@ -112,7 +112,7 @@ export default function MyCues() {
     setShowCreateModal(false);
     setEditingCue(null);
     await loadMyCues();
-    showMessage('success', editingCue ? 'Cue updated successfully' : 'New cue created successfully');
+    showMessage('success', editingCue ? '✅ Your listing has been updated successfully' : '✅ Your new listing has been created successfully');
   };
 
   const handleCloseModal = () => {
