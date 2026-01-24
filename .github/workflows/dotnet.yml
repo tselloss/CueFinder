@@ -1,9 +1,12 @@
 name: Deploy to Production
 
+# DISABLED: Using deploy.yml instead
+# on:
+#   push:
+#     branches:
+#       - release
+#   workflow_dispatch:
 on:
-  push:
-    branches:
-      - release
   workflow_dispatch:
 
 jobs:
