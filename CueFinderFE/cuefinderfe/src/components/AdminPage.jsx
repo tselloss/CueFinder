@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
@@ -21,6 +21,9 @@ export default function AdminPage({ onBack }) {
   const [query, setQuery] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [editingUser, setEditingUser] = useState(null);
+  const [userPage, setUserPage] = useState(1);
+  const [listingPage, setListingPage] = useState(1);
+  const itemsPerPage = 5;
 
   useEffect(() => {
     async function load() {
@@ -46,6 +49,15 @@ export default function AdminPage({ onBack }) {
     }
     load();
   }, []);
+
+  // Reset pagination when search query changes
+  useEffect(() => {
+    setUserPage(1);
+  }, [userQuery]);
+
+  useEffect(() => {
+    setListingPage(1);
+  }, [query]);
 
   const listings = useMemo(() => {
     const cueItems = (cues || []).map(x => ({
@@ -89,6 +101,20 @@ export default function AdminPage({ onBack }) {
       !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     );
   }, [users, userQuery]);
+
+  // Pagination for users
+  const totalUserPages = Math.ceil(filteredUsers.length / itemsPerPage);
+  const paginatedUsers = useMemo(() => {
+    const start = (userPage - 1) * itemsPerPage;
+    return filteredUsers.slice(start, start + itemsPerPage);
+  }, [filteredUsers, userPage]);
+
+  // Pagination for listings
+  const totalListingPages = Math.ceil(filteredListings.length / itemsPerPage);
+  const paginatedListings = useMemo(() => {
+    const start = (listingPage - 1) * itemsPerPage;
+    return filteredListings.slice(start, start + itemsPerPage);
+  }, [filteredListings, listingPage]);
 
   const toggleBan = async (user) => {
     const updated = await adminUsers.updateUser(user.id, { IsActive: user.isActive === false ? true : false });
@@ -249,14 +275,14 @@ export default function AdminPage({ onBack }) {
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {filteredUsers.length === 0 ? (
+                    {paginatedUsers.length === 0 ? (
                       <TableRow>
                         <TableCell colSpan={4} className="text-center text-muted-foreground">
                           No users found
                         </TableCell>
                       </TableRow>
                     ) : (
-                      filteredUsers.map((user) => (
+                      paginatedUsers.map((user) => (
                         <TableRow key={user.id}>
                           <TableCell>
                             <div>
@@ -317,6 +343,33 @@ export default function AdminPage({ onBack }) {
                   </TableBody>
                 </Table>
               </div>
+
+              {/* Users Pagination Controls */}
+              {totalUserPages > 1 && (
+                <div className="flex items-center justify-between mt-4">
+                  <span className="text-sm text-muted-foreground">
+                    Page {userPage} of {totalUserPages}
+                  </span>
+                  <div className="flex gap-2">
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserPage(p => Math.max(1, p - 1))}
+                      disabled={userPage === 1}
+                    >
+                      <ChevronLeft className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => setUserPage(p => Math.min(totalUserPages, p + 1))}
+                      disabled={userPage === totalUserPages}
+                    >
+                      <ChevronRight className="w-4 h-4" />
+                    </Button>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -364,14 +417,14 @@ export default function AdminPage({ onBack }) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredListings.length === 0 ? (
+                        {paginatedListings.length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={4} className="text-center text-muted-foreground">
                               No listings found
                             </TableCell>
                           </TableRow>
                         ) : (
-                          filteredListings.map((item) => (
+                          paginatedListings.map((item) => (
                             <TableRow key={item.uid}>
                               <TableCell>
                                 <div className="flex items-center gap-2">
@@ -410,6 +463,33 @@ export default function AdminPage({ onBack }) {
                       </TableBody>
                     </Table>
                   </div>
+
+                  {/* Listings Pagination Controls */}
+                  {totalListingPages > 1 && (
+                    <div className="flex items-center justify-between mt-4">
+                      <span className="text-sm text-muted-foreground">
+                        Page {listingPage} of {totalListingPages}
+                      </span>
+                      <div className="flex gap-2">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setListingPage(p => Math.max(1, p - 1))}
+                          disabled={listingPage === 1}
+                        >
+                          <ChevronLeft className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setListingPage(p => Math.min(totalListingPages, p + 1))}
+                          disabled={listingPage === totalListingPages}
+                        >
+                          <ChevronRight className="w-4 h-4" />
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </TabsContent>
 
                 <TabsContent value="cues" className="mt-4">
@@ -424,14 +504,14 @@ export default function AdminPage({ onBack }) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredListings.filter(l => l.itemType === 'cue').length === 0 ? (
+                        {paginatedListings.filter(l => l.itemType === 'cue').length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={4} className="text-center text-muted-foreground">
                               No cues found
                             </TableCell>
                           </TableRow>
                         ) : (
-                          filteredListings.filter(l => l.itemType === 'cue').map((item) => (
+                          paginatedListings.filter(l => l.itemType === 'cue').map((item) => (
                             <TableRow key={item.uid}>
                               <TableCell className="font-medium">{item.title}</TableCell>
                               <TableCell>€{item.price.toFixed(2)}</TableCell>
@@ -477,14 +557,14 @@ export default function AdminPage({ onBack }) {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {filteredListings.filter(l => l.itemType === 'case').length === 0 ? (
+                        {paginatedListings.filter(l => l.itemType === 'case').length === 0 ? (
                           <TableRow>
                             <TableCell colSpan={4} className="text-center text-muted-foreground">
                               No cases found
                             </TableCell>
                           </TableRow>
                         ) : (
-                          filteredListings.filter(l => l.itemType === 'case').map((item) => (
+                          paginatedListings.filter(l => l.itemType === 'case').map((item) => (
                             <TableRow key={item.uid}>
                               <TableCell className="font-medium">{item.title}</TableCell>
                               <TableCell>€{item.price.toFixed(2)}</TableCell>
