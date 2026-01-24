@@ -3,16 +3,19 @@ name: Deploy Backend (Zero-Downtime)
 # Trigger on:
 # - Changes to backend code or infrastructure
 # - Manual trigger with options
+# DISABLED: Use deploy.yml instead
+# on:
+#   push:
+#     branches:
+#       - release
+#     paths:
+#       - 'CueFinderBE/**'
+#       - 'SolutionLibraries/**'
+#       - 'docker-compose.yml'
+#       - 'docker-compose.prod.yml'
+#       - '.github/workflows/deploy-backend.yml'
+#   workflow_dispatch:
 on:
-  push:
-    branches:
-      - release
-    paths:
-      - 'CueFinderBE/**'
-      - 'SolutionLibraries/**'
-      - 'docker-compose.yml'
-      - 'docker-compose.prod.yml'
-      - '.github/workflows/deploy-backend.yml'
   workflow_dispatch:
     inputs:
       skip-healthcheck:
