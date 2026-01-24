@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState, useCallback, useRef } from 'react';
 import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, ChevronLeft, ChevronRight, Ban, Image as ImageIcon } from 'lucide-react';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
@@ -24,69 +24,69 @@ export default function AdminPage({ onBack }) {
   const [editingUser, setEditingUser] = useState(null);
   const [userPage, setUserPage] = useState(1);
   const [listingPage, setListingPage] = useState(1);
+  const [listingTab, setListingTab] = useState('all');
   const [flaggedImages, setFlaggedImages] = useState([]);
   const [bannedUsers, setBannedUsers] = useState([]);
   const [moderationStats, setModerationStats] = useState({ total: 0, pending: 0, rejected: 0, approved: 0 });
+  const [isLoading, setIsLoading] = useState(true);
   const itemsPerPage = 5;
+  const userQueryRef = useRef(null);
+  const queryRef = useRef(null);
+  const debounceTimerRef = useRef(null);
+
+  // Debounced search handler
+  const handleUserQueryChange = useCallback((e) => {
+    const value = e.target.value;
+    setUserQuery(value);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => setUserPage(1), 200);
+  }, []);
+
+  const handleQueryChange = useCallback((e) => {
+    const value = e.target.value;
+    setQuery(value);
+    if (debounceTimerRef.current) clearTimeout(debounceTimerRef.current);
+    debounceTimerRef.current = setTimeout(() => setListingPage(1), 200);
+  }, []);
 
   useEffect(() => {
     async function load() {
       console.log('AdminPage: Loading data...');
+      setIsLoading(true);
       try {
-        const [u, c, k] = await Promise.all([
+        const [u, c, k, flaggedData, bannedData] = await Promise.all([
           adminUsers.getAllUsers().catch(err => { console.error('Error loading users:', err); return []; }),
           cueService.getCues().catch(err => { console.error('Error loading cues:', err); return []; }),
-          cueCaseService.getCueCases().catch(err => { console.error('Error loading cases:', err); return []; })
+          cueCaseService.getCueCases().catch(err => { console.error('Error loading cases:', err); return []; }),
+          moderationService.getFlaggedImages().catch(err => { console.error('Error loading flagged images:', err); return { items: [], total: 0 }; }),
+          moderationService.getBannedUsers().catch(err => { console.error('Error loading banned users:', err); return { items: [], total: 0 }; })
         ]);
-        console.log('AdminPage: Users loaded:', u?.length || 0);
-        console.log('AdminPage: Cues loaded:', c?.length || 0);
-        console.log('AdminPage: Cases loaded:', k?.length || 0);
+        console.log('AdminPage: Data loaded - Users:', u?.length, 'Cues:', c?.length, 'Cases:', k?.length);
         setUsers(u || []);
         setCues(c || []);
         setCases(k || []);
+        setFlaggedImages(flaggedData?.items || []);
+        setBannedUsers(bannedData?.items || []);
         
-        // Load moderation data
-        try {
-          const [flaggedData, bannedData] = await Promise.all([
-            moderationService.getFlaggedImages().catch(err => { console.error('Error loading flagged images:', err); return { items: [], total: 0 }; }),
-            moderationService.getBannedUsers().catch(err => { console.error('Error loading banned users:', err); return { items: [], total: 0 }; })
-          ]);
-          console.log('AdminPage: Flagged images loaded:', flaggedData?.total || 0);
-          console.log('AdminPage: Banned users loaded:', bannedData?.total || 0);
-          setFlaggedImages(flaggedData?.items || []);
-          setBannedUsers(bannedData?.items || []);
-          
-          // Calculate stats
-          const pending = flaggedData?.items?.filter(f => f.status === 'pending')?.length || 0;
-          const rejected = flaggedData?.items?.filter(f => f.status === 'rejected')?.length || 0;
-          const approved = flaggedData?.items?.filter(f => f.status === 'approved')?.length || 0;
-          setModerationStats({
-            total: flaggedData?.total || 0,
-            pending,
-            rejected,
-            approved
-          });
-        } catch (modError) {
-          console.error('AdminPage: Error loading moderation data:', modError);
-        }
+        // Calculate stats efficiently
+        const flaggedItems = flaggedData?.items || [];
+        setModerationStats({
+          total: flaggedData?.total || 0,
+          pending: flaggedItems.filter(f => f.status === 'pending').length,
+          rejected: flaggedItems.filter(f => f.status === 'rejected').length,
+          approved: flaggedItems.filter(f => f.status === 'approved').length
+        });
       } catch (error) {
         console.error('AdminPage: Fatal error loading data:', error);
         setUsers([]);
         setCues([]);
         setCases([]);
+      } finally {
+        setIsLoading(false);
       }
     }
     load();
   }, []);
-
-  // Reset pagination when search query changes
-  useEffect(() => {
-    setUserPage(1);
-  }, [userQuery]);
-
-  useEffect(() => {
-    setListingPage(1);
-  }, [query]);
 
   const listings = useMemo(() => {
     const cueItems = (cues || []).map(x => ({
@@ -110,87 +110,117 @@ export default function AdminPage({ onBack }) {
     return [...cueItems, ...caseItems];
   }, [cues, cases]);
 
+  // Compute flagged listings once
   const flaggedListings = useMemo(() => listings.filter(l => l.flagged), [listings]);
 
+  // Compute users with flagged content once
   const usersWithFlaggedContent = useMemo(() => {
     const flaggedUserIds = new Set(flaggedListings.map(l => l.userId).filter(Boolean));
     return users.filter(u => flaggedUserIds.has(u.id));
   }, [users, flaggedListings]);
 
+  // Optimize filtering with case-insensitive search
   const filteredListings = useMemo(() => {
-    const q = query.trim().toLowerCase();
+    if (!query.trim()) return listings;
+    const q = query.toLowerCase();
     return listings.filter(l =>
-      !q || l.title.toLowerCase().includes(q) || String(l.price).includes(q)
+      l.title.toLowerCase().includes(q) || String(l.price).includes(q)
     );
   }, [listings, query]);
 
   const filteredUsers = useMemo(() => {
-    const q = userQuery.trim().toLowerCase();
+    if (!userQuery.trim()) return users;
+    const q = userQuery.toLowerCase();
     return users.filter(u =>
-      !q || u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+      u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
     );
   }, [users, userQuery]);
 
-  // Pagination for users
+  // Optimized action handlers with useCallback
+  const toggleBan = useCallback(async (user) => {
+    try {
+      const updated = await adminUsers.updateUser(user.id, { IsActive: user.isActive === false ? true : false });
+      setUsers((s) => s.map((x) => (x.id === updated.id ? updated : x)));
+    } catch (error) {
+      console.error('Error toggling ban:', error);
+    }
+  }, []);
+
+  const saveUser = useCallback(async () => {
+    if (!editingUser) return;
+    try {
+      const updated = await adminUsers.updateUser(editingUser.id, {
+        name: editingUser.name,
+        email: editingUser.email,
+        role: editingUser.role,
+      });
+      if (updated) {
+        setUsers((s) => s.map((u) => (u.id === updated.id ? updated : u)));
+        setEditingUser(null);
+      }
+    } catch (error) {
+      console.error('Error saving user:', error);
+    }
+  }, [editingUser]);
+
+  const deleteUser = useCallback(async (id) => {
+    if (!window.confirm('⚠️ Delete User Account?\n\nThis will permanently delete the user and all their data. This action cannot be undone.')) return;
+    try {
+      await adminUsers.deleteUser(id);
+      setUsers((s) => s.filter((u) => u.id !== id));
+    } catch (error) {
+      console.error('Error deleting user:', error);
+    }
+  }, []);
+
+  const removeListing = useCallback(async (item) => {
+    if (!window.confirm(`⚠️ Delete ${item.itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) return;
+    try {
+      if (item.itemType === 'cue') {
+        await cueService.deleteCue(item.id);
+        setCues((s) => s.filter((c) => c.id !== item.id));
+      } else {
+        await cueCaseService.deleteCueCase(item.id);
+        setCases((s) => s.filter((c) => c.id !== item.id));
+      }
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+    }
+  }, []);
+
+  const flagListing = useCallback(async (item) => {
+    try {
+      if (item.itemType === 'cue') {
+        const res = await cueService.updateCue(item.id, { flagged: true });
+        setCues((s) => s.map((c) => (c.id === res.id ? res : c)));
+      } else {
+        const res = await cueCaseService.updateCueCase(item.id, { flagged: true });
+        setCases((s) => s.map((c) => (c.id === res.id ? res : c)));
+      }
+    } catch (error) {
+      console.error('Error flagging listing:', error);
+    }
+  }, []);
+
+  // Optimized pagination calculations
   const totalUserPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = useMemo(() => {
     const start = (userPage - 1) * itemsPerPage;
     return filteredUsers.slice(start, start + itemsPerPage);
-  }, [filteredUsers, userPage]);
+  }, [filteredUsers, userPage, itemsPerPage]);
 
-  // Pagination for listings
-  const totalListingPages = Math.ceil(filteredListings.length / itemsPerPage);
+  // Pagination for listings with tab filtering
+  const filteredListingsByTab = useMemo(() => {
+    if (listingTab === 'cues') return filteredListings.filter(l => l.itemType === 'cue');
+    if (listingTab === 'cases') return filteredListings.filter(l => l.itemType === 'case');
+    return filteredListings;
+  }, [filteredListings, listingTab]);
+
+  const totalListingPages = Math.ceil(filteredListingsByTab.length / itemsPerPage);
   const paginatedListings = useMemo(() => {
     const start = (listingPage - 1) * itemsPerPage;
-    return filteredListings.slice(start, start + itemsPerPage);
-  }, [filteredListings, listingPage]);
-
-  const toggleBan = async (user) => {
-    const updated = await adminUsers.updateUser(user.id, { IsActive: user.isActive === false ? true : false });
-    setUsers((s) => s.map((x) => (x.id === updated.id ? updated : x)));
-  };
-
-  const saveUser = async () => {
-    if (!editingUser) return;
-    const updated = await adminUsers.updateUser(editingUser.id, {
-      name: editingUser.name,
-      email: editingUser.email,
-      role: editingUser.role,
-    });
-    if (updated) {
-      setUsers((s) => s.map((u) => (u.id === updated.id ? updated : u)));
-      setEditingUser(null);
-    }
-  };
-
-  const deleteUser = async (id) => {
-    if (!window.confirm('⚠️ Delete User Account?\n\nThis will permanently delete the user and all their data. This action cannot be undone.')) return;
-    await adminUsers.deleteUser(id);
-    setUsers((s) => s.filter((u) => u.id !== id));
-  };
-
-  const removeListing = async (item) => {
-    if (!window.confirm(`⚠️ Delete ${item.itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) return;
-    if (item.itemType === 'cue') {
-      await cueService.deleteCue(item.id);
-      setCues((s) => s.filter((c) => c.id !== item.id));
-    } else {
-      await cueCaseService.deleteCueCase(item.id);
-      setCases((s) => s.filter((c) => c.id !== item.id));
-    }
-  };
-
-  const flagListing = async (item) => {
-    if (item.itemType === 'cue') {
-      const res = await cueService.updateCue(item.id, { flagged: true });
-      setCues((s) => s.map((c) => (c.id === res.id ? res : c)));
-    } else {
-      const res = await cueCaseService.updateCueCase(item.id, { flagged: true });
-      setCases((s) => s.map((c) => (c.id === res.id ? res : c)));
-    }
-  };
-
-  return (
+    return filteredListingsByTab.slice(start, start + itemsPerPage);
+  }, [filteredListingsByTab, listingPage, itemsPerPage]);
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
@@ -477,8 +507,9 @@ export default function AdminPage({ onBack }) {
                 <Input
                   placeholder="Search users (name or email)"
                   value={userQuery}
-                  onChange={(e) => setUserQuery(e.target.value)}
+                  onChange={handleUserQueryChange}
                   className="flex-1"
+                  ref={userQueryRef}
                 />
                 <Badge variant="secondary">
                   {filteredUsers.length} / {users.length}
@@ -607,15 +638,16 @@ export default function AdminPage({ onBack }) {
                 <Input
                   placeholder="Search listings (title or price)"
                   value={query}
-                  onChange={(e) => setQuery(e.target.value)}
+                  onChange={handleQueryChange}
                   className="flex-1"
+                  ref={queryRef}
                 />
                 <Badge variant="secondary">
                   {filteredListings.length} / {listings.length}
                 </Badge>
               </div>
 
-              <Tabs defaultValue="all" className="w-full">
+              <Tabs value={listingTab} onValueChange={setListingTab} className="w-full">
                 <TabsList className="grid w-full grid-cols-3">
                   <TabsTrigger value="all">All ({filteredListings.length})</TabsTrigger>
                   <TabsTrigger value="cues">
@@ -626,7 +658,7 @@ export default function AdminPage({ onBack }) {
                   </TabsTrigger>
                 </TabsList>
 
-                <TabsContent value="all" className="mt-4">
+                <TabsContent value={listingTab} className="mt-4">
                   <div className="rounded-md border">
                     <Table>
                       <TableHeader>
@@ -711,112 +743,6 @@ export default function AdminPage({ onBack }) {
                       </div>
                     </div>
                   )}
-                </TabsContent>
-
-                <TabsContent value="cues" className="mt-4">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedListings.filter(l => l.itemType === 'cue').length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground">
-                              No cues found
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          paginatedListings.filter(l => l.itemType === 'cue').map((item) => (
-                            <TableRow key={item.uid}>
-                              <TableCell className="font-medium">{item.title}</TableCell>
-                              <TableCell>€{item.price.toFixed(2)}</TableCell>
-                              <TableCell>
-                                {item.flagged && <Badge variant="warning">FLAGGED</Badge>}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex justify-end gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => flagListing(item)}
-                                    disabled={item.flagged}
-                                  >
-                                    <Flag className="w-4 h-4 text-yellow-500" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => removeListing(item)}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-destructive" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
-                </TabsContent>
-
-                <TabsContent value="cases" className="mt-4">
-                  <div className="rounded-md border">
-                    <Table>
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead>Title</TableHead>
-                          <TableHead>Price</TableHead>
-                          <TableHead>Status</TableHead>
-                          <TableHead className="text-right">Actions</TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {paginatedListings.filter(l => l.itemType === 'case').length === 0 ? (
-                          <TableRow>
-                            <TableCell colSpan={4} className="text-center text-muted-foreground">
-                              No cases found
-                            </TableCell>
-                          </TableRow>
-                        ) : (
-                          paginatedListings.filter(l => l.itemType === 'case').map((item) => (
-                            <TableRow key={item.uid}>
-                              <TableCell className="font-medium">{item.title}</TableCell>
-                              <TableCell>€{item.price.toFixed(2)}</TableCell>
-                              <TableCell>
-                                {item.flagged && <Badge variant="warning">FLAGGED</Badge>}
-                              </TableCell>
-                              <TableCell>
-                                <div className="flex justify-end gap-1">
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => flagListing(item)}
-                                    disabled={item.flagged}
-                                  >
-                                    <Flag className="w-4 h-4 text-yellow-500" />
-                                  </Button>
-                                  <Button
-                                    variant="ghost"
-                                    size="sm"
-                                    onClick={() => removeListing(item)}
-                                  >
-                                    <Trash2 className="w-4 h-4 text-destructive" />
-                                  </Button>
-                                </div>
-                              </TableCell>
-                            </TableRow>
-                          ))
-                        )}
-                      </TableBody>
-                    </Table>
-                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
