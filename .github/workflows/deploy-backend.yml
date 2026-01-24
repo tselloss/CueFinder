@@ -144,11 +144,11 @@ EOF
           cat .env | grep -v PASSWORD | head -n 3
           echo "✓ Environment configured"
           
-          # Configure sudoers for passwordless sudo on specific commands (one-time setup)
-          echo "cuefinder ALL=(ALL) NOPASSWD: /usr/sbin/usermod" | sudo tee /etc/sudoers.d/cuefinder-deploy > /dev/null || true
+          # Configure sudoers for passwordless sudo (non-interactive, fails silently if not needed)
+          sudo -n bash -c 'echo "cuefinder ALL=(ALL) NOPASSWD: /usr/sbin/usermod" | tee /etc/sudoers.d/cuefinder-deploy' > /dev/null 2>&1 || echo "Note: Sudoers may already be configured"
           
           # Ensure cuefinder user is in docker group (for passwordless docker commands)
-          sudo usermod -aG docker cuefinder || true
+          sudo -n usermod -aG docker cuefinder 2>/dev/null || true
           
           # Rebuild and restart backend with zero downtime
           echo "🔄 Deploying backend..."
