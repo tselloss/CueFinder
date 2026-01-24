@@ -1,4 +1,4 @@
-name: Deploy to Production2
+name: Deploy to Production
 
 on:
   push:
@@ -6,140 +6,99 @@ on:
       - release
   workflow_dispatch:
 
-concurrency:
-  group: production-deploy
-  cancel-in-progress: true
-
 jobs:
   deploy:
     name: Deploy to Hetzner
     runs-on: ubuntu-latest
 
     steps:
-      # -----------------------
-      # 1) CHECKOUT WITH FULL HISTORY
-      # -----------------------
       - name: Checkout code
         uses: actions/checkout@v4
+
+      - name: Setup SSH agent and known_hosts
+        uses: webfactory/ssh-agent@v0.5.4
         with:
-          fetch-depth: 0   # full history to avoid ff-only issues
+          ssh-private-key: ${{ secrets.SSH_PRIVATE_KEY }}
 
-      # -----------------------
-      # 2) SSH SETUP
-      # -----------------------
-      - name: Setup SSH
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
+      - name: Add server to known_hosts
         run: |
-          set -euo pipefail
-          mkdir -p ~/.ssh
-          chmod 700 ~/.ssh
+          ssh-keyscan -H "${{ secrets.SERVER_IP }}" >> "$HOME/.ssh/known_hosts"
+          chmod 644 "$HOME/.ssh/known_hosts"
 
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-
-          ssh-keyscan -H "$SERVER_IP" >> ~/.ssh/known_hosts
-          chmod 644 ~/.ssh/known_hosts
-
-      # -----------------------
-      # 3) BUILD REMOTE DEPLOY SCRIPT
-      # -----------------------
-      - name: Deploy to server
+      - name: Prepare deploy artifacts (runner)
         env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
           CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
+          GITHUB_REPO: ${{ github.repository }}
         run: |
-          cat > deploy.sh <<'EOF'
-          #!/bin/bash
           set -euo pipefail
 
-          echo "🚀 Starting deployment to production..."
+          cat > deploy.sh <<'DEPLOY'
+#!/bin/bash
+set -euo pipefail
 
-          cd /home/cuefinder/app
+cd /home/cuefinder/app
 
-          # ------------------------------
-          # GIT SYNC — ALWAYS MATCH REMOTE
-          # ------------------------------
-          if [ -d ".git" ]; then
-            echo "📦 Syncing repository..."
-            git fetch origin
-            git checkout release
-            git reset --hard origin/release
-          else
-            echo "📦 Cloning repository..."
-            git clone --branch release git@github.com:${{ github.repository }}.git .
-          fi
+if [ -d ".git" ]; then
+  echo "📦 Pulling latest changes..."
+  git fetch --prune origin
+  git checkout release
+  git reset --hard origin/release
+  git clean -fdx
+else
+  echo "📦 Cloning repository..."
+  git clone --branch release git@github.com:REPO_PLACEHOLDER.git .
+fi
 
-          # ------------------------------
-          # ENV GENERATION
-          # ------------------------------
-          echo "⚙️ Writing .env..."
-          cat > .env <<ENVEOF
-          DB_PASSWORD=${DB_PASSWORD}
-          JWT_SECRET=${JWT_SECRET}
-          FRONTEND_API_URL=${FRONTEND_API_URL}
-          CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
-          ENVEOF
+if [ -x /usr/bin/docker-compose ]; then
+  DC="/usr/bin/docker-compose"
+else
+  DC="docker compose"
+fi
 
-          # ------------------------------
-          # DOCKER DEPLOY
-          # ------------------------------
-          echo "🐳 Rebuilding containers..."
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
 
-          if command -v docker-compose >/dev/null 2>&1; then
-            DC="docker-compose"
-          else
-            DC="docker compose"
-          fi
+echo "✅ Deployment complete"
+DEPLOY
 
-          $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
-          $DC -f docker-compose.yml -f docker-compose.prod.yml build --pull
-          $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
+          sed -i "s|REPO_PLACEHOLDER|${GITHUB_REPO}|g" deploy.sh
+          chmod +x deploy.sh
 
-          echo "📊 Container status:"
-          $DC -f docker-compose.yml -f docker-compose.prod.yml ps
+          cat > .env.deploy <<EOF
+DB_PASSWORD=${DB_PASSWORD}
+JWT_SECRET=${JWT_SECRET}
+FRONTEND_API_URL=${FRONTEND_API_URL}
+CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}
+EOF
+          chmod 600 .env.deploy
 
-          # ------------------------------
-          # HEALTH CHECK (optional)
-          # ------------------------------
-          echo "🔍 Checking backend health..."
-          sleep 5
-          curl -fs http://localhost:5000/health || echo "⚠️ Health check failed but continuing"
+      - name: Copy artifacts to server and run deploy
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+        run: |
+          set -euo pipefail
 
-          echo "✅ Deployment complete!"
-          EOF
+          scp -o StrictHostKeyChecking=yes deploy.sh "${SERVER_USER}@${SERVER_IP}:/home/cuefinder/deploy.sh"
+          scp -o StrictHostKeyChecking=yes .env.deploy "${SERVER_USER}@${SERVER_IP}:/home/cuefinder/app/.env"
 
-          # upload and execute remotely
-          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-          ssh $SERVER_USER@$SERVER_IP "\
-            chmod +x /home/cuefinder/deploy.sh && \
-            DB_PASSWORD='$DB_PASSWORD' \
-            JWT_SECRET='$JWT_SECRET' \
-            FRONTEND_API_URL='$FRONTEND_API_URL' \
-            CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' \
-            /home/cuefinder/deploy.sh \
-          "
+          shred -u .env.deploy || rm -f .env.deploy
+          rm -f deploy.sh
 
-      # -----------------------
-      # 4) DEPLOYMENT VERIFICATION
-      # -----------------------
+          ssh "${SERVER_USER}@${SERVER_IP}" "chmod +x /home/cuefinder/deploy.sh && /home/cuefinder/deploy.sh"
+
       - name: Verify Deployment
         run: |
-          echo "🔍 Verifying deployment..."
-          ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+          ssh cuefinder@${{ secrets.SERVER_IP }} "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
 
-      # -----------------------
-      # 5) SUCCESS MESSAGE
-      # -----------------------
       - name: Notify Success
         if: success()
         run: |
-          echo "✅ Deployment successful"
+          echo "✅ Deployment successful!"
           echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
           echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"
 
