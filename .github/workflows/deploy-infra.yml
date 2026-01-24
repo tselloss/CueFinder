@@ -164,6 +164,9 @@ jobs:
           if [ "$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
             
+            # Ensure cuefinder user can create backups (add to docker group)
+            sudo usermod -aG docker cuefinder || true
+            
             # Create backup before migrations
             sudo mkdir -p /backups
             sudo chown cuefinder:cuefinder /backups
