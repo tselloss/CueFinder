@@ -163,8 +163,9 @@ jobs:
           # Run database migrations (if needed)
           if [ "$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
-            
-            # Ensure cuefinder user can create backups (add to docker group)
+                        # Configure sudoers for passwordless sudo on specific paths (one-time setup)
+            echo "cuefinder ALL=(ALL) NOPASSWD: /bin/mkdir, /bin/chown, /usr/sbin/usermod" | sudo tee /etc/sudoers.d/cuefinder-deploy > /dev/null || true
+                        # Ensure cuefinder user can create backups (add to docker group)
             sudo usermod -aG docker cuefinder || true
             
             # Create backup before migrations

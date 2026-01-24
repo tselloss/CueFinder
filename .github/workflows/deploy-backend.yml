@@ -139,6 +139,9 @@ jobs:
           CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
           EOF
           
+          # Configure sudoers for passwordless sudo on specific commands (one-time setup)
+          echo "cuefinder ALL=(ALL) NOPASSWD: /usr/sbin/usermod" | sudo tee /etc/sudoers.d/cuefinder-deploy > /dev/null || true
+          
           # Ensure cuefinder user is in docker group (for passwordless docker commands)
           sudo usermod -aG docker cuefinder || true
           
