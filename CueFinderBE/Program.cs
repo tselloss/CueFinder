@@ -134,7 +134,15 @@ var app = builder.Build();
 await app.Services.InitializeDatabaseAsync();
 
 // Initialize Forum database with auto-migrations
-await app.Services.InitializeForumDatabaseAsync();
+try
+{
+    await app.Services.InitializeForumDatabaseAsync();
+    Console.WriteLine("✅ Forum database initialized successfully");
+}
+catch (Exception ex)
+{
+    Console.WriteLine($"⚠️ Forum database already initialized: {ex.Message}");
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())

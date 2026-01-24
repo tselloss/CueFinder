@@ -56,26 +56,26 @@ export default function Inbox({ onBack }) {
       setReplyBody('');
       setSelectedMessage(null);
       loadInbox();
-      alert('Reply sent successfully!');
+      alert('✅ Your reply has been sent successfully!');
     } catch (err) {
       console.error('Error sending reply:', err);
-      alert('Failed to send reply. Please try again.');
+      alert('❌ Unable to send reply. Please check your connection and try again.');
     } finally {
       setSending(false);
     }
   };
 
   const handleDelete = async (messageId) => {
-    if (!window.confirm('Are you sure you want to delete this message?')) return;
+    if (!window.confirm('⚠️ Are you sure you want to delete this message? This action cannot be undone.')) return;
 
     try {
       await messageService.deleteMessage(messageId);
       loadInbox();
       setSelectedMessage(null);
-      alert('Message deleted successfully!');
+      alert('✅ Message deleted successfully!');
     } catch (err) {
       console.error('Error deleting message:', err);
-      alert('Failed to delete message. Please try again.');
+      alert('❌ Unable to delete message. Please try again.');
     }
   };
 

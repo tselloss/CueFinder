@@ -138,13 +138,13 @@ export default function CueFormModal({ cue, onClose, onSave }) {
 
     try {
       if (!formData.title.trim() || !formData.brand.trim() || !formData.price) {
-        setError('Please fill in all required fields.');
+        setError('⚠️ Please fill in all required fields: Title, Brand, and Price');
         setLoading(false);
         return;
       }
 
       if (!cue && images.length === 0) {
-        setError(`Please upload at least one image for your ${productType} listing.`);
+        setError(`📸 Please upload at least one photo of your ${productType}. Listings with photos get more attention!`);
         setLoading(false);
         return;
       }

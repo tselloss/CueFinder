@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package, AlertTriangle, ChevronLeft, ChevronRight, Ban, Image as ImageIcon } from 'lucide-react';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
+import * as moderationService from '../api/moderationService';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
@@ -23,6 +24,9 @@ export default function AdminPage({ onBack }) {
   const [editingUser, setEditingUser] = useState(null);
   const [userPage, setUserPage] = useState(1);
   const [listingPage, setListingPage] = useState(1);
+  const [flaggedImages, setFlaggedImages] = useState([]);
+  const [bannedUsers, setBannedUsers] = useState([]);
+  const [moderationStats, setModerationStats] = useState({ total: 0, pending: 0, rejected: 0, approved: 0 });
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -40,6 +44,31 @@ export default function AdminPage({ onBack }) {
         setUsers(u || []);
         setCues(c || []);
         setCases(k || []);
+        
+        // Load moderation data
+        try {
+          const [flaggedData, bannedData] = await Promise.all([
+            moderationService.getFlaggedImages().catch(err => { console.error('Error loading flagged images:', err); return { items: [], total: 0 }; }),
+            moderationService.getBannedUsers().catch(err => { console.error('Error loading banned users:', err); return { items: [], total: 0 }; })
+          ]);
+          console.log('AdminPage: Flagged images loaded:', flaggedData?.total || 0);
+          console.log('AdminPage: Banned users loaded:', bannedData?.total || 0);
+          setFlaggedImages(flaggedData?.items || []);
+          setBannedUsers(bannedData?.items || []);
+          
+          // Calculate stats
+          const pending = flaggedData?.items?.filter(f => f.status === 'pending')?.length || 0;
+          const rejected = flaggedData?.items?.filter(f => f.status === 'rejected')?.length || 0;
+          const approved = flaggedData?.items?.filter(f => f.status === 'approved')?.length || 0;
+          setModerationStats({
+            total: flaggedData?.total || 0,
+            pending,
+            rejected,
+            approved
+          });
+        } catch (modError) {
+          console.error('AdminPage: Error loading moderation data:', modError);
+        }
       } catch (error) {
         console.error('AdminPage: Fatal error loading data:', error);
         setUsers([]);
@@ -135,13 +164,13 @@ export default function AdminPage({ onBack }) {
   };
 
   const deleteUser = async (id) => {
-    if (!window.confirm('Are you sure you want to delete this user?')) return;
+    if (!window.confirm('⚠️ Delete User Account?\n\nThis will permanently delete the user and all their data. This action cannot be undone.')) return;
     await adminUsers.deleteUser(id);
     setUsers((s) => s.filter((u) => u.id !== id));
   };
 
   const removeListing = async (item) => {
-    if (!window.confirm(`Are you sure you want to delete this ${item.itemType}?`)) return;
+    if (!window.confirm(`⚠️ Delete ${item.itemType} listing?\n\nThis will permanently remove this listing from the platform.`)) return;
     if (item.itemType === 'cue') {
       await cueService.deleteCue(item.id);
       setCues((s) => s.filter((c) => c.id !== item.id));
@@ -229,6 +258,54 @@ export default function AdminPage({ onBack }) {
           </Card>
         </div>
 
+        {/* Moderation Stats Cards */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+          <Card className="border-purple-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Blocked Images</p>
+                  <p className="text-2xl font-bold text-purple-500">{moderationStats.total}</p>
+                </div>
+                <ImageIcon className="w-8 h-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-yellow-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Pending Review</p>
+                  <p className="text-2xl font-bold text-yellow-500">{moderationStats.pending}</p>
+                </div>
+                <AlertTriangle className="w-8 h-8 text-yellow-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-red-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Rejected Images</p>
+                  <p className="text-2xl font-bold text-red-500">{moderationStats.rejected}</p>
+                </div>
+                <Ban className="w-8 h-8 text-red-500" />
+              </div>
+            </CardContent>
+          </Card>
+          <Card className="border-blue-500/50">
+            <CardContent className="pt-6">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-muted-foreground">Banned Users</p>
+                  <p className="text-2xl font-bold text-blue-500">{bannedUsers.length}</p>
+                </div>
+                <UserX className="w-8 h-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Flagged Content Alert */}
         {flaggedListings.length > 0 && (
           <Alert className="mb-6 border-orange-500/50 bg-orange-50 dark:bg-orange-950">
@@ -240,6 +317,150 @@ export default function AdminPage({ onBack }) {
               )}
             </AlertDescription>
           </Alert>
+        )}
+
+        {/* Blocked Images Info Section */}
+        {(flaggedImages.length > 0 || bannedUsers.length > 0) && (
+          <Card className="mb-6 border-purple-500/50">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <Shield className="w-5 h-5 text-purple-500" />
+                Image Moderation Overview
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <Tabs defaultValue="blocked" className="w-full">
+                <TabsList className="grid w-full grid-cols-2">
+                  <TabsTrigger value="blocked">Blocked Images ({flaggedImages.length})</TabsTrigger>
+                  <TabsTrigger value="banned">Banned Users ({bannedUsers.length})</TabsTrigger>
+                </TabsList>
+
+                <TabsContent value="blocked" className="mt-4">
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Image</TableHead>
+                          <TableHead>Reason</TableHead>
+                          <TableHead>Status</TableHead>
+                          <TableHead>Flagged Date</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {flaggedImages.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                              No blocked images
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          flaggedImages.slice(0, 10).map((img) => (
+                            <TableRow key={img.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{img.user_name || 'Unknown'}</div>
+                                  {img.user_email && (
+                                    <div className="text-sm text-muted-foreground">{img.user_email}</div>
+                                  )}
+                                  {img.user_is_banned && (
+                                    <Badge variant="destructive" className="mt-1">BANNED</Badge>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div className="text-sm">
+                                  <div className="font-mono text-xs text-muted-foreground">{img.file_name}</div>
+                                  {img.cue_id && <div className="text-xs">Cue #{img.cue_id}</div>}
+                                  {img.cue_case_id && <div className="text-xs">Case #{img.cue_case_id}</div>}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                <div>
+                                  <Badge variant="outline">{img.flag_reason || 'Unknown'}</Badge>
+                                  {img.is_ai_flagged && (
+                                    <div className="text-xs text-muted-foreground mt-1">
+                                      AI: {(img.ai_confidence * 100).toFixed(0)}%
+                                    </div>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell>
+                                {img.status === 'pending' && <Badge variant="warning">PENDING</Badge>}
+                                {img.status === 'rejected' && <Badge variant="destructive">REJECTED</Badge>}
+                                {img.status === 'approved' && <Badge variant="success">APPROVED</Badge>}
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {new Date(img.flagged_at).toLocaleDateString()}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                    {flaggedImages.length > 10 && (
+                      <div className="p-4 text-center text-sm text-muted-foreground border-t">
+                        Showing 10 of {flaggedImages.length} blocked images
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="banned" className="mt-4">
+                  <div className="rounded-md border">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead>User</TableHead>
+                          <TableHead>Email</TableHead>
+                          <TableHead>Flagged Images</TableHead>
+                          <TableHead>Rejected</TableHead>
+                          <TableHead>Joined</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        {bannedUsers.length === 0 ? (
+                          <TableRow>
+                            <TableCell colSpan={5} className="text-center text-muted-foreground">
+                              No banned users
+                            </TableCell>
+                          </TableRow>
+                        ) : (
+                          bannedUsers.slice(0, 10).map((user) => (
+                            <TableRow key={user.id}>
+                              <TableCell>
+                                <div>
+                                  <div className="font-medium">{user.username}</div>
+                                  {user.display_name && (
+                                    <div className="text-sm text-muted-foreground">{user.display_name}</div>
+                                  )}
+                                </div>
+                              </TableCell>
+                              <TableCell className="text-sm">{user.email}</TableCell>
+                              <TableCell>
+                                <Badge variant="outline">{user.flagged_images_count || 0}</Badge>
+                              </TableCell>
+                              <TableCell>
+                                <Badge variant="destructive">{user.rejected_images_count || 0}</Badge>
+                              </TableCell>
+                              <TableCell className="text-sm text-muted-foreground">
+                                {new Date(user.created_at).toLocaleDateString()}
+                              </TableCell>
+                            </TableRow>
+                          ))
+                        )}
+                      </TableBody>
+                    </Table>
+                    {bannedUsers.length > 10 && (
+                      <div className="p-4 text-center text-sm text-muted-foreground border-t">
+                        Showing 10 of {bannedUsers.length} banned users
+                      </div>
+                    )}
+                  </div>
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         )}
 
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
