@@ -139,22 +139,25 @@ jobs:
           CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
           EOF
           
+          # Ensure cuefinder user is in docker group (for passwordless docker commands)
+          sudo usermod -aG docker cuefinder || true
+          
           # Rebuild and restart backend with zero downtime
           echo "🔄 Deploying backend..."
-          sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
           
           # Graceful restart: stop, pull changes, rebuild, and restart
           echo "⏸️  Gracefully stopping backend..."
-          sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml stop backend || true
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml stop backend || true
           
           echo "🚀 Starting backend..."
-          sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d backend
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d backend
           
           # Wait for health check
           if [ "$SKIP_HEALTHCHECK" != "true" ]; then
             echo "⏳ Waiting for backend to be healthy..."
             for i in {1..30}; do
-              if sudo docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend curl -f http://localhost:5000/health > /dev/null 2>&1; then
+              if docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend curl -f http://localhost:5000/health > /dev/null 2>&1; then
                 echo "✅ Backend is healthy"
                 break
               fi
