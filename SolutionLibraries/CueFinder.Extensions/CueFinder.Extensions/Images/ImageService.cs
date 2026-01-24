@@ -97,21 +97,16 @@ public class ImageService : IImageService
                 await request.File.CopyToAsync(stream);
             }
 
-            // NSFW Check
+            // NSFW Check BEFORE adding any CueImage records
             _logger.LogInformation("Checking image for NSFW content: {FilePath}", filePath);
             var moderationResult = await _moderationService.ScanImageAsync(filePath, userId, request.CueId);
-            
+
             if (moderationResult.IsUnsafe)
             {
-                _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}", 
+                _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}",
                     filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
-                
-                // Delete the uploaded file
-                if (File.Exists(filePath))
-                {
-                    File.Delete(filePath);
-                }
-                
+
+                // Do NOT create a CueImage; retain file for admin review
                 return new ImageUploadResponse
                 {
                     Success = false,
@@ -119,7 +114,7 @@ public class ImageService : IImageService
                     UploadedAt = DateTime.UtcNow
                 };
             }
-            
+
             _logger.LogInformation("Image passed NSFW check: {FilePath}", filePath);
 
             var imageUrl = $"{GetCueFolderUrl(request.CueId)}/{fileName}";
@@ -151,40 +146,7 @@ public class ImageService : IImageService
             _context.CueImages.Add(cueImage);
             await _context.SaveChangesAsync();
 
-            // Scan image for inappropriate content if moderation service is available
-            if (_moderationService != null)
-            {
-                try
-                {
-                    _logger.LogInformation(
-                        "Scanning uploaded image for cue {CueId}, User {UserId}, FilePath: {FilePath}",
-                        request.CueId, userId, filePath);
-
-                    var scanResult = await _moderationService.ScanImageAsync(filePath, userId, request.CueId);
-                    
-                    if (scanResult.IsUnsafe)
-                    {
-                        _logger.LogWarning(
-                            "Image flagged for cue {CueId}: {Reason}, Confidence: {Score}",
-                            request.CueId, scanResult.FlagReason, scanResult.ConfidenceScore);
-
-                        // Delete the cue and all its images
-                        await DeleteCueIfFlaggedAsync(request.CueId, userId);
-
-                        return new ImageUploadResponse
-                        {
-                            Success = false,
-                            ErrorMessage = "Image violates content policy. Listing has been removed.",
-                            UploadedAt = DateTime.UtcNow
-                        };
-                    }
-                }
-                catch (Exception ex)
-                {
-                    _logger.LogError(ex, "Error scanning image for cue {CueId}", request.CueId);
-                    // Continue - don't block upload if scanning fails
-                }
-            }
+            // Secondary scan section removed: scanning is done before creating CueImage
 
             _logger.LogInformation("Image uploaded successfully for cue {CueId} by user {UserId}", request.CueId, userId);
 

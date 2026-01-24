@@ -140,14 +140,14 @@ jobs:
           
           cd /home/cuefinder/app
           
-          # Configure sudoers for passwordless sudo on specific paths (one-time setup)
+          # Configure sudoers for passwordless sudo on specific paths (non-interactive, fails silently if not needed)
           echo "⚙️  Setting up permissions..."
-          echo "cuefinder ALL=(ALL) NOPASSWD: /bin/mkdir, /bin/cp, /bin/mv, /bin/rm, /bin/chown" | sudo tee /etc/sudoers.d/cuefinder-deploy > /dev/null || true
+          sudo -n bash -c 'echo "cuefinder ALL=(ALL) NOPASSWD: /bin/mkdir, /bin/cp, /bin/mv, /bin/rm, /bin/chown" | tee /etc/sudoers.d/cuefinder-deploy' > /dev/null 2>&1 || echo "Note: Sudoers may already be configured"
           
           # Create backup of current build
           if [ -d "/var/www/cuefinder/current" ]; then
             TIMESTAMP=$(date +%s)
-            sudo mv /var/www/cuefinder/current "/var/www/cuefinder/backup-$TIMESTAMP"
+            sudo mkdir -p /var/www/cuefinder/backup-$TIMESTAMP 2>/dev/null && sudo mv /var/www/cuefinder/current /var/www/cuefinder/backup-$TIMESTAMP || true
             echo "  Backed up previous build"
           fi
           
