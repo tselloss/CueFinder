@@ -138,7 +138,7 @@ const Forum = ({ onBack }) => {
 
   const handleCreateDiscussion = async () => {
     if (!newDiscussion.title || !newDiscussion.content || !newDiscussion.categoryId) {
-      alert('Please fill all fields');
+      alert('⚠️ Please fill in all required fields:\n\n• Discussion title\n• Content\n• Category');
       return;
     }
 
@@ -158,7 +158,7 @@ const Forum = ({ onBack }) => {
       }
     } catch (error) {
       console.error('Error creating discussion:', error);
-      alert('Failed to create discussion. Please try again.');
+      alert('❌ Unable to create discussion. Please check your connection and try again.');
     } finally {
       setLoading(false);
     }
@@ -166,12 +166,12 @@ const Forum = ({ onBack }) => {
 
   const handleCreatePost = async () => {
     if (!newPost.content) {
-      alert('Please enter post content');
+      alert('⚠️ Please enter your message before posting');
       return;
     }
 
     if (!user) {
-      alert('Please sign in to post a reply');
+      alert('🔐 Please sign in to post a reply');
       return;
     }
 
@@ -187,7 +187,7 @@ const Forum = ({ onBack }) => {
       loadDiscussionDetail(selectedDiscussion.id);
     } catch (error) {
       console.error('Error creating post:', error);
-      alert('Failed to create post');
+      alert('❌ Unable to post your reply. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -195,7 +195,7 @@ const Forum = ({ onBack }) => {
 
   const handleLikePost = async (postId) => {
     if (!user) {
-      alert('Please sign in to like posts');
+      alert('🔐 Please sign in to like posts');
       return;
     }
     try {
@@ -208,7 +208,7 @@ const Forum = ({ onBack }) => {
 
   const handleMarkHelpful = async (postId) => {
     if (!user) {
-      alert('Please sign in to mark helpful');
+      alert('🔐 Please sign in to mark posts as helpful');
       return;
     }
     try {
@@ -221,7 +221,7 @@ const Forum = ({ onBack }) => {
 
   const handleReplyClick = (post) => {
     if (!user) {
-      alert('Please sign in to reply');
+      alert('🔐 Please sign in to post a reply');
       return;
     }
     setNewPost({ content: '', replyToPostId: post.id });

@@ -52,7 +52,7 @@ const ModerationDashboard = () => {
   };
 
   const handleApprove = async (flagId) => {
-    if (!window.confirm('Approve this image?')) return;
+    if (!window.confirm('✅ Approve this image?\n\nThis will make the image public and remove it from the moderation queue.')) return;
 
     try {
       setActionInProgress(true);
@@ -63,17 +63,17 @@ const ModerationDashboard = () => {
       setFlags(flags.filter(f => f.id !== flagId));
       setSelectedFlag(null);
       setAdminNotes('');
-      alert('Image approved');
+      alert('✅ Image has been approved successfully');
     } catch (error) {
       console.error('Error approving:', error);
-      alert('Failed to approve');
+      alert('❌ Unable to approve image. Please try again.');
     } finally {
       setActionInProgress(false);
     }
   };
 
   const handleReject = async (flagId) => {
-    if (!window.confirm(`Reject this image?${banUser ? ' AND ban user?' : ''}`)) return;
+    if (!window.confirm(`⚠️ Reject this image?${banUser ? '\n\n🚫 This will also BAN the user from uploading future images!' : '\n\nThe image will be permanently removed.'}`)) return;
 
     try {
       setActionInProgress(true);
@@ -85,10 +85,10 @@ const ModerationDashboard = () => {
       setSelectedFlag(null);
       setAdminNotes('');
       setBanUser(false);
-      alert('Image rejected' + (banUser ? ' and user banned' : ''));
+      alert('✅ Image rejected' + (banUser ? ' and user has been banned' : ' successfully'));
     } catch (error) {
       console.error('Error rejecting:', error);
-      alert('Failed to reject');
+      alert('❌ Unable to reject image. Please try again.');
     } finally {
       setActionInProgress(false);
     }
