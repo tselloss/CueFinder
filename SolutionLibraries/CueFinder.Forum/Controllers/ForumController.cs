@@ -298,6 +298,8 @@ public class ForumController : ControllerBase
                 .OrderBy(p => p.CreatedAt)
                 .ToListAsync();
             
+            // Note: Forum uses Guid for CreatedByUserId, but main Users table uses int Id
+            // This is a known limitation - would require mapping table or schema migration to fix
             var result = posts.Select(p => new PostResponseDto
             {
                 Id = p.Id,
@@ -306,7 +308,7 @@ public class ForumController : ControllerBase
                 ReplyToPostId = p.ReplyToPostId,
                 CreatedByUserId = p.CreatedByUserId,
                 CreatedByUsername = p.CreatedByUsername,
-                CreatedByUserPhone = "User", // TODO: Link forum posts to actual user IDs (currently using Guid, but Users use int Id)
+                CreatedByUserPhone = p.CreatedByUsername, // Using username since User ID mapping not yet implemented
                 CreatedAt = p.CreatedAt,
                 LikeCount = p.LikeCount,
                 HelpfulCount = p.HelpfulCount
