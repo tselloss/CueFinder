@@ -145,6 +145,11 @@ const Forum = ({ onBack }) => {
       return;
     }
 
+    if (!user) {
+      alert('Please sign in to create a discussion');
+      return;
+    }
+
     try {
       setLoading(true);
       await forumService.createDiscussion({
@@ -162,7 +167,8 @@ const Forum = ({ onBack }) => {
       }
     } catch (error) {
       console.error('Error creating discussion:', error);
-      alert('Failed to create discussion. Please try again.');
+      const errorMessage = error?.message || error?.toString() || 'Failed to create discussion';
+      alert(`Failed to create discussion: ${errorMessage}`);
     } finally {
       setLoading(false);
     }

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { AlertCircle, CheckCircle, Zap } from 'lucide-react';
+import { AlertCircle } from 'lucide-react';
 
 /**
  * Cache Performance Test Component
@@ -179,4 +179,8 @@ const CacheTestSimple = () => {
           <li>Response should be 10-50x faster (e.g., 5ms)</li>
         </ol>
       </div>
+    </div>
+  );
+}
+
 export default CacheTestSimple;

@@ -1,135 +1,153 @@
-name: Deploy to Production
+name: Deploy to Production (Orchestrator)
 
 on:
   push:
     branches:
       - release
   workflow_dispatch:
+    inputs:
+      deployment-mode:
+        description: 'Deployment mode'
+        required: false
+        type: choice
+        options:
+          - smart (default - only what changed)
+          - full (rebuild everything)
+          - backend-only
+          - frontend-only
+          - infra-only
+        default: 'smart (default - only what changed)'
 
 jobs:
-  deploy:
-    name: Deploy to Hetzner
+  # Detect what components changed
+  detect-changes:
+    name: Detect Changes
     runs-on: ubuntu-latest
-    
+    outputs:
+      backend: ${{ steps.detect.outputs.backend }}
+      frontend: ${{ steps.detect.outputs.frontend }}
+      infra: ${{ steps.detect.outputs.infra }}
+      deployment-mode: ${{ steps.mode.outputs.mode }}
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      - name: Setup SSH
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-        shell: bash
+      - name: Determine deployment mode
+        id: mode
         run: |
-          set -euo pipefail
-          : "${HOME:?HOME is not set}"
-
-          mkdir -p "$HOME/.ssh"
-          chmod 700 "$HOME/.ssh"
-
-          # Use printf to avoid newline/escape issues when writing multi-line secrets
-          printf '%s\n' "${{ secrets.SSH_PRIVATE_KEY }}" > "$HOME/.ssh/id_rsa"
-          chmod 600 "$HOME/.ssh/id_rsa"
-
-          # Prevent interactive host key prompts
-          ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts"
-          chmod 644 "$HOME/.ssh/known_hosts"
-
-      - name: Deploy to Server
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
-          JWT_SECRET: ${{ secrets.JWT_SECRET }}
-          FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
-          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
-        run: |
-          # Create deployment script
-          cat > deploy.sh << 'EOF'
-          #!/bin/bash
-          set -e
-          
-          echo "🚀 Starting deployment to production..."
-          
-          # Navigate to app directory
-          cd /home/cuefinder/app
-          
-          # Stop containers first to release file locks
-          echo "🛑 Stopping existing containers..."
-          if command -v docker-compose >/dev/null 2>&1; then
-            docker-compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans || true
+          if [[ "${{ github.event.inputs.deployment-mode }}" == *"full"* ]]; then
+            echo "mode=full" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.deployment-mode }}" == *"backend"* ]]; then
+            echo "mode=backend-only" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.deployment-mode }}" == *"frontend"* ]]; then
+            echo "mode=frontend-only" >> $GITHUB_OUTPUT
+          elif [[ "${{ github.event.inputs.deployment-mode }}" == *"infra"* ]]; then
+            echo "mode=infra-only" >> $GITHUB_OUTPUT
           else
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans || true
-          fi
-          
-          # Pull latest code with hard reset
-          if [ -d ".git" ]; then
-            echo "📦 Pulling latest changes (hard reset)..."
-            git fetch --prune origin
-            git checkout release
-            echo "🔄 Running git reset --hard origin/release..."
-            git reset --hard origin/release
-            echo "🧹 Running git clean -fdx (excluding uploads and SSL certs)..."
-            git clean -fdx -e uploads/ -e CueFinderBE/wwwroot/uploads/ -e ssl/
-            echo "✅ Repository cleaned and reset successfully"
-          else
-            echo "📦 Cloning repository..."
-            git clone --branch release git@github.com:${{ github.repository }}.git .
-          fi
-          
-          # Create .env file with all required variables
-          echo "⚙️  Configuring environment..."
-          echo "DB_PASSWORD=${DB_PASSWORD}" > .env
-          echo "JWT_SECRET=${JWT_SECRET}" >> .env
-          echo "FRONTEND_API_URL=${FRONTEND_API_URL}" >> .env
-          echo "CORS_FRONTEND_ORIGIN=${CORS_FRONTEND_ORIGIN}" >> .env
-          
-          # Ensure SSL directory exists and generate self-signed certificates if missing
-          echo "🔐 Checking SSL certificates..."
-          mkdir -p ssl
-          if [ ! -f "ssl/origin-cert.pem" ] || [ ! -f "ssl/origin-key.pem" ]; then
-            echo "📜 Generating self-signed SSL certificates..."
-            docker run --rm -v $(pwd)/ssl:/ssl alpine:latest sh -c 'apk add openssl && openssl req -x509 -nodes -days 365 -newkey rsa:2048 -keyout /ssl/origin-key.pem -out /ssl/origin-cert.pem -subj /CN=billiardscuefinder.com' || true
-            echo "✅ SSL certificates generated"
-          else
-            echo "✅ SSL certificates already exist"
-          fi
-          
-          # Build and deploy with Docker Compose
-          echo "🐳 Building and starting containers..."
-          if command -v docker-compose >/dev/null 2>&1; then
-            DC="docker-compose"
-          else
-            DC="docker compose"
+            echo "mode=smart" >> $GITHUB_OUTPUT
           fi
 
-          # Build and start containers
-          $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
-          $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
-          
-          # Check container status
-          echo "📊 Container status:"
-          $DC -f docker-compose.yml -f docker-compose.prod.yml ps
-          
-          echo "✅ Deployment complete!"
-          EOF
-          
-          # Copy and execute deployment script
-          scp deploy.sh $SERVER_USER@$SERVER_IP:/home/cuefinder/deploy.sh
-          ssh $SERVER_USER@$SERVER_IP "chmod +x /home/cuefinder/deploy.sh && DB_PASSWORD='$DB_PASSWORD' JWT_SECRET='$JWT_SECRET' FRONTEND_API_URL='$FRONTEND_API_URL' CORS_FRONTEND_ORIGIN='$CORS_FRONTEND_ORIGIN' /home/cuefinder/deploy.sh"
+      - name: Detect component changes (smart mode)
+        id: detect
+        run: |
+          if [[ "${{ steps.mode.outputs.mode }}" == "full" ]]; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+            echo "frontend=true" >> $GITHUB_OUTPUT
+            echo "infra=true" >> $GITHUB_OUTPUT
+          else
+            # Detect if backend actually changed
+            if git diff origin/release HEAD --name-only | grep -qE '^(CueFinderBE|SolutionLibraries)'; then
+              echo "backend=true" >> $GITHUB_OUTPUT
+            else
+              echo "backend=false" >> $GITHUB_OUTPUT
+            fi
 
-      - name: Wait for application to start
-        run: |
-          echo "⏳ Waiting for application to be ready..."
-          sleep 15
+            # Detect if frontend changed
+            if git diff origin/release HEAD --name-only | grep -qE '^CueFinderFE'; then
+              echo "frontend=true" >> $GITHUB_OUTPUT
+            else
+              echo "frontend=false" >> $GITHUB_OUTPUT
+            fi
 
-      - name: Verify Deployment
+            # Detect if infra changed
+            if git diff origin/release HEAD --name-only | grep -qE '^(init\.sql|scripts|CueFinderModerator|deployment/Dockerfile\.nudenet)'; then
+              echo "infra=true" >> $GITHUB_OUTPUT
+            else
+              echo "infra=false" >> $GITHUB_OUTPUT
+            fi
+          fi
+
+  # Orchestrate the deployment
+  orchestrate:
+    name: Orchestrate Deployment
+    needs: detect-changes
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check deployment plan
         run: |
-          echo "🔍 Verifying deployment..."
-          ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
-          
-      - name: Notify Success
-        if: success()
+          MODE="${{ needs.detect-changes.outputs.deployment-mode }}"
+          BACKEND="${{ needs.detect-changes.outputs.backend }}"
+          FRONTEND="${{ needs.detect-changes.outputs.frontend }}"
+          INFRA="${{ needs.detect-changes.outputs.infra }}"
+
+          echo "🎯 Deployment Plan ($MODE mode):"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+          echo "Backend:      $([ "$BACKEND" = "true" ] && echo "✅ Will deploy" || echo "⏭️  Skip")"
+          echo "Frontend:     $([ "$FRONTEND" = "true" ] && echo "✅ Will deploy" || echo "⏭️  Skip")"
+          echo "Infrastructure: $([ "$INFRA" = "true" ] && echo "✅ Will deploy" || echo "⏭️  Skip")"
+          echo "━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━"
+
+      - name: Trigger Backend Deployment
+        if: needs.detect-changes.outputs.backend == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('📦 Triggering backend deployment workflow...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-backend.yml',
+              ref: 'release'
+            });
+
+      - name: Trigger Frontend Deployment
+        if: needs.detect-changes.outputs.frontend == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('📦 Triggering frontend deployment workflow...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-frontend.yml',
+              ref: 'release'
+            });
+
+      - name: Trigger Infrastructure Deployment
+        if: needs.detect-changes.outputs.infra == 'true'
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            console.log('📦 Triggering infrastructure deployment workflow...');
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'deploy-infra.yml',
+              ref: 'release'
+            });
+
+      - name: Notify - Deployment Started
         run: |
-          echo "✅ Deployment successful!"
-          echo "🌐 Frontend: http://${{ secrets.SERVER_IP }}"
-          echo "🔧 Backend: http://${{ secrets.SERVER_IP }}:5000"
+          echo "🚀 Deployment orchestration started!"
+          echo ""
+          echo "Triggered workflows:"
+          echo "  • Backend:  ${{ needs.detect-changes.outputs.backend == 'true' && '✅' || '⏭️' }}"
+          echo "  • Frontend: ${{ needs.detect-changes.outputs.frontend == 'true' && '✅' || '⏭️' }}"
+          echo "  • Infra:    ${{ needs.detect-changes.outputs.infra == 'true' && '✅' || '⏭️' }}"
+          echo ""
+          echo "Check individual workflows for progress and logs."

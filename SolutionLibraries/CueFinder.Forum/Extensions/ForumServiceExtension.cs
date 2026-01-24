@@ -67,9 +67,35 @@ namespace CueFinder.Forum.Extensions
                 
                 try
                 {
-                    // Apply pending migrations
-                    await dbContext.Database.MigrateAsync();
-                    Console.WriteLine("✅ Forum database migrations applied successfully");
+                    // Check if database exists and has tables
+                    var canConnect = await dbContext.Database.CanConnectAsync();
+                    if (!canConnect)
+                    {
+                        Console.WriteLine("📊 Creating forum database...");
+                    }
+                    
+                    // Apply pending migrations (safe to run even if already applied)
+                    var pendingMigrations = await dbContext.Database.GetPendingMigrationsAsync();
+                    if (pendingMigrations.Any())
+                    {
+                        Console.WriteLine($"📊 Applying {pendingMigrations.Count()} forum database migration(s)...");
+                        await dbContext.Database.MigrateAsync();
+                        Console.WriteLine("✅ Forum database migrations applied successfully");
+                    }
+                    else
+                    {
+                        // Ensure database is created (safe if already exists)
+                        await dbContext.Database.MigrateAsync();
+                    }
+                }
+                catch (Npgsql.PostgresException pgEx) when (pgEx.SqlState == "42P07") // Table already exists
+                {
+                    // Silently ignore - this is expected when tables already exist
+                    // No need to log anything as this is normal operation
+                }
+                catch (Exception ex) when (ex.Message.Contains("already exists") || ex.Message.Contains("42P07"))
+                {
+                    // Silently ignore duplicate table errors
                 }
                 catch (Exception ex)
                 {

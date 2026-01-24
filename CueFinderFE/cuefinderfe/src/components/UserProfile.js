@@ -169,7 +169,7 @@ export default function UserProfile({ onBack }) {
         </div>
         {activeTab === 'profile' && (
           <div className="p-4">
-              {!isEditing ? (
+            {!isEditing ? (
               // View Mode
               <div className="space-y-6">
                 <div className="bg-white rounded-lg border border-gray-200 p-6">
@@ -450,7 +450,8 @@ export default function UserProfile({ onBack }) {
                 </form>
               </div>
             )}
-          )}
+          </div>
+        )}
         {activeTab === 'myListings' && (
           <div className="p-4">
             <MyCues />

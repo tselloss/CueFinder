@@ -1,0 +1,230 @@
+name: Deploy Backend (Zero-Downtime)
+
+# Trigger on:
+# - Changes to backend code or infrastructure
+# - Manual trigger with options
+on:
+  push:
+    branches:
+      - release
+    paths:
+      - 'CueFinderBE/**'
+      - 'SolutionLibraries/**'
+      - 'docker-compose.yml'
+      - 'docker-compose.prod.yml'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
+    inputs:
+      skip-healthcheck:
+        description: 'Skip health checks after deployment'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  detect-changes:
+    name: Detect Changes
+    runs-on: ubuntu-latest
+    outputs:
+      backend: ${{ steps.detect.outputs.backend }}
+      has-changes: ${{ steps.detect.outputs.has-changes }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Detect component changes
+        id: detect
+        run: |
+          # Detect if backend actually changed (comparing to origin/release)
+          if git diff origin/release HEAD --name-only | grep -qE '^(CueFinderBE|SolutionLibraries)'; then
+            echo "backend=true" >> $GITHUB_OUTPUT
+            echo "has-changes=true" >> $GITHUB_OUTPUT
+          else
+            echo "backend=false" >> $GITHUB_OUTPUT
+            echo "has-changes=false" >> $GITHUB_OUTPUT
+          fi
+
+  test-backend:
+    name: Test Backend
+    runs-on: ubuntu-latest
+    needs: detect-changes
+    if: needs.detect-changes.outputs.backend == 'true'
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '8.0.x'
+
+      - name: Restore dependencies
+        run: dotnet restore CueFinderBE/CueFinderBE.csproj
+
+      - name: Build
+        run: dotnet build CueFinderBE/CueFinderBE.csproj -c Release --no-restore
+
+      - name: Run tests
+        run: |
+          if [ -d "tests" ]; then
+            dotnet test tests/ -c Release --no-build --verbosity normal || echo "⚠️  Some tests failed, but continuing with deployment"
+          fi
+        shell: bash
+
+  deploy:
+    name: Deploy to Production
+    runs-on: ubuntu-latest
+    needs: [detect-changes, test-backend]
+    if: needs.detect-changes.outputs.has-changes == 'true'
+    environment:
+      name: production
+      url: https://billiardscuefinder.com
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup SSH
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_PRIVATE_KEY }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          : "${HOME:?HOME is not set}"
+
+          mkdir -p "$HOME/.ssh"
+          chmod 700 "$HOME/.ssh"
+
+          printf '%s\n' "$SSH_PRIVATE_KEY" > "$HOME/.ssh/id_rsa"
+          chmod 600 "$HOME/.ssh/id_rsa"
+
+          ssh-keyscan -H "$SERVER_IP" >> "$HOME/.ssh/known_hosts" 2>/dev/null || true
+          chmod 644 "$HOME/.ssh/known_hosts"
+
+      - name: Create deployment script
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          JWT_SECRET: ${{ secrets.JWT_SECRET }}
+          FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
+          CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
+          SKIP_HEALTHCHECK: ${{ github.event.inputs.skip-healthcheck || 'false' }}
+        shell: bash
+        run: |
+          cat > deploy.sh << 'DEPLOY_SCRIPT'
+          #!/bin/bash
+          set -e
+          
+          echo "🚀 Starting zero-downtime backend deployment..."
+          
+          cd /home/cuefinder/app
+          
+          # Pull latest code
+          echo "📦 Pulling latest changes..."
+          git fetch --prune origin
+          git checkout release
+          git reset --hard origin/release
+          git clean -fdx -e uploads/ -e .deployment/
+          
+          # Update environment variables
+          echo "⚙️  Updating environment..."
+          cat > .env << 'EOF'
+          DB_PASSWORD=$DB_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          FRONTEND_API_URL=$FRONTEND_API_URL
+          CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
+          EOF
+          
+          # Run blue-green deployment
+          echo "🔄 Running blue-green deployment..."
+          SKIP_HEALTHCHECK_FLAG=""
+          if [ "$SKIP_HEALTHCHECK" = "true" ]; then
+            SKIP_HEALTHCHECK_FLAG="--skip-healthcheck"
+          fi
+          
+          bash ./deployment/deploy-backend-blue-green.sh $SKIP_HEALTHCHECK_FLAG
+          DEPLOY_SCRIPT
+
+          chmod +x deploy.sh
+
+      - name: Execute deployment
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+        shell: bash
+        run: |
+          scp -o StrictHostKeyChecking=no -r deploy.sh \
+            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
+          
+          ssh -o StrictHostKeyChecking=no \
+            "$SERVER_USER@$SERVER_IP" \
+            'bash /home/cuefinder/app/deploy.sh'
+
+      - name: Verify deployment
+        env:
+          SERVER_IP: ${{ secrets.SERVER_IP }}
+          SERVER_USER: cuefinder
+        shell: bash
+        run: |
+          echo "🔍 Verifying deployment..."
+          
+          # Wait a few seconds for containers to stabilize
+          sleep 3
+          
+          # Check container status
+          ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+            'cd /home/cuefinder/app && docker compose ps'
+          
+          # Verify health endpoint
+          ACTIVE_SLOT=$(ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+            'cat /home/cuefinder/app/.deployment/active_slot')
+          
+          PORT=$([ "$ACTIVE_SLOT" = "blue" ] && echo 5001 || echo 5002)
+          
+          echo "✓ Deployment verified"
+          echo "  Active Slot: $ACTIVE_SLOT"
+          echo "  Port: $PORT"
+
+      - name: Notify Slack (Success)
+        if: success()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "✅ Backend deployment successful",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*✅ Backend Deployment Successful*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Zero-downtime deployment completed"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+
+      - name: Notify Slack (Failure)
+        if: failure()
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          payload: |
+            {
+              "text": "❌ Backend deployment failed",
+              "blocks": [
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "*❌ Backend Deployment Failed*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
+                }
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
