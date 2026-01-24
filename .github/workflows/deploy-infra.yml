@@ -158,7 +158,7 @@ jobs:
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
           
           # Run database migrations (if needed)
           if [ "$SKIP_MIGRATIONS" != "true" ]; then

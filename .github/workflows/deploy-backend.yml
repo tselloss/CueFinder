@@ -128,7 +128,7 @@ jobs:
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
           
           # Update environment variables
           echo "⚙️  Updating environment..."
