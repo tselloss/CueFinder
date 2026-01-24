@@ -12,6 +12,7 @@ using CueFinder.Forum.Extensions;
 using CueFinder.Messages.Extensions;
 using CueFinder.Messages.Hubs;
 using CueFinderBE.Services;
+using Microsoft.AspNetCore.HttpOverrides;
 
 // Configure Npgsql to handle DateTime without timezone issues
 AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
@@ -46,6 +47,14 @@ builder.Services.AddForumServices(connectionString);
 
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);
+
+// Configure forwarded headers for nginx proxy (HTTPS)
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    options.KnownNetworks.Clear();
+    options.KnownProxies.Clear();
+});
 
 // Add image upload/storage services
 builder.Services.AddCueFinderImageServices(builder.Configuration);
@@ -134,7 +143,15 @@ var app = builder.Build();
 await app.Services.InitializeDatabaseAsync();
 
 // Initialize Forum database with auto-migrations
-await app.Services.InitializeForumDatabaseAsync();
+try
+{
+    await app.Services.InitializeForumDatabaseAsync();
+}
+catch (Exception ex)
+{
+    // Log but don't crash - forum may already be initialized
+    Console.WriteLine($"⚠️ Forum initialization note: {ex.Message}");
+}
 
 // Configure the HTTP request pipeline
 if (app.Environment.IsDevelopment())
@@ -177,6 +194,12 @@ app.UseStatusCodePages();
 
 // Add rate limiting middleware (before authentication)
 app.UseRateLimiting(requestLimit: 5, timeWindowSeconds: 60);
+
+// Use forwarded headers from nginx proxy (for HTTPS)
+if (app.Environment.IsProduction())
+{
+    app.UseForwardedHeaders();
+}
 
 app.UseHttpsRedirection();
 app.UseAuthentication();

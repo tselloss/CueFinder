@@ -43,7 +43,7 @@ namespace CueFinder.Messages.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error sending message");
-                return StatusCode(500, new { message = "Error sending message", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to send message. Please try again.", error = ex.Message });
             }
         }
 
@@ -60,7 +60,7 @@ namespace CueFinder.Messages.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading inbox");
-                return StatusCode(500, new { message = "Error loading inbox", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to load your messages. Please refresh the page.", error = ex.Message });
             }
         }
 
@@ -77,7 +77,7 @@ namespace CueFinder.Messages.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading sent messages");
-                return StatusCode(500, new { message = "Error loading sent messages", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to load your sent messages. Please try again.", error = ex.Message });
             }
         }
 
@@ -94,7 +94,7 @@ namespace CueFinder.Messages.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading message thread with {OtherUserId}", otherUserId);
-                return StatusCode(500, new { message = "Error loading message thread", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to load conversation. Please try again.", error = ex.Message });
             }
         }
 
@@ -109,14 +109,14 @@ namespace CueFinder.Messages.Controllers
                 var updated = await _messageService.MarkAsReadAsync(id, userId);
 
                 if (!updated)
-                    return NotFound(new { message = "Message not found" });
+                    return NotFound(new { message = "Message not found or already deleted" });
 
                 return NoContent();
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error marking message {MessageId} as read", id);
-                return StatusCode(500, new { message = "Error marking message as read", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to mark message as read", error = ex.Message });
             }
         }
 
@@ -151,7 +151,7 @@ namespace CueFinder.Messages.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error replying to message {MessageId}", id);
-                return StatusCode(500, new { message = "Error sending reply", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to send your reply. Please try again.", error = ex.Message });
             }
         }
 
@@ -167,7 +167,7 @@ namespace CueFinder.Messages.Controllers
                 var deleted = await _messageService.DeleteMessageAsync(id, userId);
 
                 if (!deleted)
-                    return NotFound(new { message = "Message not found" });
+                    return NotFound(new { message = "Message not found or already deleted" });
 
                 _logger.LogInformation("User {UserId} deleted message {MessageId}", userId, id);
 
@@ -176,12 +176,12 @@ namespace CueFinder.Messages.Controllers
             catch (UnauthorizedAccessException ex)
             {
                 _logger.LogWarning(ex, "User {UserId} unauthorized to delete message {MessageId}", GetCurrentUserId(), id);
-                return StatusCode(403, new { message = ex.Message });
+                return StatusCode(403, new { message = "You don't have permission to delete this message" });
             }
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error deleting message {MessageId}", id);
-                return StatusCode(500, new { message = "Error deleting message", error = ex.Message });
+                return StatusCode(500, new { message = "Unable to delete message. Please try again.", error = ex.Message });
             }
         }
 

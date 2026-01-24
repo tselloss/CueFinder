@@ -36,7 +36,7 @@ namespace CueFinder.Auth.Controllers
             {
                 if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
                 {
-                    return BadRequest(new { message = "Username and password are required" });
+                    return BadRequest(new { message = "Please enter both username and password to login" });
                 }
 
                 var response = await _authService.LoginAsync(request.Username, request.Password);
@@ -69,12 +69,12 @@ namespace CueFinder.Auth.Controllers
                     string.IsNullOrWhiteSpace(request.Password) ||
                     string.IsNullOrWhiteSpace(request.Name))
                 {
-                    return BadRequest(new { message = "Username, password, and name are required" });
+                    return BadRequest(new { message = "Please provide all required information: username, password, and full name" });
                 }
 
                 if (request.Password.Length < 6)
                 {
-                    return BadRequest(new { message = "Password must be at least 6 characters long" });
+                    return BadRequest(new { message = "Password must be at least 6 characters long for your security" });
                 }
 
                 var response = await _authService.RegisterAsync(request);
@@ -118,7 +118,7 @@ namespace CueFinder.Auth.Controllers
                 var profile = await _authService.GetUserProfileAsync(userId);
                 if (profile == null)
                 {
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "User profile not found. Please contact support if this persists." });
                 }
 
                 return Ok(profile);
@@ -144,7 +144,7 @@ namespace CueFinder.Auth.Controllers
                 var profile = await _authService.GetUserProfileAsync(id);
                 if (profile == null)
                 {
-                    return NotFound(new { message = "User not found" });
+                    return NotFound(new { message = "User profile not found" });
                 }
 
                 return Ok(profile);

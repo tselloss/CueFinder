@@ -49,8 +49,6 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
   const [toast, setToast] = useState(null);
-<<<<<<< Updated upstream
-=======
   const toastTimeoutRef = useRef(null);
 
   const clearToastTimeout = () => {
@@ -72,7 +70,6 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   useEffect(() => {
     return () => clearToastTimeout();
   }, []);
->>>>>>> Stashed changes
 
   useEffect(() => {
     if (cue) {
@@ -124,7 +121,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
   };
 
   const handleDeleteExistingImage = async (imageId) => {
-    if (!window.confirm('Are you sure you want to delete this image?')) {
+    if (!window.confirm('🗑️ Delete this image?\n\nThis will permanently remove the image from your listing.')) {
       return;
     }
 
@@ -170,17 +167,14 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     setError(null);
 
     try {
-      // Validate images are provided for new listings
+      if (!formData.title.trim() || !formData.brand.trim() || !formData.price) {
+        setError('⚠️ Please fill in all required fields: Title, Brand, and Price');
+        setLoading(false);
+        return;
+      }
+
       if (!cue && images.length === 0) {
-<<<<<<< Updated upstream
-        setError(`Please upload at least one image for your ${productType} listing.`);
-        setToast({ type: 'error', message: 'Please add at least one image.' });
-        setTimeout(() => setToast(null), 3000);
-=======
-        const msg = `Please upload at least one image for your ${productType} listing.`;
-        setError(msg);
-        showToast('error', msg);
->>>>>>> Stashed changes
+        setError(`📸 Please upload at least one photo of your ${productType}. Listings with photos get more attention!`);
         setLoading(false);
         return;
       }
@@ -252,31 +246,16 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         }
       }
 
-<<<<<<< Updated upstream
-      // Show success toast for 3 seconds, then close the form
-      setToast({ type: 'success', message: 'Listing saved successfully.' });
-      setTimeout(() => {
-        setToast(null);
-        onSave();
-        onClose();
-      }, 3000);
-=======
       showToast('success', 'Listing saved successfully!');
       setTimeout(() => {
         onSave();
         onClose();
       }, 1500);
->>>>>>> Stashed changes
     } catch (error) {
       console.error('Error saving listing:', error);
       const friendlyError = getErrorMessage(error, 'Failed to save listing. Please try again.');
       setError(friendlyError);
-<<<<<<< Updated upstream
-      setToast({ type: 'error', message: friendlyError });
-      setTimeout(() => setToast(null), 3000);
-=======
       showToast('error', friendlyError);
->>>>>>> Stashed changes
     } finally {
       setLoading(false);
       setUploadProgress(null);
@@ -294,17 +273,10 @@ export default function CueFormModal({ cue, onClose, onSave }) {
     >
       {toast && (
         <div
-<<<<<<< Updated upstream
-          className={`fixed top-6 right-6 z-50 px-4 py-3 rounded-lg shadow-xl border text-sm font-semibold ${
-            toast.type === 'success'
-              ? 'bg-green-600/90 border-green-400 text-white'
-              : 'bg-red-600/90 border-red-400 text-white'
-=======
           className={`fixed top-6 right-6 z-[60] px-6 py-4 rounded-lg shadow-2xl border-2 text-base font-semibold animate-slide-in-right ${
             toast.type === 'success'
               ? 'bg-green-600 border-green-400 text-white'
               : 'bg-red-600 border-red-400 text-white'
->>>>>>> Stashed changes
           }`}
         >
           {toast.message}
@@ -318,7 +290,7 @@ export default function CueFormModal({ cue, onClose, onSave }) {
         {/* Header */}
         <div className="flex justify-between items-center p-6 border-b border-slate-700 flex-shrink-0">
           <h2 className="text-2xl font-bold text-white">
-            {cue ? '✏️ Edit Listing' : '➕ Create New Listing'}
+            {cue ? 'Edit Listing' : 'Create New Listing'}
           </h2>
           <button
             onClick={onClose}

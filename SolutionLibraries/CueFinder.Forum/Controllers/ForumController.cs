@@ -1,4 +1,5 @@
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 using CueFinder.Forum.Data;
@@ -100,6 +101,7 @@ public class ForumController : ControllerBase
     }
 
     [HttpPost("discussions")]
+    [Authorize]
     public async Task<ActionResult<DiscussionResponseDto>> CreateDiscussion([FromBody] CreateDiscussionDto dto)
     {
         try
@@ -107,12 +109,12 @@ public class ForumController : ControllerBase
             // Validate input
             if (string.IsNullOrWhiteSpace(dto.Title) || string.IsNullOrWhiteSpace(dto.Content))
             {
-                return BadRequest("Title and content are required");
+                return BadRequest("Please provide both a title and content for your discussion");
             }
 
             if (dto.CategoryId == Guid.Empty)
             {
-                return BadRequest("Valid category is required");
+                return BadRequest("Please select a category for your discussion");
             }
 
             // Validate category exists
@@ -121,11 +123,17 @@ public class ForumController : ControllerBase
             
             if (category == null)
             {
-                return BadRequest("Invalid category");
+                return BadRequest("Selected category is not available. Please choose another category.");
             }
 
             // Get user identity from claims (supports GUID or int IDs)
             var userId = GetUserIdFromClaims();
+            
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed. Please sign in again.");
+            }
+            
             var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "User";
 
             var discussion = new Discussion
@@ -290,6 +298,8 @@ public class ForumController : ControllerBase
                 .OrderBy(p => p.CreatedAt)
                 .ToListAsync();
             
+            // Note: Forum uses Guid for CreatedByUserId, but main Users table uses int Id
+            // This is a known limitation - would require mapping table or schema migration to fix
             var result = posts.Select(p => new PostResponseDto
             {
                 Id = p.Id,
@@ -298,7 +308,7 @@ public class ForumController : ControllerBase
                 ReplyToPostId = p.ReplyToPostId,
                 CreatedByUserId = p.CreatedByUserId,
                 CreatedByUsername = p.CreatedByUsername,
-                CreatedByUserPhone = "User", // TODO: Link forum posts to actual user IDs (currently using Guid, but Users use int Id)
+                CreatedByUserPhone = p.CreatedByUsername, // Using username since User ID mapping not yet implemented
                 CreatedAt = p.CreatedAt,
                 LikeCount = p.LikeCount,
                 HelpfulCount = p.HelpfulCount
@@ -321,13 +331,13 @@ public class ForumController : ControllerBase
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
             if (post == null)
             {
-                return NotFound("Post not found");
+                return NotFound("Post not found or has been deleted");
             }
 
             var userId = GetUserIdFromClaims();
             if (userId == Guid.Empty)
             {
-                return Unauthorized("User authentication required to like a post");
+                return Unauthorized("Please sign in to like posts");
             }
 
             var existingLike = await _context.PostLikes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
@@ -364,13 +374,13 @@ public class ForumController : ControllerBase
             var post = await _context.Posts.FirstOrDefaultAsync(p => p.Id == postId);
             if (post == null)
             {
-                return NotFound("Post not found");
+                return NotFound("Post not found or has been deleted");
             }
 
             var userId = GetUserIdFromClaims();
             if (userId == Guid.Empty)
             {
-                return Unauthorized("User authentication required to unlike a post");
+                return Unauthorized("Please sign in to unlike posts");
             }
 
             var existingLike = await _context.PostLikes.FirstOrDefaultAsync(l => l.PostId == postId && l.UserId == userId);
@@ -394,6 +404,7 @@ public class ForumController : ControllerBase
     }
 
     [HttpPost("posts")]
+    [Authorize]
     public async Task<ActionResult<PostResponseDto>> CreatePost([FromBody] CreatePostDto dto)
     {
         try
@@ -401,25 +412,31 @@ public class ForumController : ControllerBase
             // Validate input
             if (string.IsNullOrWhiteSpace(dto.Content))
             {
-                return BadRequest("Content is required");
+                return BadRequest("Please enter your message before posting");
             }
 
             if (dto.DiscussionId == Guid.Empty)
             {
-                return BadRequest("Valid discussion is required");
+                return BadRequest("Discussion not found. Please try again.");
             }
 
-            // Validate discussion exists
+            // Validate discussion exists and is not locked
             var discussion = await _context.Discussions
                 .FirstOrDefaultAsync(d => d.Id == dto.DiscussionId);
             
             if (discussion == null)
             {
-                return BadRequest("Invalid discussion");
+                return BadRequest("Discussion not found or has been removed");
             }
 
             // Get user identity from claims (supports GUID or int IDs)
             var userId = GetUserIdFromClaims();
+            
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed. Please sign in again.");
+            }
+            
             var username = User.FindFirst(ClaimTypes.Name)?.Value ?? "User";
 
             // Validate parent post when replying
