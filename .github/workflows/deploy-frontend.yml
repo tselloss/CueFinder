@@ -121,6 +121,13 @@ jobs:
           git reset --hard origin/release
           git clean -fdx -e uploads/ -e .deployment/ -e ssl/
           
+          # Install Node.js if not present
+          if ! command -v node &> /dev/null; then
+            echo "📦 Installing Node.js..."
+            curl -fsSL https://deb.nodesource.com/setup_18.x | sudo -E bash -
+            sudo apt-get install -y nodejs
+          fi
+          
           # Build frontend
           echo "🔨 Building frontend..."
           cd CueFinderFE/cuefinderfe

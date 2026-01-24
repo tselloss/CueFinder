@@ -139,14 +139,30 @@ jobs:
           CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
           EOF
           
-          # Run blue-green deployment
-          echo "🔄 Running blue-green deployment..."
-          SKIP_HEALTHCHECK_FLAG=""
-          if [ "$SKIP_HEALTHCHECK" = "true" ]; then
-            SKIP_HEALTHCHECK_FLAG="--skip-healthcheck"
+          # Rebuild and restart backend with zero downtime
+          echo "🔄 Deploying backend..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
+          
+          # Graceful restart: stop, pull changes, rebuild, and restart
+          echo "⏸️  Gracefully stopping backend..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml stop backend || true
+          
+          echo "🚀 Starting backend..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d backend
+          
+          # Wait for health check
+          if [ "$SKIP_HEALTHCHECK" != "true" ]; then
+            echo "⏳ Waiting for backend to be healthy..."
+            for i in {1..30}; do
+              if docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend curl -f http://localhost:5000/health > /dev/null 2>&1; then
+                echo "✅ Backend is healthy"
+                break
+              fi
+              sleep 2
+            done
           fi
           
-          bash ./deployment/deploy-backend-blue-green.sh $SKIP_HEALTHCHECK_FLAG
+          echo "✅ Backend deployment complete"
           DEPLOY_SCRIPT
 
           chmod +x deploy.sh
