@@ -14,7 +14,6 @@ export default function AdminPage({ onBack }) {
   const [query, setQuery] = useState('');
   const [userQuery, setUserQuery] = useState('');
   const [editingUser, setEditingUser] = useState(null);
-  const [sortConfig, setSortConfig] = useState({ key: null, direction: 'asc' });
   const [listingPage, setListingPage] = useState(1);
   const [userPage, setUserPage] = useState(1);
   const [activeTab, setActiveTab] = useState('all');
@@ -65,13 +64,6 @@ export default function AdminPage({ onBack }) {
     }));
     return [...cueItems, ...caseItems];
   }, [cues, cases]);
-
-  const filteredListings = useMemo(() => {
-    const q = query.trim().toLowerCase();
-    return listings.filter(l =>
-      !q || l.title.toLowerCase().includes(q) || String(l.price).includes(q)
-    );
-  }, [listings, query]);
 
   const toggleBan = async (user) => {
     const updated = await adminUsers.updateUser(user.id, { IsActive: user.isActive === false ? true : false });
@@ -160,6 +152,8 @@ export default function AdminPage({ onBack }) {
     }
     return Math.ceil(data.length / itemsPerPage);
   }, [filteredListings, activeTab]);
+
+  return (
     <div className="min-h-screen bg-gray-50">
       {/* Header */}
       <div className="bg-white border-b border-gray-200 px-6 py-4 flex items-center gap-3">
