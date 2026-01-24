@@ -132,12 +132,17 @@ jobs:
           
           # Update environment variables
           echo "⚙️  Updating environment..."
-          cat > .env << 'EOF'
-          DB_PASSWORD=$DB_PASSWORD
-          JWT_SECRET=$JWT_SECRET
-          FRONTEND_API_URL=$FRONTEND_API_URL
-          CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
-          EOF
+          cat > .env << EOF
+DB_PASSWORD=$DB_PASSWORD
+JWT_SECRET=$JWT_SECRET
+FRONTEND_API_URL=$FRONTEND_API_URL
+CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
+EOF
+          
+          # Verify .env file was created and has values
+          echo "📋 Environment file created:"
+          cat .env | grep -v PASSWORD | head -n 3
+          echo "✓ Environment configured"
           
           # Configure sudoers for passwordless sudo on specific commands (one-time setup)
           echo "cuefinder ALL=(ALL) NOPASSWD: /usr/sbin/usermod" | sudo tee /etc/sudoers.d/cuefinder-deploy > /dev/null || true
