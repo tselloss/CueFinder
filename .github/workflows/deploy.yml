@@ -58,9 +58,9 @@ else
   DC="docker compose"
 fi
 
-sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
-sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
-sudo -- $DC -f docker-compose.yml -f docker-compose.prod.yml up -d
+$DC -f docker-compose.yml -f docker-compose.prod.yml down --remove-orphans
+$DC -f docker-compose.yml -f docker-compose.prod.yml build --no-cache
+$DC -f docker-compose.yml -f docker-compose.prod.yml up -d
 
 echo "✅ Deployment complete"
 DEPLOY
@@ -93,7 +93,7 @@ EOF
 
       - name: Verify Deployment
         run: |
-          ssh cuefinder@${{ secrets.SERVER_IP }} "sudo docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
+          ssh cuefinder@${{ secrets.SERVER_IP }} "docker ps --format 'table {{.Names}}\t{{.Status}}\t{{.Ports}}'"
 
       - name: Notify Success
         if: success()
