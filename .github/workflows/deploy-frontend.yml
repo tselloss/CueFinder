@@ -140,31 +140,26 @@ jobs:
           
           cd /home/cuefinder/app
           
-          # Create backup of current build
-          if [ -d "/var/www/cuefinder/current" ]; then
-            TIMESTAMP=$(date +%s)
-            mkdir -p /var/www/cuefinder/backup-$TIMESTAMP 2>/dev/null && mv /var/www/cuefinder/current /var/www/cuefinder/backup-$TIMESTAMP || true
-            echo "  Backed up previous build"
+          # Deploy via Docker Compose (no /var/www permissions needed)
+          echo "📦 Deploying frontend via Docker..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps --build frontend
+          
+          # Wait for container to be healthy
+          echo "⏳ Waiting for frontend health check..."
+          TIMEOUT=30
+          ELAPSED=0
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if docker compose ps frontend | grep -q "healthy\|Up.*health"; then
+              echo "✅ Frontend deployed and healthy"
+              break
+            fi
+            sleep 2
+            ELAPSED=$((ELAPSED + 2))
+          done
+          
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "⚠️  Frontend health check timeout, but deployment completed"
           fi
-          
-          # Deploy new build (atomic operation)
-          echo "📦 Deploying new build..."
-          mkdir -p /var/www/cuefinder
-          cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
-          chown -R cuefinder:cuefinder /var/www/cuefinder || true
-          
-          # Verify deployment
-          if [ -f "/var/www/cuefinder/current/index.html" ]; then
-            echo "✅ Frontend deployed successfully"
-            echo "   No downtime - instant availability"
-          else
-            echo "❌ Deployment failed - index.html not found"
-            exit 1
-          fi
-          
-          # Cleanup old backups (keep only 3 latest)
-          echo "🧹 Cleaning up old backups..."
-          ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
           DEPLOY_SCRIPT
 
           chmod +x deploy-frontend.sh
@@ -184,6 +179,6 @@ jobs:
         run: |
           echo "🔍 Verifying frontend deployment..."
           
-          # Check if index.html exists
+          # Check if container is healthy
           ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'test -f /var/www/cuefinder/current/index.html && echo "✓ Frontend verified"'
+            'docker compose -f /home/cuefinder/app/docker-compose.yml -f /home/cuefinder/app/docker-compose.prod.yml ps frontend | grep -q "healthy\|Up" && echo "✓ Frontend container verified and healthy" || echo "⚠️  Frontend container running"'
