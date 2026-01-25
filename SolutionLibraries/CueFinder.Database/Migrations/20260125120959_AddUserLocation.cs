@@ -11,13 +11,13 @@ namespace CueFinder.Database.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             // Use raw SQL so we can add the column idempotently
-            migrationBuilder.Sql(@"ALTER TABLE \"Users\" ADD COLUMN IF NOT EXISTS \"Location\" character varying(200);");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" ADD COLUMN IF NOT EXISTS ""Location"" character varying(200);");
         }
 
         /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.Sql(@"ALTER TABLE \"Users\" DROP COLUMN IF EXISTS \"Location\";");
+            migrationBuilder.Sql(@"ALTER TABLE ""Users"" DROP COLUMN IF EXISTS ""Location"";");
         }
     }
 }
