@@ -309,16 +309,16 @@ const Forum = ({ onBack }) => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between gap-4">
-            <div className="flex items-center gap-4">
+        <div className="container mx-auto px-4 pt-[7px] pb-[7px]">
+          <div className="flex items-center justify-between gap-4 pt-[7px] pb-[7px]">
+            <div className="flex items-center gap-4 pt-[7px] pb-[7px]">
               <Button variant="ghost" onClick={onBack} className="gap-2">
                 <ArrowLeft className="w-4 h-4" />
                 Back
               </Button>
               <div className="flex items-center gap-2">
                 <MessageSquare className="w-6 h-6 text-primary" />
-                <h1 className="text-2xl font-bold mt-2">Forum</h1>
+                <h1 className="text-2xl font-bold">Forum</h1>
               </div>
             </div>
             {view !== 'categories' && user && (
@@ -329,9 +329,10 @@ const Forum = ({ onBack }) => {
                   categoryId: selectedCategory?.id || '' 
                 });
                 setShowNewDiscussionModal(true);
-              }} className="gap-2">
+              }} className="gap-2 whitespace-nowrap">
                 <Plus className="w-4 h-4" />
-                New Discussion
+                <span className="hidden sm:inline">New Discussion</span>
+                <span className="sm:hidden">New</span>
               </Button>
             )}
           </div>
