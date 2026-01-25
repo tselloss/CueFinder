@@ -65,7 +65,8 @@ jobs:
     name: Test Database Migrations
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.database == 'true'
+    # Always run tests on push to release, skip if only manual dispatch with no changes
+    if: github.event_name == 'push' || needs.detect-changes.outputs.database == 'true'
     services:
       postgres:
         image: postgres:15
@@ -110,7 +111,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [detect-changes, test-migrations]
-    if: needs.detect-changes.outputs.has-changes == 'true'
+    # Always deploy on push, only deploy on manual if changes detected
+    if: github.event_name == 'push' || needs.detect-changes.outputs.has-changes == 'true'
     environment:
       name: production
       url: https://billiardscuefinder.com
@@ -156,13 +158,21 @@ jobs:
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
           
           # Run database migrations (if needed)
           if [ "$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
             
+            # Configure sudoers for passwordless sudo (non-interactive, fails silently if not needed)
+            sudo -n bash -c 'echo "cuefinder ALL=(ALL) NOPASSWD: /bin/mkdir, /bin/chown, /usr/sbin/usermod" | tee /etc/sudoers.d/cuefinder-deploy' > /dev/null 2>&1 || echo "Note: Sudoers may already be configured"
+            
+            # Ensure cuefinder user is in docker group (for passwordless docker commands)
+            sudo -n usermod -aG docker cuefinder 2>/dev/null || true
+            
             # Create backup before migrations
+            sudo mkdir -p /backups
+            sudo chown cuefinder:cuefinder /backups
             BACKUP_FILE="/backups/cuefinder_backup_$(date +%Y%m%d_%H%M%S).sql"
             docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "$BACKUP_FILE"
             echo "   Backup created: $BACKUP_FILE"
@@ -229,45 +239,3 @@ jobs:
           # Check service status
           ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
             'cd /home/cuefinder/app && docker compose ps'
-
-      - name: Notify Slack (Success)
-        if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "✅ Infrastructure deployment successful",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*✅ Infrastructure Deployment Successful*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Services updated"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      - name: Notify Slack (Failure)
-        if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "❌ Infrastructure deployment failed",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*❌ Infrastructure Deployment Failed*\n• Commit: ${{ github.sha }}\n• Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

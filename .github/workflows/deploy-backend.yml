@@ -50,7 +50,8 @@ jobs:
     name: Test Backend
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.backend == 'true'
+    # Always run tests on push to release, skip if only manual dispatch with no changes
+    if: github.event_name == 'push' || needs.detect-changes.outputs.backend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -77,7 +78,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [detect-changes, test-backend]
-    if: needs.detect-changes.outputs.has-changes == 'true'
+    # Always deploy on push, only deploy on manual if changes detected
+    if: github.event_name == 'push' || needs.detect-changes.outputs.has-changes == 'true'
     environment:
       name: production
       url: https://billiardscuefinder.com
@@ -115,116 +117,91 @@ jobs:
         run: |
           cat > deploy.sh << 'DEPLOY_SCRIPT'
           #!/bin/bash
-          set -e
-          
-          echo "🚀 Starting zero-downtime backend deployment..."
-          
-          cd /home/cuefinder/app
-          
-          # Pull latest code
+          set -euo pipefail
+
+          APP_DIR="/home/cuefinder/app"
+
+          echo "🚀 Starting blue/green backend deployment..."
+
+          cd "$APP_DIR"
+
           echo "📦 Pulling latest changes..."
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/
-          
-          # Update environment variables
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
+
           echo "⚙️  Updating environment..."
-          cat > .env << 'EOF'
+          cat > .env << 'ENVEOF'
           DB_PASSWORD=$DB_PASSWORD
           JWT_SECRET=$JWT_SECRET
           FRONTEND_API_URL=$FRONTEND_API_URL
           CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
-          EOF
+          ENVEOF
           
-          # Run blue-green deployment
-          echo "🔄 Running blue-green deployment..."
-          SKIP_HEALTHCHECK_FLAG=""
-          if [ "$SKIP_HEALTHCHECK" = "true" ]; then
-            SKIP_HEALTHCHECK_FLAG="--skip-healthcheck"
-          fi
+                    echo "📋 Environment file created:"
+                    cat .env | grep -v PASSWORD | head -n 3
+                    echo "✓ Environment configured"
           
-          bash ./deployment/deploy-backend-blue-green.sh $SKIP_HEALTHCHECK_FLAG
-          DEPLOY_SCRIPT
+                    mkdir -p .deployment
+                    cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
+                    chmod +x ./deploy-backend-blue-green.sh
 
-          chmod +x deploy.sh
-
-      - name: Execute deployment
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-        shell: bash
-        run: |
-          scp -o StrictHostKeyChecking=no -r deploy.sh \
-            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
-          
-          ssh -o StrictHostKeyChecking=no \
-            "$SERVER_USER@$SERVER_IP" \
-            'bash /home/cuefinder/app/deploy.sh'
-
-      - name: Verify deployment
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-        shell: bash
-        run: |
-          echo "🔍 Verifying deployment..."
-          
-          # Wait a few seconds for containers to stabilize
-          sleep 3
-          
-          # Check container status
-          ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'cd /home/cuefinder/app && docker compose ps'
-          
-          # Verify health endpoint
-          ACTIVE_SLOT=$(ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'cat /home/cuefinder/app/.deployment/active_slot')
-          
-          PORT=$([ "$ACTIVE_SLOT" = "blue" ] && echo 5001 || echo 5002)
-          
-          echo "✓ Deployment verified"
-          echo "  Active Slot: $ACTIVE_SLOT"
-          echo "  Port: $PORT"
-
-      - name: Notify Slack (Success)
-        if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "✅ Backend deployment successful",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*✅ Backend Deployment Successful*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Zero-downtime deployment completed"
-                  }
-                }
-              ]
+          # Ensure upstream file exists so nginx can start/reload cleanly
+          if [ ! -f .deployment/backend-upstream.conf ]; then
+            cat > .deployment/backend-upstream.conf << 'UPSTREAMEOF'
+            upstream backend_upstream {
+                server cuefinder-backend-blue-prod:5000;
             }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      - name: Notify Slack (Failure)
-        if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "❌ Backend deployment failed",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*❌ Backend Deployment Failed*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+            UPSTREAMEOF
+                      fi
+            
+                      echo "🔄 Running blue/green deployment..."
+                      ARGS=""
+                      if [ "$SKIP_HEALTHCHECK" = "true" ]; then
+                        ARGS="--skip-healthcheck"
+                      fi
+                      APP_PATH="$APP_DIR" ./deploy-backend-blue-green.sh $ARGS
+            
+                      echo "✅ Backend deployment complete"
+                      DEPLOY_SCRIPT
+            
+                      chmod +x deploy.sh
+            
+                  - name: Execute deployment
+                    env:
+                      SERVER_IP: ${{ secrets.SERVER_IP }}
+                      SERVER_USER: cuefinder
+                    shell: bash
+                    run: |
+                      scp -o StrictHostKeyChecking=no -r deploy.sh \
+                        "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
+                      
+                      ssh -o StrictHostKeyChecking=no \
+                        "$SERVER_USER@$SERVER_IP" \
+                        'bash /home/cuefinder/app/deploy.sh'
+            
+                  - name: Verify deployment
+                    env:
+                      SERVER_IP: ${{ secrets.SERVER_IP }}
+                      SERVER_USER: cuefinder
+                    shell: bash
+                    run: |
+                      echo "🔍 Verifying deployment..."
+                      
+                      # Wait a few seconds for containers to stabilize
+                      sleep 3
+                      
+                      # Check container status
+                      ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+                        'cd /home/cuefinder/app && docker compose ps'
+                      
+                      # Verify health endpoint
+                      ACTIVE_SLOT=$(ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+                        'cat /home/cuefinder/app/.deployment/active_slot')
+                      
+                      PORT=$([ "$ACTIVE_SLOT" = "blue" ] && echo 5001 || echo 5002)
+                      
+                      echo "✓ Deployment verified"
+                      echo "  Active Slot: $ACTIVE_SLOT"
+                      echo "  Port: $PORT"

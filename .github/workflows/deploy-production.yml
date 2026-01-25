@@ -1,22 +1,13 @@
 name: Deploy to Production (Orchestrator)
 
+# DISABLED: Using deploy.yml for simple deployment
+# on:
+#   push:
+#     branches:
+#       - release
+#   workflow_dispatch:
 on:
-  push:
-    branches:
-      - release
   workflow_dispatch:
-    inputs:
-      deployment-mode:
-        description: 'Deployment mode'
-        required: false
-        type: choice
-        options:
-          - smart (default - only what changed)
-          - full (rebuild everything)
-          - backend-only
-          - frontend-only
-          - infra-only
-        default: 'smart (default - only what changed)'
 
 jobs:
   # Detect what components changed

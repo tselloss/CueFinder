@@ -116,7 +116,7 @@ export default function Inbox({ onBack }) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 pt-[7px] pb-[7px]">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={onBack} className="gap-2">
               <ArrowLeft className="w-4 h-4" />
@@ -124,7 +124,7 @@ export default function Inbox({ onBack }) {
             </Button>
             <div className="flex items-center gap-3">
               <Mail className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold mt-2">Inbox</h1>
+              <h1 className="text-2xl font-bold">Inbox</h1>
               {unreadCount > 0 && (
                 <Badge variant="destructive" className="rounded-full px-2">
                   {unreadCount}
