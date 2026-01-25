@@ -28,7 +28,6 @@ export default function AdminPage({ onBack }) {
   const [flaggedImages, setFlaggedImages] = useState([]);
   const [bannedUsers, setBannedUsers] = useState([]);
   const [moderationStats, setModerationStats] = useState({ total: 0, pending: 0, rejected: 0, approved: 0 });
-  const [isLoading, setIsLoading] = useState(true);
   const [flaggedImagesPage, setFlaggedImagesPage] = useState(1);
   const [bannedUsersPage, setBannedUsersPage] = useState(1);
   const itemsPerPage = 5;
@@ -54,7 +53,6 @@ export default function AdminPage({ onBack }) {
   useEffect(() => {
     async function load() {
       console.log('AdminPage: Loading data...');
-      setIsLoading(true);
       try {
         const [u, c, k, flaggedData, bannedData] = await Promise.all([
           adminUsers.getAllUsers().catch(err => { console.error('Error loading users:', err); return []; }),
@@ -84,7 +82,6 @@ export default function AdminPage({ onBack }) {
         setCues([]);
         setCases([]);
       } finally {
-        setIsLoading(false);
       }
     }
     load();
