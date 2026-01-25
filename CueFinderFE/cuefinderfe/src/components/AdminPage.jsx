@@ -29,6 +29,8 @@ export default function AdminPage({ onBack }) {
   const [bannedUsers, setBannedUsers] = useState([]);
   const [moderationStats, setModerationStats] = useState({ total: 0, pending: 0, rejected: 0, approved: 0 });
   const [isLoading, setIsLoading] = useState(true);
+  const [flaggedImagesPage, setFlaggedImagesPage] = useState(1);
+  const [bannedUsersPage, setBannedUsersPage] = useState(1);
   const itemsPerPage = 5;
   const userQueryRef = useRef(null);
   const queryRef = useRef(null);
@@ -221,10 +223,12 @@ export default function AdminPage({ onBack }) {
     const start = (listingPage - 1) * itemsPerPage;
     return filteredListingsByTab.slice(start, start + itemsPerPage);
   }, [filteredListingsByTab, listingPage, itemsPerPage]);
+
+  return (
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 py-4">
+        <div className="container mx-auto px-4 pt-[7px] pb-[7px]">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={onBack} className="gap-2">
               <ArrowLeft className="w-4 h-4" />
@@ -232,7 +236,7 @@ export default function AdminPage({ onBack }) {
             </Button>
             <div className="flex items-center gap-2">
               <Shield className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold mt-2">Admin Dashboard</h1>
+              <h1 className="text-2xl font-bold">Admin Dashboard</h1>
             </div>
           </div>
         </div>
@@ -385,7 +389,7 @@ export default function AdminPage({ onBack }) {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          flaggedImages.slice(0, 10).map((img) => (
+                          flaggedImages.slice((flaggedImagesPage - 1) * itemsPerPage, flaggedImagesPage * itemsPerPage).map((img) => (
                             <TableRow key={img.id}>
                               <TableCell>
                                 <div>
@@ -428,9 +432,32 @@ export default function AdminPage({ onBack }) {
                         )}
                       </TableBody>
                     </Table>
-                    {flaggedImages.length > 10 && (
-                      <div className="p-4 text-center text-sm text-muted-foreground border-t">
-                        Showing 10 of {flaggedImages.length} blocked images
+                    {flaggedImages.length > itemsPerPage && (
+                      <div className="p-4 flex items-center justify-between border-t">
+                        <div className="text-sm text-muted-foreground">
+                          Showing {(flaggedImagesPage - 1) * itemsPerPage + 1}-{Math.min(flaggedImagesPage * itemsPerPage, flaggedImages.length)} of {flaggedImages.length}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFlaggedImagesPage(p => Math.max(1, p - 1))}
+                            disabled={flaggedImagesPage === 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          <span className="text-sm">
+                            Page {flaggedImagesPage} of {Math.ceil(flaggedImages.length / itemsPerPage)}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setFlaggedImagesPage(p => p + 1)}
+                            disabled={flaggedImagesPage >= Math.ceil(flaggedImages.length / itemsPerPage)}
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>
@@ -456,7 +483,7 @@ export default function AdminPage({ onBack }) {
                             </TableCell>
                           </TableRow>
                         ) : (
-                          bannedUsers.slice(0, 10).map((user) => (
+                          bannedUsers.slice((bannedUsersPage - 1) * itemsPerPage, bannedUsersPage * itemsPerPage).map((user) => (
                             <TableRow key={user.id}>
                               <TableCell>
                                 <div>
@@ -481,9 +508,32 @@ export default function AdminPage({ onBack }) {
                         )}
                       </TableBody>
                     </Table>
-                    {bannedUsers.length > 10 && (
-                      <div className="p-4 text-center text-sm text-muted-foreground border-t">
-                        Showing 10 of {bannedUsers.length} banned users
+                    {bannedUsers.length > itemsPerPage && (
+                      <div className="p-4 flex items-center justify-between border-t">
+                        <div className="text-sm text-muted-foreground">
+                          Showing {(bannedUsersPage - 1) * itemsPerPage + 1}-{Math.min(bannedUsersPage * itemsPerPage, bannedUsers.length)} of {bannedUsers.length}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBannedUsersPage(p => Math.max(1, p - 1))}
+                            disabled={bannedUsersPage === 1}
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </Button>
+                          <span className="text-sm">
+                            Page {bannedUsersPage} of {Math.ceil(bannedUsers.length / itemsPerPage)}
+                          </span>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => setBannedUsersPage(p => p + 1)}
+                            disabled={bannedUsersPage >= Math.ceil(bannedUsers.length / itemsPerPage)}
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </div>
                     )}
                   </div>

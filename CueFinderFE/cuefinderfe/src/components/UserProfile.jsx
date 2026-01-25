@@ -122,7 +122,7 @@ export default function UserProfile({ onBack }) {
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-secondary/20 p-4 md:p-8">
       <div className="max-w-6xl mx-auto space-y-6">
         {/* Header */}
-        <div className="flex items-center gap-2 md:gap-4">
+        <div className="flex items-center gap-2 md:gap-4 pt-[7px] pb-[7px]">
           <Button
             variant="outline"
             size="default"
@@ -132,7 +132,7 @@ export default function UserProfile({ onBack }) {
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold mt-2">My Profile</h1>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
         </div>
 
         {/* Message Alert */}
