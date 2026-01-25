@@ -133,75 +133,75 @@ jobs:
 
           echo "⚙️  Updating environment..."
           cat > .env << 'ENVEOF'
-DB_PASSWORD=$DB_PASSWORD
-JWT_SECRET=$JWT_SECRET
-FRONTEND_API_URL=$FRONTEND_API_URL
-CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
-ENVEOF
-
-          echo "📋 Environment file created:"
-          cat .env | grep -v PASSWORD | head -n 3
-          echo "✓ Environment configured"
-
-          mkdir -p .deployment
-          cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
-          chmod +x ./deploy-backend-blue-green.sh
+          DB_PASSWORD=$DB_PASSWORD
+          JWT_SECRET=$JWT_SECRET
+          FRONTEND_API_URL=$FRONTEND_API_URL
+          CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
+          ENVEOF
+          
+                    echo "📋 Environment file created:"
+                    cat .env | grep -v PASSWORD | head -n 3
+                    echo "✓ Environment configured"
+          
+                    mkdir -p .deployment
+                    cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
+                    chmod +x ./deploy-backend-blue-green.sh
 
           # Ensure upstream file exists so nginx can start/reload cleanly
           if [ ! -f .deployment/backend-upstream.conf ]; then
             cat > .deployment/backend-upstream.conf << 'UPSTREAMEOF'
-upstream backend_upstream {
-    server cuefinder-backend-blue-prod:5000;
-}
-UPSTREAMEOF
-          fi
-
-          echo "🔄 Running blue/green deployment..."
-          ARGS=""
-          if [ "$SKIP_HEALTHCHECK" = "true" ]; then
-            ARGS="--skip-healthcheck"
-          fi
-          APP_PATH="$APP_DIR" ./deploy-backend-blue-green.sh $ARGS
-
-          echo "✅ Backend deployment complete"
-          DEPLOY_SCRIPT
-
-          chmod +x deploy.sh
-
-      - name: Execute deployment
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-        shell: bash
-        run: |
-          scp -o StrictHostKeyChecking=no -r deploy.sh \
-            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
-          
-          ssh -o StrictHostKeyChecking=no \
-            "$SERVER_USER@$SERVER_IP" \
-            'bash /home/cuefinder/app/deploy.sh'
-
-      - name: Verify deployment
-        env:
-          SERVER_IP: ${{ secrets.SERVER_IP }}
-          SERVER_USER: cuefinder
-        shell: bash
-        run: |
-          echo "🔍 Verifying deployment..."
-          
-          # Wait a few seconds for containers to stabilize
-          sleep 3
-          
-          # Check container status
-          ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'cd /home/cuefinder/app && docker compose ps'
-          
-          # Verify health endpoint
-          ACTIVE_SLOT=$(ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'cat /home/cuefinder/app/.deployment/active_slot')
-          
-          PORT=$([ "$ACTIVE_SLOT" = "blue" ] && echo 5001 || echo 5002)
-          
-          echo "✓ Deployment verified"
-          echo "  Active Slot: $ACTIVE_SLOT"
-          echo "  Port: $PORT"
+            upstream backend_upstream {
+                server cuefinder-backend-blue-prod:5000;
+            }
+            UPSTREAMEOF
+                      fi
+            
+                      echo "🔄 Running blue/green deployment..."
+                      ARGS=""
+                      if [ "$SKIP_HEALTHCHECK" = "true" ]; then
+                        ARGS="--skip-healthcheck"
+                      fi
+                      APP_PATH="$APP_DIR" ./deploy-backend-blue-green.sh $ARGS
+            
+                      echo "✅ Backend deployment complete"
+                      DEPLOY_SCRIPT
+            
+                      chmod +x deploy.sh
+            
+                  - name: Execute deployment
+                    env:
+                      SERVER_IP: ${{ secrets.SERVER_IP }}
+                      SERVER_USER: cuefinder
+                    shell: bash
+                    run: |
+                      scp -o StrictHostKeyChecking=no -r deploy.sh \
+                        "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
+                      
+                      ssh -o StrictHostKeyChecking=no \
+                        "$SERVER_USER@$SERVER_IP" \
+                        'bash /home/cuefinder/app/deploy.sh'
+            
+                  - name: Verify deployment
+                    env:
+                      SERVER_IP: ${{ secrets.SERVER_IP }}
+                      SERVER_USER: cuefinder
+                    shell: bash
+                    run: |
+                      echo "🔍 Verifying deployment..."
+                      
+                      # Wait a few seconds for containers to stabilize
+                      sleep 3
+                      
+                      # Check container status
+                      ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+                        'cd /home/cuefinder/app && docker compose ps'
+                      
+                      # Verify health endpoint
+                      ACTIVE_SLOT=$(ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
+                        'cat /home/cuefinder/app/.deployment/active_slot')
+                      
+                      PORT=$([ "$ACTIVE_SLOT" = "blue" ] && echo 5001 || echo 5002)
+                      
+                      echo "✓ Deployment verified"
+                      echo "  Active Slot: $ACTIVE_SLOT"
+                      echo "  Port: $PORT"
