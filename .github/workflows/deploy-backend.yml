@@ -132,12 +132,12 @@ jobs:
           git clean -fdx -e uploads/ -e .deployment/ -e ssl/
 
           echo "⚙️  Updating environment..."
-          cat > .env << EOF
+          cat > .env << 'ENVEOF'
 DB_PASSWORD=$DB_PASSWORD
 JWT_SECRET=$JWT_SECRET
 FRONTEND_API_URL=$FRONTEND_API_URL
 CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
-EOF
+ENVEOF
 
           echo "📋 Environment file created:"
           cat .env | grep -v PASSWORD | head -n 3
@@ -149,11 +149,11 @@ EOF
 
           # Ensure upstream file exists so nginx can start/reload cleanly
           if [ ! -f .deployment/backend-upstream.conf ]; then
-            cat > .deployment/backend-upstream.conf << 'EOF'
+            cat > .deployment/backend-upstream.conf << 'UPSTREAMEOF'
 upstream backend_upstream {
     server cuefinder-backend-blue-prod:5000;
 }
-EOF
+UPSTREAMEOF
           fi
 
           echo "🔄 Running blue/green deployment..."
