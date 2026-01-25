@@ -117,20 +117,20 @@ jobs:
         run: |
           cat > deploy.sh << 'DEPLOY_SCRIPT'
           #!/bin/bash
-          set -e
-          
-          echo "🚀 Starting zero-downtime backend deployment..."
-          
-          cd /home/cuefinder/app
-          
-          # Pull latest code
+          set -euo pipefail
+
+          APP_DIR="/home/cuefinder/app"
+
+          echo "🚀 Starting blue/green backend deployment..."
+
+          cd "$APP_DIR"
+
           echo "📦 Pulling latest changes..."
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
           git clean -fdx -e uploads/ -e .deployment/ -e ssl/
-          
-          # Update environment variables
+
           echo "⚙️  Updating environment..."
           cat > .env << EOF
 DB_PASSWORD=$DB_PASSWORD
@@ -138,41 +138,31 @@ JWT_SECRET=$JWT_SECRET
 FRONTEND_API_URL=$FRONTEND_API_URL
 CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
 EOF
-          
-          # Verify .env file was created and has values
+
           echo "📋 Environment file created:"
           cat .env | grep -v PASSWORD | head -n 3
           echo "✓ Environment configured"
-          
-          # Configure sudoers for passwordless sudo (non-interactive, fails silently if not needed)
-          sudo -n bash -c 'echo "cuefinder ALL=(ALL) NOPASSWD: /usr/sbin/usermod" | tee /etc/sudoers.d/cuefinder-deploy' > /dev/null 2>&1 || echo "Note: Sudoers may already be configured"
-          
-          # Ensure cuefinder user is in docker group (for passwordless docker commands)
-          sudo -n usermod -aG docker cuefinder 2>/dev/null || true
-          
-          # Rebuild and restart backend with zero downtime
-          echo "🔄 Deploying backend..."
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build backend
-          
-          # Graceful restart: stop, pull changes, rebuild, and restart
-          echo "⏸️  Gracefully stopping backend..."
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml stop backend || true
-          
-          echo "🚀 Starting backend..."
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d backend
-          
-          # Wait for health check
-          if [ "$SKIP_HEALTHCHECK" != "true" ]; then
-            echo "⏳ Waiting for backend to be healthy..."
-            for i in {1..30}; do
-              if docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T backend curl -f http://localhost:5000/health > /dev/null 2>&1; then
-                echo "✅ Backend is healthy"
-                break
-              fi
-              sleep 2
-            done
+
+          mkdir -p .deployment
+          cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
+          chmod +x ./deploy-backend-blue-green.sh
+
+          # Ensure upstream file exists so nginx can start/reload cleanly
+          if [ ! -f .deployment/backend-upstream.conf ]; then
+            cat > .deployment/backend-upstream.conf << 'EOF'
+upstream backend_upstream {
+    server cuefinder-backend-blue-prod:5000;
+}
+EOF
           fi
-          
+
+          echo "🔄 Running blue/green deployment..."
+          ARGS=""
+          if [ "$SKIP_HEALTHCHECK" = "true" ]; then
+            ARGS="--skip-healthcheck"
+          fi
+          APP_PATH="$APP_DIR" ./deploy-backend-blue-green.sh $ARGS
+
           echo "✅ Backend deployment complete"
           DEPLOY_SCRIPT
 

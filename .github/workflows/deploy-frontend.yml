@@ -140,22 +140,18 @@ jobs:
           
           cd /home/cuefinder/app
           
-          # Configure sudoers for passwordless sudo on specific paths (non-interactive, fails silently if not needed)
-          echo "⚙️  Setting up permissions..."
-          sudo -n bash -c 'echo "cuefinder ALL=(ALL) NOPASSWD: /bin/mkdir, /bin/cp, /bin/mv, /bin/rm, /bin/chown" | tee /etc/sudoers.d/cuefinder-deploy' > /dev/null 2>&1 || echo "Note: Sudoers may already be configured"
-          
           # Create backup of current build
           if [ -d "/var/www/cuefinder/current" ]; then
             TIMESTAMP=$(date +%s)
-            sudo mkdir -p /var/www/cuefinder/backup-$TIMESTAMP 2>/dev/null && sudo mv /var/www/cuefinder/current /var/www/cuefinder/backup-$TIMESTAMP || true
+            mkdir -p /var/www/cuefinder/backup-$TIMESTAMP 2>/dev/null && mv /var/www/cuefinder/current /var/www/cuefinder/backup-$TIMESTAMP || true
             echo "  Backed up previous build"
           fi
           
           # Deploy new build (atomic operation)
           echo "📦 Deploying new build..."
-          sudo mkdir -p /var/www/cuefinder
-          sudo cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
-          sudo chown -R cuefinder:cuefinder /var/www/cuefinder
+          mkdir -p /var/www/cuefinder
+          cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
+          chown -R cuefinder:cuefinder /var/www/cuefinder || true
           
           # Verify deployment
           if [ -f "/var/www/cuefinder/current/index.html" ]; then
@@ -168,7 +164,7 @@ jobs:
           
           # Cleanup old backups (keep only 3 latest)
           echo "🧹 Cleaning up old backups..."
-          sudo ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r sudo rm -rf
+          ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
           DEPLOY_SCRIPT
 
           chmod +x deploy-frontend.sh
