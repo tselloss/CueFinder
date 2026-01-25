@@ -3,6 +3,7 @@ name: Deploy Frontend
 # Trigger on:
 # - Changes to frontend code
 # - Manual trigger
+# Test build: 035e34b
 on:
   push:
     branches:
