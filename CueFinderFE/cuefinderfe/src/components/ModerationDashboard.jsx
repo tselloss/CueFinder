@@ -29,7 +29,7 @@ const ModerationDashboard = () => {
   const fetchPendingFlags = async () => {
     try {
       setLoading(true);
-      const response = await axios.get('/api/moderation/pending', {
+      const response = await axios.get('/api/ext/moderation/pending', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setFlags(response.data.items || []);
@@ -42,7 +42,7 @@ const ModerationDashboard = () => {
 
   const fetchRejectedImages = async () => {
     try {
-      const response = await axios.get('/api/moderation/rejected', {
+      const response = await axios.get('/api/ext/moderation/flagged-images?status=rejected', {
         headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
       });
       setRejectedImages(response.data.items || []);
@@ -56,7 +56,7 @@ const ModerationDashboard = () => {
 
     try {
       setActionInProgress(true);
-      await axios.post(`/api/moderation/approve/${flagId}`, 
+      await axios.post(`/api/ext/moderation/approve/${flagId}`, 
         { notes: adminNotes },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
@@ -77,8 +77,8 @@ const ModerationDashboard = () => {
 
     try {
       setActionInProgress(true);
-      await axios.post(`/api/moderation/reject/${flagId}`,
-        { notes: adminNotes, ban_user: banUser },
+      await axios.post(`/api/ext/moderation/reject/${flagId}`,
+        { notes: adminNotes, banUser },
         { headers: { Authorization: `Bearer ${localStorage.getItem('token')}` } }
       );
       setFlags(flags.filter(f => f.id !== flagId));
@@ -93,6 +93,29 @@ const ModerationDashboard = () => {
       setActionInProgress(false);
     }
   };
+
+  // Load image preview for selected flag
+  const [flagPreviewUrl, setFlagPreviewUrl] = useState(null);
+  useEffect(() => {
+    const loadPreview = async () => {
+      if (!selectedFlag) { setFlagPreviewUrl(null); return; }
+      try {
+        const response = await axios.get(`/api/ext/moderation/flagged/${selectedFlag.id}/image`, {
+          headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
+          responseType: 'blob'
+        });
+        const url = URL.createObjectURL(response.data);
+        setFlagPreviewUrl(url);
+      } catch (err) {
+        console.error('Failed to load preview image:', err);
+        setFlagPreviewUrl(null);
+      }
+    };
+    loadPreview();
+    return () => {
+      if (flagPreviewUrl) URL.revokeObjectURL(flagPreviewUrl);
+    };
+  }, [selectedFlag]);
 
   return (
     <div className="moderation-dashboard p-6 bg-gray-50">
@@ -221,10 +244,12 @@ const ModerationDashboard = () => {
 
               {/* Image Preview */}
               <div className="mb-6 p-4 bg-gray-100 rounded">
-                <p className="text-sm text-gray-600 mb-2">Image:</p>
-                <div className="text-sm text-gray-700 truncate">
-                  {selectedFlag.storage_path}
-                </div>
+                <p className="text-sm text-gray-600 mb-2">Image Preview:</p>
+                {flagPreviewUrl ? (
+                  <img src={flagPreviewUrl} alt="Flagged preview" className="max-h-64 rounded border" />
+                ) : (
+                  <div className="text-sm text-gray-700 truncate">(Preview unavailable)</div>
+                )}
               </div>
 
               {/* Admin Notes */}

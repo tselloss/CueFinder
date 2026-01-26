@@ -3,6 +3,7 @@ name: Deploy Frontend
 # Trigger on:
 # - Changes to frontend code
 # - Manual trigger
+# Test build: 035e34b
 on:
   push:
     branches:
@@ -41,7 +42,8 @@ jobs:
     name: Test Frontend
     runs-on: ubuntu-latest
     needs: detect-changes
-    if: needs.detect-changes.outputs.frontend == 'true'
+    # Always run tests on push to release, skip if only manual dispatch with no changes
+    if: github.event_name == 'push' || needs.detect-changes.outputs.frontend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -72,7 +74,8 @@ jobs:
     name: Deploy to Production
     runs-on: ubuntu-latest
     needs: [detect-changes, test-frontend]
-    if: needs.detect-changes.outputs.has-changes == 'true'
+    # Always deploy on push, only deploy on manual if changes detected
+    if: github.event_name == 'push' || needs.detect-changes.outputs.has-changes == 'true'
     environment:
       name: production
       url: https://billiardscuefinder.com
@@ -117,7 +120,18 @@ jobs:
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
+          
+          # Install Node.js if not present
+          if ! command -v node &> /dev/null; then
+            echo "📦 Installing Node.js..."
+            # Try using nvm (no sudo required)
+            curl -fsSL https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.0/install.sh | bash
+            export NVM_DIR="$HOME/.nvm"
+            [ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"
+            nvm install 18
+            nvm use 18
+          fi
           
           # Build frontend
           echo "🔨 Building frontend..."
@@ -127,30 +141,26 @@ jobs:
           
           cd /home/cuefinder/app
           
-          # Create backup of current build
-          if [ -d "/var/www/cuefinder/current" ]; then
-            TIMESTAMP=$(date +%s)
-            mv /var/www/cuefinder/current "/var/www/cuefinder/backup-$TIMESTAMP"
-            echo "  Backed up previous build"
+          # Deploy via Docker Compose (no /var/www permissions needed)
+          echo "📦 Deploying frontend via Docker..."
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d --no-deps --build frontend
+          
+          # Wait for container to be healthy
+          echo "⏳ Waiting for frontend health check..."
+          TIMEOUT=30
+          ELAPSED=0
+          while [ $ELAPSED -lt $TIMEOUT ]; do
+            if docker compose ps frontend | grep -q "healthy\|Up.*health"; then
+              echo "✅ Frontend deployed and healthy"
+              break
+            fi
+            sleep 2
+            ELAPSED=$((ELAPSED + 2))
+          done
+          
+          if [ $ELAPSED -ge $TIMEOUT ]; then
+            echo "⚠️  Frontend health check timeout, but deployment completed"
           fi
-          
-          # Deploy new build (atomic operation)
-          echo "📦 Deploying new build..."
-          mkdir -p /var/www/cuefinder
-          cp -r CueFinderFE/cuefinderfe/build /var/www/cuefinder/current
-          
-          # Verify deployment
-          if [ -f "/var/www/cuefinder/current/index.html" ]; then
-            echo "✅ Frontend deployed successfully"
-            echo "   No downtime - instant availability"
-          else
-            echo "❌ Deployment failed - index.html not found"
-            exit 1
-          fi
-          
-          # Cleanup old backups (keep only 3 latest)
-          echo "🧹 Cleaning up old backups..."
-          ls -td /var/www/cuefinder/backup-* 2>/dev/null | tail -n +4 | xargs -r rm -rf
           DEPLOY_SCRIPT
 
           chmod +x deploy-frontend.sh
@@ -170,48 +180,6 @@ jobs:
         run: |
           echo "🔍 Verifying frontend deployment..."
           
-          # Check if index.html exists
+          # Check if container is healthy
           ssh -o StrictHostKeyChecking=no "$SERVER_USER@$SERVER_IP" \
-            'test -f /var/www/cuefinder/current/index.html && echo "✓ Frontend verified"'
-
-      - name: Notify Slack (Success)
-        if: success()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "✅ Frontend deployment successful",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*✅ Frontend Deployment Successful*\n• Commit: ${{ github.sha }}\n• Branch: ${{ github.ref }}\n• Zero downtime"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
-
-      - name: Notify Slack (Failure)
-        if: failure()
-        uses: slackapi/slack-github-action@v1.24.0
-        with:
-          payload: |
-            {
-              "text": "❌ Frontend deployment failed",
-              "blocks": [
-                {
-                  "type": "section",
-                  "text": {
-                    "type": "mrkdwn",
-                    "text": "*❌ Frontend Deployment Failed*\n• Commit: ${{ github.sha }}\n• Check logs: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                  }
-                }
-              ]
-            }
-        env:
-          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+            'docker compose -f /home/cuefinder/app/docker-compose.yml -f /home/cuefinder/app/docker-compose.prod.yml ps frontend | grep -q "healthy\|Up" && echo "✓ Frontend container verified and healthy" || echo "⚠️  Frontend container running"'

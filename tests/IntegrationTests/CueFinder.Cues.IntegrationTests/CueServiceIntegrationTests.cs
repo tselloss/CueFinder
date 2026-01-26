@@ -39,6 +39,10 @@ namespace CueFinder.Cues.IntegrationTests
             public void EnsureStorageRootExists() { }
             public Task<(bool IsValid, string? ErrorMessage)> ValidateImageAsync(IFormFile file) => Task.FromResult((true, (string?)null));
             public string GetImageUrl(string fileName) => $"/uploads/cues/{fileName}";
+            public Task<bool> HasFlaggedImagesAsync(int cueId) => Task.FromResult(false);
+            public Task<bool> DeleteCueIfFlaggedAsync(int cueId, int userId) => Task.FromResult(false);
+            public Task<bool> HasFlaggedCueCaseImagesAsync(int cueCaseId) => Task.FromResult(false);
+            public Task<bool> DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId) => Task.FromResult(false);
         }
 
         #region Create Tests
