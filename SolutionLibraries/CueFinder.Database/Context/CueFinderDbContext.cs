@@ -71,6 +71,10 @@ namespace CueFinder.Database.Context
                 entity.Property(e => e.Phone)
                     .HasMaxLength(20);
 
+                // Optional general location (city/area) for display
+                entity.Property(e => e.Location)
+                    .HasMaxLength(200);
+
                 entity.Property(e => e.Role)
                     .HasMaxLength(50)
                     .HasDefaultValueSql("'user'");

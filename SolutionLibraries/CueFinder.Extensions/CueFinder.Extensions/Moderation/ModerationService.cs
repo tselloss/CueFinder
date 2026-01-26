@@ -71,6 +71,7 @@ namespace CueFinder.Extensions.Moderation
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<ModerationService> _logger;
         private readonly string _nudenetUrl;
+        private readonly IConfiguration _configuration;
 
         public ModerationService(
             CueFinderDbContext context,
@@ -81,6 +82,7 @@ namespace CueFinder.Extensions.Moderation
             _context = context;
             _httpClientFactory = httpClientFactory;
             _logger = logger;
+            _configuration = configuration;
             _nudenetUrl = configuration["Moderation:NudeNetUrl"] ?? "http://localhost:8001";
         }
 
@@ -127,6 +129,29 @@ namespace CueFinder.Extensions.Moderation
                     _logger.LogWarning(
                         "Flagging image for user {UserId}: {ImagePath}, Reason: {Reason}, Score: {Score}, CueId: {CueId}, CueCaseId: {CueCaseId}",
                         userId, imagePath, aiResult.FlagReason, aiResult.ConfidenceScore, cueId, cueCaseId);
+
+                    // Ensure file is retained for admin review (move to a flagged folder when coming from temp paths)
+                    try
+                    {
+                        var sourceDir = Path.GetDirectoryName(imagePath) ?? string.Empty;
+                        // If image is under uploads\\temp, move to uploads\\flagged
+                        if (sourceDir.EndsWith(Path.Combine("uploads", "temp"), StringComparison.OrdinalIgnoreCase))
+                        {
+                            var uploadsRoot = Path.GetDirectoryName(sourceDir) ?? string.Empty; // .../uploads
+                            var flaggedDir = Path.Combine(uploadsRoot, "flagged");
+                            Directory.CreateDirectory(flaggedDir);
+                            var flaggedPath = Path.Combine(flaggedDir, Path.GetFileName(imagePath));
+                            if (System.IO.File.Exists(imagePath))
+                            {
+                                System.IO.File.Move(imagePath, flaggedPath, overwrite: true);
+                                imagePath = flaggedPath;
+                            }
+                        }
+                    }
+                    catch (Exception moveEx)
+                    {
+                        _logger.LogWarning(moveEx, "Unable to move flagged file to flagged folder: {ImagePath}", imagePath);
+                    }
 
                     var flaggedImage = new FlaggedImage
                     {
@@ -346,6 +371,72 @@ namespace CueFinder.Extensions.Moderation
             await _context.SaveChangesAsync();
             _logger.LogInformation($"Flag {flagId} approved by admin {adminUserId}");
 
+            // Move flagged image to public storage and attach to cue/case so it becomes visible
+            try
+            {
+                var imageUrlBase = _configuration["ImageStorage:ImageUrlBase"] ?? "/uploads/cues";
+                var storagePath = _configuration["ImageStorage:StoragePath"] ?? "uploads/cues";
+
+                if (flag.CueId.HasValue && File.Exists(flag.StoragePath))
+                {
+                    // Move file from flagged folder to public cues storage
+                    var publicCueFolder = Path.Combine(storagePath, flag.CueId.Value.ToString());
+                    Directory.CreateDirectory(publicCueFolder);
+
+                    var newFilePath = Path.Combine(publicCueFolder, flag.FileName);
+                    if (File.Exists(flag.StoragePath))
+                    {
+                        File.Move(flag.StoragePath, newFilePath, overwrite: true);
+                        _logger.LogInformation("Moved approved image from {OldPath} to {NewPath}", flag.StoragePath, newFilePath);
+                    }
+
+                    var publicImageUrl = $"{imageUrlBase}/{flag.CueId.Value}/{flag.FileName}";
+                    var cueImage = new CueImage
+                    {
+                        CueId = flag.CueId.Value,
+                        ImageUrl = publicImageUrl,
+                        AltText = $"Cue image {flag.FileName}",
+                        DisplayOrder = 0,
+                        IsPrimary = false,
+                        UploadedAt = DateTime.UtcNow,
+                        ContentType = GuessContentType(flag.FileName)
+                    };
+                    _context.CueImages.Add(cueImage);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Attached approved image to Cue {CueId}: {ImageUrl}", flag.CueId.Value, publicImageUrl);
+                }
+                else if (flag.CueCaseId.HasValue && File.Exists(flag.StoragePath))
+                {
+                    // Move file from flagged folder to public cases storage
+                    var publicCaseFolder = Path.Combine("uploads/cases", flag.CueCaseId.Value.ToString());
+                    Directory.CreateDirectory(publicCaseFolder);
+
+                    var newFilePath = Path.Combine(publicCaseFolder, flag.FileName);
+                    if (File.Exists(flag.StoragePath))
+                    {
+                        File.Move(flag.StoragePath, newFilePath, overwrite: true);
+                        _logger.LogInformation("Moved approved image from {OldPath} to {NewPath}", flag.StoragePath, newFilePath);
+                    }
+
+                    var publicImageUrl = $"/uploads/cases/{flag.CueCaseId.Value}/{flag.FileName}";
+                    var caseImage = new CueCaseImage
+                    {
+                        CueCaseId = flag.CueCaseId.Value,
+                        ImageUrl = publicImageUrl,
+                        DisplayOrder = 0,
+                        IsPrimary = false,
+                        UploadedAt = DateTime.UtcNow
+                    };
+                    _context.CueCaseImages.Add(caseImage);
+                    await _context.SaveChangesAsync();
+                    _logger.LogInformation("Attached approved image to CueCase {CueCaseId}: {ImageUrl}", flag.CueCaseId.Value, publicImageUrl);
+                }
+            }
+            catch (Exception attachEx)
+            {
+                _logger.LogError(attachEx, "Error attaching approved image for flag {FlagId}", flagId);
+            }
+
             return true;
         }
 
@@ -406,6 +497,20 @@ namespace CueFinder.Extensions.Moderation
             // This is a placeholder - implement based on your storage solution
             // Could be local file system, S3, Azure Blob, etc.
             throw new NotImplementedException("Implement based on your storage solution");
+        }
+
+        private string? GuessContentType(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).ToLowerInvariant();
+            return ext switch
+            {
+                ".jpg" => "image/jpeg",
+                ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                _ => null
+            };
         }
     }
 }

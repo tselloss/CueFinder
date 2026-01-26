@@ -142,15 +142,23 @@ var app = builder.Build();
 // Initialize database
 await app.Services.InitializeDatabaseAsync();
 
-// Initialize Forum database with auto-migrations
-try
+// Initialize Forum database with auto-migrations unless explicitly skipped
+var skipForumInit = Environment.GetEnvironmentVariable("SKIP_FORUM_INIT");
+if (!string.Equals(skipForumInit, "true", StringComparison.OrdinalIgnoreCase))
 {
-    await app.Services.InitializeForumDatabaseAsync();
+    try
+    {
+        await app.Services.InitializeForumDatabaseAsync();
+    }
+    catch (Exception ex)
+    {
+        // Log but don't crash - forum may already be initialized
+        Console.WriteLine($"⚠️ Forum initialization note: {ex.Message}");
+    }
 }
-catch (Exception ex)
+else
 {
-    // Log but don't crash - forum may already be initialized
-    Console.WriteLine($"⚠️ Forum initialization note: {ex.Message}");
+    Console.WriteLine("⏭️ Skipping forum initialization due to SKIP_FORUM_INIT=true");
 }
 
 // Configure the HTTP request pipeline

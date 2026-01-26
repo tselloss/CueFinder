@@ -1,6 +1,56 @@
 # Production Docker Compose Override
 # Use: docker-compose -f docker-compose.yml -f docker-compose.prod.yml up -d
 
+x-backend-common: &backend-common
+  restart: always
+  build:
+    context: .
+    dockerfile: ./CueFinderBE/Dockerfile
+  environment:
+    - ASPNETCORE_ENVIRONMENT=Production
+    - ASPNETCORE_URLS=http://+:5000
+    - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
+    - JwtSettings__SecretKey=${JWT_SECRET}
+    - JwtSettings__Issuer=cuefinder.com
+    - JwtSettings__Audience=cuefinder.com
+    - JwtSettings__ExpirationMinutes=1440
+    - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
+    - BASE_URL=https://billiardscuefinder.com
+    - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
+    - ImageStorageSettings__StoragePath=/app/uploads/cues
+    - ImageStorageSettings__ImageUrlBase=/uploads/cues
+    - ImageStorageSettings__MaxFileSizeBytes=10485760
+    - ImageStorageSettings__AllowedExtensions=.jpg,.jpeg,.png,.gif,.webp
+    - ImageStorageSettings__AllowedMimeTypes=image/jpeg,image/png,image/gif,image/webp
+    - Moderation__NudeNetUrl=http://cuefinder-opennsfw-prod:8000
+  depends_on:
+    postgres:
+      condition: service_healthy
+    opennsfw:
+      condition: service_healthy
+  volumes:
+    - ./uploads:/app/uploads
+  healthcheck:
+    test:
+      - CMD-SHELL
+      - curl -f http://localhost:5000/health || exit 1
+    interval: 30s
+    timeout: 10s
+    retries: 3
+  deploy:
+    resources:
+      limits:
+        memory: 1G
+      reservations:
+        memory: 512M
+  networks:
+    - cuefinder-network
+  logging:
+    driver: "json-file"
+    options:
+      max-size: "10m"
+      max-file: "3"
+
 services:
   postgres:
     container_name: cuefinder-postgres-prod
@@ -64,57 +114,17 @@ services:
         max-size: "10m"
         max-file: "3"
 
-  backend:
-    container_name: cuefinder-backend-prod
-    restart: always
-    build:
-      context: .
-      dockerfile: ./CueFinderBE/Dockerfile
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:5000
-      - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
-      - JwtSettings__SecretKey=${JWT_SECRET}
-      - JwtSettings__Issuer=cuefinder.com
-      - JwtSettings__Audience=cuefinder.com
-      - JwtSettings__ExpirationMinutes=1440
-      - CorsOrigins__Frontend=${CORS_FRONTEND_ORIGIN}
-      - BASE_URL=https://billiardscuefinder.com
-      - FRONTEND_URL=${CORS_FRONTEND_ORIGIN}
-      - ImageStorageSettings__StoragePath=/app/uploads/cues
-      - ImageStorageSettings__ImageUrlBase=/uploads/cues
-      - ImageStorageSettings__MaxFileSizeBytes=10485760
-      - ImageStorageSettings__AllowedExtensions=.jpg,.jpeg,.png,.gif,.webp
-      - ImageStorageSettings__AllowedMimeTypes=image/jpeg,image/png,image/gif,image/webp
-      - Moderation__NudeNetUrl=http://cuefinder-opennsfw-prod:8000
-    ports: []
-    depends_on:
-      postgres:
-        condition: service_healthy
-      opennsfw:
-        condition: service_healthy
-    volumes:
-      - ./uploads:/app/uploads
-    healthcheck:
-      test:
-        - CMD-SHELL
-        - curl -f http://localhost:5000/health || exit 1
-      interval: 30s
-      timeout: 10s
-      retries: 3
-    deploy:
-      resources:
-        limits:
-          memory: 1G
-        reservations:
-          memory: 512M
-    networks:
-      - cuefinder-network
-    logging:
-      driver: "json-file"
-      options:
-        max-size: "10m"
-        max-file: "3"
+  backend-blue:
+    <<: *backend-common
+    container_name: cuefinder-backend-blue-prod
+    ports:
+      - "5001:5000"
+
+  backend-green:
+    <<: *backend-common
+    container_name: cuefinder-backend-green-prod
+    ports:
+      - "5002:5000"
 
   moderator:
     container_name: cuefinder-moderator-prod
@@ -195,9 +205,10 @@ services:
       - ./CueFinderFE/cuefinderfe/nginx-ssl.conf:/etc/nginx/conf.d/default.conf:ro
       - ./ssl:/etc/nginx/ssl:ro
       - ./uploads:/app/uploads:ro
+      - ./.deployment/backend-upstream.conf:/etc/nginx/conf.d/backend-upstream.conf:ro
     depends_on:
       - frontend
-      - backend
+      - backend-blue
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
       interval: 30s

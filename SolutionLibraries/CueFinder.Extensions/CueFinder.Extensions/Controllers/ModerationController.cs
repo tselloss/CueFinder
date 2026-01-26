@@ -82,10 +82,7 @@ namespace CueFinder.Extensions.Controllers
 
                 if (scanResult.IsUnsafe)
                 {
-                    // Clean up temp file
-                    if (System.IO.File.Exists(tempPath))
-                        System.IO.File.Delete(tempPath);
-
+                    // Retain file (ScanImageAsync may move it to uploads/flagged); return 403
                     return new ObjectResult(new
                     {
                         message = "Image rejected - violates content policy",
@@ -453,6 +450,39 @@ namespace CueFinder.Extensions.Controllers
         public class ReportRequest
         {
             public string? Reason { get; set; }
+        }
+
+        /// <summary>
+        /// [ADMIN] Stream flagged image content for preview in dashboard
+        /// </summary>
+        [HttpGet("flagged/{flagId}/image")]
+        [Authorize(Roles = "admin")]
+        public async Task<IActionResult> GetFlaggedImageContent(int flagId)
+        {
+            var flag = await _context.FlaggedImages.FirstOrDefaultAsync(f => f.Id == flagId);
+            if (flag == null)
+                return NotFound(new { message = "Flag not found" });
+
+            if (string.IsNullOrWhiteSpace(flag.StoragePath) || !System.IO.File.Exists(flag.StoragePath))
+                return NotFound(new { message = "Image file not found" });
+
+            var contentType = GuessContentType(flag.FileName) ?? "application/octet-stream";
+            var stream = new FileStream(flag.StoragePath, FileMode.Open, FileAccess.Read, FileShare.Read);
+            return File(stream, contentType);
+        }
+
+        private static string? GuessContentType(string fileName)
+        {
+            var ext = Path.GetExtension(fileName).ToLowerInvariant();
+            return ext switch
+            {
+                ".jpg" => "image/jpeg",
+                ".jpeg" => "image/jpeg",
+                ".png" => "image/png",
+                ".gif" => "image/gif",
+                ".webp" => "image/webp",
+                _ => null
+            };
         }
     }
 }

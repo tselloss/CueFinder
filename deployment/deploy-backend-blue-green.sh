@@ -18,6 +18,7 @@ NC='\033[0m' # No Color
 # Configuration
 APP_PATH="${APP_PATH:-.}"
 DEPLOYMENT_STATE_FILE="${APP_PATH}/.deployment/active_slot"
+BACKEND_UPSTREAM_FILE="${APP_PATH}/.deployment/backend-upstream.conf"
 HEALTH_CHECK_RETRIES=30
 HEALTH_CHECK_INTERVAL=2
 DRAIN_TIMEOUT=30
@@ -63,6 +64,7 @@ print_error() {
 
 # Ensure deployment directory exists
 mkdir -p "$(dirname "$DEPLOYMENT_STATE_FILE")"
+touch "$BACKEND_UPSTREAM_FILE"
 
 # Determine which slot is active (blue or green)
 if [ -f "$DEPLOYMENT_STATE_FILE" ]; then
@@ -175,10 +177,20 @@ echo ""
 print_step "Switching traffic to $STANDBY_SLOT slot..."
 echo "$STANDBY_SLOT" > "$DEPLOYMENT_STATE_FILE"
 
+# Write upstream target for nginx to pick up active slot
+cat > "$BACKEND_UPSTREAM_FILE" <<EOF
+upstream backend_upstream {
+    server cuefinder-backend-$STANDBY_SLOT-prod:5000;
+}
+EOF
+
 # If using Nginx, reload it to pick up the new upstream
 if command -v nginx &> /dev/null; then
     nginx -s reload 2>/dev/null || true
 fi
+
+# If running inside docker-compose with nginx service, trigger reload there as well
+docker compose -f docker-compose.yml -f docker-compose.prod.yml exec -T nginx nginx -s reload 2>/dev/null || true
 
 print_success "Traffic switched"
 echo ""
