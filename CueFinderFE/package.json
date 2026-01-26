@@ -1,0 +1,26 @@
+{
+  "name": "cuefinderfe-monorepo",
+  "version": "1.0.0",
+  "private": true,
+  "description": "CueFinder Frontend Monorepo with pnpm workspaces",
+  "scripts": {
+    "start": "pnpm --filter @cuefinder/app start",
+    "build": "pnpm --filter @cuefinder/app build",
+    "test": "pnpm --filter @cuefinder/app test",
+    "test:e2e": "pnpm --filter @cuefinder/app test:e2e",
+    "test:e2e:ui": "pnpm --filter @cuefinder/app test:e2e:ui",
+    "test:e2e:headed": "pnpm --filter @cuefinder/app test:e2e:headed",
+    "test:e2e:debug": "pnpm --filter @cuefinder/app test:e2e:debug",
+    "test:report": "pnpm --filter @cuefinder/app test:report",
+    "lint": "pnpm -r run lint",
+    "type-check": "pnpm -r run type-check",
+    "clean": "pnpm -r --parallel run clean && pnpm clean"
+  },
+  "devDependencies": {
+    "pnpm": "^8.0.0"
+  },
+  "engines": {
+    "pnpm": ">=8.0.0",
+    "node": ">=18.0.0"
+  }
+}

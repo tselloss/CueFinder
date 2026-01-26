@@ -117,7 +117,7 @@ services:
 
   frontend:
     build:
-      context: ./CueFinderFE/cuefinderfe
+      context: ./CueFinderFE
       dockerfile: Dockerfile
       args:
         - REACT_APP_API_URL=http://localhost:5000/api
