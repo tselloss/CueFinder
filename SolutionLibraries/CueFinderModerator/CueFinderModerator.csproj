@@ -17,8 +17,8 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\SolutionLibraries\CueFinder.Database\CueFinder.Database.csproj" />
-    <ProjectReference Include="..\SolutionLibraries\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj" />
+    <ProjectReference Include="..\CueFinder.Database\CueFinder.Database.csproj" />
+    <ProjectReference Include="..\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj" />
   </ItemGroup>
 
 </Project>

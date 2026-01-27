@@ -131,7 +131,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: CueFinderModerator/Dockerfile
+      dockerfile: SolutionLibraries/CueFinderModerator/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5001
