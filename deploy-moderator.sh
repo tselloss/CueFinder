@@ -6,7 +6,7 @@
 set -e
 
 # Configuration
-MODERATION_FOLDER="CueFinderModerator"
+MODERATION_FOLDER="SolutionLibraries/CueFinderModerator"
 CONTAINER_NAME="cuefinder-moderator"
 IMAGE_NAME="cuefinder-moderator"
 LOG_FILE="moderator-deploy.log"

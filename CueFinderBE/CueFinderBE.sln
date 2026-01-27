@@ -57,7 +57,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum", "..\Solut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum.Tests", "..\tests\UnitTests\CueFinder.Forum.Tests\CueFinder.Forum.Tests.csproj", "{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinderModerator", "..\CueFinderModerator\CueFinderModerator.csproj", "{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinderModerator", "..\SolutionLibraries\CueFinderModerator\CueFinderModerator.csproj", "{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

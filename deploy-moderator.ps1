@@ -25,7 +25,7 @@ param(
 )
 
 # Configuration
-$ModerationFolder = "CueFinderModerator"
+$ModerationFolder = "SolutionLibraries/CueFinderModerator"
 $ContainerName = "cuefinder-moderator"
 $ImageName = "cuefinder-moderator"
 $LogFile = "moderator-deploy.log"
