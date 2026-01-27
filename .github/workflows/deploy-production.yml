@@ -63,7 +63,7 @@ jobs:
             fi
 
             # Detect if infra changed
-            if git diff origin/release HEAD --name-only | grep -qE '^(init\.sql|scripts|CueFinderModerator|deployment/Dockerfile\.nudenet)'; then
+            if git diff origin/release HEAD --name-only | grep -qE '^(init\.sql|scripts|SolutionLibraries/CueFinderModerator|deployment/Dockerfile\.nudenet)'; then
               echo "infra=true" >> $GITHUB_OUTPUT
             else
               echo "infra=false" >> $GITHUB_OUTPUT

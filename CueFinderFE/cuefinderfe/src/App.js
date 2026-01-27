@@ -5,6 +5,7 @@ import CueDetail from './components/CueDetail';
 import CueFormModal from './components/CueFormModal';
 import CueCaseDetail from './components/CueCaseDetail';
 import BilliardTableDetail from './components/BilliardTableDetail';
+import AccessoryDetail from './components/AccessoryDetail';
 import AdminPage from './components/AdminPage';
 import LoginPage from './components/LoginPage';
 import UserProfile from './components/UserProfile';
@@ -19,6 +20,7 @@ import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 import * as billiardTableService from './api/billiardTableService';
+import * as accessoryService from './api/accessoryService';
 import * as messageService from './api/messageService';
 import * as forumService from './api/forumService';
 
@@ -111,25 +113,28 @@ function AppInner() {
   }, [category]);
 
   const refreshListings = useCallback(async () => {
-    // Fetch cues, cases, and tables
-    const [cuesData, casesData, tablesData] = await Promise.all([
+    // Fetch cues, cases, tables, and accessories
+    const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
       cueService.getCues(),
       cueCaseService.getCueCases(),
-      billiardTableService.getTables()
+      billiardTableService.getTables(),
+      accessoryService.getAccessories()
     ]);
 
     // Add itemType field to each item and combine (avoid colliding with backend 'category')
     const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
     const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
     const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
+    const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
 
     // Combine all arrays
-    const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory];
+    const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
 
     console.log('Loaded listings:', {
       cues: cuesWithCategory.length,
       cases: casesWithCategory.length,
       tables: tablesWithCategory.length,
+      accessories: accessoriesWithCategory.length,
       total: allListings.length
     });
     
@@ -156,20 +161,17 @@ function AppInner() {
   useEffect(() => {
     if (!isHomePage) return;
     
-    // Navigate to coming soon page for accessories only (tables now have listings)
-    if (category === 'accessories') {
-      navigate('/coming-soon');
-      return;
-    }
-    
+    // All categories now have listings, so no need to redirect to coming-soon
     refreshListings();
-  }, [isHomePage, category, refreshListings, navigate]);
+  }, [isHomePage, refreshListings]);
 
   const handleSelect = (item) => {
   if (item.itemType === 'case') {
       navigate(`/case/${item.id}`);
     } else if (item.itemType === 'table') {
       navigate(`/table/${item.id}`);
+    } else if (item.itemType === 'accessory') {
+      navigate(`/accessory/${item.id}`);
     } else {
       navigate(`/cue/${item.id}`);
     }
@@ -369,6 +371,9 @@ function AppInner() {
               } />
               <Route path="/table/:id" element={
                 user ? <BilliardTableDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/accessory/:id" element={
+                user ? <AccessoryDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/profile" element={

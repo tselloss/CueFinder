@@ -23,11 +23,13 @@ namespace CueFinder.Accessories.Controllers;
 public partial class AccessoriesController : BaseApiController
 {
     private readonly IAccessoryService _accessoryService;
+    private readonly IImageService _imageService;
     private readonly ILogger<AccessoriesController> _logger;
 
-    public AccessoriesController(IAccessoryService accessoryService, ILogger<AccessoriesController> logger)
+    public AccessoriesController(IAccessoryService accessoryService, IImageService imageService, ILogger<AccessoriesController> logger)
     {
         _accessoryService = accessoryService;
+        _imageService = imageService;
         _logger = logger;
     }
 }

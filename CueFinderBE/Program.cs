@@ -1,10 +1,12 @@
 using CueFinder.Auth.Extensions;
 using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
+using CueFinder.Accessories.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Controllers;
+using CueFinder.Extensions.Email;
 using CueFinder.Extensions.Images;
 using CueFinder.Extensions.Moderation;
 using CueFinder.Extensions.ProblemDetails;
@@ -42,8 +44,12 @@ builder.Services.AddDatabaseServices(connectionString);
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
+builder.Services.AddAccessoriesServices();
 builder.Services.AddMessageServices();
 builder.Services.AddForumServices(connectionString);
+
+// Add email service
+builder.Services.AddEmailService(builder.Configuration);
 
 // Add caching services
 builder.Services.AddCueFinderCaching(builder.Configuration);

@@ -218,28 +218,24 @@ namespace CueFinder.Extensions.Controllers
                 .Select(u => u.Id)
                 .ToListAsync();
 
-            var bannedUsers = bannedUserIds
+            var bannedUsers = await _context.Users
+                .Where(u => u.IsBanned)
+                .OrderBy(u => u.Id)
                 .Skip(skip)
                 .Take(take)
-                .Select(userId => {
-                    var user = _context.Users.FirstOrDefault(u => u.Id == userId);
-                    var flagCount = _context.FlaggedImages.Count(f => f.UserId == userId);
-                    var rejectedCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "rejected");
-                    var pendingCount = _context.FlaggedImages.Count(f => f.UserId == userId && f.Status == "pending");
-                    return new
-                    {
-                        id = user.Id,
-                        username = user.Username,
-                        email = user.Email,
-                        display_name = user.Name,
-                        is_banned = user.IsBanned,
-                        created_at = user.CreatedAt,
-                        flagged_images_count = flagCount,
-                        rejected_images_count = rejectedCount,
-                        pending_flags_count = pendingCount
-                    };
+                .Select(u => new
+                {
+                    id = u.Id,
+                    username = u.Username,
+                    email = u.Email,
+                    display_name = u.Name,
+                    is_banned = u.IsBanned,
+                    created_at = u.CreatedAt,
+                    flagged_images_count = _context.FlaggedImages.Count(f => f.UserId == u.Id),
+                    rejected_images_count = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "rejected"),
+                    pending_flags_count = _context.FlaggedImages.Count(f => f.UserId == u.Id && f.Status == "pending")
                 })
-                .ToList();
+                .ToListAsync();
 
             var totalBanned = bannedUserIds.Count;
 

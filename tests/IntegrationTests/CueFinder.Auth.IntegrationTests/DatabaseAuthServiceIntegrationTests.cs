@@ -18,9 +18,9 @@ namespace CueFinder.Auth.IntegrationTests
     /// </summary>
     public class DatabaseAuthServiceIntegrationTests : DatabaseTestBase
     {
-        private DatabaseAuthService? _authService;
-        private TokenService? _tokenService;
-        private UserService? _userService;
+        private DatabaseAuthService _authService = null!;
+        private TokenService _tokenService = null!;
+        private UserService _userService = null!;
 
         public DatabaseAuthServiceIntegrationTests() : base()
         {
@@ -74,7 +74,7 @@ namespace CueFinder.Auth.IntegrationTests
                 Phone = "555-9999"
             };
 
-            var registerResponse = await _authService.RegisterAsync(registerRequest);
+            var registerResponse = Require(await _authService.RegisterAsync(registerRequest), "registerResponse");
 
             // Assert registration
             registerResponse.Should().NotBeNull();
@@ -85,12 +85,11 @@ namespace CueFinder.Auth.IntegrationTests
             registerResponse.Role.Should().Be("user");
 
             // Verify user exists in database
-            var userInDb = await _userService.GetByUsernameAsync("integrationtest");
-            userInDb.Should().NotBeNull();
-            userInDb!.Name.Should().Be("Integration Test User");
+            var userInDb = Require(await _userService.GetByUsernameAsync("integrationtest"), "userInDb");
+            userInDb.Name.Should().Be("Integration Test User");
 
             // Step 2: Login with username
-            var loginResponse = await _authService.LoginAsync("integrationtest", "Password123!");
+            var loginResponse = Require(await _authService.LoginAsync("integrationtest", "Password123!"), "loginResponse");
 
             // Assert login
             loginResponse.Should().NotBeNull();
@@ -99,7 +98,7 @@ namespace CueFinder.Auth.IntegrationTests
             loginResponse.UserId.Should().BeGreaterThan(0);
 
             // Step 3: Get profile
-            var profile = await _authService.GetUserProfileAsync(loginResponse.UserId);
+            var profile = Require(await _authService.GetUserProfileAsync(loginResponse.UserId), "profile");
 
             // Assert profile
             profile.Should().NotBeNull();
@@ -108,7 +107,7 @@ namespace CueFinder.Auth.IntegrationTests
             profile.Email.Should().Be("integration@test.com");
 
             // Step 4: Update profile
-            var updatedProfile = await _authService.UpdateUserProfileAsync(
+            var updatedProfile = Require(await _authService.UpdateUserProfileAsync(
                 loginResponse.UserId,
                 "Updated Integration User",
                 "updated@test.com",
@@ -119,7 +118,7 @@ namespace CueFinder.Auth.IntegrationTests
                 "Test State",
                 "12345",
                 "Test Country",
-                null);
+                null), "updatedProfile");
 
             // Assert update
             updatedProfile.Should().NotBeNull();
@@ -128,8 +127,8 @@ namespace CueFinder.Auth.IntegrationTests
             updatedProfile.Phone.Should().Be("555-0000");
 
             // Verify update persisted in database
-            var updatedUserInDb = await _userService.GetByUsernameAsync("integrationtest");
-            updatedUserInDb!.Name.Should().Be("Updated Integration User");
+            var updatedUserInDb = Require(await _userService.GetByUsernameAsync("integrationtest"), "updatedUserInDb");
+            updatedUserInDb.Name.Should().Be("Updated Integration User");
             updatedUserInDb.Email.Should().Be("updated@test.com");
         }
 
@@ -179,7 +178,7 @@ namespace CueFinder.Auth.IntegrationTests
             await _authService.RegisterAsync(registerRequest);
 
             // Act - Login with email instead of username
-            var loginResponse = await _authService.LoginAsync("emailtest@test.com", "Password123!");
+            var loginResponse = Require(await _authService.LoginAsync("emailtest@test.com", "Password123!"), "loginResponse");
 
             // Assert
             loginResponse.Should().NotBeNull();
@@ -199,11 +198,11 @@ namespace CueFinder.Auth.IntegrationTests
                 Name = "Timestamp Test"
             };
 
-            var registerResponse = await _authService.RegisterAsync(registerRequest);
+            var registerResponse = Require(await _authService.RegisterAsync(registerRequest), "registerResponse");
             var userId = registerResponse.UserId;
 
-            var userBefore = await _userService.GetUserWithDetailsAsync(userId);
-            var initialLastLogin = userBefore!.LastLoginAt;
+            var userBefore = Require(await _userService.GetUserWithDetailsAsync(userId), "userBefore");
+            var initialLastLogin = userBefore.LastLoginAt;
 
             await Task.Delay(100); // Ensure time difference
 
@@ -211,8 +210,8 @@ namespace CueFinder.Auth.IntegrationTests
             await _authService.LoginAsync("timestamptest", "Password123!");
 
             // Assert
-            var userAfter = await _userService.GetUserWithDetailsAsync(userId);
-            userAfter!.LastLoginAt.Should().BeAfter(initialLastLogin ?? DateTime.MinValue);
+            var userAfter = Require(await _userService.GetUserWithDetailsAsync(userId), "userAfter");
+            userAfter.LastLoginAt.Should().BeAfter(initialLastLogin ?? DateTime.MinValue);
         }
 
         [Fact]
@@ -227,11 +226,11 @@ namespace CueFinder.Auth.IntegrationTests
                 Name = "Inactive User"
             };
 
-            var registerResponse = await _authService.RegisterAsync(registerRequest);
+            var registerResponse = Require(await _authService.RegisterAsync(registerRequest), "registerResponse");
 
             // Deactivate user
-            var user = await _userService.GetUserWithDetailsAsync(registerResponse.UserId);
-            user!.IsActive = false;
+            var user = Require(await _userService.GetUserWithDetailsAsync(registerResponse.UserId), "user");
+            user.IsActive = false;
             await _userService.UpdateUserAsync(user);
 
             // Act & Assert
@@ -261,7 +260,7 @@ namespace CueFinder.Auth.IntegrationTests
             };
 
             await _authService.RegisterAsync(user1Request);
-            var user2Response = await _authService.RegisterAsync(user2Request);
+            var user2Response = Require(await _authService.RegisterAsync(user2Request), "user2Response");
 
             // Act - Try to update user2's email to user1's email
             // Assert
@@ -293,12 +292,11 @@ namespace CueFinder.Auth.IntegrationTests
             };
 
             // Act
-            var response = await _authService.RegisterAsync(request);
+            var response = Require(await _authService.RegisterAsync(request), "response");
 
             // Assert - Verify user exists in database
-            var userInDb = await Context.Users.FirstOrDefaultAsync(u => u.Username == "dbtest");
-            userInDb.Should().NotBeNull();
-            userInDb!.Name.Should().Be("Database Test");
+            var userInDb = Require(await Context.Users.FirstOrDefaultAsync(u => u.Username == "dbtest"), "userInDb");
+            userInDb.Name.Should().Be("Database Test");
             userInDb.Role.Should().Be("user");
             userInDb.IsActive.Should().BeTrue();
             userInDb.PasswordHash.Should().NotBeNullOrEmpty();
@@ -320,13 +318,17 @@ namespace CueFinder.Auth.IntegrationTests
             await _authService.RegisterAsync(request);
 
             // Assert - Password should be hashed, not stored as plain text
-            var userInDb = await Context.Users.FirstOrDefaultAsync(u => u.Username == "hashtest");
-            userInDb!.PasswordHash.Should().NotBe("MySecurePassword123!");
+            var userInDb = Require(await Context.Users.FirstOrDefaultAsync(u => u.Username == "hashtest"), "userInDb");
+            userInDb.PasswordHash.Should().NotBe("MySecurePassword123!");
             userInDb.PasswordHash.Should().NotBeNullOrEmpty();
 
             // Should still be able to login with original password
-            var loginResult = await _authService.LoginAsync("hashtest", "MySecurePassword123!");
-            loginResult.Should().NotBeNull();
+            var loginResult = Require(await _authService.LoginAsync("hashtest", "MySecurePassword123!"), "loginResult");
+        }
+
+        private static T Require<T>(T? value, string name) where T : class
+        {
+            return value ?? throw new InvalidOperationException($"Expected {name} to be non-null in test");
         }
 
         // Simple test logger implementation
