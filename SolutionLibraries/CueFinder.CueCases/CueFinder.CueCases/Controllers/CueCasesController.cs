@@ -1,19 +1,24 @@
 using CueFinder.CueCases.Interfaces;
 using CueFinder.CueCases.Models;
-using Microsoft.AspNetCore.Authorization;
+using CueFinder.Extensions.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace CueFinder.CueCases.Controllers;
 
 /// <summary>
 /// API Controller for cue case management operations
+/// Split into partial classes for better organization and maintainability
+/// 
+/// Partial Classes:
+/// - CueCasesController.cs - Base class and constructor (this file)
+/// - CueCasesController.QueryOperations.cs - GET operations and search
+/// - CueCasesController.CrudOperations.cs - POST, PUT, DELETE operations
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class CueCasesController : ControllerBase
+public partial class CueCasesController : BaseApiController
 {
     private readonly ICueCaseService _cueCaseService;
     private readonly ILogger<CueCasesController> _logger;
@@ -23,6 +28,7 @@ public class CueCasesController : ControllerBase
         _cueCaseService = cueCaseService;
         _logger = logger;
     }
+}
 
     /// <summary>
     /// Get all cue cases with optional filtering
