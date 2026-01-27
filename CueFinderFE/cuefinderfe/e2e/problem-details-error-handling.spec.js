@@ -30,6 +30,7 @@ const testUser = {
   name: 'Error Test User',
   email: `errortest${timestamp}@example.com`,
   phone: '+1234567890',
+  acceptedTerms: true
 };
 
 test.describe('Problem Details Error Handling - Visual Testing', () => {

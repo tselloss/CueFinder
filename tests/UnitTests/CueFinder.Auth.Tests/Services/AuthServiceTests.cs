@@ -158,7 +158,8 @@ namespace CueFinder.Auth.Tests.Services
                 Password = "password123",
                 Name = "New User",
                 Email = "newuser@test.com",
-                Phone = "555-1234"
+                Phone = "555-1234",
+                AcceptedTerms = true
             };
 
             // Act
@@ -182,7 +183,8 @@ namespace CueFinder.Auth.Tests.Services
             {
                 Username = "admin", // Already exists
                 Password = "password123",
-                Name = "Test User"
+                Name = "Test User",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -199,7 +201,8 @@ namespace CueFinder.Auth.Tests.Services
                 Username = "newuser",
                 Password = "password123",
                 Name = "Test User",
-                Email = "admin@cuefinder.com" // Already exists
+                Email = "admin@cuefinder.com", // Already exists
+                AcceptedTerms = true
             };
 
             // Act & Assert

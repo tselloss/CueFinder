@@ -1,22 +1,24 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import CueList from './components/CueList.jsx';
-import CueDetail from './components/CueDetail.jsx';
-import CueFormModal from './components/CueFormModal.jsx';
+import CueList from './components/CueList';
+import CueDetail from './components/CueDetail';
+import CueFormModal from './components/CueFormModal';
 import CueCaseDetail from './components/CueCaseDetail';
-import AdminPage from './components/AdminPage.jsx';
-import LoginPage from './components/LoginPage.jsx';
-import UserProfile from './components/UserProfile.jsx';
+import BilliardTableDetail from './components/BilliardTableDetail';
+import AdminPage from './components/AdminPage';
+import LoginPage from './components/LoginPage';
+import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
-import Inbox from './components/Inbox.jsx';
+import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
-import Forum from './components/Forum.jsx';
+import Forum from './components/Forum';
 import DesktopSidebar from './components/DesktopSidebar';
-import AppHeader from './components/AppHeader.jsx';
-import AppFooter from './components/AppFooter.jsx';
+import AppHeader from './components/AppHeader';
+import AppFooter from './components/AppFooter';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
+import * as billiardTableService from './api/billiardTableService';
 import * as messageService from './api/messageService';
 import * as forumService from './api/forumService';
 
@@ -109,22 +111,25 @@ function AppInner() {
   }, [category]);
 
   const refreshListings = useCallback(async () => {
-    // Fetch both cues and cases
-    const [cuesData, casesData] = await Promise.all([
+    // Fetch cues, cases, and tables
+    const [cuesData, casesData, tablesData] = await Promise.all([
       cueService.getCues(),
-      cueCaseService.getCueCases()
+      cueCaseService.getCueCases(),
+      billiardTableService.getTables()
     ]);
 
     // Add itemType field to each item and combine (avoid colliding with backend 'category')
     const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
     const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
+    const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
 
-    // Combine both arrays
-    const allListings = [...cuesWithCategory, ...casesWithCategory];
+    // Combine all arrays
+    const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory];
 
     console.log('Loaded listings:', {
       cues: cuesWithCategory.length,
       cases: casesWithCategory.length,
+      tables: tablesWithCategory.length,
       total: allListings.length
     });
     
@@ -151,8 +156,8 @@ function AppInner() {
   useEffect(() => {
     if (!isHomePage) return;
     
-    // Navigate to coming soon page for tables and accessories
-    if (category === 'tables' || category === 'accessories') {
+    // Navigate to coming soon page for accessories only (tables now have listings)
+    if (category === 'accessories') {
       navigate('/coming-soon');
       return;
     }
@@ -163,6 +168,8 @@ function AppInner() {
   const handleSelect = (item) => {
   if (item.itemType === 'case') {
       navigate(`/case/${item.id}`);
+    } else if (item.itemType === 'table') {
+      navigate(`/table/${item.id}`);
     } else {
       navigate(`/cue/${item.id}`);
     }
@@ -359,6 +366,9 @@ function AppInner() {
               } />
               <Route path="/case/:id" element={
                 user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/table/:id" element={
+                user ? <BilliardTableDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/profile" element={

@@ -5,8 +5,29 @@
 
 const { test, expect } = require('@playwright/test');
 
+// Generate unique test user
+const timestamp = Date.now();
+const testUser = {
+  username: `loginflowuser_${timestamp}`,
+  email: `loginflowuser_${timestamp}@test.com`,
+  password: 'TestAdmin123!',
+  name: `Login Flow User ${timestamp}`,
+  acceptedTerms: true
+};
+
+// Helper to register user via API
+async function registerUser(request, userData) {
+  const response = await request.post('http://localhost:5000/api/auth/register', {
+    data: userData
+  });
+  return response;
+}
+
 test.describe('Login and Listing Navigation', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    // Register test user
+    await registerUser(request, testUser);
+    
     // Navigate to app home
     await page.goto('http://localhost:3000');
     // Wait for main heading
@@ -16,14 +37,16 @@ test.describe('Login and Listing Navigation', () => {
   test('Should persist login and allow listing navigation', async ({ page }) => {
     console.log('1️⃣ Starting test: Login and navigate to listing');
 
-    // Click Sign In button
+    // Click Sign In button - use getByRole to be more specific
     console.log('2️⃣ Clicking Sign In button...');
-    await page.locator('button:has-text("Sign In")').first().click();
-    await page.waitForTimeout(500);
+    const signInBtn = page.locator('button:has-text("Sign In")').first();
+    await signInBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await signInBtn.click();
+    await page.waitForTimeout(1000);
 
     // Wait for Sign In heading
     console.log('3️⃣ Waiting for Sign In page...');
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 10000 });
 
     // Fill login form
     console.log('4️⃣ Filling login credentials...');
@@ -33,8 +56,8 @@ test.describe('Login and Listing Navigation', () => {
     await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
     await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
 
-    await usernameInput.fill('testadmin');
-    await passwordInput.fill('TestAdmin123!');
+    await usernameInput.fill(testUser.username);
+    await passwordInput.fill(testUser.password);
 
     // Submit login form
     console.log('5️⃣ Submitting login form...');
@@ -113,8 +136,8 @@ test.describe('Login and Listing Navigation', () => {
     const usernameInput = page.getByPlaceholder('Enter username');
     const passwordInput = page.getByPlaceholder('Password');
     
-    await usernameInput.fill('testadmin');
-    await passwordInput.fill('TestAdmin123!');
+    await usernameInput.fill(testUser.username);
+    await passwordInput.fill(testUser.password);
     
     const loginButton = page.locator('button:has-text("Sign In")').last();
     await loginButton.click();

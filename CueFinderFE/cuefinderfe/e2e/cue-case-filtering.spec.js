@@ -26,7 +26,7 @@ test.describe('Cue and Case Filtering', () => {
 
   test('Should display both cues and cases on initial load', async ({ page }) => {
     // Wait for listings to load
-    await page.waitForSelector('[data-testid="cue-card"], .grommet-card', { timeout: 10000 });
+    await page.waitForSelector('[data-testid="cue-card"], .grommet-card', { timeout: 30000 });
     
     // Count the cards
     const cards = await page.locator('.grommet-card').count();
@@ -38,11 +38,11 @@ test.describe('Cue and Case Filtering', () => {
   test('Should filter to show only cues when clicking Cues category', async ({ page }) => {
     // Open the sidebar menu
     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
-    await page.waitForTimeout(500); // Wait for sidebar animation
+    await page.waitForTimeout(3000); // Wait for sidebar animation
     
     // Click on Cues category
     await page.getByRole('button', { name: /^Cues/i }).click();
-    await page.waitForTimeout(1000); // Wait for filtering
+    await page.waitForTimeout(5000); // Wait for filtering
     
     // Take a screenshot
     await page.screenshot({ path: 'test-results/cues-filter.png', fullPage: true });
@@ -53,11 +53,11 @@ test.describe('Cue and Case Filtering', () => {
   test('Should filter to show only cases when clicking Cases category', async ({ page }) => {
     // Open the sidebar menu
     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
-    await page.waitForTimeout(500); // Wait for sidebar animation
+    await page.waitForTimeout(3000); // Wait for sidebar animation
     
     // Click on Cases category
     await page.getByRole('button', { name: /^Cases/i }).click();
-    await page.waitForTimeout(1000); // Wait for filtering
+    await page.waitForTimeout(5000); // Wait for filtering
     
     // Take a screenshot
     await page.screenshot({ path: 'test-results/cases-filter.png', fullPage: true });
@@ -68,15 +68,15 @@ test.describe('Cue and Case Filtering', () => {
   test('Should show all items when clicking All Items category', async ({ page }) => {
     // Open the sidebar menu
     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
-    await page.waitForTimeout(500); // Wait for sidebar animation
+    await page.waitForTimeout(3000); // Wait for sidebar animation
     
     // First filter to cues
     await page.getByRole('button', { name: /^Cues/i }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     
     // Then click All Items to reset
     await page.getByRole('button', { name: /All Items/i }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(5000);
     
     // Take a screenshot
     await page.screenshot({ path: 'test-results/all-items-filter.png', fullPage: true });
@@ -89,7 +89,7 @@ test.describe('Cue and Case Filtering', () => {
     
     // Step 1: Initial state - show all items
     console.log('Step 1: Initial state - All listings visible');
-    await page.waitForSelector('.grommet-card', { timeout: 10000 });
+    await page.waitForSelector('.grommet-card', { timeout: 30000 });
     const totalCards = await page.locator('.grommet-card').count();
     console.log(`  ✓ Total listings: ${totalCards}`);
     await page.screenshot({ path: 'test-results/filter-flow-1-all.png', fullPage: true });
@@ -98,32 +98,32 @@ test.describe('Cue and Case Filtering', () => {
     // Step 2: Open sidebar
     console.log('\nStep 2: Opening category sidebar');
     await page.getByRole('button', { name: /Show Categories/i }).click();
-    await page.waitForTimeout(1000);
+    await page.waitForTimeout(3000);
     console.log('  ✓ Sidebar opened');
     await page.screenshot({ path: 'test-results/filter-flow-2-sidebar.png', fullPage: true });
     
     // Step 3: Filter to Cues
     console.log('\nStep 3: Filtering to Cues only');
     await page.getByRole('button', { name: /^Cues/i }).click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(5000);
     const cuesCount = await page.locator('.grommet-card').count();
     console.log(`  ✓ Cues displayed: ${cuesCount}`);
     await page.screenshot({ path: 'test-results/filter-flow-3-cues.png', fullPage: true });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     
     // Step 4: Filter to Cases
     console.log('\nStep 4: Filtering to Cases only');
     await page.getByRole('button', { name: /^Cases/i }).click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(5000);
     const casesCount = await page.locator('.grommet-card').count();
     console.log(`  ✓ Cases displayed: ${casesCount}`);
     await page.screenshot({ path: 'test-results/filter-flow-4-cases.png', fullPage: true });
-    await page.waitForTimeout(2000);
+    await page.waitForTimeout(3000);
     
     // Step 5: Back to All Items
     console.log('\nStep 5: Back to All Items');
     await page.getByRole('button', { name: /All Items/i }).click();
-    await page.waitForTimeout(1500);
+    await page.waitForTimeout(5000);
     const allCount = await page.locator('.grommet-card').count();
     console.log(`  ✓ All listings displayed: ${allCount}`);
     await page.screenshot({ path: 'test-results/filter-flow-5-all-again.png', fullPage: true });

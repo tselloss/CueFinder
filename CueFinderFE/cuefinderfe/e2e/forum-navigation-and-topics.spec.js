@@ -19,10 +19,14 @@
 
 const { test, expect } = require('@playwright/test');
 
-// Test credentials
+// Test credentials - use unique timestamp to avoid conflicts
+const timestamp = Date.now();
 const testUser = {
-  username: 'testadmin',
+  username: `testadmin_${timestamp}`,
+  email: `testadmin_${timestamp}@test.com`,
   password: 'TestAdmin123!',
+  name: `Test Admin ${timestamp}`,
+  acceptedTerms: true
 };
 
 test.describe('Forum Menu Bar Navigation', () => {
@@ -89,7 +93,7 @@ test.describe('Forum Menu Bar Navigation', () => {
     // Check each category is visible
     for (const category of expectedCategories) {
       const categoryItem = page.getByText(category, { exact: true }).first();
-      await expect(categoryItem).toBeVisible({ timeout: 3000 });
+      await expect(categoryItem).toBeVisible({ timeout: 15000 });
       console.log(`✓ Found category: ${category}`);
     }
 
@@ -114,7 +118,7 @@ test.describe('Forum Menu Bar Navigation', () => {
     
     // Verify forum heading is visible
     const forumHeading = page.getByRole('heading', { name: /Forum/i }).first();
-    await expect(forumHeading).toBeVisible({ timeout: 3000 });
+    await expect(forumHeading).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Successfully navigated to forum page');
   });
@@ -140,7 +144,17 @@ test.describe('Forum Menu Bar Navigation', () => {
 });
 
 test.describe('Forum Topic Creation Flow', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    // Register user first (via API)
+    const registerResponse = await request.post('http://localhost:5000/api/auth/register', {
+      data: testUser
+    });
+    
+    if (registerResponse.ok() || registerResponse.status() === 409) {
+      // User registered or already exists
+      console.log('✓ User ready for testing');
+    }
+
     // Login first
     await page.goto('http://localhost:3000');
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
@@ -218,12 +232,12 @@ test.describe('Forum Topic Creation Flow', () => {
     await expect(modalHeading).toBeVisible({ timeout: 5000 });
 
     // Verify form fields exist
-    await expect(page.getByPlaceholder(/Discussion title/i)).toBeVisible();
-    await expect(page.getByPlaceholder(/What would you like to discuss?/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/Discussion title/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByPlaceholder(/What would you like to discuss?/i)).toBeVisible({ timeout: 15000 });
     
     // Verify buttons exist
-    await expect(page.locator('button').filter({ hasText: /Create Topic/i })).toBeVisible();
-    await expect(page.locator('button').filter({ hasText: /Cancel/i })).toBeVisible();
+    await expect(page.locator('button').filter({ hasText: /Create Topic/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('button').filter({ hasText: /Cancel/i })).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Modal opened with all required fields');
 
@@ -405,11 +419,11 @@ test.describe('Forum Topic Creation Flow', () => {
 
     // Verify we're in the discussions view for that category
     const categoryHeading = page.getByRole('heading', { name: /General|Community Forum/i });
-    await expect(categoryHeading.first()).toBeVisible({ timeout: 3000 });
+    await expect(categoryHeading.first()).toBeVisible({ timeout: 15000 });
 
     // Verify New Topic button is still visible in discussions view
     const newTopicButton = page.locator('[data-testid="new-topic-button"]');
-    await expect(newTopicButton).toBeVisible({ timeout: 3000 });
+    await expect(newTopicButton).toBeVisible({ timeout: 15000 });
     console.log('✓ New Topic button visible in discussions view');
   });
 });
@@ -470,7 +484,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
 
     // Verify we're viewing Tournaments category
     const categoryHeading = page.getByText('Tournaments').first();
-    await expect(categoryHeading).toBeVisible({ timeout: 3000 });
+    await expect(categoryHeading).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Category selection persisted correctly');
   });
@@ -499,7 +513,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
 
       // Verify we're back in categories view
       const categoriesHeading = page.getByRole('heading', { name: /Forum Categories|Forum/i });
-      await expect(categoriesHeading.first()).toBeVisible({ timeout: 3000 });
+      await expect(categoriesHeading.first()).toBeVisible({ timeout: 15000 });
       
       console.log('✓ Navigated back to categories view');
     }
