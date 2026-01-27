@@ -48,7 +48,136 @@ public partial class CueService
 
         _logger.LogInformation("Cue {CueId} created by user {UserId}", cue.Id, userId);
 
+        // Send email notification to admin users
+        try
+        {
+            await SendCueCreatedEmailToAdminsAsync(cue, user);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Failed to send cue created email notification for cue {CueId}", cue.Id);
+            // Don't throw - email failure shouldn't prevent cue creation
+        }
+
         return MapToCueResponseDto(cue);
+    }
+
+    /// <summary>
+    /// Send email notification to all admin users when a new cue is created
+    /// </summary>
+    private async Task SendCueCreatedEmailToAdminsAsync(Cue cue, User seller)
+    {
+        // Get all admin users with email
+        var adminUsers = await _context.Users
+            .Where(u => u.Role == "admin" && !string.IsNullOrWhiteSpace(u.Email))
+            .ToListAsync();
+
+        if (!adminUsers.Any())
+        {
+            _logger.LogWarning("No admin users found with email addresses to notify about cue {CueId}", cue.Id);
+            return;
+        }
+
+        var adminEmails = adminUsers.Select(u => u.Email).ToList();
+        
+        var subject = $"New Cue Listing: {cue.Title}";
+        var htmlBody = BuildCueCreatedEmailBody(cue, seller);
+
+        await _emailService.SendBatchAsync(adminEmails, subject, htmlBody, isHtml: true);
+
+        _logger.LogInformation("Sent cue created notification email to {Count} admin users for cue {CueId}", 
+            adminUsers.Count, cue.Id);
+    }
+
+    /// <summary>
+    /// Build HTML email body for cue creation notification
+    /// </summary>
+    private string BuildCueCreatedEmailBody(Cue cue, User seller)
+    {
+        var cueLink = $"{Environment.GetEnvironmentVariable("APP_URL") ?? "http://localhost:3000"}/cues/{cue.Id}";
+        
+        return $@"
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {{ font-family: Arial, sans-serif; color: #333; }}
+        .container {{ max-width: 600px; margin: 0 auto; padding: 20px; }}
+        .header {{ background-color: #1a5f3b; color: white; padding: 20px; border-radius: 5px; margin-bottom: 20px; }}
+        .content {{ background-color: #f9f9f9; padding: 20px; border-radius: 5px; }}
+        .field {{ margin: 15px 0; }}
+        .label {{ font-weight: bold; color: #1a5f3b; }}
+        .value {{ margin-top: 5px; }}
+        .button {{ display: inline-block; background-color: #1a5f3b; color: white; padding: 10px 20px; text-decoration: none; border-radius: 5px; margin-top: 15px; }}
+        .footer {{ margin-top: 20px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; }}
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h2>New Cue Listing Created</h2>
+        </div>
+        
+        <div class=""content"">
+            <div class=""field"">
+                <div class=""label"">Title:</div>
+                <div class=""value"">{cue.Title}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Brand:</div>
+                <div class=""value"">{cue.Brand}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Price:</div>
+                <div class=""value"">${cue.Price:N2}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Condition:</div>
+                <div class=""value"">{cue.Condition}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Type:</div>
+                <div class=""value"">{cue.CueType}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Location:</div>
+                <div class=""value"">{cue.Location}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Description:</div>
+                <div class=""value"">{cue.Description}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Seller:</div>
+                <div class=""value"">{seller.Name} ({seller.Username})</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Seller Email:</div>
+                <div class=""value"">{seller.Email}</div>
+            </div>
+            
+            <div class=""field"">
+                <div class=""label"">Created:</div>
+                <div class=""value"">{cue.CreatedAt:yyyy-MM-dd HH:mm:ss} UTC</div>
+            </div>
+            
+            <a href=""{cueLink}"" class=""button"">View Cue Listing</a>
+        </div>
+        
+        <div class=""footer"">
+            <p>This is an automated notification from CueFinder Admin System</p>
+        </div>
+    </div>
+</body>
+</html>";
     }
 
     public async Task<CueResponseDto?> UpdateCueAsync(int cueId, UpdateCueDto dto, int userId)

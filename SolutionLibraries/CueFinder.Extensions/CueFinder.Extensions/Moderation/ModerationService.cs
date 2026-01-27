@@ -492,7 +492,7 @@ namespace CueFinder.Extensions.Moderation
         /// <summary>
         /// Move image from temp storage to public storage (not implemented - custom per setup)
         /// </summary>
-        public async Task<string> MoveToPublicStorageAsync(string tempPath, int cueId, string filename)
+        public Task<string> MoveToPublicStorageAsync(string tempPath, int cueId, string filename)
         {
             // This is a placeholder - implement based on your storage solution
             // Could be local file system, S3, Azure Blob, etc.

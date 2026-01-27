@@ -28,6 +28,8 @@ export function useCueFiltering(
       if (category && category !== 'all') {
         if (category === 'cues' && item.itemType !== 'cue') return false;
         if (category === 'cases' && item.itemType !== 'case') return false;
+        if (category === 'tables' && item.itemType !== 'table') return false;
+        if (category === 'accessories' && item.itemType !== 'accessory') return false;
       }
 
       if (condition && condition !== 'all' && item.condition !== condition) {

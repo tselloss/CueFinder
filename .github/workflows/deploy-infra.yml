@@ -11,7 +11,7 @@ on:
     paths:
       - 'init.sql/**'
       - 'scripts/**'
-      - 'CueFinderModerator/**'
+      - 'SolutionLibraries/CueFinderModerator/**'
       - 'deployment/Dockerfile.nudenet'
       - 'deployment/nudenet_*'
       - '.github/workflows/deploy-infra.yml'
@@ -47,7 +47,7 @@ jobs:
             DATABASE_CHANGED=true
           fi
           
-          if git diff origin/release HEAD --name-only | grep -qE '^(CueFinderModerator|deployment/(Dockerfile\.nudenet|nudenet))'; then
+          if git diff origin/release HEAD --name-only | grep -qE '^(SolutionLibraries/CueFinderModerator|deployment/(Dockerfile\.nudenet|nudenet))'; then
             BACKEND_CHANGED=true
           fi
           

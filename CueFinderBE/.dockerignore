@@ -1,0 +1,54 @@
+# Build outputs
+bin/
+obj/
+out/
+*.dll
+*.pdb
+
+# User-specific files
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+
+# Visual Studio
+.vs/
+.vscode/
+
+# NuGet
+packages/
+*.nupkg
+
+# Test results
+TestResults/
+test-results/
+
+# Logs
+logs/
+*.log
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Uploads directory (runtime data)
+uploads/
+
+# Frontend directories (should not be in backend context)
+../CueFinderFE/node_modules/
+../CueFinderFE/.pnpm-store/
+../CueFinderFE/dist/
+../CueFinderFE/build/
+../CueFinderFE/packages/*/node_modules/
+../CueFinderFE/packages/*/dist/
+../CueFinderFE/cuefinderfe/node_modules/
+../CueFinderFE/cuefinderfe/build/
+
+# Documentation
+*.md
+!README.md
+
+# Git
+.git/
+.gitignore
+.gitattributes

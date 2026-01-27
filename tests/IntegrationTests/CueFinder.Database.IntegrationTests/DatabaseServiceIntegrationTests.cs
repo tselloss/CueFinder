@@ -614,8 +614,10 @@ namespace CueFinder.Database.IntegrationTests
 
             // Assert
             cueWithUser.Should().NotBeNull();
-            cueWithUser!.User.Should().NotBeNull();
-            cueWithUser.User.Username.Should().Be("reluser");
+            var cueResult = cueWithUser!;
+            cueResult.User.Should().NotBeNull();
+            var userResult = cueResult.User!;
+            userResult.Username.Should().Be("reluser");
         }
 
         // Note: Cascade delete test removed - requires EF Core relationship configuration
@@ -624,6 +626,11 @@ namespace CueFinder.Database.IntegrationTests
         #endregion
 
         #region Helper Methods
+
+        private static T Require<T>(T? value, string name) where T : class
+        {
+            return value ?? throw new InvalidOperationException($"Expected {name} to be non-null in test");
+        }
 
         private UserService CreateUserService()
         {
@@ -650,7 +657,7 @@ namespace CueFinder.Database.IntegrationTests
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };
-            return await userService.CreateUserAsync(user);
+            return Require(await userService.CreateUserAsync(user), "user");
         }
 
         private async Task<Cue> CreateTestCue(CueService cueService, int userId, string title, string brand = "TestBrand")
@@ -666,7 +673,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow,
                 IsSold = false
             };
-            return await cueService.CreateCueAsync(cue);
+            return Require(await cueService.CreateCueAsync(cue), "cue");
         }
 
         #endregion

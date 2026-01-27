@@ -15,10 +15,10 @@ namespace CueFinder.Database.IntegrationTests
     /// </summary>
     public class DatabaseIntegrationTests : DatabaseTestBase
     {
-        private UserRepository? _userRepository;
-        private CueRepository? _cueRepository;
-        private UserService? _userService;
-        private CueService? _cueService;
+        private UserRepository _userRepository = null!;
+        private CueRepository _cueRepository = null!;
+        private UserService _userService = null!;
+        private CueService _cueService = null!;
 
         public DatabaseIntegrationTests() : base()
         {
@@ -65,7 +65,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Assert creation
             createdUser.Should().NotBeNull();
@@ -73,22 +73,21 @@ namespace CueFinder.Database.IntegrationTests
             createdUser.Username.Should().Be("integrationuser");
 
             // Step 2: Get user by username
-            var retrievedUser = await _userService.GetByUsernameAsync("integrationuser");
-            retrievedUser.Should().NotBeNull();
-            retrievedUser!.Name.Should().Be("Integration User");
+            var retrievedUser = Require(await _userService.GetByUsernameAsync("integrationuser"), "retrievedUser");
+            retrievedUser.Name.Should().Be("Integration User");
 
             // Step 3: Update user
             retrievedUser.Name = "Updated Integration User";
             retrievedUser.Email = "updated@test.com";
-            var updatedUser = await _userService.UpdateUserAsync(retrievedUser);
+            var updatedUser = Require(await _userService.UpdateUserAsync(retrievedUser), "updatedUser");
 
             // Assert update
             updatedUser.Name.Should().Be("Updated Integration User");
             updatedUser.Email.Should().Be("updated@test.com");
 
             // Verify in database
-            var userFromDb = await _userService.GetByUsernameAsync("integrationuser");
-            userFromDb!.Name.Should().Be("Updated Integration User");
+            var userFromDb = Require(await _userService.GetByUsernameAsync("integrationuser"), "userFromDb");
+            userFromDb.Name.Should().Be("Updated Integration User");
 
             // Step 4: Delete user
             var deleteResult = await _userService.DeleteUserAsync(createdUser.Id);
@@ -117,7 +116,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Step 2: Create cue
             var cue = new Cue
@@ -134,7 +133,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdCue = await _cueService.CreateCueAsync(cue);
+            var createdCue = Require(await _cueService.CreateCueAsync(cue), "createdCue");
 
             // Assert creation
             createdCue.Should().NotBeNull();
@@ -142,30 +141,29 @@ namespace CueFinder.Database.IntegrationTests
             createdCue.Title.Should().Be("Integration Test Cue");
 
             // Step 3: Get cue with details
-            var retrievedCue = await _cueService.GetCueWithDetailsAsync(createdCue.Id);
-            retrievedCue.Should().NotBeNull();
-            retrievedCue!.User.Should().NotBeNull();
-            retrievedCue.User.Username.Should().Be("cueowner");
+            var retrievedCue = Require(await _cueService.GetCueWithDetailsAsync(createdCue.Id), "retrievedCue");
+            retrievedCue.User.Should().NotBeNull();
+            retrievedCue.User!.Username.Should().Be("cueowner");
 
             // Step 4: Update cue
             retrievedCue.Price = 800.00m;
             retrievedCue.Title = "Updated Integration Test Cue";
-            var updatedCue = await _cueService.UpdateCueAsync(retrievedCue);
+            var updatedCue = Require(await _cueService.UpdateCueAsync(retrievedCue), "updatedCue");
 
             // Assert update
             updatedCue.Price.Should().Be(800.00m);
             updatedCue.Title.Should().Be("Updated Integration Test Cue");
 
             // Verify in database
-            var cueFromDb = await _cueService.GetCueWithDetailsAsync(createdCue.Id);
-            cueFromDb!.Price.Should().Be(800.00m);
+            var cueFromDb = Require(await _cueService.GetCueWithDetailsAsync(createdCue.Id), "cueFromDb");
+            cueFromDb.Price.Should().Be(800.00m);
 
             // Step 5: Mark as sold
             var markSoldResult = await _cueService.MarkAsSoldAsync(createdCue.Id);
             markSoldResult.Should().BeTrue();
-            
-            var soldCue = await _cueService.GetCueWithDetailsAsync(createdCue.Id);
-            soldCue!.IsSold.Should().BeTrue();
+
+            var soldCue = Require(await _cueService.GetCueWithDetailsAsync(createdCue.Id), "soldCue");
+            soldCue.IsSold.Should().BeTrue();
 
             // Step 6: Delete cue
             var deleteResult = await _cueService.DeleteCueAsync(createdCue.Id);
@@ -194,7 +192,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Create multiple cues for the same user
             var cue1 = new Cue
@@ -229,7 +227,7 @@ namespace CueFinder.Database.IntegrationTests
             await _cueService.CreateCueAsync(cue2);
 
             // Get user's cues
-            var userCues = await _cueService.GetUserCuesAsync(createdUser.Id);
+            var userCues = Require(await _cueService.GetUserCuesAsync(createdUser.Id), "userCues");
 
             // Assert
             userCues.Should().HaveCount(2);
@@ -256,7 +254,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Create cues with different brands
             var predatorCue = new Cue
@@ -291,14 +289,14 @@ namespace CueFinder.Database.IntegrationTests
             await _cueService.CreateCueAsync(mcdermottCue);
 
             // Search by brand (case-insensitive)
-            var searchResults = await _cueService.SearchCuesAsync("predator", 1, 20);
+            var searchResults = Require(await _cueService.SearchCuesAsync("predator", 1, 20), "searchResults");
 
             // Assert
             searchResults.Should().HaveCount(1);
             searchResults.First().Brand.Should().Be("Predator");
 
             // Search by title
-            var titleSearch = await _cueService.SearchCuesAsync("McDermott", 1, 20);
+            var titleSearch = Require(await _cueService.SearchCuesAsync("McDermott", 1, 20), "titleSearch");
             titleSearch.Should().HaveCount(1);
             titleSearch.First().Title.Should().Contain("McDermott");
         }
@@ -321,7 +319,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Create active and sold cues
             var activeCue = new Cue
@@ -356,7 +354,7 @@ namespace CueFinder.Database.IntegrationTests
             await _cueService.CreateCueAsync(soldCue);
 
             // Get active cues
-            var activeCues = await _cueService.GetActiveCuesWithPaginationAsync(1, 20);
+            var activeCues = Require(await _cueService.GetActiveCuesWithPaginationAsync(1, 20), "activeCues");
 
             // Assert - should only get active cue
             activeCues.Should().Contain(c => c.Title == "Active Cue");
@@ -382,7 +380,7 @@ namespace CueFinder.Database.IntegrationTests
                 UpdatedAt = DateTime.UtcNow
             };
             
-            var createdUser = await _userService.CreateUserAsync(user);
+            var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
             // Create 25 cues
             for (int i = 1; i <= 25; i++)
@@ -408,10 +406,10 @@ namespace CueFinder.Database.IntegrationTests
             totalCount.Should().BeGreaterOrEqualTo(25);
 
             // Get first page (10 items)
-            var page1 = await _cueService.GetActiveCuesWithPaginationAsync(1, 10);
+            var page1 = Require(await _cueService.GetActiveCuesWithPaginationAsync(1, 10), "page1");
 
             // Get second page (10 items)
-            var page2 = await _cueService.GetActiveCuesWithPaginationAsync(2, 10);
+            var page2 = Require(await _cueService.GetActiveCuesWithPaginationAsync(2, 10), "page2");
 
             // Assert pagination works
             page1.Should().HaveCount(10);
@@ -421,6 +419,11 @@ namespace CueFinder.Database.IntegrationTests
             var page1Ids = page1.Select(c => c.Id).ToList();
             var page2Ids = page2.Select(c => c.Id).ToList();
             page1Ids.Intersect(page2Ids).Should().BeEmpty();
+        }
+
+        private static T Require<T>(T? value, string name) where T : class
+        {
+            return value ?? throw new InvalidOperationException($"Expected {name} to be non-null in test");
         }
 
     [Fact]
@@ -441,7 +444,7 @@ namespace CueFinder.Database.IntegrationTests
             UpdatedAt = DateTime.UtcNow
         };
 
-        var createdUser = await _userService.CreateUserAsync(user);
+        var createdUser = Require(await _userService.CreateUserAsync(user), "createdUser");
 
         // Create multiple cues concurrently
         // Each operation needs its own DbContext instance to avoid thread-safety issues
@@ -490,7 +493,7 @@ namespace CueFinder.Database.IntegrationTests
         results.All(c => c.Id > 0).Should().BeTrue();
 
         // Verify in database
-        var userCues = await _cueService.GetUserCuesAsync(createdUser.Id);
+        var userCues = Require(await _cueService.GetUserCuesAsync(createdUser.Id), "userCues");
         userCues.Should().HaveCount(10);
     }        /// <summary>
         /// Test logger implementation for integration tests

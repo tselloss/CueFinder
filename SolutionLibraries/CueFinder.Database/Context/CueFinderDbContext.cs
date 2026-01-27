@@ -28,6 +28,8 @@ namespace CueFinder.Database.Context
         public DbSet<CueCaseImage> CueCaseImages { get; set; } = null!;
         public DbSet<BilliardTable> BilliardTables { get; set; } = null!;
         public DbSet<BilliardTableImage> BilliardTableImages { get; set; } = null!;
+        public DbSet<Accessory> Accessories { get; set; } = null!;
+        public DbSet<AccessoryImage> AccessoryImages { get; set; } = null!;
         public DbSet<Rating> Ratings { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
@@ -178,6 +180,99 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.CueId)
                     .HasDatabaseName("IX_CueImage_CueId");
+            });
+
+            // Accessory entity configuration
+            modelBuilder.Entity<Accessory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.Images)
+                    .WithOne(i => i.Accessory)
+                    .HasForeignKey(i => i.AccessoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Brand)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Price)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.Condition)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.AccessoryType)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Material)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Size)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Color)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Location)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_Accessory_UserId");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_Accessory_IsSold");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_Accessory_CreatedAt");
+            });
+
+            // AccessoryImage entity configuration
+            modelBuilder.Entity<AccessoryImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.AltText)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.IsPrimary)
+                    .HasDefaultValue(false);
+
+                entity.HasOne(e => e.Accessory)
+                    .WithMany(a => a.Images)
+                    .HasForeignKey(e => e.AccessoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AccessoryId)
+                    .HasDatabaseName("IX_AccessoryImage_AccessoryId");
+
+                entity.HasIndex(e => new { e.AccessoryId, e.IsPrimary })
+                    .HasDatabaseName("IX_AccessoryImage_Primary");
             });
 
             // Rating entity configuration

@@ -2,6 +2,7 @@ using CueFinder.Cues.Interfaces;
 using CueFinder.Cues.Models;
 using CueFinder.Database.Context;
 using CueFinder.Database.Models;
+using CueFinder.Extensions.Email;
 using Microsoft.Extensions.Logging;
 
 namespace CueFinder.Cues.Services;
@@ -21,11 +22,14 @@ public partial class CueService : ICueService
     protected readonly CueFinderDbContext _context;
     protected readonly ILogger<CueService> _logger;
     protected readonly CueFinder.Extensions.Images.IImageService _imageService;
+    protected readonly IEmailService _emailService;
 
-    public CueService(CueFinderDbContext context, ILogger<CueService> logger, CueFinder.Extensions.Images.IImageService imageService)
+    public CueService(CueFinderDbContext context, ILogger<CueService> logger, CueFinder.Extensions.Images.IImageService imageService, IEmailService emailService)
     {
         _context = context;
         _logger = logger;
         _imageService = imageService;
+        _emailService = emailService;
     }
 }
+
