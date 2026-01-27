@@ -9,8 +9,9 @@ namespace CueFinder.BilliardTables.Services;
 
 /// <summary>
 /// Service implementation for billiard table management
+/// Partial class: Main CRUD operations
 /// </summary>
-public class BilliardTableService : IBilliardTableService
+public partial class BilliardTableService : IBilliardTableService
 {
     private readonly CueFinderDbContext _context;
     private readonly ILogger<BilliardTableService> _logger;
@@ -208,47 +209,5 @@ public class BilliardTableService : IBilliardTableService
             .ToListAsync();
 
         return tables.Select(MapToBilliardTableResponseDto).ToList();
-    }
-
-    private BilliardTableResponseDto MapToBilliardTableResponseDto(BilliardTable table)
-    {
-        return new BilliardTableResponseDto
-        {
-            Id = table.Id,
-            Title = table.Title,
-            Brand = table.Brand,
-            Description = table.Description,
-            Price = table.Price,
-            TableSize = table.TableSize,
-            TableType = table.TableType,
-            PlayingSurface = table.PlayingSurface,
-            FeltType = table.FeltType,
-            FrameMaterial = table.FrameMaterial,
-            PocketType = table.PocketType,
-            Features = table.Features,
-            ManufactureYear = table.ManufactureYear,
-            Condition = table.Condition,
-            Location = table.Location,
-            IsSold = table.IsSold,
-            ViewCount = table.ViewCount,
-            CreatedAt = table.CreatedAt,
-            UpdatedAt = table.UpdatedAt,
-            SellerId = table.UserId,
-            SellerName = table.User?.Name ?? string.Empty,
-            SellerEmail = table.User?.Email ?? string.Empty,
-            SellerPhone = table.User?.Phone,
-            SellerHidePhone = table.User?.HidePhone ?? false,
-            AverageRating = (double)table.AverageRating,
-            RatingCount = table.RatingCount,
-            Images = table.Images?.Select(i => new BilliardTableImageDto
-            {
-                Id = i.Id,
-                BilliardTableId = i.BilliardTableId,
-                ImageUrl = i.ImageUrl,
-                DisplayOrder = i.DisplayOrder,
-                IsPrimary = i.IsPrimary,
-                UploadedAt = i.CreatedAt
-            }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<BilliardTableImageDto>()
-        };
     }
 }
