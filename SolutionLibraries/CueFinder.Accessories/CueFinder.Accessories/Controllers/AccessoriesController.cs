@@ -1,19 +1,19 @@
 using CueFinder.Accessories.Interfaces;
 using CueFinder.Accessories.Models;
-using Microsoft.AspNetCore.Authorization;
+using CueFinder.Extensions.Controllers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
-using System.Security.Claims;
 
 namespace CueFinder.Accessories.Controllers;
 
 /// <summary>
 /// API Controller for accessory management operations
+/// Split into partial classes for better organization and maintainability
 /// </summary>
 [ApiController]
 [Route("api/[controller]")]
-public class AccessoriesController : ControllerBase
+public partial class AccessoriesController : BaseApiController
 {
     private readonly IAccessoryService _accessoryService;
     private readonly ILogger<AccessoriesController> _logger;
@@ -237,23 +237,4 @@ public class AccessoriesController : ControllerBase
             return StatusCode(500, new { message = "Error deleting accessory", error = ex.Message });
         }
     }
-
-    #region Helper Methods
-
-    private int GetCurrentUserId()
-    {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
-        
-        if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
-            throw new UnauthorizedAccessException("User ID not found in token");
-
-        return userId;
-    }
-
-    private bool IsAdmin()
-    {
-        return User.IsInRole("admin") || User.HasClaim(ClaimTypes.Role, "admin");
-    }
-
-    #endregion
 }
