@@ -196,6 +196,11 @@ namespace CueFinder.Database.Models
         public virtual ICollection<SavedCue>? SavedCues { get; set; }
 
         /// <summary>
+        /// Saved/Favorited billiard tables by this user
+        /// </summary>
+        public virtual ICollection<SavedBilliardTable>? SavedBilliardTables { get; set; }
+
+        /// <summary>
         /// Phone verification tokens for this user
         /// </summary>
         public virtual ICollection<PhoneVerificationToken>? PhoneVerificationTokens { get; set; }

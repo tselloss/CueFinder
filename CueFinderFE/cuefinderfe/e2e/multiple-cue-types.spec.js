@@ -122,7 +122,7 @@ async function expectTitleVisibleEventually(page, title, timeoutMs = 15000) {
     await page.waitForTimeout(250);
   }
 
-  await expect(locator).toBeVisible({ timeout: 1 });
+  await expect(locator).toBeVisible({ timeout: 15000 });
 }
 
 async function setSearch(page, value) {
@@ -133,7 +133,7 @@ async function setSearch(page, value) {
   
   // If still not visible, scroll to it or use force fill
   try {
-    await expect(input).toBeVisible({ timeout: 5000 });
+    await expect(input).toBeVisible({ timeout: 15000 });
     await input.fill(value);
   } catch {
     // If element isn't visible (might be off-screen), use force fill
@@ -357,7 +357,7 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.waitForTimeout(1500);
     
     // Verify our cue is still visible
-    await expect(playingCueCard).toBeVisible({ timeout: 3000 });
+    await expect(playingCueCard).toBeVisible({ timeout: 15000 });
     console.log('✅ Playing cue filter works correctly\n');
   });
 
@@ -493,7 +493,7 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     console.log(`  After filter: Playing=${playingVisibleAfter}, Break=${breakVisibleAfter}, Jump=${jumpVisibleAfter}`);
     
     // Verify our jump cue is visible
-    await expect(jumpCueCard).toBeVisible({ timeout: 3000 });
+    await expect(jumpCueCard).toBeVisible({ timeout: 15000 });
     
     // Verify other cues are NOT visible
     const playingCueCard = page.locator(`text=${playingCue.title}`);

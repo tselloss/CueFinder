@@ -96,6 +96,7 @@ const testUser = {
   name: 'Cue Test User',
   email: `cuetest${timestamp}@example.com`,
   phone: '+15551234567',
+  acceptedTerms: true
 };
 
 // Test cue data - field names match the actual CueFormModal (camelCase)

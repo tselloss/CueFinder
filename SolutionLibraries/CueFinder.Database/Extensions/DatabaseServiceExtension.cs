@@ -34,6 +34,7 @@ namespace CueFinder.Database.Extensions
 
             // Register services
             services.AddScoped<ICueService, CueService>();
+            services.AddScoped<IBilliardTableService, BilliardTableService>();
             services.AddScoped<IUserService, UserService>();
 
             return services;

@@ -138,7 +138,8 @@ namespace CueFinder.Auth.Tests.Services
                 Password = "Password123!",
                 Name = "New User",
                 Email = "new@test.com",
-                Phone = "555-1234"
+                Phone = "555-1234",
+                AcceptedTerms = true
             };
 
             _mockUserService
@@ -170,7 +171,8 @@ namespace CueFinder.Auth.Tests.Services
             {
                 Username = "existinguser",
                 Password = "Password123!",
-                Name = "Test User"
+                Name = "Test User",
+                AcceptedTerms = true
             };
 
             _mockUserService
@@ -191,7 +193,8 @@ namespace CueFinder.Auth.Tests.Services
                 Username = "newuser",
                 Password = "Password123!",
                 Name = "Test User",
-                Email = "existing@test.com"
+                Email = "existing@test.com",
+                AcceptedTerms = true
             };
 
             _mockUserService

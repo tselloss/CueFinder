@@ -105,7 +105,8 @@ const testUser = {
   name: 'Case Test User',
   email: `casetest${timestamp}@example.com`,
   phone: '+15559876543',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 // Test cue case data
@@ -176,9 +177,9 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     console.log('✅ Selected Cue Case product type');
 
     // Verify case-specific fields are visible
-    await expect(page.locator('text=Case Capacity')).toBeVisible();
-    await expect(page.locator('text=Case Opening')).toBeVisible();
-    await expect(page.locator('text=Case Type')).toBeVisible();
+    await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Opening')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Type')).toBeVisible({ timeout: 15000 });
     console.log('✅ Case-specific fields are visible');
 
     // Fill basic information

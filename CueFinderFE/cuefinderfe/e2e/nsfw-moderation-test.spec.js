@@ -40,7 +40,8 @@ const testUser = {
   name: 'NSFW Test User',
   email: `nsfwtest${timestamp}@example.com`,
   phone: '+15559999999',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 const testCue = {

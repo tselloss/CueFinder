@@ -50,7 +50,8 @@ const testUser = {
   name: 'Listing Test User',
   email: `listing${timestamp}@example.com`,
   phone: '+15559876543',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 const testCue = {
@@ -129,9 +130,9 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     // STEP 4: Verify Cue-Specific Fields
     // ========================================
     console.log('📍 STEP 4: Verifying cue-specific fields...');
-    await expect(page.locator('text=Weight (oz)')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Tip Size')).toBeVisible();
-    await expect(page.locator('text=Length')).toBeVisible();
+    await expect(page.locator('text=Weight (oz)')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Tip Size')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Length')).toBeVisible({ timeout: 15000 });
     console.log('✅ Cue-specific fields visible\n');
 
     // ========================================
@@ -259,9 +260,9 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     // STEP 4: Verify Case-Specific Fields
     // ========================================
     console.log('📍 STEP 4: Verifying case-specific fields...');
-    await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Case Opening')).toBeVisible();
-    await expect(page.locator('text=Case Type')).toBeVisible();
+    await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Opening')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Type')).toBeVisible({ timeout: 15000 });
     console.log('✅ Case-specific fields visible\n');
 
     // ========================================

@@ -26,9 +26,12 @@ namespace CueFinder.Database.Context
         public DbSet<CueImage> CueImages { get; set; } = null!;
         public DbSet<CueCase> CueCases { get; set; } = null!;
         public DbSet<CueCaseImage> CueCaseImages { get; set; } = null!;
+        public DbSet<BilliardTable> BilliardTables { get; set; } = null!;
+        public DbSet<BilliardTableImage> BilliardTableImages { get; set; } = null!;
         public DbSet<Rating> Ratings { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
+        public DbSet<SavedBilliardTable> SavedBilliardTables { get; set; } = null!;
         public DbSet<Transaction> Transactions { get; set; } = null!;
         public DbSet<PhoneVerificationToken> PhoneVerificationTokens { get; set; } = null!;
         public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
@@ -592,6 +595,93 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.FlaggedImageId)
                     .HasDatabaseName("IX_UserReport_FlaggedImageId");
+            });
+
+            // BilliardTable entity configuration
+            modelBuilder.Entity<BilliardTable>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.IsSold)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.ViewCount)
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.IsFlagged)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.ModerationStatus)
+                    .HasDefaultValue("approved");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_BilliardTable_UserId");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_BilliardTable_IsSold");
+
+                entity.HasIndex(e => e.IsFlagged)
+                    .HasDatabaseName("IX_BilliardTable_IsFlagged");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_BilliardTable_CreatedAt");
+            });
+
+            // BilliardTableImage entity configuration
+            modelBuilder.Entity<BilliardTableImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.BilliardTable)
+                    .WithMany(t => t.Images)
+                    .HasForeignKey(e => e.BilliardTableId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.IsPrimary)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.BilliardTableId)
+                    .HasDatabaseName("IX_BilliardTableImage_BilliardTableId");
+
+                entity.HasIndex(e => new { e.BilliardTableId, e.IsPrimary })
+                    .HasDatabaseName("IX_BilliardTableImage_Primary");
+            });
+
+            // SavedBilliardTable entity configuration
+            modelBuilder.Entity<SavedBilliardTable>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.BilliardTable)
+                    .WithMany(t => t.SavedByUsers)
+                    .HasForeignKey(e => e.BilliardTableId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.SavedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => new { e.UserId, e.BilliardTableId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_SavedBilliardTable_Unique_User_Table");
             });
         }
     }

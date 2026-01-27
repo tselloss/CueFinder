@@ -34,7 +34,8 @@ const testUser = {
   name: 'Flow Test User',
   email: `flowtest${timestamp}@example.com`,
   phone: '+15559876543',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 const testCase = {
