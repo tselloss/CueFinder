@@ -2,6 +2,7 @@ using CueFinder.CueCases.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.Extensions.Logging;
 
 namespace CueFinder.CueCases.Controllers;
 

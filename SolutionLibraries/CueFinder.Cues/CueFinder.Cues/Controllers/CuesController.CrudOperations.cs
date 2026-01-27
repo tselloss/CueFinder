@@ -12,15 +12,6 @@ namespace CueFinder.Cues.Controllers;
 /// </summary>
 public partial class CuesController
 {
-    private readonly ICueService _cueService;
-    private readonly ILogger<CuesController> _logger;
-
-    public CuesController(ICueService cueService, ILogger<CuesController> logger)
-    {
-        _cueService = cueService;
-        _logger = logger;
-    }
-
     /// <summary>
     /// Get a specific cue by ID
     /// </summary>
