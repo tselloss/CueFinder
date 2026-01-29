@@ -6,7 +6,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 // Helper: Register user
 async function registerUser(request, userData) {
@@ -192,3 +192,5 @@ test('Complete Flow: Register → Login → Create Listing → NSFW Upload Test'
   console.log(`  • Safe images are being accepted\n`);
   console.log('===================================\n');
 });
+
+

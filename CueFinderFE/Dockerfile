@@ -9,17 +9,25 @@ RUN npm install -g pnpm
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Copy workspace files and old source for migration
+# Copy workspace files and dependency manifests only (better caching)
 COPY pnpm-workspace.yaml .npmrc package.json pnpm-lock.yaml* ./
+COPY packages/api/package.json ./packages/api/package.json
+COPY packages/app/package.json ./packages/app/package.json
+COPY packages/auth/package.json ./packages/auth/package.json
+COPY packages/common/package.json ./packages/common/package.json
+COPY packages/ui/package.json ./packages/ui/package.json
+COPY cuefinderfe/package.json ./cuefinderfe/package.json
+
+# Install dependencies (monorepo)
+RUN pnpm install --frozen-lockfile --ignore-scripts
+
+# Copy full source after dependencies are cached
 COPY packages ./packages
 COPY cuefinderfe ./cuefinderfe
 COPY scripts ./scripts
 
 # Run build helper to sync old source to new structure
 RUN node scripts/build-helper.js
-
-# Install dependencies (monorepo)
-RUN pnpm install --ignore-scripts
 
 # Debug: Print environment variable
 RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL"

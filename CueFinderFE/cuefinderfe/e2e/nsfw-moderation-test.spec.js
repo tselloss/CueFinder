@@ -13,7 +13,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 // Helper functions
 async function registerUser(request, userData) {
@@ -234,7 +234,7 @@ test.describe('NSFW Moderation Flow', () => {
     const formData = new FormData();
     formData.append('file', fs.createReadStream(nsfwImagePath));
     
-    const apiUpload = await fetch('http://localhost:5000/api/moderation/upload-image?cueId=' + cueId, {
+    const apiUpload = await fetch('http://localhost:5200/api/moderation/upload-image?cueId=' + cueId, {
       method: 'POST',
       headers: {
         'Authorization': `Bearer ${authToken}`
@@ -261,3 +261,5 @@ test.describe('NSFW Moderation Flow', () => {
     console.log('════════════════════════════════════════════════════════\n');
   });
 });
+
+

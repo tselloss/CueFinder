@@ -7,7 +7,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 // Helper functions
 async function registerUser(request, userData) {
@@ -308,3 +308,5 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('\n🧹 Demo completed!\n');
   });
 });
+
+

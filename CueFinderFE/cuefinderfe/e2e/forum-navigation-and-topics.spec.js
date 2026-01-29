@@ -8,7 +8,7 @@
  * 4. Forum page navigation and UI elements
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 4. Forum categories must be seeded
@@ -146,7 +146,7 @@ test.describe('Forum Menu Bar Navigation', () => {
 test.describe('Forum Topic Creation Flow', () => {
   test.beforeEach(async ({ page, request }) => {
     // Register user first (via API)
-    const registerResponse = await request.post('http://localhost:5000/api/auth/register', {
+    const registerResponse = await request.post('http://localhost:5200/api/auth/register', {
       data: testUser
     });
     
@@ -603,7 +603,7 @@ test.describe('Forum API Integration', () => {
   test('Categories API endpoint returns data', async ({ request }) => {
     console.log('✓ Testing categories API endpoint...');
 
-    const response = await request.get('http://localhost:5000/api/forum/categories');
+    const response = await request.get('http://localhost:5200/api/forum/categories');
     
     expect(response.status()).toBe(200);
     
@@ -632,7 +632,7 @@ test.describe('Forum API Integration', () => {
       categoryId: '00000000-0000-0000-0000-000000000000', // Placeholder
     };
 
-    const response = await request.post('http://localhost:5000/api/forum/discussions', {
+    const response = await request.post('http://localhost:5200/api/forum/discussions', {
       data: testDiscussion,
       headers: {
         'Content-Type': 'application/json',
@@ -654,3 +654,5 @@ test.describe('Forum API Integration', () => {
     }
   });
 });
+
+

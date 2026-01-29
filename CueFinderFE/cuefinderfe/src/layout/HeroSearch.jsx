@@ -54,9 +54,10 @@ export function HeroSearch({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8">
-      {/* Hero Title */}
-      <div className="text-center mb-8">
+    <div className="w-full bg-gradient-to-b from-background via-background to-secondary/20 py-8 sm:py-12 px-2 sm:px-4 md:px-6">
+      <div className="w-full max-w-5xl mx-auto">
+        {/* Hero Title */}
+        <div className="text-center mb-8">
         <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
           <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             {t('hero.title')}
@@ -67,27 +68,27 @@ export function HeroSearch({
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold"
             >
               <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Add New Listing</span><span className="sm:hidden">Add Listing</span>
+              <span className="hidden sm:inline">{t('header.addNewListing')}</span><span className="sm:hidden">{t('header.addListing')}</span>
             </Button>
           )}
         </div>
         <p className="text-base md:text-lg text-muted-foreground">
           {t('hero.subtitle')}
         </p>
-      </div>
+        </div>
 
-      {/* Search & Filters Card */}
-      <Card className="border-2 border-primary/20 shadow-xl bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-4 md:p-6 space-y-4">
+        {/* Search & Filters Card */}
+        <Card className="border border-slate-800/70 bg-slate-900/80 shadow-2xl backdrop-blur-sm">
+          <CardContent className="p-4 md:p-6 space-y-4">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
             <Input
               type="text"
-              placeholder={t('search.placeholder', 'Search for cues, brands...')}
+              placeholder={t('search.placeholder', 'Search for cues, brands, models...')}
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="pl-10 pr-10 h-10 text-sm sm:text-base border-2 focus:border-primary"
+              className="pl-10 pr-10 h-11 text-sm sm:text-base bg-slate-950/80 border border-slate-700/80 text-slate-100 placeholder:text-slate-400 focus:border-blue-500"
             />
             {search && (
               <button
@@ -123,11 +124,11 @@ export function HeroSearch({
             <div className="space-y-4 md:space-y-0 md:grid md:grid-cols-3 md:gap-4">
               {/* Condition Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-slate-200">
                   {t('filter.condition', 'Condition')}
                 </label>
                 <Select value={condition} onValueChange={setCondition}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="h-10 bg-slate-950/80 border border-slate-700/80 text-slate-100">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -142,11 +143,11 @@ export function HeroSearch({
 
               {/* Sort By Filter */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-slate-200">
                   {t('filter.sortBy', 'Sort By')}
                 </label>
                 <Select value={sortBy} onValueChange={setSortBy}>
-                  <SelectTrigger className="h-10">
+                  <SelectTrigger className="h-10 bg-slate-950/80 border border-slate-700/80 text-slate-100">
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
@@ -159,11 +160,11 @@ export function HeroSearch({
 
               {/* Price Range */}
               <div className="space-y-2">
-                <label className="text-sm font-medium text-foreground">
+                <label className="text-sm font-medium text-slate-200">
                   {t('filter.priceRange', 'Price Range')}
                 </label>
                 <div className="space-y-2">
-                  <div className="flex items-center justify-between text-sm text-muted-foreground">
+                  <div className="flex items-center justify-between text-sm text-slate-400">
                     <span>{currencySymbol}{priceRange[0]}</span>
                     <span>{currencySymbol}{priceRange[1]}</span>
                   </div>
@@ -173,7 +174,7 @@ export function HeroSearch({
                     max={PRICE_MAX_LIMIT}
                     value={priceRange[1]}
                     onChange={(e) => setPriceRange([priceRange[0], parseInt(e.target.value)])}
-                    className="w-full h-2 bg-secondary rounded-lg appearance-none cursor-pointer slider"
+                    className="w-full h-2 bg-slate-700 rounded-lg appearance-none cursor-pointer slider"
                   />
                 </div>
               </div>
@@ -185,7 +186,7 @@ export function HeroSearch({
             <Button
               variant="outline"
               onClick={clearAllFilters}
-              className="w-full"
+              className="w-full border-slate-700 text-slate-200 hover:text-white"
             >
               <X className="mr-2 h-4 w-4" />
               {t('filters.clear', 'Clear All Filters')}
@@ -199,14 +200,15 @@ export function HeroSearch({
                 variant="ghost"
                 size="sm"
                 onClick={clearAllFilters}
+                className="text-slate-300 hover:text-white"
               >
                 <X className="mr-2 h-4 w-4" />
                 {t('filters.clear', 'Clear All')}
               </Button>
             </div>
           )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
       {/* Custom Slider Styles */}
       <style jsx>{`
@@ -230,6 +232,7 @@ export function HeroSearch({
           box-shadow: 0 2px 4px rgba(0,0,0,0.2);
         }
       `}</style>
+      </div>
     </div>
   );
 }

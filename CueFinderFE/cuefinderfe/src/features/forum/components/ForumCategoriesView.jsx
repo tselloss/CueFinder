@@ -25,13 +25,13 @@ export default function ForumCategoriesView({
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-4">
-        <div className="w-1 h-7 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full shadow-lg" />
-        <h2 className="text-2xl font-bold text-purple-400">Forum Categories</h2>
+        <div className="w-1 h-7 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full shadow-lg" />
+        <h2 className="text-2xl font-bold text-blue-400">Forum Categories</h2>
         <span className="text-xs text-slate-500">• Choose a category</span>
       </div>
 
       {/* Mobile Sorting Toolbar */}
-      <div className="md:hidden bg-slate-800/95 border border-purple-500/20 px-4 py-3 rounded-lg">
+      <div className="md:hidden bg-slate-800/95 border border-blue-500/20 px-4 py-3 rounded-lg">
         <div className="flex items-center justify-between gap-2">
           <span className="text-xs font-semibold text-slate-400">Sort by:</span>
           <div className="flex gap-2">
@@ -41,8 +41,8 @@ export default function ForumCategoriesView({
                 onClick={() => onSortChange(option)}
                 className={`px-3 py-1 text-xs font-semibold rounded-lg transition-all ${
                   sortBy === option
-                    ? 'bg-purple-600/40 border border-purple-500/50 text-purple-200'
-                    : 'bg-purple-600/10 border border-purple-500/20 text-purple-300 hover:bg-purple-600/20'
+                    ? 'bg-blue-600/40 border border-blue-500/50 text-blue-200'
+                    : 'bg-blue-600/10 border border-blue-500/20 text-blue-300 hover:bg-blue-600/20'
                 }`}
               >
                 {option === 'discussions' ? 'Most Active' : option.charAt(0).toUpperCase() + option.slice(1)}

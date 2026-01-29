@@ -13,7 +13,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 const UI_BASE_URL = 'http://localhost:3000';
 
 // NSFW test image path
@@ -298,3 +298,5 @@ test('Step 1: User Registration', async ({ request }) => {
     console.log(`  • Safe images are being allowed\n`);
     console.log('===================================\n');
   });
+
+

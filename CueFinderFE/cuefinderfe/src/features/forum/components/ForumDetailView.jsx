@@ -34,10 +34,6 @@ export default function ForumDetailView({
             {discussion.isPinned && <span className="ml-2">📌</span>}
             {discussion.isLocked && <span className="ml-2">🔒</span>}
           </h2>
-          <div className="flex flex-col md:flex-row gap-3 mt-2 text-sm">
-            <span className="text-slate-400">Started by: {discussion.createdByUserId}</span>
-            <span className="text-slate-400">{new Date(discussion.createdAt).toLocaleDateString()}</span>
-          </div>
         </div>
         <Button
           onClick={onBack}
@@ -45,11 +41,6 @@ export default function ForumDetailView({
         >
           Back
         </Button>
-      </div>
-
-      {/* Original Post */}
-      <div className="p-4 bg-slate-800/50 border border-slate-700 rounded-lg">
-        <p className="text-slate-100">{discussion.content}</p>
       </div>
 
       {/* Posts Title */}
@@ -78,7 +69,7 @@ export default function ForumDetailView({
         <div className="mt-6">
           <Button
             onClick={() => onNewPost(null)}
-            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white font-semibold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
           >
             <MessageSquare size={16} />
             Post Reply

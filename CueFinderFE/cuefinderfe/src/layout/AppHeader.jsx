@@ -1,16 +1,19 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from '../components/ui/button.jsx';
 import { Badge } from '../components/ui/badge.jsx';
-import { Mail, LogOut, User as UserIcon, Shield } from 'lucide-react';
+import { Mail, LogOut, User as UserIcon, Shield, Globe } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from '../components/ui/dropdown-menu.jsx';
 
 export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
+  const { i18n, t } = useTranslation();
   const [dropdownOpen, setDropdownOpen] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
+  const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const navLinks = [
-    { label: 'Home', path: '/' },
-    { label: 'Forum', path: '/forum' },
-    { label: 'Inbox', path: '/inbox', requiresAuth: true }
+    { label: t('nav.home'), path: '/' },
+    { label: t('nav.forum'), path: '/forum' },
+    { label: t('nav.inbox'), path: '/inbox', requiresAuth: true }
   ];
 
   // Handle mobile menu toggle - close dropdown when opening mobile menu
@@ -25,8 +28,24 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
   const handleDropdownChange = (open) => {
     if (open) {
       setMobileNavOpen(false); // Close mobile nav when opening dropdown
+      setLangDropdownOpen(false); // Close language dropdown when opening account dropdown
     }
     setDropdownOpen(open);
+  };
+
+  const handleLanguageDropdownChange = (open) => {
+    if (open) {
+      setMobileNavOpen(false); // Close mobile nav
+      setDropdownOpen(false); // Close account dropdown when opening language dropdown
+    }
+    setLangDropdownOpen(open);
+  };
+
+  const handleLanguageChange = (lang) => {
+    if (i18n.language !== lang) {
+      i18n.changeLanguage(lang);
+      localStorage.setItem('lang', lang);
+    }
   };
 
   return (
@@ -52,6 +71,36 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
           </nav>
         </div>
         <div className="flex items-center gap-2">
+          <DropdownMenu open={langDropdownOpen} onOpenChange={handleLanguageDropdownChange}>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1 flex-shrink-0 hover:bg-primary/10 transition-colors">
+                <Globe className="h-4 w-4" />
+                <span className="hidden sm:inline text-xs font-semibold">{i18n.language === 'gr' ? 'ΕΛ' : 'EN'}</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-40 z-[60]">
+              <DropdownMenuLabel className="text-xs font-semibold">{t('language.selectLanguage')}</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              <DropdownMenuItem 
+                onClick={() => { 
+                  handleLanguageChange('en'); 
+                  setLangDropdownOpen(false); 
+                }} 
+                className={`cursor-pointer transition-colors ${i18n.language === 'en' ? 'bg-primary/20 text-primary' : 'hover:bg-slate-700/50'}`}
+              >
+                <span className="font-medium">{t('language.english')}</span>
+              </DropdownMenuItem>
+              <DropdownMenuItem 
+                onClick={() => { 
+                  handleLanguageChange('gr'); 
+                  setLangDropdownOpen(false); 
+                }} 
+                className={`cursor-pointer transition-colors ${i18n.language === 'gr' ? 'bg-primary/20 text-primary' : 'hover:bg-slate-700/50'}`}
+              >
+                <span className="font-medium">{t('language.greek')}</span>
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
           {user ? (
             <>
               <div className="hidden sm:flex items-center gap-2 rounded-md border border-primary/40 bg-background/60 backdrop-blur px-2 py-1 min-w-0">
@@ -71,7 +120,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   setDropdownOpen(false);
                   setMobileNavOpen(false);
                 }} className="relative hidden sm:inline-flex">
-                  <Mail className="mr-2 h-4 w-4" /> Inbox
+                  <Mail className="mr-2 h-4 w-4" /> {t('header.inbox')}
                   {unreadCount > 0 && (
                     <Badge variant="destructive" className="absolute -top-2 -right-2 rounded-full unread-badge">
                       {unreadCount > 99 ? '99+' : unreadCount}
@@ -89,7 +138,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                     setMobileNavOpen(false);
                   }} 
                   className="sm:hidden relative"
-                  title={unreadCount > 0 ? `${unreadCount} unread messages` : 'Inbox'}
+                  title={unreadCount > 0 ? `${unreadCount} ${t('inbox.unread').toLowerCase()}` : t('header.inbox')}
                 >
                   <Mail className="h-4 w-4" />
                   {unreadCount > 0 && (
@@ -101,36 +150,36 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
 
                 <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange} modal={true}>
                   <DropdownMenuTrigger asChild>
-                    <Button variant="outline" size="sm" className="flex-shrink-0">
+                    <Button variant="outline" size="sm" className="flex-shrink-0 hover:bg-primary/10 transition-colors">
                       <UserIcon className="h-4 w-4" />
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 z-[60]">
-                    <DropdownMenuLabel>Account</DropdownMenuLabel>
+                    <DropdownMenuLabel className="font-semibold">{t('header.account')}</DropdownMenuLabel>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
                       setDropdownOpen(false);
                       onNavigate && onNavigate('/profile');
-                    }}>
+                    }} className="cursor-pointer hover:bg-slate-700/50 transition-colors">
                       <UserIcon className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>{t('header.profile')}</span>
                     </DropdownMenuItem>
                     {user.role === 'admin' && (
                       <DropdownMenuItem onClick={() => {
                         setDropdownOpen(false);
                         onNavigate && onNavigate('/admin');
-                      }}>
+                      }} className="cursor-pointer hover:bg-slate-700/50 transition-colors">
                         <Shield className="mr-2 h-4 w-4" />
-                        <span>Admin Dashboard</span>
+                        <span>{t('header.adminDashboard')}</span>
                       </DropdownMenuItem>
                     )}
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={() => {
                       setDropdownOpen(false);
                       onLogout && onLogout();
-                    }} className="text-destructive">
+                    }} className="text-destructive cursor-pointer hover:bg-destructive/10 transition-colors">
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Logout</span>
+                      <span>{t('header.logout')}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -139,7 +188,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   variant="ghost"
                   size="sm"
                   className="md:hidden flex-shrink-0"
-                  aria-label="Toggle menu"
+                  aria-label={t('common.toggleMenu')}
                   onClick={handleMobileToggle}
                 >
                   <span className="inline-block w-5 h-5">{mobileNavOpen ? '✕' : '☰'}</span>
@@ -151,23 +200,22 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
               <Button variant="default" size="sm" onClick={() => {
                 onNavigate && onNavigate('/login');
                 setMobileNavOpen(false);
-              }} className="hidden sm:inline-flex">Sign In</Button>
+              }} className="hidden sm:inline-flex">{t('header.signIn')}</Button>
               <Button variant="outline" size="sm" onClick={() => {
                 onNavigate && onNavigate('/register');
                 setMobileNavOpen(false);
-              }} className="hidden sm:inline-flex">Register</Button>
+              }} className="hidden sm:inline-flex">{t('header.register')}</Button>
               
-              {/* Mobile Sign In/Register */}
-              <Button variant="default" size="sm" onClick={() => {
+              {/* Mobile Sign In/Register */}\n              <Button variant="default" size="sm" onClick={() => {
                 onNavigate && onNavigate('/login');
                 setMobileNavOpen(false);
-              }} className="sm:hidden">Sign In</Button>
+              }} className="sm:hidden">{t('header.signIn')}</Button>
               
               <Button
                 variant="ghost"
                 size="sm"
                 className="md:hidden flex-shrink-0"
-                aria-label="Toggle menu"
+                aria-label={t('common.toggleMenu')}
                 onClick={handleMobileToggle}
               >
                 <span className="inline-block w-5 h-5">{mobileNavOpen ? '✕' : '☰'}</span>

@@ -38,7 +38,7 @@ export default function ForumNewPostModal({
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
           rows={6}
-          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
+          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500"
         />
       </FormField>
     </BaseModal>

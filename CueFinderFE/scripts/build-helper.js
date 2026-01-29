@@ -34,10 +34,8 @@ if (fs.existsSync(oldSrcDir)) {
       if (stat.isDirectory()) {
         copyDir(srcFile, destFile);
       } else {
-        // Skip if already exists (don't overwrite)
-        if (!fs.existsSync(destFile)) {
-          fs.copyFileSync(srcFile, destFile);
-        }
+        // Always overwrite to ensure latest changes are copied
+        fs.copyFileSync(srcFile, destFile);
       }
     });
   };

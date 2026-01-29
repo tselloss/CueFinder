@@ -12,7 +12,7 @@
  * 8. Delete the case listing
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 
@@ -25,7 +25,7 @@
 const { test, expect } = require('@playwright/test');
 
 // API base URL for direct database queries
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 /**
  * Helper: Fetch all cue cases from the database via API
@@ -655,3 +655,5 @@ test.describe('Cue Case vs Cue Product Type Selection', () => {
 });
 
 console.log('\n✨ Cue Case E2E Tests Ready\n');
+
+

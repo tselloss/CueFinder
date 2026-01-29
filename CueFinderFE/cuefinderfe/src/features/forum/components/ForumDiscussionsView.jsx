@@ -34,15 +34,15 @@ export default function ForumDiscussionsView({
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-6">
         <div className="flex items-center gap-3">
-          <div className="w-1 h-6 bg-gradient-to-b from-purple-600 to-purple-700 rounded-full" />
-          <h2 className="text-xl font-bold text-purple-400">{category.name}</h2>
+          <div className="w-1 h-6 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full" />
+          <h2 className="text-xl font-bold text-blue-400">{category.name}</h2>
         </div>
         <div className="flex gap-2 items-center">
           {user && (
             <Button
               onClick={onNewDiscussion}
               data-testid="new-topic-button-discussions"
-              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-purple-600 to-purple-700 text-white font-bold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
+              className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
             >
               <Plus size={16} />
               New Topic
@@ -50,7 +50,7 @@ export default function ForumDiscussionsView({
           )}
           <Button
             onClick={onBackToCategories}
-            className="flex items-center gap-2 px-4 py-2 bg-purple-600/10 border border-purple-500/30 text-slate-300 hover:bg-purple-600/20 rounded-lg text-sm transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 text-slate-300 hover:bg-blue-600/20 rounded-lg text-sm transition-all"
           >
             <MessageCircle size={16} />
             All Categories
@@ -88,7 +88,7 @@ export default function ForumDiscussionsView({
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-3 text-xs">
                   <div className="flex gap-4">
                     <span className="text-slate-500 font-semibold">
-                      👤 {discussion.createdByUserId}
+                      👤 <span className="text-blue-400">{discussion.createdByUsername || 'User'}</span>
                     </span>
                     <span className="text-slate-500 font-semibold">
                       🕐 {new Date(discussion.createdAt).toLocaleDateString()}

@@ -3,7 +3,7 @@
  * 
  * This test runs against real backend and frontend instances.
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 4. Admin user must exist with username: CuefinderAdminTheOneAndOnly, password: TheBestAdminThatYouEverHave
@@ -26,7 +26,7 @@ const testUser = {
 
 // Helper to register user via API
 async function registerTestUser(request, userData) {
-  const response = await request.post('http://localhost:5000/api/auth/register', {
+  const response = await request.post('http://localhost:5200/api/auth/register', {
     data: userData
   });
   return response;
@@ -255,3 +255,5 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     console.log('\n✅ Navigation test complete!\n');
   });
 });
+
+

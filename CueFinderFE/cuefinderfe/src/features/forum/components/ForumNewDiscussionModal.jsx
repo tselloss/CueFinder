@@ -31,14 +31,14 @@ export default function ForumNewDiscussionModal({
       onClose={onClose}
       submitText="Create Topic"
       loading={loading}
-      variant="purple"
+      variant="blue"
     >
       {/* Category Select */}
       <FormField label="Category">
         <select
           value={formData.categoryId}
           onChange={(e) => onFormChange('categoryId', e.target.value)}
-          className="w-full px-3 py-2 border border-purple-500/30 rounded-lg bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-purple-500"
+          className="w-full px-3 py-2 border border-blue-500/30 rounded-lg bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500"
         >
           <option value="">Select a category</option>
           {categories.map((c) => (
@@ -56,7 +56,7 @@ export default function ForumNewDiscussionModal({
           placeholder="Discussion title"
           value={formData.title}
           onChange={(e) => onFormChange('title', e.target.value)}
-          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
+          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500"
         />
       </FormField>
 
@@ -67,7 +67,7 @@ export default function ForumNewDiscussionModal({
           value={formData.content}
           onChange={(e) => onFormChange('content', e.target.value)}
           rows={6}
-          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-purple-500"
+          className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500"
         />
       </FormField>
     </BaseModal>

@@ -14,7 +14,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 async function goToCuesCategory(page) {
   const cuesButtonByTestId = page.locator('[data-testid="sidebar-category-cues"]');
@@ -686,3 +686,5 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     console.log('✅ All cues have valid cue types and data\n');
   });
 });
+
+

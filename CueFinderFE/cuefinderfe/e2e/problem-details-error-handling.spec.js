@@ -5,7 +5,7 @@
  * RFC 7807 Problem Details error responses from the backend.
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 
@@ -527,3 +527,5 @@ test.describe('Problem Details - HTTP Cache Headers Verification', () => {
     console.log('✅ Cache headers verification complete');
   });
 });
+
+

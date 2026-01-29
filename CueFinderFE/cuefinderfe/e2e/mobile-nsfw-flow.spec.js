@@ -6,7 +6,7 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 const UI_BASE_URL = 'http://localhost:3000';
 const NSFW_IMAGE_PATH = 'C:\\Users\\karac\\Downloads\\nsfw-ida-testing-some-underwear-v0-mod5ylqkkmyc1.webp';
 
@@ -285,3 +285,5 @@ test('Summary: Mobile NSFW Flow Complete', async ({}) => {
   console.log('='.repeat(70));
   console.log('🎉 ALL MOBILE TESTS PASSED!\n');
 });
+
+

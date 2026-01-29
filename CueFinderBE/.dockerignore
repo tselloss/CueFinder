@@ -2,6 +2,8 @@
 bin/
 obj/
 out/
+publish/
+build-log.txt
 *.dll
 *.pdb
 
@@ -11,17 +13,24 @@ out/
 *.userosscache
 *.sln.docstates
 
-# Visual Studio
+# Visual Studio & IDE
 .vs/
 .vscode/
+.idea/
+*.swp
+*.swo
 
 # NuGet
 packages/
 *.nupkg
+.nuget/
 
 # Test results
 TestResults/
 test-results/
+test-output.txt
+coverage/
+*.trx
 
 # Logs
 logs/
@@ -31,22 +40,48 @@ logs/
 .DS_Store
 Thumbs.db
 
-# Uploads directory (runtime data)
-uploads/
+# Git
+.git/
+.gitignore
+.gitattributes
 
-# Frontend directories (should not be in backend context)
-../CueFinderFE/node_modules/
-../CueFinderFE/.pnpm-store/
-../CueFinderFE/dist/
-../CueFinderFE/build/
-../CueFinderFE/packages/*/node_modules/
-../CueFinderFE/packages/*/dist/
-../CueFinderFE/cuefinderfe/node_modules/
-../CueFinderFE/cuefinderfe/build/
+# Runtime data
+uploads/
+temp/
+*.tmp
+
+# Frontend directories (completely exclude)
+../CueFinderFE/
+
+# Other backend services (if building specific service)
+../CueFinderModerator/
+../SolutionLibraries/
+
+# Scripts & deployment
+../scripts/
+../deployment/
+../*.ps1
+../*.sh
 
 # Documentation
 *.md
+../*.md
 !README.md
+
+# SQL files
+../*.sql
+
+# Config files (use environment variables instead)
+*.Development.json
+*.local.json
+appsettings.*.json
+!appsettings.json
+!appsettings.Production.json
+
+# Docker files
+Dockerfile*
+.dockerignore
+../docker-compose*.yml
 
 # Git
 .git/

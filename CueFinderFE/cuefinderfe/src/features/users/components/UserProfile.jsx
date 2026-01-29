@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { useAuth } from '../../../auth/AuthContext';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, User, Mail, Phone, MapPin, Edit, Save, X, Image } from 'lucide-react';
@@ -18,6 +19,7 @@ const AVATAR_OPTIONS = [
 export default function UserProfile({ onBack }) {
   const { user, updateUser } = useAuth();
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState('profile');
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState(null);
@@ -132,7 +134,7 @@ export default function UserProfile({ onBack }) {
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
             <span className="hidden sm:inline">Back</span>
           </Button>
-          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">My Profile</h1>
+          <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">{t('nav.myProfile')}</h1>
         </div>
 
         {/* Message Alert */}

@@ -139,13 +139,13 @@ test.describe('Cue and Case Filtering', () => {
 
   test('API verification: Check both cues and cases are returned', async ({ request }) => {
     // Check cues endpoint
-    const cuesResponse = await request.get('http://localhost:5000/api/cues');
+    const cuesResponse = await request.get('http://localhost:5200/api/cues');
     expect(cuesResponse.ok()).toBeTruthy();
     const cuesData = await cuesResponse.json();
     console.log(`Cues from API: ${cuesData.length}`);
     
     // Check cases endpoint
-    const casesResponse = await request.get('http://localhost:5000/api/cuecases');
+    const casesResponse = await request.get('http://localhost:5200/api/cuecases');
     expect(casesResponse.ok()).toBeTruthy();
     const casesData = await casesResponse.json();
     console.log(`Cases from API: ${casesData.length}`);
@@ -156,3 +156,5 @@ test.describe('Cue and Case Filtering', () => {
     expect(casesData.length).toBeGreaterThan(0);
   });
 });
+
+

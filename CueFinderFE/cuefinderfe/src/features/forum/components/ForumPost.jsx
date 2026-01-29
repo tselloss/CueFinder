@@ -47,7 +47,7 @@ export default function ForumPost({
         {/* Post Header */}
         <div className="flex justify-between items-center gap-2">
           <div className="flex items-center gap-2">
-            <User size={18} className="text-purple-500" />
+            <User size={18} className="text-blue-500" />
             <span className="text-xs font-bold text-slate-200">{post.createdByUsername || 'User'}</span>
             <span className="text-xs text-slate-500" title={new Date(post.createdAt).toLocaleString()}>
               {formatRelativeTime(post.createdAt)}
@@ -66,7 +66,7 @@ export default function ForumPost({
           <button
             onClick={() => onLike(post.id)}
             disabled={!user}
-            className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-purple-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <Star size={14} className="opacity-50" />
             {post.likeCount}
@@ -75,7 +75,7 @@ export default function ForumPost({
           <button
             onClick={() => onReply(post.id)}
             disabled={discussionLocked || !user}
-            className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-purple-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <MessageSquare size={14} />
             Reply

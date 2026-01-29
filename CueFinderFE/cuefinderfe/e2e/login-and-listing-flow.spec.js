@@ -17,7 +17,7 @@ const testUser = {
 
 // Helper to register user via API
 async function registerUser(request, userData) {
-  const response = await request.post('http://localhost:5000/api/auth/register', {
+  const response = await request.post('http://127.0.0.1:5200/api/auth/register', {
     data: userData
   });
   return response;
@@ -46,7 +46,7 @@ test.describe('Login and Listing Navigation', () => {
 
     // Wait for Sign In heading
     console.log('3️⃣ Waiting for Sign In page...');
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /Welcome Back|Sign In/i })).toBeVisible({ timeout: 10000 });
 
     // Fill login form
     console.log('4️⃣ Filling login credentials...');
@@ -131,7 +131,7 @@ test.describe('Login and Listing Navigation', () => {
     // Login first
     await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: /Welcome Back|Sign In/i })).toBeVisible({ timeout: 5000 });
 
     const usernameInput = page.getByPlaceholder('Enter username');
     const passwordInput = page.getByPlaceholder('Password');
@@ -163,3 +163,5 @@ test.describe('Login and Listing Navigation', () => {
     console.log('✅ Token persisted correctly!');
   });
 });
+
+

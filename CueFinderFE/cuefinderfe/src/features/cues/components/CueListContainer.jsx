@@ -3,6 +3,7 @@ import { useCueFiltering } from '../hooks/useCueFiltering';
 import CueViewToggle from './CueViewToggle';
 import { CueGridView, CueListView } from './CueViews';
 import CueResultsInfo from './CueResultsInfo';
+import HeroSearch from '../../../layout/HeroSearch';
 
 /**
  * CueListContainer - Main cue list component with filtering, sorting, and view modes
@@ -39,19 +40,30 @@ import CueResultsInfo from './CueResultsInfo';
 export default function CueListContainer({
   cues,
   onSelect,
+  onAdd,
   query,
+  search,
+  setSearch,
   category,
   condition,
+  setCondition,
   cueType,
   priceRange,
+  setPriceRange,
   sortBy,
+  setSortBy,
   viewMode,
   setViewMode,
+  PRICE_MIN_LIMIT,
+  PRICE_MAX_LIMIT,
   currencySymbol = '€',
+  user,
 }) {
+  const searchValue = search ?? query ?? '';
+  const setSearchValue = setSearch ?? (() => {});
   // Use the custom hook for filtering, sorting, and pagination
   const { filteredItems } = useCueFiltering(cues || [], {
-    search: query,
+    search: searchValue,
     category,
     condition,
     cueType,
@@ -60,27 +72,49 @@ export default function CueListContainer({
   });
 
   return (
-    <div className="w-full p-4 md:p-6 relative z-10">
-      {/* View Mode Toggle */}
-      <CueViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-
-      {/* Grid or List View */}
-      {viewMode === 'grid' ? (
-        <CueGridView
-          items={filteredItems}
-          onSelect={onSelect}
+    <div className="w-full relative z-10">
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-background via-background to-secondary/20 py-4 sm:py-6 px-2 sm:px-4 md:px-6">
+        <HeroSearch
+          search={searchValue}
+          setSearch={setSearchValue}
+          condition={condition}
+          setCondition={setCondition}
+          sortBy={sortBy}
+          setSortBy={setSortBy}
+          priceRange={priceRange}
+          setPriceRange={setPriceRange}
+          PRICE_MIN_LIMIT={PRICE_MIN_LIMIT}
+          PRICE_MAX_LIMIT={PRICE_MAX_LIMIT}
           currencySymbol={currencySymbol}
+          user={user}
+          onAddListing={onAdd}
         />
-      ) : (
-        <CueListView
-          items={filteredItems}
-          onSelect={onSelect}
-          currencySymbol={currencySymbol}
-        />
-      )}
+      </div>
 
-      {/* Results Info */}
-      <CueResultsInfo count={filteredItems.length} category={category} />
+      {/* Listings Content */}
+      <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
+        {/* View Mode Toggle */}
+        <CueViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+
+        {/* Grid or List View */}
+        {viewMode === 'grid' ? (
+          <CueGridView
+            items={filteredItems}
+            onSelect={onSelect}
+            currencySymbol={currencySymbol}
+          />
+        ) : (
+          <CueListView
+            items={filteredItems}
+            onSelect={onSelect}
+            currencySymbol={currencySymbol}
+          />
+        )}
+
+        {/* Results Info */}
+        <CueResultsInfo count={filteredItems.length} category={category} />
+      </div>
     </div>
   );
 }

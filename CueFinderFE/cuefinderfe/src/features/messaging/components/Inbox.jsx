@@ -116,7 +116,7 @@ export default function Inbox({ onBack }) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card">
-        <div className="container mx-auto px-4 pt-[7px] pb-[7px]">
+        <div className="container mx-auto px-4 pt-6 pb-4">
           <div className="flex items-center gap-4">
             <Button variant="ghost" onClick={onBack} className="gap-2">
               <ArrowLeft className="w-4 h-4" />

@@ -23,7 +23,7 @@
  * 6. Verify the listing appears in UI
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 
@@ -36,7 +36,7 @@
 const { test, expect } = require('@playwright/test');
 
 // API base URL for direct database queries
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'http://localhost:5200/api';
 
 /**
  * Helper: Fetch all cues from the database via API
@@ -553,3 +553,5 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     console.log('✅ API tests complete - database queries working!\n');
   });
 });
+
+
