@@ -319,6 +319,18 @@ export default function LoginPage() {
                 </>
               )}
             </div>
+
+            {!isRegister && !codeSent && (
+              <div className="text-center pt-2 border-t">
+                <button
+                  type="button"
+                  onClick={() => navigate('/forgot-password')}
+                  className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
+                >
+                  Forgot your password?
+                </button>
+              </div>
+            )}
           </CardFooter>
         </form>
       </Card>

@@ -17,7 +17,7 @@ const testUser = {
 
 // Helper to register user via API
 async function registerUser(request, userData) {
-  const response = await request.post('http://127.0.0.1:5200/api/auth/register', {
+  const response = await request.post('http://127.0.0.1:5000/api/auth/register', {
     data: userData
   });
   return response;

@@ -1,6 +1,5 @@
 using CueFinder.Accessories.Interfaces;
 using CueFinder.Accessories.Models;
-using CueFinder.Auth.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +27,7 @@ public partial class AccessoriesController
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue) return Unauthorized(new { message = "Invalid user" });
 
             if (file == null || file.Length == 0) return BadRequest(new { message = "No file provided" });
@@ -82,7 +81,7 @@ public partial class AccessoriesController
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<ActionResult> SetAccessoryPrimaryImage(int id, int imageId)
     {
-        var userId = User.GetUserId();
+        var userId = GetUserIdFromClaims();
         if (!userId.HasValue) return Unauthorized(new { message = "Invalid user" });
         var ok = await _imageService.SetPrimaryImageAsync(id, imageId, userId.Value);
         if (!ok) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "Not found or not permitted" });
@@ -97,7 +96,7 @@ public partial class AccessoriesController
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<ActionResult> DeleteAccessoryImage(int id, int imageId)
     {
-        var userId = User.GetUserId();
+        var userId = GetUserIdFromClaims();
         if (!userId.HasValue) return Unauthorized(new { message = "Invalid user" });
         var ok = await _imageService.DeleteAccessoryImageAsync(id, imageId, userId.Value);
         if (!ok) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "Not found or not permitted" });
@@ -112,11 +111,21 @@ public partial class AccessoriesController
     [ProducesResponseType(typeof(object), StatusCodes.Status200OK)]
     public async Task<ActionResult> DeleteAccessoryImages(int id)
     {
-        var userId = User.GetUserId();
+        var userId = GetUserIdFromClaims();
         if (!userId.HasValue) return Unauthorized(new { message = "Invalid user" });
         var isAdmin = User.IsInRole("admin");
         var ok = await _imageService.DeleteAccessoryImagesAsync(id, userId.Value, isAdmin);
         if (!ok) return StatusCode(StatusCodes.Status401Unauthorized, new { message = "Not found or not permitted" });
         return Ok(new { message = "All images deleted" });
+    }
+
+    private int? GetUserIdFromClaims()
+    {
+        if (User?.FindFirst("sub")?.Value is string userIdStr &&
+            int.TryParse(userIdStr, out int userId))
+        {
+            return userId;
+        }
+        return null;
     }
 }

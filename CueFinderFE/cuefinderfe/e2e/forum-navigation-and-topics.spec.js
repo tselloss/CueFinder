@@ -19,6 +19,9 @@
 
 const { test, expect } = require('@playwright/test');
 
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
+
 // Test credentials - use unique timestamp to avoid conflicts
 const timestamp = Date.now();
 const testUser = {
@@ -32,7 +35,7 @@ const testUser = {
 test.describe('Forum Menu Bar Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app home page
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
@@ -146,7 +149,7 @@ test.describe('Forum Menu Bar Navigation', () => {
 test.describe('Forum Topic Creation Flow', () => {
   test.beforeEach(async ({ page, request }) => {
     // Register user first (via API)
-    const registerResponse = await request.post('http://localhost:5200/api/auth/register', {
+    const registerResponse = await request.post(`${API_BASE_URL}/auth/register`, {
       data: testUser
     });
     
@@ -156,7 +159,7 @@ test.describe('Forum Topic Creation Flow', () => {
     }
 
     // Login first
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
 
     // Check if already logged in
@@ -199,7 +202,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForTimeout(1000);
     
     // Check for New Topic button
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
 
     console.log('✓ New Topic button is visible');
@@ -220,7 +223,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForTimeout(1000);
     
     // Wait for New Topic button
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     
     // Click and wait for modal with better timeout
@@ -263,7 +266,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForURL('**/forum');
     await page.waitForTimeout(1000);
     
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     await newTopicButton.click();
     await page.waitForTimeout(500);
@@ -294,7 +297,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForURL('**/forum');
     await page.waitForTimeout(1000);
     
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     await newTopicButton.click({ force: true });
     await page.waitForTimeout(1500);
@@ -430,7 +433,7 @@ test.describe('Forum Topic Creation Flow', () => {
 
 test.describe('Forum Category Navigation from Sidebar', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
@@ -493,7 +496,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
     console.log('✓ Testing All Categories navigation...');
 
     // Navigate to forum
-    await page.goto('http://localhost:3000/forum');
+    await page.goto(`${APP_BASE_URL}/forum`);
     await page.waitForTimeout(1000);
 
     // Click on a specific category
@@ -527,7 +530,7 @@ test.describe('Forum Responsive Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(1500);
 
     // On mobile, the sidebar may be hidden. Try to find and click menu button to reveal it
@@ -584,7 +587,7 @@ test.describe('Forum Responsive Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    await page.goto('http://localhost:3000/forum');
+    await page.goto(`${APP_BASE_URL}/forum`);
     await page.waitForTimeout(1000);
 
     // Check if New Topic button is visible or in overflow menu
@@ -603,7 +606,7 @@ test.describe('Forum API Integration', () => {
   test('Categories API endpoint returns data', async ({ request }) => {
     console.log('✓ Testing categories API endpoint...');
 
-    const response = await request.get('http://localhost:5200/api/forum/categories');
+    const response = await request.get(`${API_BASE_URL}/forum/categories`);
     
     expect(response.status()).toBe(200);
     
@@ -632,7 +635,7 @@ test.describe('Forum API Integration', () => {
       categoryId: '00000000-0000-0000-0000-000000000000', // Placeholder
     };
 
-    const response = await request.post('http://localhost:5200/api/forum/discussions', {
+    const response = await request.post(`${API_BASE_URL}/forum/discussions`, {
       data: testDiscussion,
       headers: {
         'Content-Type': 'application/json',

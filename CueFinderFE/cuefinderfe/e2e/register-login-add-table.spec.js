@@ -16,7 +16,7 @@
 const { test, expect } = require('@playwright/test');
 const path = require('path');
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 const APP_BASE_URL = process.env.APP_BASE_URL || 'http://127.0.0.1:3000';
 
 // Generate unique test data
@@ -66,14 +66,14 @@ test.describe('E2E: Register → Login → Add Billiard Table', () => {
     
     const loginResponse = await request.post(`${API_BASE_URL}/auth/login`, {
       data: {
-        username: testUser.username,
+        emailOrUsername: testUser.username,
         password: testUser.password
       }
     });
     
     expect(loginResponse.ok()).toBeTruthy();
     const loginData = await loginResponse.json();
-    const authToken = loginData.accessToken;
+    const authToken = loginData.token || loginData.accessToken;
     expect(authToken).toBeTruthy();
     console.log(`✅ Login successful\n`);
 
@@ -108,7 +108,7 @@ test.describe('E2E: Register → Login → Add Billiard Table', () => {
     if (viewState === 'login') {
       console.log('🔁 Detected login page, completing UI login...');
       await loginUsernameInput.fill(testUser.username);
-      await page.getByPlaceholder('Enter password').fill(testUser.password);
+      await page.locator('input[placeholder="Password"], input[placeholder="Enter password"], input[type="password"]').first().fill(testUser.password);
       await page.getByRole('button', { name: /sign in/i }).click();
       await page.waitForURL(/#\/$/, { timeout: 15000 });
       await page.goto(`${APP_BASE_URL}/#/profile`, { waitUntil: 'networkidle' });

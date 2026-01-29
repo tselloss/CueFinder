@@ -6,8 +6,8 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5200/api';
-const UI_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const UI_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 const NSFW_IMAGE_PATH = 'C:\\Users\\karac\\Downloads\\nsfw-ida-testing-some-underwear-v0-mod5ylqkkmyc1.webp';
 
 let timestamp = Date.now();
@@ -38,9 +38,9 @@ async function registerUser(request, userData) {
   return response;
 }
 
-async function loginUser(request, username, password) {
+async function loginUser(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();

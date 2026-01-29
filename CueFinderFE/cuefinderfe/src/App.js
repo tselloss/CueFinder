@@ -13,6 +13,8 @@ import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum';
+import ForgotPassword from './features/auth/components/ForgotPassword';
+import ResetPassword from './features/auth/components/ResetPassword';
 import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader';
 import AppFooter from './components/AppFooter';
@@ -359,6 +361,14 @@ function AppInner() {
               
               <Route path="/register" element={
                 user ? <Navigate to="/" /> : <LoginPage />
+              } />
+              
+              <Route path="/forgot-password" element={
+                user ? <Navigate to="/" /> : <ForgotPassword />
+              } />
+              
+              <Route path="/reset-password" element={
+                user ? <Navigate to="/" /> : <ResetPassword />
               } />
               
               <Route path="/oauth-callback" element={<OAuthCallback />} />

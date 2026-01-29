@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Alert, Button, Card, Form, Spinner } from 'react-bootstrap';
-import './ForgotPassword.css';
+import { Mail, Lock } from 'lucide-react';
+import { Button } from '../../../components/ui/button.jsx';
+import { Input } from '../../../components/ui/input.jsx';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.jsx';
 
 /**
  * ForgotPassword Component
@@ -15,6 +18,7 @@ import './ForgotPassword.css';
  */
 export default function ForgotPassword() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [emailOrUsername, setEmailOrUsername] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
@@ -75,60 +79,74 @@ export default function ForgotPassword() {
 
   if (success) {
     return (
-      <div className="forgot-password-container">
-        <Card className="forgot-password-card">
-          <Card.Body>
-            <Alert variant="success" className="mb-4">
-              <Alert.Heading>Check Your Email</Alert.Heading>
-              <p>
-                If an account exists with that email or username, you'll receive a password reset link shortly.
-              </p>
-              <hr />
-              <small>
-                The reset link will expire in 30 minutes for security reasons.
-                <br />
-                If you don't see it, check your spam folder.
-              </small>
-            </Alert>
-
-            <div className="text-center">
-              <p className="text-muted mb-3">
-                Redirecting to login in a few seconds...
-              </p>
-              <Button 
-                variant="primary" 
-                onClick={() => navigate('/login')}
-              >
-                Back to Login
-              </Button>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-md border-2 border-primary/20 shadow-2xl">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+                <Mail className="h-8 w-8 text-primary-foreground" />
+              </div>
             </div>
-          </Card.Body>
+            <CardTitle className="text-2xl text-center">Check Your Email</CardTitle>
+            <CardDescription className="text-center">
+              We've sent a secure password reset link
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
+              <p className="text-sm text-primary">
+                If an account is associated with <strong>{emailOrUsername}</strong>, we've sent a secure password reset link to your email.
+              </p>
+            </div>
+            <div className="p-4 rounded-md bg-muted/50 border border-border">
+              <p className="text-sm text-muted-foreground">
+                The link will expire in 30 minutes for security reasons.
+              </p>
+            </div>
+            <div className="text-center text-sm text-muted-foreground">
+              <p>Redirecting to login in a few seconds...</p>
+            </div>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="w-full"
+            >
+              Back to Login
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="forgot-password-container">
-      <Card className="forgot-password-card">
-        <Card.Header className="forgot-password-header">
-          <h2>Forgot Password</h2>
-          <p className="subtitle">
-            No worries! We'll help you reset your password securely.
-          </p>
-        </Card.Header>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+      <Card className="w-full max-w-md border-2 border-primary/20 shadow-2xl">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-4">
+            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+              <Lock className="h-8 w-8 text-primary-foreground" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center">Forgot Password</CardTitle>
+          <CardDescription className="text-center">
+            We'll help you reset your password securely
+          </CardDescription>
+        </CardHeader>
 
-        <Card.Body>
-          {error && (
-            <Alert variant="danger" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive font-medium">{error}</p>
+              </div>
+            )}
 
-          <Form onSubmit={handleSubmit}>
-            <Form.Group className="mb-4">
-              <Form.Label>Email Address or Username</Form.Label>
-              <Form.Control
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Mail className="h-4 w-4 text-muted-foreground" />
+                Email or Username
+              </label>
+              <Input
                 type="text"
                 placeholder="Enter your email or username"
                 value={emailOrUsername}
@@ -136,71 +154,31 @@ export default function ForgotPassword() {
                 disabled={isLoading}
                 required
                 autoFocus
-                className="form-control-lg"
               />
-              <Form.Text className="text-muted d-block mt-2">
+              <p className="text-xs text-muted-foreground mt-1">
                 We'll verify your account and send a secure reset link.
-              </Form.Text>
-            </Form.Group>
+              </p>
+            </div>
 
-            {requestCount > 2 && (
-              <Alert variant="warning" className="mb-3">
-                <small>
-                  We're monitoring multiple requests for security. If you didn't request these, 
-                  you can secure your account by {' '}
-                  <a href="/support">contacting our support team</a>.
-                </small>
-              </Alert>
-            )}
-
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={isLoading || !emailOrUsername.trim()}
-              className="w-100 mb-3"
-              size="lg"
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isLoading}
             >
-              {isLoading ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                    className="me-2"
-                  />
-                  Sending Reset Link...
-                </>
-              ) : (
-                'Send Reset Link'
-              )}
+              {isLoading ? 'Sending...' : 'Send Reset Link'}
             </Button>
-          </Form>
 
-          <div className="text-center">
-            <small className="text-muted">
-              Remember your password?{' '}
-              <a href="/login" className="text-decoration-none fw-bold">
+            <div className="flex items-center justify-center pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
+              >
                 Back to Login
-              </a>
-            </small>
-          </div>
-
-          <hr className="my-4" />
-
-          <div className="security-info">
-            <h6 className="mb-3">
-              <i className="bi bi-shield-check"></i> Security Information
-            </h6>
-            <ul className="security-list">
-              <li>Reset links expire after 30 minutes</li>
-              <li>Links can only be used once</li>
-              <li>We never store plain passwords</li>
-              <li>All requests are logged for security</li>
-            </ul>
-          </div>
-        </Card.Body>
+              </button>
+            </div>
+          </CardContent>
+        </form>
       </Card>
     </div>
   );

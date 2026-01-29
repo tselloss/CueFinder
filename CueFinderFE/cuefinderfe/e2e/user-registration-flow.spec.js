@@ -26,7 +26,7 @@ const testUser = {
 
 // Helper to register user via API
 async function registerTestUser(request, userData) {
-  const response = await request.post('http://localhost:5200/api/auth/register', {
+  const response = await request.post('http://localhost:5000/api/auth/register', {
     data: userData
   });
   return response;

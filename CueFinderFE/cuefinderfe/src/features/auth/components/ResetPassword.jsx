@@ -1,8 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import axios from 'axios';
-import { Alert, Button, Card, Form, ProgressBar, Spinner } from 'react-bootstrap';
-import './ResetPassword.css';
+import { Lock, Eye, EyeOff } from 'lucide-react';
+import { Button } from '../../../components/ui/button.jsx';
+import { Input } from '../../../components/ui/input.jsx';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '../../../components/ui/card.jsx';
 
 /**
  * ResetPassword Component
@@ -16,6 +19,7 @@ import './ResetPassword.css';
  */
 export default function ResetPassword() {
   const navigate = useNavigate();
+  const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
 
@@ -29,6 +33,7 @@ export default function ResetPassword() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [passwordStrength, setPasswordStrength] = useState(0);
   const [showPassword, setShowPassword] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
@@ -165,14 +170,14 @@ export default function ResetPassword() {
 
   if (isValidating) {
     return (
-      <div className="reset-password-container">
-        <Card className="reset-password-card">
-          <Card.Body className="text-center py-5">
-            <Spinner animation="border" role="status" className="mb-3">
-              <span className="visually-hidden">Validating your reset link...</span>
-            </Spinner>
-            <p className="text-muted">Validating your reset link...</p>
-          </Card.Body>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-md border-2 border-primary/20 shadow-2xl">
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg mb-4 animate-pulse">
+              <Lock className="h-6 w-6 text-primary-foreground" />
+            </div>
+            <p className="text-center text-muted-foreground">Verifying your reset link...</p>
+          </CardContent>
         </Card>
       </div>
     );
@@ -180,22 +185,27 @@ export default function ResetPassword() {
 
   if (!isValidToken) {
     return (
-      <div className="reset-password-container">
-        <Card className="reset-password-card">
-          <Card.Body>
-            <Alert variant="danger" className="mb-4">
-              <Alert.Heading>Invalid Reset Link</Alert.Heading>
-              <p>{error}</p>
-            </Alert>
-
-            <Button
-              variant="primary"
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-md border-2 border-destructive/20 shadow-2xl">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-destructive/10 flex items-center justify-center shadow-lg">
+                <Lock className="h-8 w-8 text-destructive" />
+              </div>
+            </div>
+            <CardTitle className="text-2xl text-center">Link Invalid or Expired</CardTitle>
+            <CardDescription className="text-center text-destructive/80">
+              {error}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
               onClick={() => navigate('/forgot-password')}
-              className="w-100"
+              className="w-full"
             >
-              Request a New Reset Link
+              Request New Link
             </Button>
-          </Card.Body>
+          </CardContent>
         </Card>
       </div>
     );
@@ -203,187 +213,171 @@ export default function ResetPassword() {
 
   if (success) {
     return (
-      <div className="reset-password-container">
-        <Card className="reset-password-card">
-          <Card.Body>
-            <Alert variant="success" className="mb-4">
-              <Alert.Heading>Password Reset Successful!</Alert.Heading>
-              <p>
-                Your password has been reset securely. You'll be redirected to the login page shortly.
-              </p>
-            </Alert>
-
-            <div className="text-center">
-              <Spinner animation="border" role="status" size="sm" className="mb-3">
-                <span className="visually-hidden">Redirecting...</span>
-              </Spinner>
-              <p className="text-muted">
-                Redirecting to login...
-              </p>
-              <Button
-                variant="primary"
-                onClick={() => navigate('/login')}
-              >
-                Go to Login
-              </Button>
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+        <Card className="w-full max-w-md border-2 border-primary/20 shadow-2xl">
+          <CardHeader className="space-y-1">
+            <div className="flex items-center justify-center mb-4">
+              <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+                <Lock className="h-8 w-8 text-primary-foreground" />
+              </div>
             </div>
-          </Card.Body>
+            <CardTitle className="text-2xl text-center">Password Reset Successful</CardTitle>
+            <CardDescription className="text-center">
+              Your password has been reset. Please log in with your new password.
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <Button 
+              onClick={() => navigate('/login')}
+              className="w-full"
+            >
+              Go to Login
+            </Button>
+          </CardContent>
         </Card>
       </div>
     );
   }
 
   return (
-    <div className="reset-password-container">
-      <Card className="reset-password-card">
-        <Card.Header className="reset-password-header">
-          <h2>Reset Your Password</h2>
-          <p className="subtitle">Create a strong new password</p>
-        </Card.Header>
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-background via-background to-secondary/20 p-4">
+      <Card className="w-full max-w-md border-2 border-primary/20 shadow-2xl">
+        <CardHeader className="space-y-1">
+          <div className="flex items-center justify-center mb-4">
+            <div className="h-16 w-16 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg">
+              <Lock className="h-8 w-8 text-primary-foreground" />
+            </div>
+          </div>
+          <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
+          <CardDescription className="text-center">
+            Create a strong password to secure your account
+          </CardDescription>
+        </CardHeader>
 
-        <Card.Body>
-          {error && (
-            <Alert variant="danger" onClose={() => setError('')} dismissible>
-              {error}
-            </Alert>
-          )}
+        <form onSubmit={handleSubmit}>
+          <CardContent className="space-y-4">
+            {error && (
+              <div className="p-3 rounded-md bg-destructive/10 border border-destructive/20">
+                <p className="text-sm text-destructive font-medium">{error}</p>
+              </div>
+            )}
 
-          <Form onSubmit={handleSubmit}>
             {/* New Password */}
-            <Form.Group className="mb-4">
-              <Form.Label>New Password</Form.Label>
-              <div className="password-input-group">
-                <Form.Control
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                New Password
+              </label>
+              <div className="relative">
+                <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter your new password"
+                  placeholder="Enter new password (min 8 characters)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={isResetting}
                   required
-                  className="form-control-lg"
+                  autoFocus
                 />
                 <button
                   type="button"
-                  className="password-toggle"
                   onClick={() => setShowPassword(!showPassword)}
-                  disabled={isResetting}
-                  tabIndex="-1"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {showPassword ? 'Hide' : 'Show'}
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                 </button>
               </div>
-            </Form.Group>
+            </div>
 
             {/* Password Strength */}
             {newPassword && (
-              <div className="mb-4">
-                <div className="d-flex justify-content-between align-items-center mb-2">
-                  <small className="text-muted">Password Strength</small>
-                  <small className={`fw-bold text-${getPasswordStrengthColor()}`}>
-                    {getPasswordStrengthText()}
-                  </small>
+              <div className="space-y-2">
+                <div className="flex items-center justify-between">
+                  <label className="text-xs font-medium text-muted-foreground">Password Strength</label>
+                  <span className="text-xs font-medium" style={{
+                    color: passwordStrength < 30 ? '#ef4444' : passwordStrength < 60 ? '#f59e0b' : passwordStrength < 80 ? '#3b82f6' : '#22c55e'
+                  }}>
+                    {passwordStrength < 30 ? 'Weak' : passwordStrength < 60 ? 'Fair' : passwordStrength < 80 ? 'Good' : 'Strong'}
+                  </span>
                 </div>
-                <ProgressBar
-                  now={passwordStrength}
-                  variant={getPasswordStrengthColor()}
-                  className="password-strength-bar"
-                />
+                <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
+                  <div 
+                    className="h-full rounded-full transition-all duration-300" 
+                    style={{
+                      width: `${passwordStrength}%`,
+                      backgroundColor: passwordStrength < 30 ? '#ef4444' : passwordStrength < 60 ? '#f59e0b' : passwordStrength < 80 ? '#3b82f6' : '#22c55e'
+                    }}
+                  />
+                </div>
+                {/* Requirements */}
+                <div className="space-y-1 mt-3">
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={newPassword.length >= 8 ? 'text-green-500' : 'text-muted-foreground'}>
+                      {newPassword.length >= 8 ? '✓' : '○'} At least 8 characters
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
+                      {/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? '✓' : '○'} Mix of uppercase & lowercase
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 text-xs">
+                    <span className={/\d/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
+                      {/\d/.test(newPassword) ? '✓' : '○'} At least one number
+                    </span>
+                  </div>
+                </div>
               </div>
             )}
 
-            {/* Password Requirements */}
-            <div className="password-requirements mb-4">
-              <small className="text-muted d-block mb-2">Password must contain:</small>
-              <ul className="requirement-list">
-                <li className={newPassword.length >= 8 ? 'valid' : ''}>
-                  <i className={`bi bi-${newPassword.length >= 8 ? 'check-circle-fill' : 'circle'}`}></i>
-                  At least 8 characters
-                </li>
-                <li className={/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? 'valid' : ''}>
-                  <i className={`bi bi-${/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? 'check-circle-fill' : 'circle'}`}></i>
-                  Both uppercase and lowercase letters
-                </li>
-                <li className={/\d/.test(newPassword) ? 'valid' : ''}>
-                  <i className={`bi bi-${/\d/.test(newPassword) ? 'check-circle-fill' : 'circle'}`}></i>
-                  At least one number
-                </li>
-                <li className={/[^a-zA-Z\d]/.test(newPassword) ? 'valid' : ''}>
-                  <i className={`bi bi-${/[^a-zA-Z\d]/.test(newPassword) ? 'check-circle-fill' : 'circle'}`}></i>
-                  Special character (optional but recommended)
-                </li>
-              </ul>
+            {/* Confirm Password */}
+            <div className="space-y-2">
+              <label className="text-sm font-medium flex items-center gap-2">
+                <Lock className="h-4 w-4 text-muted-foreground" />
+                Confirm Password
+              </label>
+              <div className="relative">
+                <Input
+                  type={showConfirm ? 'text' : 'password'}
+                  placeholder="Re-enter your password"
+                  value={confirmPassword}
+                  onChange={(e) => setConfirmPassword(e.target.value)}
+                  disabled={isResetting}
+                  required
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirm(!showConfirm)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  {showConfirm ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
+              {newPassword && confirmPassword && (
+                <p className={`text-xs font-medium ${newPassword === confirmPassword ? 'text-green-500' : 'text-destructive'}`}>
+                  {newPassword === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                </p>
+              )}
             </div>
 
-            {/* Confirm Password */}
-            <Form.Group className="mb-4">
-              <Form.Label>Confirm Password</Form.Label>
-              <Form.Control
-                type="password"
-                placeholder="Re-enter your password"
-                value={confirmPassword}
-                onChange={(e) => setConfirmPassword(e.target.value)}
-                disabled={isResetting}
-                required
-                isInvalid={confirmPassword && newPassword !== confirmPassword}
-                className="form-control-lg"
-              />
-              {confirmPassword && newPassword === confirmPassword && (
-                <Form.Text className="text-success d-block mt-1">
-                  <i className="bi bi-check-circle"></i> Passwords match
-                </Form.Text>
-              )}
-              {confirmPassword && newPassword !== confirmPassword && (
-                <Form.Text className="text-danger d-block mt-1">
-                  <i className="bi bi-x-circle"></i> Passwords don't match
-                </Form.Text>
-              )}
-            </Form.Group>
-
-            <Button
-              variant="primary"
-              type="submit"
-              disabled={
-                isResetting ||
-                !newPassword ||
-                !confirmPassword ||
-                newPassword !== confirmPassword ||
-                newPassword.length < 8
-              }
-              className="w-100 mb-3"
-              size="lg"
+            <Button 
+              type="submit" 
+              className="w-full"
+              disabled={isResetting || !newPassword || newPassword !== confirmPassword || passwordStrength < 60}
             >
-              {isResetting ? (
-                <>
-                  <Spinner
-                    as="span"
-                    animation="border"
-                    size="sm"
-                    role="status"
-                    aria-hidden="true"
-                    className="me-2"
-                  />
-                  Resetting Password...
-                </>
-              ) : (
-                'Reset Password'
-              )}
+              {isResetting ? 'Resetting...' : 'Reset Password'}
             </Button>
-          </Form>
 
-          <hr className="my-4" />
-
-          <div className="security-note">
-            <Alert variant="info" className="mb-0">
-              <Alert.Heading className="mb-2">
-                <i className="bi bi-info-circle"></i> Security Note
-              </Alert.Heading>
-              <small>
-                After resetting your password, you'll be logged out from all devices for security. 
-                You'll need to login again with your new password on all your devices.
-              </small>
-            </Alert>
-          </div>
-        </Card.Body>
+            <div className="flex items-center justify-center pt-2 border-t border-border">
+              <button
+                type="button"
+                onClick={() => navigate('/login')}
+                className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
+              >
+                Back to Login
+              </button>
+            </div>
+          </CardContent>
+        </form>
       </Card>
     </div>
   );

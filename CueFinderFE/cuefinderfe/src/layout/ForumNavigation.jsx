@@ -10,6 +10,7 @@ import {
   Settings
 } from 'lucide-react';
 import { useAuth } from '../auth/AuthContext';
+import { useTranslation } from 'react-i18next';
 
 const ForumNavigation = ({ 
   onNavigateTo, 
@@ -18,6 +19,7 @@ const ForumNavigation = ({
   setProfileOpen 
 }) => {
   const { user, logout } = useAuth();
+  const { t } = useTranslation();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   // Check if mobile
@@ -25,26 +27,26 @@ const ForumNavigation = ({
 
   const navigationItems = [
     {
-      label: 'Home',
+      label: t('nav.home'),
       icon: Home,
       page: 'home',
       color: '#3b82f6'
     },
     {
-      label: 'Search',
+      label: t('common.search'),
       icon: SearchIcon,
       page: 'search',
       color: '#666'
     },
     {
-      label: 'Forum',
+      label: t('nav.forum'),
       icon: MessageSquare,
       page: 'forum',
       color: '#10b981',
-      badge: 'New'
+      badge: t('common.new')
     },
     {
-      label: 'Profile',
+      label: t('nav.profile'),
       icon: User,
       page: 'profile',
       color: '#666'
@@ -122,7 +124,7 @@ const ForumNavigation = ({
           }}
         >
           <div className="flex items-center justify-between p-4 border-b">
-            <h2 className="font-semibold text-lg">Menu</h2>
+            <h2 className="font-semibold text-lg">{t('common.menu')}</h2>
             <button
               onClick={() => setMobileMenuOpen(false)}
               className="p-1 hover:bg-gray-100 rounded-md"
@@ -169,7 +171,7 @@ const ForumNavigation = ({
                 className="w-full px-3 py-3 rounded-md text-left transition-colors flex items-center gap-3 text-red-600 hover:bg-red-50"
               >
                 <LogOut size={20} />
-                <span className="text-sm font-medium">Logout</span>
+                <span className="text-sm font-medium">{t('header.logout')}</span>
               </button>
             ) : null}
           </div>
@@ -187,7 +189,7 @@ const ForumNavigation = ({
     >
       {/* Brand/Logo */}
       <div className="flex items-center gap-2">
-        <h1 className="font-bold text-lg text-blue-600">CueFinder</h1>
+        <h1 className="font-bold text-lg text-blue-600">{t('app.title')}</h1>
       </div>
 
       {/* Navigation */}

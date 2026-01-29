@@ -31,6 +31,13 @@ namespace CueFinder.Auth.Interfaces
         Task<UserProfile?> GetUserProfileAsync(int userId);
 
         /// <summary>
+        /// Get user by ID
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <returns>User entity if found, null otherwise</returns>
+        Task<User?> GetUserByIdAsync(int userId);
+
+        /// <summary>
         /// Get user by email or username (for password reset flows)
         /// </summary>
         /// <param name="emailOrUsername">User's email address or username</param>

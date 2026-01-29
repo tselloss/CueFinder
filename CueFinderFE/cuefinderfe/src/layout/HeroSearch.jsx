@@ -58,23 +58,23 @@ export function HeroSearch({
       <div className="w-full max-w-5xl mx-auto">
         {/* Hero Title */}
         <div className="text-center mb-8">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
-            {t('hero.title')}
-          </h1>
-          {user && onAddListing && (
-            <Button
-              onClick={onAddListing}
-              className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold"
-            >
-              <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">{t('header.addNewListing')}</span><span className="sm:hidden">{t('header.addListing')}</span>
-            </Button>
-          )}
-        </div>
-        <p className="text-base md:text-lg text-muted-foreground">
-          {t('hero.subtitle')}
-        </p>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+              {t('hero.title')}
+            </h1>
+            {user && onAddListing && (
+              <Button
+                onClick={onAddListing}
+                className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold"
+              >
+                <Plus className="mr-2 h-4 w-4" />
+                <span className="hidden sm:inline">{t('header.addNewListing')}</span><span className="sm:hidden">{t('header.addListing')}</span>
+              </Button>
+            )}
+          </div>
+          <p className="text-base md:text-lg text-muted-foreground">
+            {t('hero.subtitle')}
+          </p>
         </div>
 
         {/* Search & Filters Card */}

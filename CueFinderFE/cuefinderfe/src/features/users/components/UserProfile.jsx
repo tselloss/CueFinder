@@ -92,11 +92,11 @@ export default function UserProfile({ onBack }) {
         country: profile.address.country,
       });
       setIsEditing(false);
-      setMessage({ type: 'success', text: 'Profile updated successfully!' });
+      setMessage({ type: 'success', text: t('profile.updatedSuccess') });
       setTimeout(() => setMessage(null), 3000);
     } catch (err) {
       console.error('Profile update error:', err);
-      const errorMessage = getErrorMessage(err, 'Failed to update profile');
+      const errorMessage = getErrorMessage(err, t('profile.updateFailed'));
       
       if (isValidationError(err)) {
         const validationDetails = formatValidationErrors(err);
@@ -115,7 +115,7 @@ export default function UserProfile({ onBack }) {
   if (!user) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <p className="text-muted-foreground">Loading profile...</p>
+        <p className="text-muted-foreground">{t('profile.loading')}</p>
       </div>
     );
   }
@@ -132,7 +132,7 @@ export default function UserProfile({ onBack }) {
             className="gap-2 flex-shrink-0"
           >
             <ArrowLeft className="h-4 w-4 md:h-5 md:w-5" />
-            <span className="hidden sm:inline">Back</span>
+            <span className="hidden sm:inline">{t('nav.back')}</span>
           </Button>
           <h1 className="text-xl md:text-3xl lg:text-4xl font-bold">{t('nav.myProfile')}</h1>
         </div>
@@ -160,7 +160,7 @@ export default function UserProfile({ onBack }) {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            Profile Settings
+            {t('profile.settings')}
           </button>
           <button
             onClick={() => setActiveTab('myListings')}
@@ -170,7 +170,7 @@ export default function UserProfile({ onBack }) {
                 : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            My Listings
+            {t('profile.listings')}
           </button>
         </div>
 
@@ -180,15 +180,15 @@ export default function UserProfile({ onBack }) {
             <CardHeader>
               <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                 <div className="space-y-1">
-                  <CardTitle className="text-xl md:text-2xl">Account Information</CardTitle>
+                  <CardTitle className="text-xl md:text-2xl">{t('profile.accountInfo')}</CardTitle>
                   <CardDescription>
-                    {isEditing ? 'Update your profile details' : 'View your account details'}
+                    {isEditing ? t('profile.updateDetails') : t('profile.viewDetails')}
                   </CardDescription>
                 </div>
                 {!isEditing ? (
                   <Button onClick={() => setIsEditing(true)} className="gap-2 w-full sm:w-auto">
                     <Edit className="h-4 w-4" />
-                    Edit Profile
+                    {t('profile.editProfile')}
                   </Button>
                 ) : (
                   <div className="flex gap-2 w-full sm:w-auto">
@@ -215,7 +215,7 @@ export default function UserProfile({ onBack }) {
                       className="gap-2 flex-1 sm:flex-initial"
                     >
                       <X className="h-4 w-4" />
-                      <span className="hidden sm:inline">Cancel</span>
+                      <span className="hidden sm:inline">{t('common.cancel')}</span>
                     </Button>
                     <Button
                       onClick={handleSaveProfile}
@@ -223,7 +223,7 @@ export default function UserProfile({ onBack }) {
                       className="gap-2 flex-1 sm:flex-initial"
                     >
                       <Save className="h-4 w-4" />
-                      {loading ? 'Saving...' : 'Save'}
+                      {loading ? t('common.saving') : t('common.save')}
                     </Button>
                   </div>
                 )}
@@ -235,7 +235,7 @@ export default function UserProfile({ onBack }) {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <Image className="h-4 w-4" />
-                  Profile Avatar
+                  {t('profile.avatar')}
                 </Label>
                 <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
                   <div className="text-5xl md:text-6xl">{profile.avatar}</div>
@@ -262,16 +262,16 @@ export default function UserProfile({ onBack }) {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <User className="h-4 w-4" />
-                  Full Name
+                  {t('auth.name')}
                 </Label>
                 {isEditing ? (
                   <Input
                     value={profile.name}
                     onChange={(e) => handleProfileChange('name', e.target.value)}
-                    placeholder="Enter your name"
+                    placeholder={t('profile.namePlaceholder')}
                   />
                 ) : (
-                  <p className="text-base md:text-lg break-words">{profile.name || 'Not set'}</p>
+                  <p className="text-base md:text-lg break-words">{profile.name || t('common.notSet')}</p>
                 )}
               </div>
 
@@ -279,17 +279,17 @@ export default function UserProfile({ onBack }) {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Mail className="h-4 w-4" />
-                  Email
+                  {t('auth.email')}
                 </Label>
                 {isEditing ? (
                   <Input
                     type="email"
                     value={profile.email}
                     onChange={(e) => handleProfileChange('email', e.target.value)}
-                    placeholder="your@email.com"
+                    placeholder={t('profile.emailPlaceholder')}
                   />
                 ) : (
-                  <p className="text-base md:text-lg break-all">{profile.email || 'Not set'}</p>
+                  <p className="text-base md:text-lg break-all">{profile.email || t('common.notSet')}</p>
                 )}
               </div>
 
@@ -297,7 +297,7 @@ export default function UserProfile({ onBack }) {
               <div className="space-y-2">
                 <Label className="flex items-center gap-2">
                   <Phone className="h-4 w-4" />
-                  Phone Number
+                  {t('profile.phoneNumber')}
                 </Label>
                 {isEditing ? (
                   <div className="space-y-2">
@@ -305,7 +305,7 @@ export default function UserProfile({ onBack }) {
                       type="tel"
                       value={profile.phone}
                       onChange={(e) => handleProfileChange('phone', e.target.value)}
-                      placeholder="+1234567890"
+                      placeholder={t('profile.phonePlaceholder')}
                     />
                     <div className="flex items-center space-x-3 mt-3 p-3 bg-muted/30 rounded-lg border border-border/50">
                       <input
@@ -316,14 +316,14 @@ export default function UserProfile({ onBack }) {
                         className="h-5 w-5 rounded border-2 border-input checked:bg-primary checked:border-primary focus:ring-2 focus:ring-primary focus:ring-offset-2 cursor-pointer transition-all"
                       />
                       <label htmlFor="hidePhone" className="text-sm font-medium text-foreground cursor-pointer select-none flex-1">
-                        Hide phone number from public listings
+                        {t('profile.hidePhone')}
                       </label>
                     </div>
                   </div>
                 ) : (
                   <p className="text-base md:text-lg">
-                    {profile.phone || 'Not set'}
-                    {profile.hidePhone && <span className="text-xs md:text-sm text-muted-foreground ml-2">(Hidden)</span>}
+                    {profile.phone || t('common.notSet')}
+                    {profile.hidePhone && <span className="text-xs md:text-sm text-muted-foreground ml-2">({t('profile.hidden')})</span>}
                   </p>
                 )}
               </div>
@@ -332,50 +332,50 @@ export default function UserProfile({ onBack }) {
               <div className="space-y-3">
                 <Label className="flex items-center gap-2">
                   <MapPin className="h-4 w-4" />
-                  Address
+                  {t('profile.address.label')}
                 </Label>
                 {isEditing ? (
                   <div className="space-y-3">
                     <Input
                       value={profile.address.street}
                       onChange={(e) => handleProfileChange('address.street', e.target.value)}
-                      placeholder="Street address"
+                      placeholder={t('profile.address.street')}
                     />
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         value={profile.address.city}
                         onChange={(e) => handleProfileChange('address.city', e.target.value)}
-                        placeholder="City"
+                        placeholder={t('profile.address.city')}
                       />
                       <Input
                         value={profile.address.state}
                         onChange={(e) => handleProfileChange('address.state', e.target.value)}
-                        placeholder="State"
+                        placeholder={t('profile.address.state')}
                       />
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                       <Input
                         value={profile.address.postalCode}
                         onChange={(e) => handleProfileChange('address.postalCode', e.target.value)}
-                        placeholder="ZIP Code"
+                        placeholder={t('profile.address.postalCode')}
                       />
                       <Input
                         value={profile.address.country}
                         onChange={(e) => handleProfileChange('address.country', e.target.value)}
-                        placeholder="Country"
+                        placeholder={t('profile.address.country')}
                       />
                     </div>
                   </div>
                 ) : (
                   <div className="text-base md:text-lg space-y-1">
-                    <p className="break-words">{profile.address.street || 'Street not set'}</p>
+                    <p className="break-words">{profile.address.street || t('profile.address.streetNotSet')}</p>
                     <p>
                       {profile.address.city && profile.address.state 
                         ? `${profile.address.city}, ${profile.address.state}` 
-                        : 'City/State not set'}
+                        : t('profile.address.cityStateNotSet')}
                     </p>
                     <p>
-                      {profile.address.postalCode || ''} {profile.address.country || 'Country not set'}
+                      {profile.address.postalCode || ''} {profile.address.country || t('profile.address.countryNotSet')}
                     </p>
                   </div>
                 )}

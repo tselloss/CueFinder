@@ -1,0 +1,168 @@
+# Quick Reference Card - GitHub Secrets for Email
+
+## 🎯 One-Pager for Setting Up Production Email
+
+**Objective**: Enable password reset emails in production using GitHub Secrets + SMTP
+
+**Time Required**: 15 minutes total
+
+---
+
+## 📋 Checklist
+
+```
+Step 1: Generate Password (2 min)
+  [ ] Open https://myaccount.google.com/apppasswords
+  [ ] Select: Mail + Windows Computer
+  [ ] Copy 16-character password
+  
+Step 2: Add Secrets to GitHub (5 min)
+  [ ] Go: GitHub Settings → Secrets and variables → Actions
+  [ ] Click "New repository secret" 4 times:
+      [ ] SMTP_PASSWORD = [paste 16-char password]
+      [ ] EMAIL_FROM = cuefinderinfo@gmail.com
+      [ ] SMTP_SERVER = smtp.gmail.com
+      [ ] SMTP_PORT = 587
+
+Step 3: Deploy (5 min)
+  [ ] Push code: git push origin release
+  [ ] Watch Actions: GitHub → Actions tab
+  [ ] Wait for ✅ green check
+
+Step 4: Test (2 min)
+  [ ] Go: https://billiardscuefinder.com/forgot-password
+  [ ] Enter test email
+  [ ] Check inbox for email
+  [ ] Click reset link works
+
+DONE! ✅
+```
+
+---
+
+## 🔑 The 4 Secrets You Need
+
+| Name | Value | Example |
+|------|-------|---------|
+| SMTP_PASSWORD | Gmail app password | `abcd efgh ijkl mnop` |
+| EMAIL_FROM | Sender email | `cuefinderinfo@gmail.com` |
+| SMTP_SERVER | SMTP host | `smtp.gmail.com` |
+| SMTP_PORT | SMTP port | `587` |
+
+---
+
+## 🚀 How It Works
+
+```
+GitHub Secrets
+    ↓ (encrypted)
+GitHub Actions
+    ↓ (reads secrets)
+Deploy Script
+    ↓ (creates .env file)
+Server
+    ↓ (.env loaded)
+Docker Container
+    ↓ (environment variables)
+Backend App
+    ↓ (email service)
+SMTP to Gmail
+    ↓
+Email Sent ✅
+```
+
+---
+
+## ✅ Verification
+
+### 1. Secrets Added?
+GitHub → Settings → Secrets → Should see 4 secrets
+
+### 2. Deployed?
+GitHub → Actions → Should see ✅ green check
+
+### 3. On Server?
+```bash
+ssh user@server
+cat /home/cuefinder/app/.env | grep SMTP
+# Should output:
+# SMTP_PASSWORD=abcd efgh ijkl mnop
+# SMTP_SERVER=smtp.gmail.com
+# SMTP_PORT=587
+# EMAIL_FROM=cuefinderinfo@gmail.com
+```
+
+### 4. Email Works?
+Test: https://billiardscuefinder.com/forgot-password
+
+---
+
+## 🆘 Quick Fixes
+
+| Problem | Fix |
+|---------|-----|
+| Secret not in GitHub | Refresh page, try adding again |
+| Deployment failed | Check Actions logs, redeploy |
+| Email not sending | Check SMTP_PASSWORD secret |
+| App password revoked | Generate new at myaccount.google.com/apppasswords |
+
+---
+
+## 📞 Full Documentation
+
+- Quick Setup: [GITHUB_SECRETS_QUICK_SETUP.md](GITHUB_SECRETS_QUICK_SETUP.md)
+- UI Guide: [GITHUB_SECRETS_UI_GUIDE.md](GITHUB_SECRETS_UI_GUIDE.md)
+- Full Guide: [GITHUB_SECRETS_SETUP_GUIDE.md](GITHUB_SECRETS_SETUP_GUIDE.md)
+- Architecture: [GITHUB_SECRETS_ARCHITECTURE.md](GITHUB_SECRETS_ARCHITECTURE.md)
+- Management: [MANAGE_SECRETS.md](MANAGE_SECRETS.md)
+- Index: [DOCUMENTATION_INDEX.md](DOCUMENTATION_INDEX.md)
+
+---
+
+## 🎓 Key Terms
+
+| Term | Meaning |
+|------|---------|
+| **GitHub Secret** | Encrypted value stored in GitHub, only accessible to Actions |
+| **.env file** | Environment file on server with all secrets |
+| **Environment Variable** | Value passed to Docker container |
+| **SMTP** | Protocol for sending emails (what Gmail uses) |
+| **Credentials** | Username/password (or app password) for SMTP |
+| **Deployment** | Process of moving code to production server |
+
+---
+
+## 📌 Important Notes
+
+✅ **Do:**
+- Keep passwords secure
+- Rotate passwords every 90 days
+- Use app passwords (not main password)
+- Store in GitHub Secrets (not code)
+
+❌ **Don't:**
+- Share passwords via email/chat
+- Hardcode in code files
+- Commit .env to git
+- Log sensitive values
+
+---
+
+## 🎯 You Are Here
+
+```
+┌─────────────────────────┐
+│ Setup (15 min)          │  ← YOU ARE HERE
+├─────────────────────────┤
+│ ✅ Code implemented     │
+│ ✅ Docs created        │
+│ ⏳ Add secrets          │  ← Next step
+│ ⏳ Deploy               │
+│ ⏳ Test                 │
+└─────────────────────────┘
+```
+
+---
+
+**Ready?** Start with [GITHUB_SECRETS_QUICK_SETUP.md](GITHUB_SECRETS_QUICK_SETUP.md) →
+

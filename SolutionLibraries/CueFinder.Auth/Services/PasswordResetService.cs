@@ -16,9 +16,10 @@ namespace CueFinder.Auth.Services
     public class PasswordResetService : IPasswordResetService
     {
         private readonly CueFinderDbContext _dbContext;
-        private readonly IUserService _userService;
+        private readonly IAuthService _authService;
         private readonly IConfiguration _configuration;
         private readonly ILogger<PasswordResetService> _logger;
+        private readonly string _serverPepper;
 
         // Configuration constants (moved to appsettings in production)
         private const int TOKEN_LENGTH_BYTES = 32;
@@ -27,14 +28,15 @@ namespace CueFinder.Auth.Services
 
         public PasswordResetService(
             CueFinderDbContext dbContext,
-            IUserService userService,
+            IAuthService authService,
             IConfiguration configuration,
             ILogger<PasswordResetService> logger)
         {
             _dbContext = dbContext;
-            _userService = userService;
+            _authService = authService;
             _configuration = configuration;
             _logger = logger;
+            _serverPepper = configuration["PasswordReset:ServerPepper"] ?? "default-pepper-change-in-production";
         }
 
         /// <summary>
@@ -46,7 +48,7 @@ namespace CueFinder.Auth.Services
             try
             {
                 // Verify user exists
-                var user = await _userService.GetUserAsync(userId);
+                var user = await _authService.GetUserByIdAsync(userId);
                 if (user == null)
                 {
                     _logger.LogWarning("Password reset requested for non-existent user: {UserId}", userId);
@@ -71,8 +73,7 @@ namespace CueFinder.Auth.Services
                         .Replace("=", "");
 
                     // Hash token for storage (never store plain token in DB)
-                    string serverPepper = _configuration["PasswordReset:ServerPepper"] ?? "CueFinder-DefaultPepper";
-                    string tokenHash = HashToken(plainToken, serverPepper);
+                    string tokenHash = HashToken(plainToken, _serverPepper);
 
                     // Create token record
                     var resetToken = new PasswordResetToken
@@ -156,7 +157,6 @@ namespace CueFinder.Auth.Services
                 {
                     return false;
                 }
-
                 // Validate token and get user ID
                 int? userId = await ValidateResetTokenAsync(token);
                 if (!userId.HasValue)
@@ -166,7 +166,7 @@ namespace CueFinder.Auth.Services
                 }
 
                 // Get user
-                var user = await _userService.GetUserAsync(userId.Value);
+                var user = await _authService.GetUserByIdAsync(userId.Value);
                 if (user == null)
                 {
                     _logger.LogWarning("Attempted password reset for non-existent user: {UserId}", userId);
@@ -174,8 +174,7 @@ namespace CueFinder.Auth.Services
                 }
 
                 // Hash the provided token to mark as used
-                string serverPepper = _configuration["PasswordReset:ServerPepper"] ?? "CueFinder-DefaultPepper";
-                string tokenHash = HashToken(token, serverPepper);
+                string tokenHash = HashToken(token, _serverPepper);
 
                 // Get the token record
                 var resetToken = await _dbContext.PasswordResetTokens
@@ -191,7 +190,7 @@ namespace CueFinder.Auth.Services
                 resetToken.UsedAt = DateTime.UtcNow;
 
                 // Update user password
-                var passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword);
+                var passwordHash = HashPassword(newPassword);
                 user.PasswordHash = passwordHash;
                 user.UpdatedAt = DateTime.UtcNow;
 
@@ -299,6 +298,26 @@ namespace CueFinder.Auth.Services
             {
                 byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
                 return Convert.ToHexString(hashBytes).ToLower();
+            }
+        }
+
+        /// <summary>
+        /// Hash password using SHA-256
+        /// </summary>
+        private string HashPassword(string password)
+        {
+            try
+            {
+                using (var sha256 = SHA256.Create())
+                {
+                    var hashedBuffer = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                    return Convert.ToBase64String(hashedBuffer);
+                }
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error hashing password");
+                throw;
             }
         }
     }

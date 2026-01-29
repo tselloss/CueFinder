@@ -206,7 +206,8 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 setMobileNavOpen(false);
               }} className="hidden sm:inline-flex">{t('header.register')}</Button>
               
-              {/* Mobile Sign In/Register */}\n              <Button variant="default" size="sm" onClick={() => {
+              {/* Mobile Sign In/Register */}
+              <Button variant="default" size="sm" onClick={() => {
                 onNavigate && onNavigate('/login');
                 setMobileNavOpen(false);
               }} className="sm:hidden">{t('header.signIn')}</Button>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ChevronLeft, ChevronRight, X } from 'lucide-react';
 import { Button } from '../../../../components/ui/button';
 import StepIndicator from './StepIndicator';
@@ -23,6 +24,7 @@ import { getErrorMessage } from '../../../../utils/errorUtils';
  * Mobile-optimized with responsive design and touch-friendly controls
  */
 export default function CueFormWizard({ cue, onClose, onSave }) {
+  const { t } = useTranslation();
   const isEditing = !!cue;
   
   // Determine initial product type
@@ -459,18 +461,18 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           {/* Header */}
           <div className="bg-card border-b border-border p-3 sm:p-4 pr-12">
             <h2 className="text-lg sm:text-xl font-bold text-foreground">
-              {isEditing ? 'Edit Listing' : 'Create New Listing'}
+              {isEditing ? t('listing.editListing') : t('listing.createNewListing')}
             </h2>
             <p className="text-xs sm:text-sm text-muted-foreground mt-0.5">
               {productType === 'cue' 
-                ? 'Share details about your billiard cue'
+                ? t('listing.shareDetailsCue')
                 : productType === 'case'
-                ? 'Share details about your cue case'
+                ? t('listing.shareDetailsCase')
                 : productType === 'table'
-                ? 'Share details about your billiard table'
+                ? t('listing.shareDetailsTable')
                 : productType === 'accessory'
-                ? 'Share details about your accessory'
-                : 'Follow the steps to create your listing'}
+                ? t('listing.shareDetailsAccessory')
+                : t('listing.followSteps')}
             </p>
           </div>
 
@@ -502,7 +504,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                 className="h-11 px-4 sm:px-6"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                Back
+                {t('common.back')}
               </Button>
 
               {/* Next/Submit Button */}
@@ -518,15 +520,15 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                       <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
                       <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
                     </svg>
-                    {uploadProgress !== null ? `Uploading ${Math.round(uploadProgress)}%` : 'Saving...'}
+                    {uploadProgress !== null ? `${t('common.uploading')} ${Math.round(uploadProgress)}%` : t('common.saving')}
                   </>
                 ) : isLastStep ? (
                   <>
-                    {isEditing ? 'Update Listing' : 'Create Listing'}
+                    {isEditing ? t('listing.updateListing') : t('listing.createListing')}
                   </>
                 ) : (
                   <>
-                    Next
+                    {t('common.next')}
                     <ChevronRight className="w-4 h-4 ml-1" />
                   </>
                 )}
@@ -536,8 +538,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
             {/* Progress Text */}
             <div className="mt-2 text-center">
               <p className="text-xs text-muted-foreground">
-                Step {currentStep + 1} of {steps.length}
-                {!isLastStep && ' - ' + steps[currentStep + 1]?.title + ' next'}
+                {t('listing.step')} {currentStep + 1} {t('listing.of')} {steps.length}
+                {!isLastStep && ' - ' + steps[currentStep + 1]?.title + ' ' + t('listing.next')}
               </p>
             </div>
           </div>

@@ -5,6 +5,8 @@ using CueFinder.Auth.Interfaces;
 using CueFinder.Auth.Models;
 using Microsoft.Extensions.Logging;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using CueFinder.Extensions.Email;
 
 namespace CueFinder.Auth.Controllers
 {
@@ -17,15 +19,21 @@ namespace CueFinder.Auth.Controllers
     {
         private readonly IAuthService _authService;
         private readonly IPasswordResetService _passwordResetService;
+        private readonly IEmailService _emailService;
+        private readonly IConfiguration _configuration;
         private readonly ILogger<AuthController> _logger;
 
         public AuthController(
             IAuthService authService,
             IPasswordResetService passwordResetService,
+            IEmailService emailService,
+            IConfiguration configuration,
             ILogger<AuthController> logger)
         {
             _authService = authService;
             _passwordResetService = passwordResetService;
+            _emailService = emailService;
+            _configuration = configuration;
             _logger = logger;
         }
 
@@ -324,9 +332,15 @@ namespace CueFinder.Auth.Controllers
                         clientIp,
                         userAgent);
 
-                    // TODO: Send email with reset link
-                    // string resetLink = $"{_configuration["AppUrl"]}/reset-password?token={resetToken}";
-                    // await _emailService.SendPasswordResetEmailAsync(user.Email, resetLink, user.Name);
+                    string appUrl = _configuration["AppUrl"]
+                        ?? Environment.GetEnvironmentVariable("APP_URL")
+                        ?? "http://localhost:3000";
+                    appUrl = appUrl.TrimEnd('/');
+                    string resetLink = $"{appUrl}/reset-password?token={resetToken}";
+                    string subject = "Reset Your CueFinder Password";
+                    string body = BuildPasswordResetEmailBody(user.Name ?? user.Username, resetLink, clientIp, userAgent);
+
+                    await _emailService.SendAsync(user.Email, subject, body, isHtml: true);
 
                     _logger.LogInformation(
                         "Password reset requested for user {UserId} ({Email}) from IP {IpAddress}",
@@ -361,6 +375,49 @@ namespace CueFinder.Auth.Controllers
                 _logger.LogError(ex, "Forgot password error");
                 return StatusCode(500, new { message = "An error occurred processing your request" });
             }
+        }
+
+        private static string BuildPasswordResetEmailBody(string displayName, string resetLink, string ipAddress, string userAgent)
+        {
+            var safeName = string.IsNullOrWhiteSpace(displayName) ? "CueFinder user" : displayName;
+
+            return @"
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset=""utf-8"" />
+    <style>
+        body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
+        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #1a5f3b; color: white; padding: 20px; border-radius: 6px; }
+        .content { background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin-top: 16px; }
+        .button { display: inline-block; margin-top: 16px; background-color: #1a5f3b; color: white; padding: 10px 18px; text-decoration: none; border-radius: 4px; }
+        .footer { margin-top: 20px; font-size: 12px; color: #666; }
+        .meta { margin-top: 12px; font-size: 13px; color: #555; }
+    </style>
+</head>
+<body>
+    <div class=""container"">
+        <div class=""header"">
+            <h2>Reset your CueFinder password</h2>
+        </div>
+        <div class=""content"">
+            <p>Hi " + safeName + @",</p>
+            <p>We received a request to reset your CueFinder password. If you didn't make this request, you can safely ignore this email.</p>
+            <p><a class=""button"" href=""" + resetLink + @""">Reset Password</a></p>
+            <div class=""meta"">
+                <div><strong>Request details</strong></div>
+                <div>IP Address: " + ipAddress + @"</div>
+                <div>Browser: " + userAgent + @"</div>
+            </div>
+            <p>This link expires in 30 minutes for your security.</p>
+        </div>
+        <div class=""footer"">
+            <p>If you did not request a password reset, no further action is required.</p>
+        </div>
+    </div>
+</body>
+</html>";
         }
 
         /// <summary>

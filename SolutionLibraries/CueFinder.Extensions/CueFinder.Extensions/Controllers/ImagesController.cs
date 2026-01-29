@@ -1,6 +1,5 @@
 using CueFinder.Database.Models;
 using CueFinder.Extensions.Images;
-using CueFinder.Auth.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -53,7 +52,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Invalid user" });
@@ -99,7 +98,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Invalid user" });
@@ -191,7 +190,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Invalid user" });
@@ -221,7 +220,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Invalid user" });
@@ -251,7 +250,7 @@ public class ImagesController : ControllerBase
     {
         try
         {
-            var userId = User.GetUserId();
+            var userId = GetUserIdFromClaims();
             if (!userId.HasValue)
             {
                 return Unauthorized(new { message = "Invalid user" });
@@ -273,4 +272,18 @@ public class ImagesController : ControllerBase
                 new { message = "An error occurred while deleting the images" });
         }
     }
+
+    /// <summary>
+    /// Helper method to extract user ID from JWT claims.
+    /// </summary>
+    private int? GetUserIdFromClaims()
+    {
+        if (User?.FindFirst("sub")?.Value is string userIdStr &&
+            int.TryParse(userIdStr, out int userId))
+        {
+            return userId;
+        }
+        return null;
+    }
 }
+

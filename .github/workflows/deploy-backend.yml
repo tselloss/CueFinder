@@ -112,10 +112,17 @@ jobs:
           JWT_SECRET: ${{ secrets.JWT_SECRET }}
           FRONTEND_API_URL: ${{ secrets.FRONTEND_API_URL }}
           CORS_FRONTEND_ORIGIN: ${{ secrets.CORS_FRONTEND_ORIGIN }}
+          SMTP_PASSWORD: ${{ secrets.SMTP_PASSWORD }}
+          SMTP_SERVER: ${{ secrets.SMTP_SERVER || 'smtp.gmail.com' }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT || '587' }}
+          EMAIL_FROM: ${{ secrets.EMAIL_FROM || 'cuefinderinfo@gmail.com' }}
+          GMAIL_CLIENT_ID: ${{ secrets.GMAIL_CLIENT_ID }}
+          GMAIL_CLIENT_SECRET: ${{ secrets.GMAIL_CLIENT_SECRET }}
+          GMAIL_PROJECT_ID: ${{ secrets.GMAIL_PROJECT_ID }}
           SKIP_HEALTHCHECK: ${{ github.event.inputs.skip-healthcheck || 'false' }}
         shell: bash
         run: |
-          cat > deploy.sh << 'DEPLOY_SCRIPT'
+          cat > deploy.sh << DEPLOY_SCRIPT
           #!/bin/bash
           set -euo pipefail
 
@@ -132,11 +139,18 @@ jobs:
           git clean -fdx -e uploads/ -e .deployment/ -e ssl/
 
           echo "⚙️  Updating environment..."
-          cat > .env << 'ENVEOF'
+          cat > .env << ENVEOF
           DB_PASSWORD=$DB_PASSWORD
           JWT_SECRET=$JWT_SECRET
           FRONTEND_API_URL=$FRONTEND_API_URL
           CORS_FRONTEND_ORIGIN=$CORS_FRONTEND_ORIGIN
+          SMTP_PASSWORD=$SMTP_PASSWORD
+          SMTP_SERVER=$SMTP_SERVER
+          SMTP_PORT=$SMTP_PORT
+          EMAIL_FROM=$EMAIL_FROM
+          GMAIL_CLIENT_ID=$GMAIL_CLIENT_ID
+          GMAIL_CLIENT_SECRET=$GMAIL_CLIENT_SECRET
+          GMAIL_PROJECT_ID=$GMAIL_PROJECT_ID
           ENVEOF
           
                     echo "📋 Environment file created:"

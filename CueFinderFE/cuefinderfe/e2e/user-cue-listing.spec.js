@@ -36,7 +36,7 @@
 const { test, expect } = require('@playwright/test');
 
 // API base URL for direct database queries
-const API_BASE_URL = 'http://localhost:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 /**
  * Helper: Fetch all cues from the database via API
@@ -79,13 +79,13 @@ async function searchCuesInDB(request, query) {
 /**
  * Helper: Login and get auth token via API
  */
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.token;
+  return data.token || data.accessToken || null;
 }
 
 // Generate unique test user credentials

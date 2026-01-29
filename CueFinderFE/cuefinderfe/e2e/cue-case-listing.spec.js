@@ -25,7 +25,7 @@
 const { test, expect } = require('@playwright/test');
 
 // API base URL for direct database queries
-const API_BASE_URL = 'http://localhost:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 /**
  * Helper: Fetch all cue cases from the database via API
@@ -68,13 +68,13 @@ async function searchCueCasesInDB(request, query) {
 /**
  * Helper: Login and get auth token via API
  */
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 /**
@@ -158,8 +158,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
 
     // Login
     await page.click('button:has-text("Sign In")');
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     
     // Wait for successful login
@@ -250,8 +250,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser.username);
-      await page.locator('input[name="password"]').fill(testUser.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -375,8 +375,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser.username);
-      await page.locator('input[name="password"]').fill(testUser.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -415,8 +415,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser.username);
-      await page.locator('input[name="password"]').fill(testUser.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -455,8 +455,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser.username);
-      await page.locator('input[name="password"]').fill(testUser.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -496,8 +496,8 @@ test.describe('Cue Case Listing - Complete E2E Flow', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser.username);
-      await page.locator('input[name="password"]').fill(testUser.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -557,8 +557,8 @@ test.describe('Cue Case vs Cue Product Type Selection', () => {
 
     // Login
     await page.click('button:has-text("Sign In")');
-    await page.locator('input[name="username"]').fill(testUser2.username);
-    await page.locator('input[name="password"]').fill(testUser2.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser2.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser2.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2000);
 
@@ -586,8 +586,8 @@ test.describe('Cue Case vs Cue Product Type Selection', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser2.username);
-      await page.locator('input[name="password"]').fill(testUser2.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser2.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser2.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }
@@ -624,8 +624,8 @@ test.describe('Cue Case vs Cue Product Type Selection', () => {
     const isLoggedIn = await page.locator('text=Logout').isVisible();
     if (!isLoggedIn) {
       await page.click('button:has-text("Sign In")');
-      await page.locator('input[name="username"]').fill(testUser2.username);
-      await page.locator('input[name="password"]').fill(testUser2.password);
+      await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser2.username);
+      await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser2.password);
       await page.click('button[type="submit"]:has-text("Sign In")');
       await page.waitForTimeout(2000);
     }

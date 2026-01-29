@@ -7,7 +7,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 // Helper functions
 async function registerUser(request, userData) {
@@ -17,16 +17,16 @@ async function registerUser(request, userData) {
   return response.ok();
 }
 
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) {
     console.error('Login failed:', await response.text());
     return null;
   }
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 async function createCueCase(request, authToken, caseData) {

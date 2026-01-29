@@ -7,7 +7,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 // Helper functions
 async function registerUser(request, userData) {
@@ -17,13 +17,13 @@ async function registerUser(request, userData) {
   return response.ok();
 }
 
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 // Test data
@@ -86,9 +86,11 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     // STEP 3: Login with Credentials
     // ========================================
     console.log('📍 STEP 3: Logging in...');
-    await page.locator('input[name="username"]').fill(testUser.username);
+    const usernameInput = page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first();
+    const passwordInput = page.locator('input[placeholder="Password"], input[type="password"]').first();
+    await usernameInput.fill(testUser.username);
     await page.waitForTimeout(500);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await passwordInput.fill(testUser.password);
     await page.waitForTimeout(500);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(3000); // Wait for login to complete
@@ -264,8 +266,8 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('📍 Logging in...');
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2000);
     console.log('✅ Logged in\n');

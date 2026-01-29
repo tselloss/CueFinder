@@ -533,5 +533,13 @@ namespace CueFinder.Auth.Services
                 throw;
             }
         }
+
+        /// <summary>
+        /// Get user by ID
+        /// </summary>
+        public async Task<User?> GetUserByIdAsync(int userId)
+        {
+            return await _userService.GetUserWithDetailsAsync(userId);
+        }
     }
 }

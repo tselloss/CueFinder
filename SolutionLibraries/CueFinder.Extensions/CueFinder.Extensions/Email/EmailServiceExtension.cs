@@ -1,5 +1,6 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace CueFinder.Extensions.Email
 {
@@ -18,8 +19,21 @@ namespace CueFinder.Extensions.Email
             // Bind email settings from configuration
             services.Configure<EmailSettings>(configuration.GetSection("EmailSettings"));
 
-            // Register email service
-            services.AddScoped<IEmailService, EmailService>();
+            // Bind Gmail API settings (if available)
+            services.Configure<GmailApiSettings>(configuration.GetSection("GmailApi"));
+
+            // Register email service based on configuration
+            var gmailApiConfig = configuration.GetSection("GmailApi");
+            if (gmailApiConfig.Exists() && gmailApiConfig.GetValue<bool>("Enabled"))
+            {
+                // Use Gmail API service
+                services.AddScoped<IEmailService, GmailApiEmailService>();
+            }
+            else
+            {
+                // Use SMTP service (default)
+                services.AddScoped<IEmailService, EmailService>();
+            }
 
             return services;
         }
