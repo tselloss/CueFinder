@@ -299,13 +299,31 @@ public class CueService : ICueService
     "EnableSsl": true
   },
   "GmailApiSettings": {
-    "ServiceAccountCredentialsJson": "{\"type\":\"service_account\",\"project_id\":\"...\"}",
+    "ServiceAccountCredentialsJson": "",
     "ServiceAccountCredentialsPath": "/path/to/service-account-key.json",
     "FromEmail": "admin@yourdomain.com",
     "FromName": "CueFinder Admin",
     "ImpersonateUser": "admin@yourdomain.com",
     "ApplicationName": "CueFinder"
   }
+}
+```
+
+**Note:** For `GmailApiSettings`, use **either** `ServiceAccountCredentialsJson` (JSON string) **or** `ServiceAccountCredentialsPath` (file path), not both.
+
+**Option 1 - Using JSON String:**
+```json
+"GmailApiSettings": {
+  "ServiceAccountCredentialsJson": "{\"type\":\"service_account\",\"project_id\":\"your-project\",\"private_key_id\":\"...\"}",
+  "FromEmail": "admin@yourdomain.com"
+}
+```
+
+**Option 2 - Using File Path:**
+```json
+"GmailApiSettings": {
+  "ServiceAccountCredentialsPath": "/path/to/service-account-key.json",
+  "FromEmail": "admin@yourdomain.com"
 }
 ```
 

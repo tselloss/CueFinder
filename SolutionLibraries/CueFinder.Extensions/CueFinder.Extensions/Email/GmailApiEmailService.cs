@@ -32,6 +32,12 @@ namespace CueFinder.Extensions.Email
         /// </summary>
         public async Task SendAsync(string to, string subject, string body, bool isHtml = true)
         {
+            // Validate input parameters
+            if (string.IsNullOrWhiteSpace(to))
+            {
+                throw new ArgumentException("Recipient email address cannot be null or empty.", nameof(to));
+            }
+
             if (!IsConfigured())
             {
                 _logger.LogWarning("Gmail API service is not configured. Email to {To} not sent.", to);
@@ -43,9 +49,11 @@ namespace CueFinder.Extensions.Email
                 var message = CreateMimeMessage(_settings.FromEmail, _settings.FromName, to, subject, body, isHtml);
                 var gmailMessage = EncodeMessage(message);
 
-                var service = await CreateGmailServiceAsync();
-                var request = service.Users.Messages.Send(gmailMessage, "me");
-                await request.ExecuteAsync();
+                using (var service = await CreateGmailServiceAsync())
+                {
+                    var request = service.Users.Messages.Send(gmailMessage, "me");
+                    await request.ExecuteAsync();
+                }
 
                 _logger.LogInformation("Email sent successfully via Gmail API to {To} with subject '{Subject}'", to, subject);
             }
@@ -57,7 +65,9 @@ namespace CueFinder.Extensions.Email
         }
 
         /// <summary>
-        /// Send an email to multiple recipients
+        /// Send an email to multiple recipients.
+        /// Note: Unlike SMTP implementation, this sends individual emails to each recipient
+        /// so recipients will not see each other's email addresses in the To field.
         /// </summary>
         public async Task SendBatchAsync(IEnumerable<string> recipients, string subject, string body, bool isHtml = true)
         {
@@ -74,37 +84,49 @@ namespace CueFinder.Extensions.Email
                 return;
             }
 
+            int successCount = 0;
+            int failureCount = 0;
+
             try
             {
-                var service = await CreateGmailServiceAsync();
-
-                // Send emails individually as Gmail API doesn't have a native batch send with multiple "To" recipients in one message
-                // For true batch functionality, we would send individual emails to each recipient
-                foreach (var recipient in recipientList)
+                using (var service = await CreateGmailServiceAsync())
                 {
-                    try
+                    // Send emails individually - recipients won't see each other's addresses
+                    foreach (var recipient in recipientList)
                     {
-                        var message = CreateMimeMessage(_settings.FromEmail, _settings.FromName, recipient, subject, body, isHtml);
-                        var gmailMessage = EncodeMessage(message);
+                        if (string.IsNullOrWhiteSpace(recipient))
+                        {
+                            _logger.LogWarning("Skipping null or empty recipient email address.");
+                            failureCount++;
+                            continue;
+                        }
 
-                        var request = service.Users.Messages.Send(gmailMessage, "me");
-                        await request.ExecuteAsync();
+                        try
+                        {
+                            var message = CreateMimeMessage(_settings.FromEmail, _settings.FromName, recipient, subject, body, isHtml);
+                            var gmailMessage = EncodeMessage(message);
 
-                        _logger.LogInformation("Batch email sent successfully via Gmail API to {To}", recipient);
-                    }
-                    catch (Exception ex)
-                    {
-                        _logger.LogError(ex, "Failed to send batch email via Gmail API to {To}", recipient);
-                        // Continue sending to other recipients even if one fails
+                            var request = service.Users.Messages.Send(gmailMessage, "me");
+                            await request.ExecuteAsync();
+
+                            successCount++;
+                            _logger.LogInformation("Batch email sent successfully via Gmail API to {To}", recipient);
+                        }
+                        catch (Exception ex)
+                        {
+                            failureCount++;
+                            _logger.LogError(ex, "Failed to send batch email via Gmail API to {To}", recipient);
+                            // Continue sending to other recipients even if one fails
+                        }
                     }
                 }
 
-                _logger.LogInformation("Batch email process completed. Sent to {Count} recipients with subject '{Subject}'", 
-                    recipientList.Count, subject);
+                _logger.LogInformation("Batch email process completed. Sent to {SuccessCount}/{TotalCount} recipients with subject '{Subject}'", 
+                    successCount, recipientList.Count, subject);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Failed to send batch email via Gmail API to {Count} recipients", recipientList.Count);
+                _logger.LogError(ex, "Failed to initialize Gmail API service for batch email to {Count} recipients", recipientList.Count);
                 throw;
             }
         }
@@ -159,7 +181,7 @@ namespace CueFinder.Extensions.Email
             var service = new GmailService(new BaseClientService.Initializer()
             {
                 HttpClientInitializer = credential,
-                ApplicationName = _settings.ApplicationName ?? "CueFinder"
+                ApplicationName = _settings.ApplicationName
             });
 
             return service;
