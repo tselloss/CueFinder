@@ -36,6 +36,7 @@ namespace CueFinder.Database.Context
         public DbSet<SavedBilliardTable> SavedBilliardTables { get; set; } = null!;
         public DbSet<Transaction> Transactions { get; set; } = null!;
         public DbSet<PhoneVerificationToken> PhoneVerificationTokens { get; set; } = null!;
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
         public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
         public DbSet<ModerationQueue> ModerationQueues { get; set; } = null!;
         public DbSet<UserReport> UserReports { get; set; } = null!;
@@ -475,6 +476,52 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
                     .HasDatabaseName("IX_PhoneVerification_User_Status");
+            });
+
+            // PasswordResetToken entity configuration
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.TokenHash)
+                    .IsRequired()
+                    .HasMaxLength(256); // SHA-256 hex = 64 chars, stored as text
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.ExpiresAt);
+
+                entity.Property(e => e.IsUsed)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.UsedAt);
+
+                entity.Property(e => e.RequestIpAddress)
+                    .HasMaxLength(45); // IPv6 max length
+
+                entity.Property(e => e.RequestUserAgent)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Purpose)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValue("password_reset");
+
+                entity.HasIndex(e => e.TokenHash)
+                    .IsUnique()
+                    .HasDatabaseName("IX_PasswordResetToken_Hash");
+
+                entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
+                    .HasDatabaseName("IX_PasswordResetToken_User_Status");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_PasswordResetToken_CreatedAt");
             });
 
             // CueCase entity configuration

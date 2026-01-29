@@ -207,6 +207,36 @@ namespace CueFinder.Auth.Services
         }
 
         /// <summary>
+        /// Get user by email or username (for password reset flows)
+        /// </summary>
+        public async Task<User?> GetUserByEmailOrUsernameAsync(string emailOrUsername)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(emailOrUsername))
+                {
+                    return null;
+                }
+
+                // Try as username first
+                var user = await _userService.GetByUsernameAsync(emailOrUsername);
+                
+                // If not found, try as email
+                if (user == null)
+                {
+                    user = await _userService.GetByEmailAsync(emailOrUsername);
+                }
+
+                return user;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error retrieving user by email or username: {EmailOrUsername}", emailOrUsername);
+                return null;
+            }
+        }
+
+        /// <summary>
         /// Get user profile by ID
         /// </summary>
         public async Task<UserProfile?> GetUserProfileAsync(int userId)
