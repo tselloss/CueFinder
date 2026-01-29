@@ -82,6 +82,11 @@ Advanced caching functionality (existing):
 - Cache invalidation
 - Cache statistics
 
+### 10. Email Services
+Email sending functionality with multiple implementations:
+- **SMTP Email Service**: Traditional SMTP-based email sending
+- **Gmail API Email Service**: Google Gmail API v1 integration for sending emails
+
 ## Installation
 
 Add reference to CueFinder.Extensions in your project:
@@ -284,7 +289,78 @@ public class CueService : ICueService
     "SlidingExpirationMinutes": 5,
     "MaxCacheSize": 1000,
     "EnableStatistics": true
+  },
+  "EmailSettings": {
+    "SmtpServer": "smtp.gmail.com",
+    "SmtpPort": 587,
+    "FromEmail": "your-email@gmail.com",
+    "FromName": "CueFinder Admin",
+    "SmtpPassword": "your-app-password",
+    "EnableSsl": true
+  },
+  "GmailApiSettings": {
+    "ServiceAccountCredentialsJson": "{\"type\":\"service_account\",\"project_id\":\"...\"}",
+    "ServiceAccountCredentialsPath": "/path/to/service-account-key.json",
+    "FromEmail": "admin@yourdomain.com",
+    "FromName": "CueFinder Admin",
+    "ImpersonateUser": "admin@yourdomain.com",
+    "ApplicationName": "CueFinder"
   }
+}
+```
+
+### Email Service Setup
+
+#### Using SMTP Email Service
+
+```csharp
+// In Program.cs
+using CueFinder.Extensions.Email;
+
+builder.Services.AddEmailService(builder.Configuration);
+```
+
+#### Using Gmail API Email Service
+
+```csharp
+// In Program.cs
+using CueFinder.Extensions.Email;
+
+builder.Services.AddGmailApiEmailService(builder.Configuration);
+```
+
+**Gmail API Setup Requirements:**
+1. Create a Google Cloud Project
+2. Enable Gmail API
+3. Create a Service Account with domain-wide delegation (for Google Workspace)
+4. Download the service account JSON key
+5. Configure the JSON key in `ServiceAccountCredentialsJson` or save it to a file and set `ServiceAccountCredentialsPath`
+6. If using domain-wide delegation, set `ImpersonateUser` to the email address to send from
+
+#### Using Email Service in Code
+
+```csharp
+public class NotificationService
+{
+    private readonly IEmailService _emailService;
+    
+    public NotificationService(IEmailService emailService)
+    {
+        _emailService = emailService;
+    }
+    
+    public async Task SendWelcomeEmailAsync(string userEmail, string userName)
+    {
+        var subject = "Welcome to CueFinder!";
+        var body = $"<h1>Welcome {userName}!</h1><p>Thank you for joining CueFinder.</p>";
+        
+        await _emailService.SendAsync(userEmail, subject, body, isHtml: true);
+    }
+    
+    public async Task SendBulkNotificationAsync(List<string> recipients, string subject, string message)
+    {
+        await _emailService.SendBatchAsync(recipients, subject, message, isHtml: true);
+    }
 }
 ```
 
