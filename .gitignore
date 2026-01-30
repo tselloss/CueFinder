@@ -386,4 +386,4 @@ deployment/*-secrets.sh
 
 # User uploaded files (production data)
 uploads/
-CueFinderBE/wwwroot/uploads/
+CueFinderBE/wwwroot/uploads/.env.production
