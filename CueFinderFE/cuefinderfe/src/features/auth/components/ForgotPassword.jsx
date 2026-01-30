@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -24,7 +24,17 @@ export default function ForgotPassword() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [requestCount, setRequestCount] = useState(0);
+  const timeoutRef = useRef(null);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -33,7 +43,7 @@ export default function ForgotPassword() {
 
     // Check rate limiting (client-side for UX feedback)
     if (requestCount >= 5) {
-      setError('Πάρα πολλές αιτήσεις επαναφοράς. Παρακαλώ δοκιμάστε ξανά σε λίγα λεπτά.');
+      setError(t('error.tooManyRequests'));
       setIsLoading(false);
       return;
     }
@@ -56,19 +66,24 @@ export default function ForgotPassword() {
       setEmailOrUsername('');
       setRequestCount(requestCount + 1);
 
+      // Clear any previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Auto-redirect after 5 seconds
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         navigate('/login');
       }, 5000);
     } catch (err) {
       // Even on error, show generic message to prevent enumeration
       if (err.response?.status === 429) {
-        setError('Πάρα πολλές αιτήσεις επαναφοράς. Παρακαλώ δοκιμάστε ξανά αργότερα.');
+        setError(t('error.tooManyRequests'));
       } else if (err.code === 'ECONNABORTED') {
-        setError('Η αίτηση έληξε. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
+        setError(t('error.requestTimeout'));
       } else {
         // Show generic error
-        setError('Αντιμετωπίσαμε ένα πρόβλημα. Παρακαλώ δοκιμάστε ξανά αργότερα.');
+        setError(t('error.genericError'));
       }
       setRequestCount(requestCount + 1);
       console.error('Forgot password error:', err);
@@ -87,30 +102,30 @@ export default function ForgotPassword() {
                 <Mail className="h-8 w-8 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Ελέγξτε το Email Σας</CardTitle>
+            <CardTitle className="text-2xl text-center">{t('auth.forgotPassword.checkEmail')}</CardTitle>
             <CardDescription className="text-center">
-              Στείλαμε ασφαλή σύνδεσμο επαναφοράς κωδικού
+              {t('auth.forgotPassword.linkSent')}
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
               <p className="text-sm text-primary">
-                Εάν υπάρχει λογαριασμός συνδεδεμένος με <strong>{emailOrUsername}</strong>, στείλαμε ασφαλή σύνδεσμο επαναφοράς κωδικού στο email σας.
+                {t('auth.forgotPassword.success', { email: <strong>{emailOrUsername}</strong> })}
               </p>
             </div>
             <div className="p-4 rounded-md bg-muted/50 border border-border">
               <p className="text-sm text-muted-foreground">
-                Ο σύνδεσμος θα λήξει σε 30 λεπτά για λόγους ασφαλείας.
+                {t('auth.forgotPassword.linkExpires')}
               </p>
             </div>
             <div className="text-center text-sm text-muted-foreground">
-              <p>Ανακατεύθυνση στη σύνδεση σε λίγα δευτερόλεπτα...</p>
+              <p>{t('auth.forgotPassword.redirecting')}</p>
             </div>
             <Button 
               onClick={() => navigate('/login')}
               className="w-full"
             >
-              Επιστροφή στη Σύνδεση
+              {t('auth.forgotPassword.backToLogin')}
             </Button>
           </CardContent>
         </Card>
@@ -127,9 +142,9 @@ export default function ForgotPassword() {
               <Lock className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Ξέχασα τον Κωδικό</CardTitle>
+          <CardTitle className="text-2xl text-center">{t('auth.forgotPassword.title')}</CardTitle>
           <CardDescription className="text-center">
-            Θα σας βοηθήσουμε να επαναφέρετε τον κωδικό σας ασφαλώς
+            {t('auth.forgotPassword.subtitle')}
           </CardDescription>
         </CardHeader>
 
@@ -144,11 +159,11 @@ export default function ForgotPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                Email ή Όνομα Χρήστη
+                {t('auth.forgotPassword.emailOrUsername')}
               </label>
               <Input
                 type="text"
-                placeholder="Εισάγετε email ή όνομα χρήστη"
+                placeholder={t('auth.forgotPassword.placeholder')}
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 disabled={isLoading}
@@ -156,7 +171,7 @@ export default function ForgotPassword() {
                 autoFocus
               />
               <p className="text-xs text-muted-foreground mt-1">
-                Θα επαληθεύσουμε τον λογαριασμό σας και θα στείλουμε ασφαλή σύνδεσμο επαναφοράς.
+                {t('auth.forgotPassword.helpText')}
               </p>
             </div>
 
@@ -165,7 +180,7 @@ export default function ForgotPassword() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Αποστολή...' : 'Αποστολή Συνδέσμου Επαναφοράς'}
+              {isLoading ? t('auth.forgotPassword.sending') : t('auth.forgotPassword.sendLink')}
             </Button>
 
             <div className="flex items-center justify-center pt-2 border-t border-border">
@@ -174,7 +189,7 @@ export default function ForgotPassword() {
                 onClick={() => navigate('/login')}
                 className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
               >
-                Επιστροφή στη Σύνδεση
+                {t('auth.forgotPassword.backToLogin')}
               </button>
             </div>
           </CardContent>

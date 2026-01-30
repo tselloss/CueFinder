@@ -19,6 +19,8 @@ import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader';
 import AppFooter from './components/AppFooter';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
+import { initializeAxiosInterceptor } from './utils/axiosInterceptor';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 import * as billiardTableService from './api/billiardTableService';
@@ -32,6 +34,13 @@ import { useTranslation } from 'react-i18next';
 
 function AppInner() {
   const { t, i18n } = useTranslation();
+  const { showError } = useToast();
+  
+  // Initialize axios interceptor for global error handling
+  useEffect(() => {
+    initializeAxiosInterceptor(showError);
+  }, [showError]);
+  
   // Load saved language from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('lang');
@@ -115,47 +124,64 @@ function AppInner() {
   }, [category]);
 
   const refreshListings = useCallback(async () => {
-    // Fetch cues, cases, tables, and accessories
-    const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
-      cueService.getCues(),
-      cueCaseService.getCueCases(),
-      billiardTableService.getTables(),
-      accessoryService.getAccessories()
-    ]);
+    try {
+      // Fetch cues, cases, tables, and accessories with individual error handling
+      const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
+        cueService.getCues().catch(err => { 
+          console.error('Error fetching cues:', err); 
+          return []; 
+        }),
+        cueCaseService.getCueCases().catch(err => { 
+          console.error('Error fetching cue cases:', err); 
+          return []; 
+        }),
+        billiardTableService.getTables().catch(err => { 
+          console.error('Error fetching tables:', err); 
+          return []; 
+        }),
+        accessoryService.getAccessories().catch(err => { 
+          console.error('Error fetching accessories:', err); 
+          return []; 
+        })
+      ]);
 
-    // Add itemType field to each item and combine (avoid colliding with backend 'category')
-    const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
-    const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
-    const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
-    const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
+      // Add itemType field to each item and combine (avoid colliding with backend 'category')
+      const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
+      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
+      const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
+      const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
 
-    // Combine all arrays
-    const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
+      // Combine all arrays
+      const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
 
-    console.log('Loaded listings:', {
-      cues: cuesWithCategory.length,
-      cases: casesWithCategory.length,
-      tables: tablesWithCategory.length,
-      accessories: accessoriesWithCategory.length,
-      total: allListings.length
-    });
-    
-    // Log first cue for debugging
-    if (cuesWithCategory.length > 0) {
-      console.log('Sample cue data:', {
-        title: cuesWithCategory[0].title,
-        cueType: cuesWithCategory[0].cueType,
-        cue_type: cuesWithCategory[0].cue_type,
-        itemType: cuesWithCategory[0].itemType,
-        keys: Object.keys(cuesWithCategory[0])
+      console.log('Loaded listings:', {
+        cues: cuesWithCategory.length,
+        cases: casesWithCategory.length,
+        tables: tablesWithCategory.length,
+        accessories: accessoriesWithCategory.length,
+        total: allListings.length
       });
-    }
+      
+      // Log first cue for debugging
+      if (cuesWithCategory.length > 0) {
+        console.log('Sample cue data:', {
+          title: cuesWithCategory[0].title,
+          cueType: cuesWithCategory[0].cueType,
+          cue_type: cuesWithCategory[0].cue_type,
+          itemType: cuesWithCategory[0].itemType,
+          keys: Object.keys(cuesWithCategory[0])
+        });
+      }
 
-    setCues(allListings);
-    
-    // Expose for debugging in E2E tests
-    if (typeof window !== 'undefined') {
-      window.__cuesData = allListings;
+      setCues(allListings);
+      
+      // Expose for debugging in E2E tests
+      if (typeof window !== 'undefined') {
+        window.__cuesData = allListings;
+      }
+    } catch (error) {
+      console.error('Error refreshing listings:', error);
+      setCues([]);
     }
   }, []);
 
@@ -443,7 +469,9 @@ function AppInner() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <ToastProvider>
+        <AppInner />
+      </ToastProvider>
     </AuthProvider>
   );
 }

@@ -1,10 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useToast } from '../../../contexts/ToastContext';
 
 /**
  * Admin Moderation Dashboard for reviewing flagged images
  */
 const ModerationDashboard = () => {
+  const { showSuccess, showError } = useToast();
   const [flags, setFlags] = useState([]);
   const [rejectedImages, setRejectedImages] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -63,10 +65,10 @@ const ModerationDashboard = () => {
       setFlags(flags.filter(f => f.id !== flagId));
       setSelectedFlag(null);
       setAdminNotes('');
-      alert('✅ Η εικόνα εγκρίθηκε επιτυχώς');
+      showSuccess('✅ Η εικόνα εγκρίθηκε επιτυχώς');
     } catch (error) {
       console.error('Error approving:', error);
-      alert('❌ Αδυναμία έγκρισης εικόνας. Παρακαλώ δοκιμάστε ξανά.');
+      showError('❌ Αδυναμία έγκρισης εικόνας. Παρακαλώ δοκιμάστε ξανά.');
     } finally {
       setActionInProgress(false);
     }
@@ -85,10 +87,10 @@ const ModerationDashboard = () => {
       setSelectedFlag(null);
       setAdminNotes('');
       setBanUser(false);
-      alert('✅ Η εικόνα απορρίφθηκε' + (banUser ? ' και ο χρήστης αποκλείστηκε' : ' επιτυχώς'));
+      showSuccess('✅ Η εικόνα απορρίφθηκε' + (banUser ? ' και ο χρήστης αποκλείστηκε' : ' επιτυχώς'));
     } catch (error) {
       console.error('Error rejecting:', error);
-      alert('❌ Αδυναμία απόρριψης εικόνας. Παρακαλώ δοκιμάστε ξανά.');
+      showError('❌ Αδυναμία απόρριψης εικόνας. Παρακαλώ δοκιμάστε ξανά.');
     } finally {
       setActionInProgress(false);
     }

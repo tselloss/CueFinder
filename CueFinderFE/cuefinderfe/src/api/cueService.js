@@ -37,7 +37,7 @@ export async function getCues() {
     return response.data;
   } catch (error) {
     console.error('Error fetching cues:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -52,7 +52,7 @@ export async function getCueById(id) {
     return response.data;
   } catch (error) {
     console.error('Error fetching cue:', error);
-    return null;
+    throw error;
   }
 }
 

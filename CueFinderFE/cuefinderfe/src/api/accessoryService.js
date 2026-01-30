@@ -23,7 +23,7 @@ export async function getAccessories(page = 1, pageSize = 20) {
     return response.data;
   } catch (error) {
     console.error('Error fetching accessories:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -34,7 +34,7 @@ export async function getAccessoryById(id) {
     return response.data;
   } catch (error) {
     console.error('Error fetching accessory:', error);
-    return null;
+    throw error;
   }
 }
 
@@ -60,7 +60,7 @@ export async function searchAccessories(query, page = 1, pageSize = 20) {
     return response.data;
   } catch (error) {
     console.error('Error searching accessories:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -81,7 +81,7 @@ export async function getFilteredAccessories(filters = {}) {
     return response.data;
   } catch (error) {
     console.error('Error fetching filtered accessories:', error);
-    return [];
+    throw error;
   }
 }
 

@@ -6,11 +6,22 @@ import ItemDetail from '../../../components/ItemDetail.jsx';
 export default function BilliardTableDetail({ onBack }) {
   const { id } = useParams();
   const [table, setTable] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const data = await billiardTableService.getTableById(id);
-      setTable(data);
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await billiardTableService.getTableById(id);
+        setTable(data);
+      } catch (err) {
+        console.error('Error loading table:', err);
+        setError('Failed to load table details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [id]);
@@ -41,6 +52,8 @@ export default function BilliardTableDetail({ onBack }) {
       itemType="table"
       onBack={onBack}
       specifications={specifications}
+      loading={loading}
+      error={error}
     />
   );
 }

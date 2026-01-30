@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import axios from 'axios';
@@ -22,6 +22,7 @@ export default function ResetPassword() {
   const { t } = useTranslation();
   const [searchParams] = useSearchParams();
   const token = searchParams.get('token');
+  const timeoutRef = useRef(null);
 
   const [isValidating, setIsValidating] = useState(true);
   const [isValidToken, setIsValidToken] = useState(false);
@@ -37,11 +38,20 @@ export default function ResetPassword() {
 
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
 
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+    };
+  }, []);
+
   // Validate token on component mount
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
-        setError('Δεν παρέχθηκε σύνδεσμος επαναφοράς. Παρακαλώ ελέγξτε το σύνδεσμο στο email σας.');
+        setError(t('error.noResetLink'));
         setIsValidating(false);
         return;
       }
@@ -58,14 +68,14 @@ export default function ResetPassword() {
           setIsValidToken(true);
           setError('');
         } else {
-          setError('Αυτός ο σύνδεσμος επαναφοράς είναι άκυρος ή έχει λήξει.');
+          setError(t('error.linkExpired'));
           setIsValidToken(false);
         }
       } catch (err) {
         if (err.response?.status === 401) {
-          setError('Αυτός ο σύνδεσμος επαναφοράς έχει λήξει ή είναι άκυρος. Παρακαλώ ζητήστε νέο.');
+          setError(t('error.linkExpired'));
         } else {
-          setError('Αδυναμία επαλήθευσης του συνδέσμου επαναφοράς. Παρακαλώ δοκιμάστε ξανά.');
+          setError(t('error.tokenValidationFailed'));
         }
         setIsValidToken(false);
         console.error('Token validation error:', err);
@@ -75,7 +85,7 @@ export default function ResetPassword() {
     };
 
     validateToken();
-  }, [token, API_BASE_URL]);
+  }, [token, API_BASE_URL, t]);
 
   // Calculate password strength
   useEffect(() => {
@@ -112,19 +122,19 @@ export default function ResetPassword() {
 
     // Validation
     if (newPassword.length < 8) {
-      setError('Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.');
+      setError(t('error.passwordTooShort'));
       setIsResetting(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Οι κωδικοί δεν ταιριάζουν.');
+      setError(t('error.passwordsMismatch'));
       setIsResetting(false);
       return;
     }
 
     if (!/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      setError('Ο κωδικός πρέπει να περιέχει γράμματα και αριθμούς.');
+      setError(t('error.passwordRequirements'));
       setIsResetting(false);
       return;
     }
@@ -146,21 +156,26 @@ export default function ResetPassword() {
       setNewPassword('');
       setConfirmPassword('');
 
+      // Clear any previous timeout
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+      }
+
       // Redirect to login after 3 seconds
-      setTimeout(() => {
+      timeoutRef.current = setTimeout(() => {
         navigate('/login', {
-          state: { message: 'Η επαναφορά κωδικού ολοκληρώθηκε. Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.' }
+          state: { message: t('auth.resetPassword.successMessage') }
         });
       }, 3000);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError('Αυτός ο σύνδεσμος επαναφοράς έχει λήξει. Παρακαλώ ζητήστε νέο.');
+        setError(t('error.linkExpired'));
       } else if (err.response?.status === 400) {
-        setError(err.response.data?.message || 'Μη έγκυρος κωδικός. Παρακαλώ ελέγξτε τις απαιτήσεις.');
+        setError(err.response.data?.message || t('error.invalidPassword'));
       } else if (err.code === 'ECONNABORTED') {
-        setError('Η αίτηση έληξε. Παρακαλώ δοκιμάστε ξανά.');
+        setError(t('error.requestTimeout'));
       } else {
-        setError('Αδυναμία επαναφοράς κωδικού. Παρακαλώ δοκιμάστε ξανά αργότερα.');
+        setError(t('error.resetFailed'));
       }
       console.error('Password reset error:', err);
     } finally {
@@ -176,7 +191,7 @@ export default function ResetPassword() {
             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg mb-4 animate-pulse">
               <Lock className="h-6 w-6 text-primary-foreground" />
             </div>
-            <p className="text-center text-muted-foreground">Επαλήθευση συνδέσμου επαναφοράς...</p>
+            <p className="text-center text-muted-foreground">{t('auth.resetPassword.validating')}</p>
           </CardContent>
         </Card>
       </div>
@@ -193,7 +208,7 @@ export default function ResetPassword() {
                 <Lock className="h-8 w-8 text-destructive" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Σύνδεσμος Άκυρος ή έχει Λήξει</CardTitle>
+            <CardTitle className="text-2xl text-center">{t('auth.resetPassword.invalidLink')}</CardTitle>
             <CardDescription className="text-center text-destructive/80">
               {error}
             </CardDescription>
@@ -203,7 +218,7 @@ export default function ResetPassword() {
               onClick={() => navigate('/forgot-password')}
               className="w-full"
             >
-              Αίτηση Νέου Συνδέσμου
+              {t('auth.resetPassword.requestNew')}
             </Button>
           </CardContent>
         </Card>
@@ -221,9 +236,9 @@ export default function ResetPassword() {
                 <Lock className="h-8 w-8 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Επιτυχής Επαναφορά Κωδικού</CardTitle>
+            <CardTitle className="text-2xl text-center">{t('auth.resetPassword.success')}</CardTitle>
             <CardDescription className="text-center">
-              Ο κωδικός σας επαναφέρθηκε. Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.
+              {t('auth.resetPassword.redirectMessage')}
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -231,7 +246,7 @@ export default function ResetPassword() {
               onClick={() => navigate('/login')}
               className="w-full"
             >
-              Μετάβαση στη Σύνδεση
+              {t('auth.resetPassword.goToLogin')}
             </Button>
           </CardContent>
         </Card>
@@ -248,9 +263,9 @@ export default function ResetPassword() {
               <Lock className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Επαναφορά Κωδικού</CardTitle>
+          <CardTitle className="text-2xl text-center">{t('auth.resetPassword.title')}</CardTitle>
           <CardDescription className="text-center">
-            Δημιουργήστε έναν ισχυρό κωδικό για να ασφαλίσετε τον λογαριασμό σας
+            {t('auth.resetPassword.createStrong')}
           </CardDescription>
         </CardHeader>
 
@@ -266,12 +281,12 @@ export default function ResetPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                Νέος Κωδικός
+                {t('auth.resetPassword.newPassword')}
               </label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Εισάγετε νέο κωδικό (τουλάχιστον 8 χαρακτήρες)"
+                  placeholder={t('auth.resetPassword.placeholder')}
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={isResetting}
@@ -292,11 +307,11 @@ export default function ResetPassword() {
             {newPassword && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-muted-foreground">Ισχύς Κωδικού</label>
+                  <label className="text-xs font-medium text-muted-foreground">{t('auth.resetPassword.passwordStrength')}</label>
                   <span className="text-xs font-medium" style={{
                     color: passwordStrength < 30 ? '#ef4444' : passwordStrength < 60 ? '#f59e0b' : passwordStrength < 80 ? '#3b82f6' : '#22c55e'
                   }}>
-                    {passwordStrength < 30 ? 'Αδύναμος' : passwordStrength < 60 ? 'Μέτριος' : passwordStrength < 80 ? 'Καλός' : 'Ισχυρός'}
+                    {passwordStrength < 30 ? t('auth.resetPassword.passwordStrength.weak') : passwordStrength < 60 ? t('auth.resetPassword.passwordStrength.medium') : passwordStrength < 80 ? t('auth.resetPassword.passwordStrength.good') : t('auth.resetPassword.passwordStrength.strong')}
                   </span>
                 </div>
                 <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
@@ -312,17 +327,17 @@ export default function ResetPassword() {
                 <div className="space-y-1 mt-3">
                   <div className="flex items-center gap-2 text-xs">
                     <span className={newPassword.length >= 8 ? 'text-green-500' : 'text-muted-foreground'}>
-                      {newPassword.length >= 8 ? '✓' : '○'} Τουλάχιστον 8 χαρακτήρες
+                      {newPassword.length >= 8 ? '✓' : '○'} {t('auth.resetPassword.requirement.minLength')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className={/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
-                      {/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? '✓' : '○'} Μείγμα κεφαλαίων & πεζών
+                      {/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? '✓' : '○'} {t('auth.resetPassword.requirement.mixedCase')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className={/\d/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
-                      {/\d/.test(newPassword) ? '✓' : '○'} Τουλάχιστον ένας αριθμός
+                      {/\d/.test(newPassword) ? '✓' : '○'} {t('auth.resetPassword.requirement.number')}
                     </span>
                   </div>
                 </div>
@@ -333,12 +348,12 @@ export default function ResetPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                Επιβεβαίωση Κωδικού
+                {t('auth.resetPassword.confirmPassword')}
               </label>
               <div className="relative">
                 <Input
                   type={showConfirm ? 'text' : 'password'}
-                  placeholder="Εισάγετε ξανά τον κωδικό σας"
+                  placeholder={t('auth.resetPassword.confirmPlaceholder')}
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isResetting}
@@ -354,7 +369,7 @@ export default function ResetPassword() {
               </div>
               {newPassword && confirmPassword && (
                 <p className={`text-xs font-medium ${newPassword === confirmPassword ? 'text-green-500' : 'text-destructive'}`}>
-                  {newPassword === confirmPassword ? '✓ Οι κωδικοί ταιριάζουν' : '✗ Οι κωδικοί δεν ταιριάζουν'}
+                  {newPassword === confirmPassword ? `✓ ${t('auth.resetPassword.requirement.match')}` : `✗ ${t('auth.resetPassword.requirement.noMatch')}`}
                 </p>
               )}
             </div>
@@ -364,7 +379,7 @@ export default function ResetPassword() {
               className="w-full"
               disabled={isResetting || !newPassword || newPassword !== confirmPassword || passwordStrength < 60}
             >
-              {isResetting ? 'Επαναφορά...' : 'Επαναφορά Κωδικού'}
+              {isResetting ? t('auth.resetPassword.resetting') : t('auth.resetPassword.resetButton')}
             </Button>
 
             <div className="flex items-center justify-center pt-2 border-t border-border">
@@ -373,7 +388,7 @@ export default function ResetPassword() {
                 onClick={() => navigate('/login')}
                 className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
               >
-                Επιστροφή στη Σύνδεση
+                {t('auth.forgotPassword.backToLogin')}
               </button>
             </div>
           </CardContent>

@@ -23,7 +23,7 @@ export async function getTables(page = 1, pageSize = 20) {
     return response.data;
   } catch (error) {
     console.error('Error fetching billiard tables:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -34,7 +34,7 @@ export async function getTableById(id) {
     return response.data;
   } catch (error) {
     console.error('Error fetching billiard table:', error);
-    return null;
+    throw error;
   }
 }
 
@@ -60,7 +60,7 @@ export async function searchTables(query, page = 1, pageSize = 20) {
     return response.data;
   } catch (error) {
     console.error('Error searching billiard tables:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -81,7 +81,7 @@ export async function getFilteredTables(filters = {}) {
     return response.data;
   } catch (error) {
     console.error('Error fetching filtered billiard tables:', error);
-    return [];
+    throw error;
   }
 }
 

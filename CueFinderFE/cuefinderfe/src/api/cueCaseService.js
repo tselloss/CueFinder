@@ -25,7 +25,7 @@ export async function getCueCases() {
     return response.data;
   } catch (error) {
     console.error('Error fetching cue cases:', error);
-    return [];
+    throw error;
   }
 }
 
@@ -36,7 +36,7 @@ export async function getCueCaseById(id) {
     return response.data;
   } catch (error) {
     console.error('Error fetching cue case:', error);
-    return null;
+    throw error;
   }
 }
 

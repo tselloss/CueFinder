@@ -6,13 +6,24 @@ import ItemDetail from '../../../components/ItemDetail.jsx';
 export default function CueCaseDetail({ onBack }) {
   const { id } = useParams();
   const [cueCase, setCueCase] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   // Cue case details are public; do not force login here.
 
   useEffect(() => {
     async function load() {
-      const data = await cueCaseService.getCueCaseById(id);
-      setCueCase(data);
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await cueCaseService.getCueCaseById(id);
+        setCueCase(data);
+      } catch (err) {
+        console.error('Error loading cue case:', err);
+        setError('Failed to load cue case details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [id]);
@@ -44,6 +55,8 @@ export default function CueCaseDetail({ onBack }) {
       itemType="case"
       onBack={onBack}
       specifications={specifications}
+      loading={loading}
+      error={error}
     />
   );
 }

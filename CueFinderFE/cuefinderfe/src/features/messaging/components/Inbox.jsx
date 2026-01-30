@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { ArrowLeft, Mail, Trash2, Send, Search, Filter } from 'lucide-react';
 import * as messageService from '../../../api/messageService';
 import * as authService from '../../../api/authService';
+import { useToast } from '../../../contexts/ToastContext';
 import { Button } from '../../../components/ui/button.jsx';
 import { Card, CardContent } from '../../../components/ui/card.jsx';
 import { Badge } from '../../../components/ui/badge.jsx';
@@ -10,6 +11,7 @@ import { Textarea } from '../../../components/ui/textarea.jsx';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '../../../components/ui/dialog.jsx';
 
 export default function Inbox({ onBack }) {
+  const { showSuccess, showError } = useToast();
   const [messages, setMessages] = useState([]);
   const [loading, setLoading] = useState(true);
   const [unreadCount, setUnreadCount] = useState(0);
@@ -56,10 +58,10 @@ export default function Inbox({ onBack }) {
       setReplyBody('');
       setSelectedMessage(null);
       loadInbox();
-      alert('✅ Your reply has been sent successfully!');
+      showSuccess('✅ Your reply has been sent successfully!');
     } catch (err) {
       console.error('Error sending reply:', err);
-      alert('❌ Unable to send reply. Please check your connection and try again.');
+      showError('❌ Unable to send reply. Please check your connection and try again.');
     } finally {
       setSending(false);
     }
@@ -72,10 +74,10 @@ export default function Inbox({ onBack }) {
       await messageService.deleteMessage(messageId);
       loadInbox();
       setSelectedMessage(null);
-      alert('✅ Message deleted successfully!');
+      showSuccess('✅ Message deleted successfully!');
     } catch (err) {
       console.error('Error deleting message:', err);
-      alert('❌ Unable to delete message. Please try again.');
+      showError('❌ Unable to delete message. Please try again.');
     }
   };
 

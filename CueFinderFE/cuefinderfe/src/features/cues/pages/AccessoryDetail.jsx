@@ -6,11 +6,22 @@ import ItemDetail from '../../../components/ItemDetail.jsx';
 export default function AccessoryDetail({ onBack }) {
   const { id } = useParams();
   const [accessory, setAccessory] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const data = await accessoryService.getAccessoryById(id);
-      setAccessory(data);
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await accessoryService.getAccessoryById(id);
+        setAccessory(data);
+      } catch (err) {
+        console.error('Error loading accessory:', err);
+        setError('Failed to load accessory details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [id]);
@@ -37,6 +48,8 @@ export default function AccessoryDetail({ onBack }) {
       itemType="accessory"
       onBack={onBack}
       specifications={specifications}
+      loading={loading}
+      error={error}
     />
   );
 }
