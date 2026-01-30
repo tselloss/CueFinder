@@ -37,10 +37,10 @@ Value: 587
 
 ```
 Name: GMAIL_CLIENT_ID
-Value: 1084511442650-9f54j50i7r955pafbou5t8d0qcid87td.apps.googleusercontent.com
+Value: [YOUR_GMAIL_CLIENT_ID]
 
 Name: GMAIL_CLIENT_SECRET
-Value: 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
+Value: [YOUR_GMAIL_CLIENT_SECRET]
 
 Name: GMAIL_PROJECT_ID
 Value: cuefinder

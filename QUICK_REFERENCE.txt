@@ -44,7 +44,7 @@ DONE! ✅
 
 | Name | Value | Example |
 |------|-------|---------|
-| SMTP_PASSWORD | Gmail app password | `abcd efgh ijkl mnop` |
+| SMTP_PASSWORD | Gmail app password | `[YOUR_GMAIL_APP_PASSWORD_HERE]` |
 | EMAIL_FROM | Sender email | `cuefinderinfo@gmail.com` |
 | SMTP_SERVER | SMTP host | `smtp.gmail.com` |
 | SMTP_PORT | SMTP port | `587` |
