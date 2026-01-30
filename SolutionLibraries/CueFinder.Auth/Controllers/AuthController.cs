@@ -47,23 +47,23 @@ namespace CueFinder.Auth.Controllers
         {
             try
             {
-                if (string.IsNullOrWhiteSpace(request.Username) || string.IsNullOrWhiteSpace(request.Password))
+                if (string.IsNullOrWhiteSpace(request.UsernameValue) || string.IsNullOrWhiteSpace(request.Password))
                 {
                     return BadRequest(new { message = "Please enter both username and password to login" });
                 }
 
-                var response = await _authService.LoginAsync(request.Username, request.Password);
-                _logger.LogInformation("User {Username} logged in successfully", request.Username);
+                var response = await _authService.LoginAsync(request.UsernameValue, request.Password);
+                _logger.LogInformation("User {Username} logged in successfully", request.UsernameValue);
                 return Ok(response);
             }
             catch (UnauthorizedAccessException ex)
             {
-                _logger.LogWarning("Login failed for user {Username}: {Message}", request.Username, ex.Message);
+                _logger.LogWarning("Login failed for user {Username}: {Message}", request.UsernameValue, ex.Message);
                 return StatusCode(StatusCodes.Status401Unauthorized, new { message = ex.Message });
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Login error for user {Username}", request.Username);
+                _logger.LogError(ex, "Login error for user {Username}", request.UsernameValue);
                 return StatusCode(500, new { message = "An error occurred during login" });
             }
         }

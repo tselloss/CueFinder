@@ -403,7 +403,7 @@ function AppInner() {
               } />
               
               <Route path="/forum" element={
-                user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
+                <Forum onBack={handleBack} />
               } />
             </Routes>
           </div>

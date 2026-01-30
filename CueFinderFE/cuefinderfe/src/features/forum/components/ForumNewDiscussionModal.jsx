@@ -26,21 +26,21 @@ export default function ForumNewDiscussionModal({
   return (
     <BaseModal
       isOpen={isOpen}
-      title="Start New Topic"
+      title="Δημιουργία Νέου Θέματος"
       onSubmit={onSubmit}
       onClose={onClose}
-      submitText="Create Topic"
+      submitText="Δημιουργία Θέματος"
       loading={loading}
       variant="blue"
     >
       {/* Category Select */}
-      <FormField label="Category">
+      <FormField label="Κατηγορία">
         <select
           value={formData.categoryId}
           onChange={(e) => onFormChange('categoryId', e.target.value)}
           className="w-full px-3 py-2 border border-blue-500/30 rounded-lg bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500"
         >
-          <option value="">Select a category</option>
+          <option value="">Επιλέξτε κατηγορία</option>
           {categories.map((c) => (
             <option key={c.id} value={c.id}>
               {c.name}
@@ -50,10 +50,10 @@ export default function ForumNewDiscussionModal({
       </FormField>
 
       {/* Title Input */}
-      <FormField label="Title">
+      <FormField label="Τίτλος">
         <input
           type="text"
-          placeholder="Discussion title"
+          placeholder="Τίτλος συζήτησης"
           value={formData.title}
           onChange={(e) => onFormChange('title', e.target.value)}
           className="w-full px-3 py-2 border border-slate-700 rounded-lg bg-slate-800 text-slate-100 placeholder-slate-500 text-sm focus:outline-none focus:border-blue-500"
@@ -61,9 +61,9 @@ export default function ForumNewDiscussionModal({
       </FormField>
 
       {/* Content Textarea */}
-      <FormField label="Content">
+      <FormField label="Περιεχόμενο">
         <textarea
-          placeholder="What would you like to discuss?"
+          placeholder="Τι θα θέλατε να συζητήσετε;"
           value={formData.content}
           onChange={(e) => onFormChange('content', e.target.value)}
           rows={6}

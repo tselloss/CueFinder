@@ -84,18 +84,18 @@ export default function ForumContainer({ onBack }) {
       setShowNewDiscussionModal(false);
       setNewDiscussionForm({ title: '', content: '', categoryId: '' });
     } catch (error) {
-      alert(`Failed to create discussion: ${error.message}`);
+      alert(`Αποτυχία δημιουργίας συζήτησης: ${error.message}`);
     }
   };
 
   const handleCreatePost = async () => {
     if (!newPostContent) {
-      alert('Please enter post content');
+      alert('Παρακαλώ εισάγετε περιεχόμενο ανάρτησης');
       return;
     }
 
     if (!user) {
-      alert('Please sign in to post a reply');
+      alert('Παρακαλώ συνδεθείτε για να δημοσιεύσετε απάντηση');
       return;
     }
 
@@ -108,13 +108,13 @@ export default function ForumContainer({ onBack }) {
       setNewPostContent('');
       setReplyToPostId(null);
     } catch (error) {
-      alert('Failed to create post');
+      alert('Αποτυχία δημιουργίας ανάρτησης');
     }
   };
 
   const handleReplyClick = (postId) => {
     if (!user) {
-      alert('Please sign in to reply');
+      alert('Παρακαλώ συνδεθείτε για να απαντήσετε');
       return;
     }
     setReplyToPostId(postId);
@@ -124,25 +124,25 @@ export default function ForumContainer({ onBack }) {
 
   const handleLikePost = async (postId) => {
     if (!user) {
-      alert('Please sign in to like posts');
+      alert('Παρακαλώ συνδεθείτε για να κάνετε like');
       return;
     }
     try {
       await likePost(postId);
     } catch (error) {
-      alert('Failed to like post');
+      alert('Αποτυχία εκτέλεσης like');
     }
   };
 
   const handleMarkHelpful = async (postId) => {
     if (!user) {
-      alert('Please sign in to mark helpful');
+      alert('Παρακαλώ συνδεθείτε για να σημειώσετε ως χρήσιμο');
       return;
     }
     try {
       await markPostAsHelpful(postId);
     } catch (error) {
-      alert('Failed to mark as helpful');
+      alert('Αποτυχία σήμανσης ως χρήσιμο');
     }
   };
 

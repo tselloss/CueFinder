@@ -43,7 +43,7 @@ export default function MyCues() {
       setMyListings(combined);
     } catch (error) {
       console.error('Error loading my cues:', error);
-      showMessage('error', '❌ Unable to load your listings. Please refresh the page or try again later.');
+      showMessage('error', '❌ Αδυναμία φόρτωσης των καταχωρήσεών σας. Παρακαλώ ανανεώστε τη σελίδα ή δοκιμάστε ξανά αργότερα.');
     } finally {
       setLoading(false);
     }
@@ -71,8 +71,8 @@ export default function MyCues() {
   };
 
   const handleDelete = async (item) => {
-    const itemType = item.category === 'case' ? 'case' : 'cue';
-    if (!window.confirm(`⚠️ Delete ${itemType} listing?\n\nThis will permanently remove your listing and cannot be undone.`)) {
+    const itemType = item.category === 'case' ? 'θήκη' : 'μπιλιάρδο';
+    if (!window.confirm(`⚠️ Διαγραφή καταχώρησης ${itemType};\n\nΑυτή η ενέργεια θα αφαιρέσει οριστικά την καταχώρησή σας και δεν μπορεί να αναιρεθεί.`)) {
       return;
     }
 
@@ -83,9 +83,9 @@ export default function MyCues() {
         await cueService.deleteCue(item.id);
       }
       setMyListings(myListings.filter(c => c.id !== item.id));
-      showMessage('success', `✅ Your ${itemType} listing has been deleted successfully`);
+      showMessage('success', `✅ Η καταχώρησή σας ${itemType} διαγράφηκε επιτυχώς`);
     } catch (error) {
-      showMessage('error', `❌ Unable to delete your ${itemType} listing. Please try again.`);
+      showMessage('error', `❌ Αδυναμία διαγραφής της καταχώρησής σας ${itemType}. Παρακαλώ δοκιμάστε ξανά.`);
     }
   };
 
@@ -123,7 +123,7 @@ export default function MyCues() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Loading your listings...</p>
+        <p className="text-muted-foreground">Φόρτωση των καταχωρήσεών σας...</p>
       </div>
     );
   }
@@ -131,13 +131,13 @@ export default function MyCues() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-2xl md:text-3xl font-bold">📋 My Listings</h2>
+        <h2 className="text-2xl md:text-3xl font-bold">📋 Οι Καταχωρήσεις μου</h2>
         <Button
           onClick={handleCreateNew}
           className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Add New Listing</span><span className="sm:hidden">Add Listing</span>
+          <span className="hidden sm:inline">Προσθήκη Νέας Καταχώρησης</span><span className="sm:hidden">Προσθήκη</span>
         </Button>
       </div>
 
@@ -155,14 +155,14 @@ export default function MyCues() {
         <Card className="border-2 border-dashed border-primary/20">
           <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
             <p className="text-lg text-muted-foreground text-center">
-              You haven't created any listings yet.
+              Δεν έχετε δημιουργήσει ακόμα καμία καταχώρηση.
             </p>
             <Button
               onClick={handleCreateNew}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold"
             >
               <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Add New Listing</span><span className="sm:hidden">Add Listing</span>
+              <span className="hidden sm:inline">Προσθήκη Νέας Καταχώρησης</span><span className="sm:hidden">Προσθήκη</span>
             </Button>
           </CardContent>
         </Card>
@@ -249,7 +249,7 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
             className="flex-1"
           >
             <Edit2 className="w-4 h-4 mr-1" />
-            Edit
+            Επεξεργασία
           </Button>
           <Button
             variant="outline"
@@ -260,12 +260,12 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
             {cue.isSold ? (
               <>
                 <CheckCircle className="w-4 h-4 mr-1" />
-                Mark Available
+                Σήμανση Διαθέσιμου
               </>
             ) : (
               <>
                 <AlertCircle className="w-4 h-4 mr-1" />
-                Mark Sold
+                Σήμανση Πωλημένου
               </>
             )}
           </Button>

@@ -27,9 +27,9 @@ export default function CategoryCard({ category, onSelect }) {
         <p className="text-sm text-slate-400 line-clamp-2">{category.description}</p>
         <div className="flex justify-between items-center mt-3 p-2 bg-blue-500/5 rounded text-xs font-semibold border border-blue-500/15">
           <span className="text-blue-300/80">
-            {category.discussionCount === 1 ? '1 discussion' : `${category.discussionCount || 0} discussions`}
+            {category.discussionCount === 1 ? '1 συζήτηση' : `${category.discussionCount || 0} συζητήσεις`}
           </span>
-          <span className="text-blue-300">View →</span>
+          <span className="text-blue-300">Προβολή →</span>
         </div>
       </div>
     </div>

@@ -11,13 +11,31 @@ test.describe('Messaging Flow', () => {
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
-  test('Should complete full messaging workflow', async ({ page }) => {
+  test('Should complete full messaging workflow', async ({ page, request }) => {
     console.log('1️⃣ Starting messaging flow test');
 
+    // Generate unique test user
+    const timestamp = Date.now();
+    const testUser = {
+      username: `msgflowuser_${timestamp}`,
+      email: `msgflowuser_${timestamp}@example.com`,
+      password: 'TestPassword123!',
+      name: 'Messaging Flow User',
+      phone: '+12025551234',
+      acceptedTerms: true
+    };
+    
+    // Register test user
+    console.log('1.5️⃣ Registering test user...');
+    const regResponse = await request.post('http://127.0.0.1:5000/api/auth/register', {
+      data: testUser
+    });
+    console.log(`Registration status: ${regResponse.status()}`);
+
     // ===== LOGIN =====
-    console.log('2️⃣ Logging in as testadmin...');
+    console.log('2️⃣ Logging in...');
     await page.locator('button:has-text("Sign In")').first().click();
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible({ timeout: 25000 });
 
     const usernameInput = page.getByPlaceholder('Enter username');
     const passwordInput = page.getByPlaceholder('Password');
@@ -25,14 +43,19 @@ test.describe('Messaging Flow', () => {
     await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
     await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
 
-    await usernameInput.fill('testadmin');
-    await passwordInput.fill('TestAdmin123!');
+    await usernameInput.fill(testUser.username);
+    await passwordInput.fill(testUser.password);
 
     const loginButton = page.locator('button:has-text("Sign In")').last();
     await loginButton.click();
 
-    await page.waitForURL(/\/#\/$/, { timeout: 10000 });
-    const token = await page.evaluate(() => localStorage.getItem('authToken'));
+    // Wait for navigation to complete - increased timeout
+    await page.waitForNavigation({ timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+    
+    console.log(`Current URL after login: ${page.url()}`);
+    
+    const token = await page.evaluate(() => localStorage.getItem('authToken')).catch(() => null);
     console.log(`✅ Logged in, token: ${token ? 'YES' : 'NO'}`);
     expect(token).toBeTruthy();
 

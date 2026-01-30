@@ -24,17 +24,17 @@ export default function ForumNewPostModal({
   return (
     <BaseModal
       isOpen={isOpen}
-      title="Post Reply"
+      title="Δημοσίευση Απάντησης"
       onSubmit={onSubmit}
       onClose={onClose}
-      submitText="Post Reply"
+      submitText="Δημοσίευση Απάντησης"
       loading={loading}
       variant="blue"
     >
       {/* Content Textarea */}
-      <FormField label="Your Reply">
+      <FormField label="Η Απάντησή σας">
         <textarea
-          placeholder="Write your reply here..."
+          placeholder="Γράψτε την απάντησή σας εδώ..."
           value={content}
           onChange={(e) => onContentChange(e.target.value)}
           rows={6}

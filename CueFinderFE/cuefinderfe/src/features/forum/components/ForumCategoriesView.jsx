@@ -26,14 +26,14 @@ export default function ForumCategoriesView({
     <div className="space-y-6">
       <div className="flex items-center gap-4">
         <div className="w-1 h-7 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full shadow-lg" />
-        <h2 className="text-2xl font-bold text-blue-400">Forum Categories</h2>
-        <span className="text-xs text-slate-500">• Choose a category</span>
+        <h2 className="text-2xl font-bold text-blue-400">Κατηγορίες Φόρουμ</h2>
+        <span className="text-xs text-slate-500">• Επιλέξτε μια κατηγορία</span>
       </div>
 
       {/* Mobile Sorting Toolbar */}
       <div className="md:hidden bg-slate-800/95 border border-blue-500/20 px-4 py-3 rounded-lg">
         <div className="flex items-center justify-between gap-2">
-          <span className="text-xs font-semibold text-slate-400">Sort by:</span>
+          <span className="text-xs font-semibold text-slate-400">Ταξινόμηση κατά:</span>
           <div className="flex gap-2">
             {['name', 'discussions', 'recent'].map((option) => (
               <button
@@ -45,7 +45,7 @@ export default function ForumCategoriesView({
                     : 'bg-blue-600/10 border border-blue-500/20 text-blue-300 hover:bg-blue-600/20'
                 }`}
               >
-                {option === 'discussions' ? 'Most Active' : option.charAt(0).toUpperCase() + option.slice(1)}
+                {option === 'discussions' ? 'Πιο Ενεργές' : option === 'name' ? 'Όνομα' : 'Πρόσφατες'}
               </button>
             ))}
           </div>

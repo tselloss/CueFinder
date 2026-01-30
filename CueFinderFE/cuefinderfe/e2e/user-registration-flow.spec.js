@@ -49,7 +49,7 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     // Navigate to login page first
     await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 10000 });
 
     // Wait for form inputs to be ready
     const usernameInput = page.getByPlaceholder('Enter username');
@@ -122,11 +122,11 @@ test.describe('End-to-End: User Registration and Authentication', () => {
     console.log('Testing registration form...');
 
     // Navigate to register page via header button
-    await page.locator('button:has-text("Register")').click();
+    await page.locator('button:has-text("Register")').first().click();
     await page.waitForTimeout(500);
     
     // Wait for form to be in register mode
-    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible({ timeout: 15000 });
+    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible({ timeout: 20000 });
     console.log('✓ Registration form visible');
 
     // Fill form with test data

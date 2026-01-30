@@ -266,7 +266,6 @@ export default function DesktopSidebar({
           data-testid="sidebar-forum"
           onClick={(e) => {
             e.stopPropagation();
-            navigate('/forum');
             setShowForumCategories(!showForumCategories);
             setMobileMenuOpen(false);
           }}

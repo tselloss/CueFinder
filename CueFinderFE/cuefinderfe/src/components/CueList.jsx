@@ -164,7 +164,8 @@ export default function CueList({
 
             return (
               <Card 
-                key={c.id} 
+                key={c.id}
+                data-testid="cue-card"
                 onClick={() => onSelect(c)}
                 className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50 group"
               >
@@ -221,7 +222,8 @@ export default function CueList({
 
             return (
               <Card 
-                key={c.id} 
+                key={c.id}
+                data-testid="cue-card"
                 onClick={() => onSelect(c)}
                 className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50"
               >

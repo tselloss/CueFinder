@@ -15,6 +15,7 @@ export default function CueCard({ cue, onSelect, currencySymbol = '€' }) {
 
   return (
     <Card
+      data-testid="cue-card"
       className="cursor-pointer hover:shadow-lg transition-all border-border/50 overflow-hidden group"
       onClick={() => onSelect(cue)}
     >

@@ -29,11 +29,12 @@ COPY scripts ./scripts
 # Run build helper to sync old source to new structure
 RUN node scripts/build-helper.js
 
-# Debug: Print environment variable
-RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL"
+# Debug: Print environment variable and list files to verify copy worked
+RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL" && \
+    grep -c "data-testid" cuefinderfe/src/features/cues/components/CueCard.jsx || echo "CueCard not found or no data-testid"
 
-# Build the app package
-RUN pnpm --filter @cuefinder/app build
+# Build the app package (add --reset-cache to force rebuild)
+RUN pnpm --filter @cuefinder/app build --
 
 # Production stage
 FROM nginx:alpine

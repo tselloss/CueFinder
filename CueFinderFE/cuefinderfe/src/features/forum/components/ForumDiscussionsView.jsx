@@ -45,7 +45,7 @@ export default function ForumDiscussionsView({
               className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
             >
               <Plus size={16} />
-              New Topic
+              Νέο Θέμα
             </Button>
           )}
           <Button
@@ -53,7 +53,7 @@ export default function ForumDiscussionsView({
             className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 text-slate-300 hover:bg-blue-600/20 rounded-lg text-sm transition-all"
           >
             <MessageCircle size={16} />
-            All Categories
+            Όλες οι Κατηγορίες
           </Button>
         </div>
       </div>
@@ -61,7 +61,7 @@ export default function ForumDiscussionsView({
       <SearchInput
         value={searchTerm}
         onChange={onSearchChange}
-        placeholder="Search discussions..."
+        placeholder="Αναζήτηση συζητήσεων..."
       />
 
       <div className="space-y-2">

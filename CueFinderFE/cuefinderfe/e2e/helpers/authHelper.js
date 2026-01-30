@@ -4,7 +4,7 @@
  * Provides reusable functions for user registration, login, and cleanup
  */
 
-const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5200/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 const APP_BASE_URL = process.env.APP_BASE_URL || 'http://127.0.0.1:3000';
 
 /**
@@ -33,24 +33,37 @@ async function registerUser(request, userData) {
  * @param {Object} request - Playwright request context
  * @param {string} emailOrUsername - Email or username
  * @param {string} password - User password
- * @returns {Promise<Object>} Login response with token
+ * @returns {Promise<string|null>} JWT token or null if login failed
  */
 async function loginUser(request, emailOrUsername, password) {
-  const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: {
-      emailOrUsername,
-      password
+  try {
+    const response = await request.post(`${API_BASE_URL}/auth/login`, {
+      data: {
+        emailOrUsername,
+        password
+      }
+    });
+    
+    if (!response.ok()) {
+      const errorText = await response.text();
+      console.error('Login failed:', response.status(), errorText);
+      return null;
     }
-  });
-  
-  if (!response.ok()) {
-    console.error('Login failed:', response.status(), await response.text());
+    
+    const data = await response.json();
+    // Extract token - handle multiple response formats
+    const token = data.token || data.accessToken || data.jwtToken;
+    
+    if (!token) {
+      console.error('No token in login response:', data);
+      return null;
+    }
+    
+    return token;
+  } catch (error) {
+    console.error('Login error:', error.message);
+    return null;
   }
-  
-  return {
-    status: response.status(),
-    data: await response.json().catch(() => ({}))
-  };
 }
 
 /**
@@ -69,7 +82,7 @@ async function loginViaUI(page, emailOrUsername, password) {
   // Click login button
   const loginButton = page.locator('button').filter({ hasText: /Login|Sign In/i }).first();
   await loginButton.click({ timeout: 10000 });
-  await page.waitForTimeout(500);
+  await page.waitForTimeout(1000);
   
   // Fill email/username
   const emailInput = page.locator('input[type="text"], input[type="email"]').first();
@@ -87,6 +100,20 @@ async function loginViaUI(page, emailOrUsername, password) {
   await page.waitForURL(`${APP_BASE_URL}/**`, { timeout: 15000 });
   await page.waitForLoadState('networkidle');
   
+  // Wait for auth cookie to be set
+  await page.waitForFunction(async () => {
+    const cookies = await page.context().cookies();
+    return cookies.some(c => 
+      c.name.toLowerCase().includes('token') || 
+      c.name.toLowerCase().includes('auth') ||
+      c.name.toLowerCase().includes('jwt')
+    );
+  }, { timeout: 10000 }).catch(() => {
+    console.warn('Warning: Auth cookie not found after login');
+  });
+  
+  await page.waitForTimeout(1000); // Extra time for React state updates
+  
   console.log('✓ User logged in successfully');
 }
 
@@ -100,20 +127,22 @@ async function registerAndLogin(request, userData) {
   // Register
   const registerRes = await registerUser(request, userData);
   
-  if (!registerRes.data.token) {
-    // If no token in register response, try login
-    const loginRes = await loginUser(request, userData.email, userData.password);
+  if (registerRes.status !== 200) {
+    const loginToken = await loginUser(request, userData.email || userData.username, userData.password);
     return {
       ...userData,
-      token: loginRes.data.token,
-      userId: loginRes.data.userId || loginRes.data.user?.id
+      token: loginToken,
+      userId: null
     };
   }
   
+  const registerData = await registerRes.data;
+  const token = registerData.token || registerData.accessToken || registerData.jwtToken;
+  
   return {
     ...userData,
-    token: registerRes.data.token,
-    userId: registerRes.data.userId || registerRes.data.user?.id
+    token: token || await loginUser(request, userData.email || userData.username, userData.password),
+    userId: registerData.userId || registerData.user?.id
   };
 }
 
@@ -150,14 +179,47 @@ async function setAuthToken(page, token) {
 }
 
 /**
- * Get authentication token from page
+ * Get auth token from cookies
  * @param {Object} page - Playwright page object
- * @returns {Promise<string>} JWT token
+ * @returns {Promise<string|null>} JWT token or null
  */
 async function getAuthToken(page) {
-  return await page.evaluate(() => {
-    return localStorage.getItem('token') || localStorage.getItem('authToken');
-  });
+  try {
+    // Get all cookies
+    const cookies = await page.context().cookies();
+    
+    // Look for auth cookie (common names: token, authToken, jwt, Authorization, etc.)
+    const authCookie = cookies.find(c => 
+      c.name.toLowerCase().includes('token') || 
+      c.name.toLowerCase().includes('auth') ||
+      c.name.toLowerCase().includes('jwt') ||
+      c.name === 'Authorization'
+    );
+    
+    if (authCookie) {
+      console.log(`✓ Found auth cookie: ${authCookie.name}`);
+      return authCookie.value;
+    }
+    
+    // Also check localStorage as fallback
+    const localStorageToken = await page.evaluate(() => {
+      try {
+        return localStorage.getItem('token') || localStorage.getItem('authToken');
+      } catch (e) {
+        return null;
+      }
+    });
+    
+    if (localStorageToken) {
+      return localStorageToken;
+    }
+    
+    console.warn('No auth token found in cookies or localStorage');
+    return null;
+  } catch (error) {
+    console.warn('Failed to get auth token:', error.message);
+    return null;
+  }
 }
 
 /**
@@ -166,8 +228,13 @@ async function getAuthToken(page) {
  * @returns {Promise<boolean>} True if logged in
  */
 async function isLoggedIn(page) {
-  const token = await getAuthToken(page);
-  return !!token;
+  try {
+    const token = await getAuthToken(page);
+    return !!token;
+  } catch (error) {
+    console.warn('Error checking login status:', error.message);
+    return false;
+  }
 }
 
 /**

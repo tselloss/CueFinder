@@ -39,15 +39,15 @@ export default function ForumDetailView({
           onClick={onBack}
           className="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-slate-300 hover:bg-blue-500/20 rounded-lg text-sm transition-all"
         >
-          Back
+          Πίσω
         </Button>
       </div>
 
       {/* Posts Title */}
-      <h3 className="text-lg font-bold text-slate-300">Posts ({postTree.length})</h3>
+      <h3 className="text-lg font-bold text-slate-300">Αναρτήσεις ({postTree.length})</h3>
 
       {/* Sign-in Prompt */}
-      {!user && <p className="text-sm text-slate-400">Sign in to like or reply.</p>}
+      {!user && <p className="text-sm text-slate-400">Συνδεθείτε για να κάνετε like ή να απαντήσετε.</p>}
 
       {/* Posts Tree */}
       <div className="space-y-2">
@@ -72,7 +72,7 @@ export default function ForumDetailView({
             className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold text-sm rounded-lg hover:-translate-y-0.5 shadow-md hover:shadow-lg transition-all"
           >
             <MessageSquare size={16} />
-            Post Reply
+            Δημοσίευση Απάντησης
           </Button>
         </div>
       )}

@@ -41,7 +41,7 @@ export default function ResetPassword() {
   useEffect(() => {
     const validateToken = async () => {
       if (!token) {
-        setError('No reset token provided. Please check your email link.');
+        setError('Δεν παρέχθηκε σύνδεσμος επαναφοράς. Παρακαλώ ελέγξτε το σύνδεσμο στο email σας.');
         setIsValidating(false);
         return;
       }
@@ -58,14 +58,14 @@ export default function ResetPassword() {
           setIsValidToken(true);
           setError('');
         } else {
-          setError('This reset link is invalid or has expired.');
+          setError('Αυτός ο σύνδεσμος επαναφοράς είναι άκυρος ή έχει λήξει.');
           setIsValidToken(false);
         }
       } catch (err) {
         if (err.response?.status === 401) {
-          setError('This reset link has expired or is invalid. Please request a new one.');
+          setError('Αυτός ο σύνδεσμος επαναφοράς έχει λήξει ή είναι άκυρος. Παρακαλώ ζητήστε νέο.');
         } else {
-          setError('Unable to validate your reset link. Please try again.');
+          setError('Αδυναμία επαλήθευσης του συνδέσμου επαναφοράς. Παρακαλώ δοκιμάστε ξανά.');
         }
         setIsValidToken(false);
         console.error('Token validation error:', err);
@@ -112,19 +112,19 @@ export default function ResetPassword() {
 
     // Validation
     if (newPassword.length < 8) {
-      setError('Password must be at least 8 characters long.');
+      setError('Ο κωδικός πρέπει να έχει τουλάχιστον 8 χαρακτήρες.');
       setIsResetting(false);
       return;
     }
 
     if (newPassword !== confirmPassword) {
-      setError('Passwords do not match.');
+      setError('Οι κωδικοί δεν ταιριάζουν.');
       setIsResetting(false);
       return;
     }
 
     if (!/[a-zA-Z]/.test(newPassword) || !/\d/.test(newPassword)) {
-      setError('Password must contain both letters and numbers.');
+      setError('Ο κωδικός πρέπει να περιέχει γράμματα και αριθμούς.');
       setIsResetting(false);
       return;
     }
@@ -149,18 +149,18 @@ export default function ResetPassword() {
       // Redirect to login after 3 seconds
       setTimeout(() => {
         navigate('/login', {
-          state: { message: 'Password reset successful. Please login with your new password.' }
+          state: { message: 'Η επαναφορά κωδικού ολοκληρώθηκε. Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.' }
         });
       }, 3000);
     } catch (err) {
       if (err.response?.status === 401) {
-        setError('This reset link has expired. Please request a new one.');
+        setError('Αυτός ο σύνδεσμος επαναφοράς έχει λήξει. Παρακαλώ ζητήστε νέο.');
       } else if (err.response?.status === 400) {
-        setError(err.response.data?.message || 'Invalid password. Please check the requirements.');
+        setError(err.response.data?.message || 'Μη έγκυρος κωδικός. Παρακαλώ ελέγξτε τις απαιτήσεις.');
       } else if (err.code === 'ECONNABORTED') {
-        setError('Request timeout. Please try again.');
+        setError('Η αίτηση έληξε. Παρακαλώ δοκιμάστε ξανά.');
       } else {
-        setError('Unable to reset your password. Please try again later.');
+        setError('Αδυναμία επαναφοράς κωδικού. Παρακαλώ δοκιμάστε ξανά αργότερα.');
       }
       console.error('Password reset error:', err);
     } finally {
@@ -176,7 +176,7 @@ export default function ResetPassword() {
             <div className="h-12 w-12 rounded-full bg-gradient-to-br from-primary to-primary/60 flex items-center justify-center shadow-lg mb-4 animate-pulse">
               <Lock className="h-6 w-6 text-primary-foreground" />
             </div>
-            <p className="text-center text-muted-foreground">Verifying your reset link...</p>
+            <p className="text-center text-muted-foreground">Επαλήθευση συνδέσμου επαναφοράς...</p>
           </CardContent>
         </Card>
       </div>
@@ -193,7 +193,7 @@ export default function ResetPassword() {
                 <Lock className="h-8 w-8 text-destructive" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Link Invalid or Expired</CardTitle>
+            <CardTitle className="text-2xl text-center">Σύνδεσμος Άκυρος ή έχει Λήξει</CardTitle>
             <CardDescription className="text-center text-destructive/80">
               {error}
             </CardDescription>
@@ -203,7 +203,7 @@ export default function ResetPassword() {
               onClick={() => navigate('/forgot-password')}
               className="w-full"
             >
-              Request New Link
+              Αίτηση Νέου Συνδέσμου
             </Button>
           </CardContent>
         </Card>
@@ -221,9 +221,9 @@ export default function ResetPassword() {
                 <Lock className="h-8 w-8 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Password Reset Successful</CardTitle>
+            <CardTitle className="text-2xl text-center">Επιτυχής Επαναφορά Κωδικού</CardTitle>
             <CardDescription className="text-center">
-              Your password has been reset. Please log in with your new password.
+              Ο κωδικός σας επαναφέρθηκε. Παρακαλώ συνδεθείτε με τον νέο σας κωδικό.
             </CardDescription>
           </CardHeader>
           <CardContent>
@@ -231,7 +231,7 @@ export default function ResetPassword() {
               onClick={() => navigate('/login')}
               className="w-full"
             >
-              Go to Login
+              Μετάβαση στη Σύνδεση
             </Button>
           </CardContent>
         </Card>
@@ -248,9 +248,9 @@ export default function ResetPassword() {
               <Lock className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Reset Password</CardTitle>
+          <CardTitle className="text-2xl text-center">Επαναφορά Κωδικού</CardTitle>
           <CardDescription className="text-center">
-            Create a strong password to secure your account
+            Δημιουργήστε έναν ισχυρό κωδικό για να ασφαλίσετε τον λογαριασμό σας
           </CardDescription>
         </CardHeader>
 
@@ -266,12 +266,12 @@ export default function ResetPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                New Password
+                Νέος Κωδικός
               </label>
               <div className="relative">
                 <Input
                   type={showPassword ? 'text' : 'password'}
-                  placeholder="Enter new password (min 8 characters)"
+                  placeholder="Εισάγετε νέο κωδικό (τουλάχιστον 8 χαρακτήρες)"
                   value={newPassword}
                   onChange={(e) => setNewPassword(e.target.value)}
                   disabled={isResetting}
@@ -292,11 +292,11 @@ export default function ResetPassword() {
             {newPassword && (
               <div className="space-y-2">
                 <div className="flex items-center justify-between">
-                  <label className="text-xs font-medium text-muted-foreground">Password Strength</label>
+                  <label className="text-xs font-medium text-muted-foreground">Ισχύς Κωδικού</label>
                   <span className="text-xs font-medium" style={{
                     color: passwordStrength < 30 ? '#ef4444' : passwordStrength < 60 ? '#f59e0b' : passwordStrength < 80 ? '#3b82f6' : '#22c55e'
                   }}>
-                    {passwordStrength < 30 ? 'Weak' : passwordStrength < 60 ? 'Fair' : passwordStrength < 80 ? 'Good' : 'Strong'}
+                    {passwordStrength < 30 ? 'Αδύναμος' : passwordStrength < 60 ? 'Μέτριος' : passwordStrength < 80 ? 'Καλός' : 'Ισχυρός'}
                   </span>
                 </div>
                 <div className="w-full h-2 bg-secondary rounded-full overflow-hidden">
@@ -312,17 +312,17 @@ export default function ResetPassword() {
                 <div className="space-y-1 mt-3">
                   <div className="flex items-center gap-2 text-xs">
                     <span className={newPassword.length >= 8 ? 'text-green-500' : 'text-muted-foreground'}>
-                      {newPassword.length >= 8 ? '✓' : '○'} At least 8 characters
+                      {newPassword.length >= 8 ? '✓' : '○'} Τουλάχιστον 8 χαρακτήρες
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className={/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
-                      {/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? '✓' : '○'} Mix of uppercase & lowercase
+                      {/[a-z]/.test(newPassword) && /[A-Z]/.test(newPassword) ? '✓' : '○'} Μείγμα κεφαλαίων & πεζών
                     </span>
                   </div>
                   <div className="flex items-center gap-2 text-xs">
                     <span className={/\d/.test(newPassword) ? 'text-green-500' : 'text-muted-foreground'}>
-                      {/\d/.test(newPassword) ? '✓' : '○'} At least one number
+                      {/\d/.test(newPassword) ? '✓' : '○'} Τουλάχιστον ένας αριθμός
                     </span>
                   </div>
                 </div>
@@ -333,12 +333,12 @@ export default function ResetPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Lock className="h-4 w-4 text-muted-foreground" />
-                Confirm Password
+                Επιβεβαίωση Κωδικού
               </label>
               <div className="relative">
                 <Input
                   type={showConfirm ? 'text' : 'password'}
-                  placeholder="Re-enter your password"
+                  placeholder="Εισάγετε ξανά τον κωδικό σας"
                   value={confirmPassword}
                   onChange={(e) => setConfirmPassword(e.target.value)}
                   disabled={isResetting}
@@ -354,7 +354,7 @@ export default function ResetPassword() {
               </div>
               {newPassword && confirmPassword && (
                 <p className={`text-xs font-medium ${newPassword === confirmPassword ? 'text-green-500' : 'text-destructive'}`}>
-                  {newPassword === confirmPassword ? '✓ Passwords match' : '✗ Passwords do not match'}
+                  {newPassword === confirmPassword ? '✓ Οι κωδικοί ταιριάζουν' : '✗ Οι κωδικοί δεν ταιριάζουν'}
                 </p>
               )}
             </div>
@@ -364,7 +364,7 @@ export default function ResetPassword() {
               className="w-full"
               disabled={isResetting || !newPassword || newPassword !== confirmPassword || passwordStrength < 60}
             >
-              {isResetting ? 'Resetting...' : 'Reset Password'}
+              {isResetting ? 'Επαναφορά...' : 'Επαναφορά Κωδικού'}
             </Button>
 
             <div className="flex items-center justify-center pt-2 border-t border-border">
@@ -373,7 +373,7 @@ export default function ResetPassword() {
                 onClick={() => navigate('/login')}
                 className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
               >
-                Back to Login
+                Επιστροφή στη Σύνδεση
               </button>
             </div>
           </CardContent>

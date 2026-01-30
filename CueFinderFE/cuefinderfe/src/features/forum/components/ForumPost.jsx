@@ -54,7 +54,7 @@ export default function ForumPost({
             </span>
           </div>
           {post.helpfulCount > 0 && (
-            <span className="text-xs font-semibold text-green-500">✓ {post.helpfulCount} helpful</span>
+            <span className="text-xs font-semibold text-green-500">✓ {post.helpfulCount} χρήσιμο</span>
           )}
         </div>
 
@@ -78,7 +78,7 @@ export default function ForumPost({
             className="flex items-center gap-1 text-xs font-semibold text-slate-400 hover:text-blue-400 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             <MessageSquare size={14} />
-            Reply
+            Απάντηση
           </button>
 
           <button
@@ -86,7 +86,7 @@ export default function ForumPost({
             disabled={!user}
             className="px-2 py-1 text-xs font-semibold text-green-500 border border-green-500/30 rounded hover:bg-green-500/10 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Helpful
+            Χρήσιμο
           </button>
         </div>
       </div>

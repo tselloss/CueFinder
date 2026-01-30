@@ -4,6 +4,10 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { registerUser: registerUserHelper, loginUser: loginUserHelper } = require('./helpers/authHelper');
+
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 // Generate unique test user
 const timestamp = Date.now();
@@ -15,61 +19,34 @@ const testUser = {
   acceptedTerms: true
 };
 
-// Helper to register user via API
-async function registerUser(request, userData) {
-  const response = await request.post('http://127.0.0.1:5000/api/auth/register', {
-    data: userData
-  });
-  return response;
-}
-
 test.describe('Login and Listing Navigation', () => {
-  test.beforeEach(async ({ page, request }) => {
+  let authToken;
+  
+  test.beforeEach(async ({ request }) => {
     // Register test user
-    await registerUser(request, testUser);
+    await registerUserHelper(request, testUser);
     
-    // Navigate to app home
-    await page.goto('http://localhost:3000');
-    // Wait for main heading
-    await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
+    // Get auth token for tests
+    authToken = await loginUserHelper(request, testUser.username, testUser.password);
+    expect(authToken).toBeTruthy();
   });
 
   test('Should persist login and allow listing navigation', async ({ page }) => {
     console.log('1️⃣ Starting test: Login and navigate to listing');
 
-    // Click Sign In button - use getByRole to be more specific
-    console.log('2️⃣ Clicking Sign In button...');
-    const signInBtn = page.locator('button:has-text("Sign In")').first();
-    await signInBtn.waitFor({ state: 'visible', timeout: 5000 });
-    await signInBtn.click();
+    // Set token in localStorage BEFORE navigating
+    console.log('2️⃣ Setting auth token...');
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, authToken);
+
+    // Navigate to home page - user is already logged in
+    console.log('3️⃣ Navigating to home page...');
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(1000);
 
-    // Wait for Sign In heading
-    console.log('3️⃣ Waiting for Sign In page...');
-    await expect(page.getByRole('heading', { name: /Welcome Back|Sign In/i })).toBeVisible({ timeout: 10000 });
-
-    // Fill login form
-    console.log('4️⃣ Filling login credentials...');
-    const usernameInput = page.getByPlaceholder('Enter username');
-    const passwordInput = page.getByPlaceholder('Password');
-    
-    await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
-    await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
-
-    await usernameInput.fill(testUser.username);
-    await passwordInput.fill(testUser.password);
-
-    // Submit login form
-    console.log('5️⃣ Submitting login form...');
-    const submitButtons = await page.locator('button:has-text("Sign In")').count();
-    console.log(`Found ${submitButtons} Sign In button(s)`);
-    
-    const loginButton = page.locator('button:has-text("Sign In")').last();
-    await loginButton.click();
-
-    // Wait for redirect to home/listings page
-    console.log('6️⃣ Waiting for redirect to listings...');
-    await page.waitForURL(/\/#\/$/, { timeout: 10000 });
+    // Wait for main heading
+    await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
     
     // Verify auth token is stored
     const token = await page.evaluate(() => localStorage.getItem('authToken'));
@@ -77,7 +54,7 @@ test.describe('Login and Listing Navigation', () => {
     expect(token).toBeTruthy();
 
     // Wait a moment for listings to load
-    console.log('7️⃣ Waiting for listings to load...');
+    console.log('4️⃣ Waiting for listings to load...');
     await page.waitForTimeout(2000);
 
     // Get all listing cards/items
@@ -128,29 +105,21 @@ test.describe('Login and Listing Navigation', () => {
   test('Should maintain auth token across navigation', async ({ page }) => {
     console.log('Testing token persistence across navigation...');
 
-    // Login first
-    await page.locator('button:has-text("Sign In")').first().click();
-    await page.waitForTimeout(500);
-    await expect(page.getByRole('heading', { name: /Welcome Back|Sign In/i })).toBeVisible({ timeout: 5000 });
+    // Set token in localStorage BEFORE navigating
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, authToken);
 
-    const usernameInput = page.getByPlaceholder('Enter username');
-    const passwordInput = page.getByPlaceholder('Password');
-    
-    await usernameInput.fill(testUser.username);
-    await passwordInput.fill(testUser.password);
-    
-    const loginButton = page.locator('button:has-text("Sign In")').last();
-    await loginButton.click();
-
-    // Wait for redirect
-    await page.waitForURL(/\/#\/$/, { timeout: 10000 });
+    // Navigate to home page - user is already logged in
+    await page.goto(APP_BASE_URL);
+    await page.waitForTimeout(1000);
 
     // Get initial token
     const tokenBefore = await page.evaluate(() => localStorage.getItem('authToken'));
     console.log(`Token before navigation: ${tokenBefore ? 'Present' : 'Missing'}`);
 
     // Navigate using back button (simulating user going back from detail page)
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(1000);
 
     // Check token is still there

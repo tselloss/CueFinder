@@ -71,7 +71,8 @@ test.describe('E2E: Register, Login, Add Billiard Table', () => {
     } else if (await usernameByLabel.isVisible().catch(() => false)) {
       await usernameByLabel.fill(testUser.username);
     } else {
-      await usernameByType.waitFor({ state: 'visible', timeout: 15000 });
+      // Use default timeout from config (now 30s)
+      await usernameByType.waitFor({ state: 'visible' });
       await usernameByType.fill(testUser.username);
     }
 
@@ -84,7 +85,8 @@ test.describe('E2E: Register, Login, Add Billiard Table', () => {
     } else if (await passwordByLabel.isVisible().catch(() => false)) {
       await passwordByLabel.fill(testUser.password);
     } else {
-      await passwordByType.waitFor({ state: 'visible', timeout: 15000 });
+      // Increased timeout and use the config default
+      await passwordByType.waitFor({ state: 'visible' });
       await passwordByType.fill(testUser.password);
     }
     await page.locator('button[type="submit"]').first().click();

@@ -1,0 +1,1655 @@
+
+> cuefinderfe@0.1.0 test:e2e C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe
+> npx @playwright/test test
+
+
+Γ£¿ Cue Case E2E Tests Ready
+
+
+Running 118 tests using 8 workers
+
+
+Γ£¿ Cue Case E2E Tests Ready
+
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒô¥ Forum Test User: forum_user_1769757597433
+
+
+========== E2E TEST: REGISTER ΓåÆ LOGIN ΓåÆ CREATE LISTING ΓåÆ NSFW UPLOAD ==========
+
+≡ƒô¥ STEP 1: Registering user...
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒô¥ Test User: e2e_user_1769757597476
+
+≡ƒÜÇ Setting up test user...
+≡ƒôº Email: e2e_user_1769757597476@test.com
+
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒôé STEP 1: Get Forum Categories
+
+Γ£à User registered: caseuser_1769757597318
+Γ£à User registered: flowuser_1769757597321
+Γ£à Registration successful (User ID: 183)
+
+≡ƒöÉ STEP 2: Logging in...
+Login failed: {"message":"Too many login attempts. Please try again in 0 seconds.","retryAfter":0}
+Γ£à User registered: caseuser_1769757597346
+Γ£ô Found 6 forum categories:
+  1. General (ID: 06f3a277-60e9-40b2-8795-78641bcaed5c)
+  2. Billiard Clubs (ID: 5c8843ab-3dfa-44ba-9822-c356b487a7ef)
+  3. Tournaments (ID: 1be045b5-171b-426d-abac-909b573fc433)
+  4. Sales (ID: e2f6d381-36f9-4dec-a3be-d4e5875aeadf)
+  5. Practise Drills (ID: 2f26708e-c984-4996-8fb8-3577c2e792f7)
+  6. Pool Lessons (ID: fc372d19-758e-422c-8c6d-d52aaccc4b76)
+Γ£à User registered: listinguser_1769757597351
+  Γ£ô  1 e2e\forum-complete-flow.spec.js:58:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 1: Get forum categories (137ms)
+Γ£à Auth token obtained
+
+  Γ£ÿ  2 e2e\complete-e2e-flow.spec.js:24:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓåÆ NSFW Upload Test (218ms)
+≡ƒº╣ Cleanup completed
+
+  Γ£ÿ  3 e2e\cue-case-api.spec.js:131:3 ΓÇ║ Cue Case API Tests ΓÇ║ 1. Create a new cue case listing (16ms)
+
+≡ƒº╣ Cleanup completed
+  Γ£ÿ  4 e2e\cue-case-listing.spec.js:152:3 ΓÇ║ Cue Case Listing - Complete E2E Flow ΓÇ║ 1. Create new cue case listing via UI (13ms)
+
+============================================================
+≡ƒÄë ALL TESTS COMPLETED SUCCESSFULLY!
+============================================================
+
+≡ƒôï SUMMARY:
+  Γ£à Test 1: Demonstrated adding a Cue listing
+  Γ£à Test 2: Demonstrated adding a Case listing
+  Γ£à Test 3: Compared Cue vs Case form fields
+
+≡ƒÆí KEY FEATURES VALIDATED:
+  Γ£à Product type selector working
+  Γ£à Dynamic form fields switching
+  Γ£à Cue-specific fields display correctly
+  Γ£à Case-specific fields display correctly
+  Γ£à Form data entry working
+  Γ£à User authentication working
+
+≡ƒÜÇ Implementation Status: FULLY FUNCTIONAL
+
+  Γ£ÿ  5 e2e\add-cue-and-case.spec.js:90:3 ΓÇ║ Add Cue and Case Listings - Complete Flow ΓÇ║ 1. Add Cue Listing via UI (16ms)
+
+≡ƒöÉ STEP 1: Register New User
+
+Registering: e2e_user_1769757597476
+Γ£ô Registration response status: 200
+  Γ£ô  6 e2e\complete-user-journey.spec.js:61:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 1: Register new user (508ms)
+
+≡ƒÄ¼ Starting Complete Cue Case Flow Demo...
+
+≡ƒôì STEP 1: Navigating to home page...
+
+≡ƒöÉ STEP 2: Register and Login Forum User
+
+Γ£ô Registration response: 200
+
+≡ƒöæ STEP 2: Login User via UI
+
+≡ƒöæ Logging in user: forum_user_1769757597433@test.com
+
+Γ£¿ Cue Case E2E Tests Ready
+
+  Γ£ÿ  7 e2e\cue-case-listing.spec.js:552:3 ΓÇ║ Cue Case vs Cue Product Type Selection ΓÇ║ 1. Product type selector is visible for new listings (18ms)
+Γ£à Home page loaded
+
+≡ƒôì STEP 2: Opening login...
+Γ£ô Home page loaded
+
+≡ƒô¿ Starting message receiving flow test
+
+0∩╕ÅΓâú Registering test user...
+Registration status: 200
+1∩╕ÅΓâú Navigating to home page...
+Γ£ô Login modal opened
+Γ£à Home page loaded
+2∩╕ÅΓâú Logging in...
+Γ£ô Testing forum button visibility...
+1∩╕ÅΓâú Starting test: Login and navigate to listing
+2∩╕ÅΓâú Clicking Sign In button...
+Γ£ô Email entered
+Γ£ô Forum button is visible
+Γ£ô Password entered
+  Γ£ô  8 e2e\forum-navigation-and-topics.spec.js:42:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum button is visible in sidebar (1.0s)
+Γ£ô User logged in successfully
+Γ£ô Login submitted
+Γ£à Login modal opened
+
+≡ƒôì STEP 3: Logging in...
+  Γ£ÿ  9 e2e\forum-complete-flow.spec.js:72:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 2: Register and login forum user (4.3s)
+Γ£ô Testing forum dropdown toggle...
+3∩╕ÅΓâú Waiting for Sign In page...
+4∩╕ÅΓâú Filling login credentials...
+  Γ£ÿ  10 e2e\complete-user-journey.spec.js:79:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 2: Login user via UI (4.5s)
+1∩╕ÅΓâú Starting messaging flow test
+1.5∩╕ÅΓâú Registering test user...
+Registration status: 200
+2∩╕ÅΓâú Logging in...
+5∩╕ÅΓâú Submitting login form...
+Found 3 Sign In button(s)
+6∩╕ÅΓâú Waiting for redirect to listings...
+Γ£ô First click opens dropdown
+Γ£à Auth token stored: YES
+7∩╕ÅΓâú Waiting for listings to load...
+
+≡ƒô¥ Forum Test User: forum_user_1769757605826
+
+
+≡ƒô¥ Test User: e2e_user_1769757606612
+≡ƒôº Email: e2e_user_1769757606612@test.com
+
+Current URL after login: http://localhost:3000/#/
+Γ£à Logged in, token: YES
+3∩╕ÅΓâú Waiting for listings to load...
+
+≡ƒîÉ STEP 3: Navigate to Forum
+
+≡ƒöæ Logging in user: forum_user_1769757605826@test.com
+
+≡ƒô¥ STEP 3: Add Multiple Listings
+
+≡ƒöæ Logging in user: e2e_user_1769757606612@test.com
+Current URL after login: http://localhost:3000/#/
+Γ£à Logged in, token: YES
+3∩╕ÅΓâú Waiting for listings to load...
+≡ƒôª Found 0 listing item(s)
+8∩╕ÅΓâú Clicking first listing...
+Found listing element, clicking...
+9∩╕ÅΓâú Waiting for detail page to load...
+Γ£ô User logged in successfully
+≡ƒôª Found 24 clickable elements
+4∩╕ÅΓâú Clicking on first listing...
+Γ£ô User logged in successfully
+
+≡ƒôª Creating cue listing...
+Title: Premium Cue Stick 1769757609300
+Failed to create listing: 500 {"message":"Error creating cue","error":"User ID not found in token"}
+  Γ£ÿ  11 e2e\complete-user-journey.spec.js:127:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 3: Add multiple listing types (1.9s)
+Γ£à User logged in successfully
+
+≡ƒôì STEP 4: Opening new listing modal...
+≡ƒôª Found 24 clickable elements
+4∩╕ÅΓâú Clicking on first listing...
+Current URL: http://localhost:3000/#/
+≡ƒöƒ Verifying we did NOT redirect to login...
+Is Login Page: false
+Is Detail Page: false
+Γ£à Test passed: Login persisted and listing navigation successful!
+  Γ£ô  12 e2e\login-and-listing-flow.spec.js:37:3 ΓÇ║ Login and Listing Navigation ΓÇ║ Should persist login and allow listing navigation (6.6s)
+Γ£ô Home page loaded
+Looking for Forum button...
+Testing token persistence across navigation...
+
+≡ƒô¥ Test User: e2e_user_1769757610566
+≡ƒôº Email: e2e_user_1769757610566@test.com
+
+Γ£ô Forum page visible: false
+  Γ£ô  13 e2e\forum-complete-flow.spec.js:92:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 3: Navigate to forum via UI (4.3s)
+≡ƒôì Current URL: http://localhost:3000/#/
+5∩╕ÅΓâú Looking for "Message Seller" button...
+ΓÜá∩╕Å Message Seller button not found - seller may not be available or user not authenticated
+8∩╕ÅΓâú Navigating to Inbox...
+9∩╕ÅΓâú Clicked Inbox link
+
+Γ£¿ STEP 4: Create New Forum Topic
+
+≡ƒöæ Logging in user: forum_user_1769757605826@test.com
+Token before navigation: Present
+
+Γ£Å∩╕Å STEP 4: Edit Listing via UI
+
+≡ƒöæ Logging in user: e2e_user_1769757610566@test.com
+Γ£à New listing modal opened
+
+≡ƒôì STEP 5: Checking product type selector...
+≡ƒôì Current URL: http://localhost:3000/#/
+4∩╕ÅΓâú Looking for "Message Seller" button...
+ΓÜá∩╕Å Message Seller button not found
+7∩╕ÅΓâú Navigating to Inbox...
+Γ£à Found Inbox button
+8∩╕ÅΓâú Current URL after inbox navigation: http://localhost:3000/#/inbox
+Token after navigation: Present
+Γ£à Token persisted correctly!
+  Γ£ô  14 e2e\login-and-listing-flow.spec.js:128:3 ΓÇ║ Login and Listing Navigation ΓÇ║ Should maintain auth token across navigation (2.5s)
+
+≡ƒô▒ STEP 1: Register Mobile User
+
+  Username: mobileuser1769757612434
+  Email: mobile1769757612434@test.com
+  Γ£à Registration successful
+  User ID: 192
+
+  Γ£ô  15 e2e\mobile-nsfw-flow.spec.js:52:1 ΓÇ║ Step 1: Register mobile user (46ms)
+
+≡ƒöÉ STEP 2: Logging in
+
+  Username: mobileuser1769757612434
+  Γ£ÿ  16 e2e\mobile-nsfw-flow.spec.js:85:1 ΓÇ║ Step 2: User login (22ms)
+Γ£ô User logged in successfully
+≡ƒöƒ Checking Inbox page...
+Γ£à Inbox page loaded
+≡ƒô¿ Found 0 message element(s) in inbox
+Found 0 message items
+≡ƒôì Found 0 notification badge(s)
+Γ£à Messaging flow test completed
+  Γ£ô  17 e2e\messaging-flow.spec.js:14:3 ΓÇ║ Messaging Flow ΓÇ║ Should complete full messaging workflow (8.5s)
+
+≡ƒÜÇ Setting up test user...
+Γ£à User registered: cuetype_user_1769757613291
+
+≡ƒº╣ Cleaning up test data...
+Γ£à Cleaned up 0 test cue(s)
+
+≡ƒô¥ Page heading: ≡ƒÄ▒ CueFinder
+9∩╕ÅΓâú Checking for message in inbox...
+
+≡ƒôï STEP 3: Creating cue listing
+
+  Title: Mobile Test Cue
+  Brand: Test Brand
+  Price: $150
+  Γ£ÿ  18 e2e\multiple-cue-types.spec.js:313:3 ΓÇ║ Multiple Cue Types - Complete Flow ΓÇ║ 1. Filter: Playing Cue (1ms)
+  Γ¥î Error: Error creating cue
+  Γ£ÿ  19 e2e\mobile-nsfw-flow.spec.js:97:1 ΓÇ║ Step 3: Create cue listing (103ms)
+Γ£ô User logged in successfully
+Navigating to listings page...
+  Γ£ÿ  20 e2e\forum-complete-flow.spec.js:140:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 4: Create a new forum topic/discussion (3.1s)
+
+≡ƒÜÇ SETUP: Registering test user...
+
+≡ƒÜ½ STEP 4: Upload NSFW Image (Should be Rejected)
+
+ΓÅ¡∩╕Å  Skipping (no cue ID)
+
+  -  21 e2e\mobile-nsfw-flow.spec.js:133:1 ΓÇ║ Step 4: Upload NSFW image and verify rejection
+Γ£à User registered: nsfwtest_1769757614529
+
+≡ƒæñ STEP 5: Register Admin User
+
+  Username: mobileadmin1769757614564
+  Email: admin1769757614564@test.com
+  Γ£à Admin user registered
+  Admin ID: 195
+  Γ£ÿ  22 e2e\mobile-nsfw-flow.spec.js:183:1 ΓÇ║ Step 5: Register admin user (96ms)
+Γ£ô Listings page loaded
+ΓÜá∩╕Å No listings found to edit - creating one first
+Failed to create listing: 500 {"message":"Error creating cue","error":"User ID not found in token"}
+  Γ£ô  23 e2e\complete-user-journey.spec.js:171:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 4: Edit listing via UI (3.7s)
+ΓÜá∩╕Å Message not found in inbox - checking inbox content...
+Γä╣∩╕Å No message content found (may need backend time)
+≡ƒöƒ Checking notification badge...
+Γä╣∩╕Å No unread badge visible (messages may be marked as read)
+
+Γ£à Message receiving flow test completed!
+
+
+≡ƒæñ STEP 5: Edit User Profile
+
+  Γ£ô  24 e2e\message-receiving-flow.spec.js:4:7 ΓÇ║ Message Receiving Flow ΓÇ║ Should allow user to receive and view messages from buyers (11.9s)
+≡ƒöæ Logging in user: e2e_user_1769757610566@test.com
+
+≡ƒô¥ Forum Test User: forum_user_1769757615740
+
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Invalid Login Credentials
+
+≡ƒôï STEP 6: Check Admin Moderation Data
+
+  Moderation Endpoint Status: 404
+  ΓÜá∩╕Å  Could not access moderation endpoint
+
+  Γ£ô  25 e2e\mobile-nsfw-flow.spec.js:217:1 ΓÇ║ Step 6: Verify admin can see rejected images (119ms)
+
+≡ƒº╣ Demo completed!
+
+  Γ£ÿ  26 e2e\cue-case-complete-flow.spec.js:66:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Complete Flow: Registration ΓåÆ Login ΓåÆ Create Case ΓåÆ View ΓåÆ Navigate (16.7s)
+
+≡ƒÆ¼ STEP 5: Add Reply to Discussion
+
+≡ƒöæ Logging in user: forum_user_1769757615740@test.com
+
+≡ƒô▒ STEP 7: Test Admin Dashboard on Mobile
+
+Γ£ô User logged in successfully
+Navigating to profile...
+Γ£ô Profile menu opened
+
+≡ƒÜÇ Setting up test user...
+Γ£ô Profile page loaded
+Γ£à User registered: flowuser_1769757618709
+Γ£ô Name updated: Updated Name 1769757618828
+Failed to get profile: 405
+  Γ£ô  27 e2e\complete-user-journey.spec.js:239:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 5: Edit user profile (3.8s)
+
+≡ƒº╣ Demo completed!
+
+  Γ£ÿ  28 e2e\cue-case-complete-flow.spec.js:259:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Quick Demo: Product Type Selection (13ms)
+  Found 0 admin-related elements
+
+≡ƒÄ» STEP 6: Verify UI Elements and Menus
+
+≡ƒöæ Logging in user: e2e_user_1769757610566@test.com
+Γ£ô User logged in successfully
+  Γ£ÿ  29 e2e\forum-complete-flow.spec.js:188:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 5: Add a reply/post to the discussion (2.1s)
+  Γ£à Navigated to admin URL
+  ≡ƒô▒ Viewport: 375x667px
+  ≡ƒô╕ Screenshot saved
+
+  Γ£ô  30 e2e\mobile-nsfw-flow.spec.js:237:1 ΓÇ║ Step 7: Verify admin dashboard loads on mobile (3.5s)
+
+======================================================================
+≡ƒô▒ MOBILE E2E TEST SUMMARY
+======================================================================
+Γ£à Step 1: User Registered: mobileuser1769757615870
+Γ£à Step 2: User Logged In
+Γ£à Step 3: Listing Created: Cue #undefined
+Γ£à Step 4: NSFW Image Rejected
+Γ£à Step 5: Admin Registered: mobileadmin1769757615870
+Γ£à Step 6: Admin Can Access Moderation Data
+Γ£à Step 7: Admin Dashboard Loads on Mobile
+======================================================================
+≡ƒÄë ALL MOBILE TESTS PASSED!
+
+  Γ£ô  31 e2e\mobile-nsfw-flow.spec.js:274:1 ΓÇ║ Summary: Mobile NSFW Flow Complete (16ms)
+
+≡ƒÄ▒ Starting E2E Test: Register (API) ΓåÆ Login (API) ΓåÆ Add Table (UI)
+
+Test User: tableuser_1769757619929
+Test Email: tableuser_1769757619929@example.com
+
+≡ƒô¥ STEP 1: Registering new user via API...
+
+========== E2E TEST: REGISTER ΓåÆ LOGIN ΓåÆ LISTING ΓåÆ NSFW UPLOAD ==========
+
+
+≡ƒô¥ STEP 1: Registering user...
+
+  Username: user_1769757621338
+  Email: user_1769757621338@test.com
+  Password: TestPass123!
+  Γ£à Registration successful
+
+  Token: eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJodHRwOi8vc...
+  User ID: 198
+Γ£à User registered: tableuser_1769757619929
+
+≡ƒöÉ STEP 2: Logging in via API...
+  Γ£ô  32 e2e\register-login-listing-nsfw-flow.spec.js:50:1 ΓÇ║ Step 1: User Registration (70ms)
+
+≡ƒöÉ STEP 2: Logging in...
+
+  Username: user_1769757621338
+  Password: TestPass123!
+
+≡ƒô¥ Forum Test User: forum_user_1769757621847
+
+  Γ£ÿ  33 e2e\register-login-listing-nsfw-flow.spec.js:87:3 ΓÇ║ Step 2: User Login (45ms)
+  Γ£ÿ  34 e2e\register-login-add-table.spec.js:44:3 ΓÇ║ E2E: Register ΓåÆ Login ΓåÆ Add Billiard Table ΓÇ║ should register via API, login via API, and create a billiard table via UI (408ms)
+Γ£ô User logged in successfully
+
+≡ƒæü∩╕Å STEP 6: Verify Posts Visibility
+
+≡ƒöæ Logging in user: forum_user_1769757621847@test.com
+
+========== E2E TEST: REGISTER ΓåÆ LOGIN ΓåÆ CREATE LISTING ==========
+
+≡ƒô¥ STEP 1: Registering user...
+
+≡ƒôï STEP 3: Creating cue listing...
+
+  Title: Premium Billiard Cue
+  Brand: McDermott
+  Price: $250
+Γ£à Registration successful (User ID: 199)
+
+≡ƒöÉ STEP 2: Logging in...
+  Response Status: 500
+  ΓÜá∩╕Å  Error creating listing: Error creating cue
+  Γ£ô  35 e2e\register-login-listing-nsfw-flow.spec.js:102:3 ΓÇ║ Step 3: Create Cue Listing (105ms)
+  Γ£ÿ  36 e2e\simple-flow-test.spec.js:22:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing (147ms)
+
+ΓÅ¡∩╕Å  STEP 4: Skipping (no cue ID from previous step)
+
+  Γ£ô  37 e2e\register-login-listing-nsfw-flow.spec.js:141:3 ΓÇ║ Step 4: Attempt NSFW Image Upload (Should Reject) (27ms)
+
+ΓÅ¡∩╕Å  STEP 5: Skipping (no cue ID from previous step)
+
+Γ£ô Main navigation visible: true
+  Γ£ô  38 e2e\register-login-listing-nsfw-flow.spec.js:192:3 ΓÇ║ Step 5: Upload Safe Image (Should Succeed) (30ms)
+Γ£ô Sidebar visible: false
+
+≡ƒôï Checking for menu items:
+  Γ£ô Home
+  Γ£ù Listings
+  Γ£ù Profile
+  Γ£ô Forum
+  Γ£ù Messages
+
+≡ƒö╜ Checking dropdown menus:
+Γ£ô Found 1 potential dropdown elements
+≡ƒô╕ Screenshot saved: ui-overview
+  Γ£ô  39 e2e\complete-user-journey.spec.js:316:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 6: Verify all menus and UI elements are accessible (5.6s)
+
+≡ƒÜ¬ STEP 7: Logout
+
+
+≡ƒîÉ STEP 6: Testing UI login flow...
+
+  Navigating to: http://localhost:3000
+Γ£ô User logged in successfully
+  Γ£ÿ  40 e2e\forum-complete-flow.spec.js:232:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 6: Verify posts are visible in discussion (2.9s)
+  Γ£à Page loaded
+
+ΓÜá∩╕Å Logout button not found - manually clearing auth
+  Γ£ô  41 e2e\complete-user-journey.spec.js:358:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 7: Logout (2.1s)
+  Γ£à On login page
+
+  Login UI is available and working
+  Γ£ô  42 e2e\register-login-listing-nsfw-flow.spec.js:253:3 ΓÇ║ Step 6: UI Flow - Login on Frontend (1.6s)
+
+≡ƒÄ¿ UI Test User: ui_test_1769757626622
+
+
+========== TEST SUMMARY ==========
+
+Γ£à All tests completed!
+
+Results:
+  1. Γ£à User Registration: PASSED
+  2. Γ£à User Login: PASSED
+  3. Γ£à Create Listing: PASSED (ID: undefined)
+  4. Γ£à NSFW Image Rejected: PASSED
+  5. Γ£à Safe Image Accepted: PASSED
+  6. Γ£à UI Login Flow: PASSED
+
+Key Findings:
+  ΓÇó Moderation system is working correctly
+  ΓÇó NSFW images are being blocked
+  ΓÇó Safe images are being allowed
+
+===================================
+
+  Γ£ô  43 e2e\register-login-listing-nsfw-flow.spec.js:285:3 ΓÇ║ Step 7: Summary Report (18ms)
+
+≡ƒÄ▒ E2E: Register -> Login -> Add Table
+
+Step 1: Registering test user via API...
+Γ£ô Registered user: tableuser_1769757625124
+Step 2: Logging in via UI...
+
+≡ƒö¥ STEP 1: Navigation Bar Visibility
+
+
+≡ƒÜÇ Starting E2E Test: User Registration and Cue Listing
+
+Step 1: Navigating to application...
+
+≡ƒô¥ Forum Test User: forum_user_1769757627660
+
+Checking navigation bar elements...
+Γ£ô Application loaded successfully
+
+Step 2: Registering new user...
+Γ£ô Navigation bar visible: true
+Γ£ô Logo/Brand visible: true
+Γ£ô Home button visible: true
+Γ£ô Menu button visible: false
+Γ£ô Login button visible: true
+Γ£ô Register button visible: true
+≡ƒô╕ Screenshot saved: navbar-unauthenticated
+  Γ£ô  44 e2e\ui-components-visibility.spec.js:42:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 1: Navigation bar visibility on home page (2.2s)
+
+≡ƒôï STEP 7: Forum Navigation and Menus
+
+
+≡ƒôé STEP 2: Sidebar Menu Toggle
+
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+≡ƒöæ Logging in user: forum_user_1769757627660@test.com
+  Γ£ÿ  45 e2e\cue-case-filtering.spec.js:27:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should display both cues and cases on initial load (30.0s)
+Γ£ô User logged in successfully
+Γ£ô User logged in successfully
+Testing sidebar menu...
+Checking forum UI elements...
+Γ£ô Sidebar initially visible: true
+Γ£ô Found 0 visible category elements
+Γ£ô Toggle button visible: false
+
+Checking sidebar menu items...
+Γ£ô Found 0 discussion/item elements
+  Γ£ô Home
+  Γ£ù Listings
+Γ£ô Create button visible: false
+  Γ£ù Profile
+Γ£ô Search visible: false
+  Γ£ô Forum
+Γ£ô Back/Home button visible: true
+  Γ£ù Messages
+  Γ£ù Logout
+  Γ£ÿ  46 e2e\problem-details-error-handling.spec.js:51:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Login Error: Invalid Credentials (401 Unauthorized) (17.7s)
+≡ƒô╕ Screenshot saved: forum-overview
+  Γ£ô  47 e2e\forum-complete-flow.spec.js:268:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 7: Check forum navigation and menus (5.4s)
+≡ƒô╕ Screenshot saved: sidebar-menu
+  Γ£ô  48 e2e\ui-components-visibility.spec.js:84:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 2: Sidebar menu toggle (open/close) (5.3s)
+
+≡ƒöÄ STEP 8: Forum Filtering and Sorting
+
+
+≡ƒö╜ STEP 3: Dropdown Menus
+
+≡ƒöæ Logging in user: forum_user_1769757627660@test.com
+  Γ£ÿ  49 e2e\user-cue-listing.spec.js:119:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Complete workflow: Register -> Login -> Add Cue -> Manage Listing (7.4s)
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+  Γ£ÿ  50 e2e\forum-navigation-and-topics.spec.js:52:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown toggles on click (30.0s)
+Γ£ô User logged in successfully
+Γ£ô User logged in successfully
+
+≡ƒÜÇ Quick Test: Add Cue with Existing User
+
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Validation Error - Short Password
+Γ£ô Testing category list in dropdown...
+Testing dropdown menus...
+Γ£ô Found 2 potential dropdown buttons
+
+Testing dropdown: Forum
+Looking for filter/sort controls...
+Γ£ô Found 3 filter/sort elements
+  Γ£ô  51 e2e\forum-complete-flow.spec.js:310:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 8: Test forum filtering and sorting (4.8s)
+  Γ£ô Menu opened with 0 items
+Testing direct login...
+  Γ£ô Menu closed
+
+Testing dropdown: Create Account
+  Γ£ô Menu opened with 0 items
+  Γ£ô Menu closed
+≡ƒô╕ Screenshot saved: dropdowns
+  Γ£ô  52 e2e\ui-components-visibility.spec.js:138:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 3: Dropdown menus expand/collapse (6.2s)
+
+≡ƒôï STEP 4: Forum Dropdown and Categories
+
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+Γ£ô User logged in successfully
+Testing forum dropdown...
+  Γ£ÿ  53 e2e\table-listing.spec.js:50:3 ΓÇ║ E2E: Register, Login, Add Billiard Table ΓÇ║ Complete flow: register -> login -> add table (16.9s)
+Γ£ô Forum button visible: false
+≡ƒô╕ Screenshot saved: forum-dropdown
+  Γ£ô  54 e2e\ui-components-visibility.spec.js:180:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 4: Forum dropdown and categories (3.4s)
+
+≡ƒæñ STEP 5: Profile Menu
+
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+  Γ£ÿ  55 e2e\nsfw-moderation-test.spec.js:117:3 ΓÇ║ NSFW Moderation Flow ΓÇ║ NSFW Image Upload Rejection - Full Flow (13ms)
+  ΓÜá∩╕Å  Retry login... (3 left)
+Γ£ô User logged in successfully
+Testing profile menu...
+Γ£ô Profile button visible: false
+≡ƒô╕ Screenshot saved: profile-menu
+  Γ£ô  56 e2e\ui-components-visibility.spec.js:236:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 5: Profile menu visibility and interactions (3.0s)
+
+≡ƒô▒ STEP 6: Modal Dialogs
+
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+  Γ£ÿ  57 e2e\problem-details-error-handling.spec.js:107:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Validation - Password Too Short (400 Bad Request) (10.9s)
+Γ£ô User logged in successfully
+Testing modal dialogs...
+Γ£ô Found 0 potential modal trigger buttons
+  Γ£ÿ  58 e2e\user-cue-listing.spec.js:430:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Quick test: Add cue with existing user and verify in database (12.2s)
+≡ƒô╕ Screenshot saved: modals
+  Γ£ô  59 e2e\ui-components-visibility.spec.js:279:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 6: Modal dialogs - open and close (3.9s)
+
+≡ƒô▒ STEP 7: Mobile Responsive Menu
+
+  Γ£ÿ  60 e2e\user-registration-flow.spec.js:43:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Direct login with valid credentials (11.2s)
+≡ƒöæ Logging in user: ui_test_1769757626622@test.com
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Duplicate Username - Conflict Error
+
+≡ƒÜÇ API Test: Fetch and Search Cues from Database
+
+Test 1: Fetching all cues...
+  -  61 e2e\user-registration-flow.spec.js:92:8 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Admin user can access admin page
+  - Retrieved 15 cues from database
+  - Sample cue: "Premium Billiard Cue" by McDermott - $250
+Γ£ô Cue structure verified
+
+Test 2: Fetching cue by ID...
+Γ£ô Successfully fetched cue ID 18: "Premium Billiard Cue"
+
+Test 3: Searching cues...
+  - Search for "McDermott" returned 10 results
+Γ£ô Search functionality verified
+
+Γ£à API tests complete - database queries working!
+
+  Γ£ô  62 e2e\user-cue-listing.spec.js:517:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ API test: Fetch and search cues from database (164ms)
+Testing registration form...
+  Γ£ÿ  63 e2e\forum-navigation-and-topics.spec.js:78:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown displays all categories (16.8s)
+Γ£ô Testing category navigation...
+  Γ£ÿ  64 e2e\problem-details-error-handling.spec.js:182:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Duplicate Username (409 Conflict) (10.7s)
+  Γ£ÿ  65 e2e\ui-components-visibility.spec.js:335:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 7: Mobile responsive menu (11.1s)
+
+≡ƒÄ¿ UI Test User: ui_test_1769757663069
+
+  Γ£ÿ  66 e2e\cue-case-filtering.spec.js:38:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cues when clicking Cues category (30.0s)
+
+≡ƒöÉ STEP 8: Authenticated Navigation Bar
+
+≡ƒöæ Logging in user: ui_test_1769757663069@test.com
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Profile Update - Invalid Email Validation
+Γ£ô User logged in successfully
+Checking authenticated navigation elements...
+Γ£ô Login button hidden: false
+Γ£ô Logout button visible: false
+Γ£ô Profile button visible: false
+≡ƒô╕ Screenshot saved: navbar-authenticated
+  Γ£ô  67 e2e\ui-components-visibility.spec.js:383:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 8: Navigation bar after authentication (3.6s)
+  Γ£ÿ  68 e2e\user-registration-flow.spec.js:121:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Registration form validation (21.2s)
+Testing app navigation...
+  Γ£ÿ  69 e2e\problem-details-error-handling.spec.js:287:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Profile Update Error: Invalid Email Format (400 Validation) (11.5s)
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Network Error - Backend Unavailable
+ΓÜá∩╕Å  Note: This test simulates backend being down
+≡ƒöî Simulating backend failure...
+≡ƒô¥ Attempting login with simulated network failure
+Γ£à Error displayed to user: Failed to fetch
+ΓÅ╕∩╕Å  Pausing for 3 seconds to visualize the network error...
+≡ƒô╕ Screenshot saved: test-results/error-network-failure.png
+  Γ£ô  70 e2e\problem-details-error-handling.spec.js:365:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Network Error: Backend Unavailable (Connection Failed) (7.5s)
+Γ£à Application loaded successfully
+
+≡ƒº¬ TEST: Multiple Validation Errors
+  Γ£ÿ  71 e2e\forum-navigation-and-topics.spec.js:106:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Clicking category navigates to forum page (30.0s)
+Γ£ô Testing direct forum navigation...
+  Γ£ÿ  72 e2e\user-registration-flow.spec.js:193:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ User can navigate app features (14.3s)
+  Γ£ÿ  73 e2e\problem-details-error-handling.spec.js:406:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Complete Error Flow: Multiple Validation Errors (10.4s)
+  Γ£ÿ  74 e2e\cue-case-filtering.spec.js:53:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cases when clicking Cases category (30.0s)
+
+≡ƒº¬ TEST: Verify HTTP Cache Headers
+  Γ£ÿ  75 e2e\forum-navigation-and-topics.spec.js:129:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum button click navigates to categories view (30.0s)
+Γ£ô User ready for testing
+Logging in...
+Γ£ô Logged in successfully
+Γ£ô Testing New Topic button visibility...
+Γ£ô New Topic button is visible
+  Γ£ô  76 e2e\forum-navigation-and-topics.spec.js:190:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ New Topic button is visible on categories page (5.7s)
+Logging in...
+  Γ£ÿ  77 e2e\problem-details-error-handling.spec.js:465:3 ΓÇ║ Problem Details - HTTP Cache Headers Verification ΓÇ║ Verify Cache Headers on Successful Requests (30.0s)
+  Γ£ÿ  78 e2e\cue-case-filtering.spec.js:68:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should show all items when clicking All Items category (30.0s)
+Γ£ô Logged in successfully
+Γ£ô Testing New Topic modal...
+
+=== FILTERING FLOW DEMONSTRATION ===
+
+Step 1: Initial state - All listings visible
+Γ£ô Modal opened with all required fields
+  Γ£ô  79 e2e\forum-navigation-and-topics.spec.js:211:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ New Topic modal opens and displays form (7.0s)
+Logging in...
+Γ£ô Logged in successfully
+Γ£ô Testing modal cancel functionality...
+Γ£ô Modal closed successfully
+  Γ£ô  80 e2e\forum-navigation-and-topics.spec.js:255:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ Modal closes when Cancel button is clicked (6.8s)
+Logging in...
+Γ£ô Logged in successfully
+Γ£ô Testing topic creation...
+Available categories: [
+  [32m'Select a category'[39m,
+  [32m'General'[39m,
+  [32m'Billiard Clubs'[39m,
+  [32m'Tournaments'[39m,
+  [32m'Sales'[39m,
+  [32m'Practise Drills'[39m,
+  [32m'Pool Lessons'[39m
+]
+Γ£ô Selected category: General
+Γ£ô Clicked Create Topic button
+Current URL after creation: http://localhost:3000/#/forum
+Γ£ô No errors detected - topic created successfully
+Γ£ô Modal closed after submission
+  Γ£ô  81 e2e\forum-navigation-and-topics.spec.js:286:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ Create new topic with valid data (10.5s)
+Logging in...
+Γ£ô Logged in successfully
+Γ£ô Testing form validation...
+Γ£ô Modal stayed open (validation prevented submission)
+Validation messages: []
+  Γ£ô  82 e2e\forum-navigation-and-topics.spec.js:370:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ Form validation - empty title shows error (6.8s)
+Logging in...
+Γ£ô Logged in successfully
+Γ£ô Testing topic creation from category discussions view...
+  Γ£ÿ  83 e2e\cue-case-filtering.spec.js:87:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Complete filtering flow demonstration (30.0s)
+Γ£ô Clicked on General category
+Γ£ô New Topic button visible in discussions view
+  Γ£ô  84 e2e\forum-navigation-and-topics.spec.js:408:3 ΓÇ║ Forum Topic Creation Flow ΓÇ║ Navigate to category and create topic from discussions view (6.2s)
+Γ£ô Testing all category links...
+Cues from API: 15
+Cases from API: 0
+
+Total items available: 15
+  Γ£ÿ  85 e2e\cue-case-filtering.spec.js:140:3 ΓÇ║ Cue and Case Filtering ΓÇ║ API verification: Check both cues and cases are returned (2.5s)
+  Γ£ÿ  86 e2e\forum-navigation-and-topics.spec.js:440:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Each category in dropdown is clickable (30.0s)
+Γ£ô Testing category persistence...
+  Γ£ÿ  87 e2e\forum-navigation-and-topics.spec.js:476:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Category selection persists in forum view (30.0s)
+Γ£ô Testing All Categories navigation...
+  Γ£ô  88 e2e\forum-navigation-and-topics.spec.js:495:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ All Categories link returns to main view (1.5s)
+Γ£ô Testing mobile responsive navigation...
+ΓÜá Sidebar not accessible on mobile (may require different interaction method)
+  Γ£ô  89 e2e\forum-navigation-and-topics.spec.js:527:3 ΓÇ║ Forum Responsive Navigation ΓÇ║ Forum dropdown works on mobile viewport (2.7s)
+Γ£ô Testing New Topic button on mobile...
+Note: New Topic button may be in overflow menu on mobile
+  Γ£ô  90 e2e\forum-navigation-and-topics.spec.js:584:3 ΓÇ║ Forum Responsive Navigation ΓÇ║ New Topic button visible on mobile (1.3s)
+Γ£ô Testing categories API endpoint...
+Γ£ô API returned 6 categories
+Γ£ô Category structure is valid
+  Γ£ô  91 e2e\forum-navigation-and-topics.spec.js:606:3 ΓÇ║ Forum API Integration ΓÇ║ Categories API endpoint returns data (43ms)
+Γ£ô Testing discussions endpoint availability...
+POST /api/forum/discussions returned: 401
+Γ£ô Endpoint exists but requires authentication (expected)
+  Γ£ô  92 e2e\forum-navigation-and-topics.spec.js:629:3 ΓÇ║ Forum API Integration ΓÇ║ Creating discussion endpoint exists (or returns expected error) (20ms)
+
+
+  1) e2e\add-cue-and-case.spec.js:90:3 ΓÇ║ Add Cue and Case Listings - Complete Flow ΓÇ║ 1. Add Cue Listing via UI 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      84 |     // Get token for API validation
+      85 |     authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    > 86 |     expect(authToken).toBeTruthy();
+         |                       ^
+      87 |     console.log('Γ£à Auth token obtained\n');
+      88 |   });
+      89 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\add-cue-and-case.spec.js:86:23
+
+  2) e2e\complete-e2e-flow.spec.js:24:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓåÆ NSFW Upload Test 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      57 |   const token = await loginUser(request, testUsername, testPassword);
+      58 |   
+    > 59 |   expect(token).toBeTruthy();
+         |                 ^
+      60 |   expect(token).toBe(authToken);
+      61 |   console.log(`Γ£à Login successful\n`);
+      62 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\complete-e2e-flow.spec.js:59:17
+
+  3) e2e\complete-user-journey.spec.js:79:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 2: Login user via UI 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBe[2m([22m[32mexpected[39m[2m) // Object.is equality[22m
+
+    Expected: [32mtrue[39m
+    Received: [31mfalse[39m
+
+      117 |     // Verify login success
+      118 |     const loggedIn = await isLoggedIn(page);
+    > 119 |     expect(loggedIn).toBe(true);
+          |                      ^
+      120 |     
+      121 |     // Get and store token for API calls
+      122 |     token = await getAuthToken(page);
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\complete-user-journey.spec.js:119:22
+
+  4) e2e\complete-user-journey.spec.js:127:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 3: Add multiple listing types 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoContain[2m([22m[32mexpected[39m[2m) // indexOf[22m
+
+    Expected value: [32m500[39m
+    Received array: [31m[200, 201][39m
+
+      146 |       // Create listing via API
+      147 |       const response = await createListing(request, token, listingData);
+    > 148 |       expect([200, 201]).toContain(response.status);
+          |                          ^
+      149 |       
+      150 |       const listingId = response.data.id || response.data.Id;
+      151 |       createdListings.push({
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\complete-user-journey.spec.js:148:26
+
+  5) e2e\cue-case-api.spec.js:131:3 ΓÇ║ Cue Case API Tests ΓÇ║ 1. Create a new cue case listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      125 |     // Login
+      126 |     authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    > 127 |     expect(authToken).toBeTruthy();
+          |                       ^
+      128 |     console.log('Γ£à Auth token obtained\n');
+      129 |   });
+      130 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-api.spec.js:127:23
+
+  6) e2e\cue-case-complete-flow.spec.js:66:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Complete Flow: Registration ΓåÆ Login ΓåÆ Create Case ΓåÆ View ΓåÆ Navigate 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('button:has-text("Billiard Cue")')
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for locator('button:has-text("Billiard Cue")')[22m
+
+
+      111 |     console.log('≡ƒôì STEP 5: Checking product type selector...');
+      112 |     await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 5000 });
+    > 113 |     await expect(page.locator('button:has-text("Billiard Cue")')).toBeVisible();
+          |                                                                   ^
+      114 |     await expect(page.locator('button:has-text("Cue Case")')).toBeVisible();
+      115 |     console.log('Γ£à Product type selector visible\n');
+      116 |     await page.waitForTimeout(2000);
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-complete-flow.spec.js:113:67
+
+  7) e2e\cue-case-complete-flow.spec.js:259:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Quick Demo: Product Type Selection 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      60 |     // Get token for API validation
+      61 |     authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    > 62 |     expect(authToken).toBeTruthy();
+         |                       ^
+      63 |     console.log('Γ£à Auth token obtained\n');
+      64 |   });
+      65 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-complete-flow.spec.js:62:23
+
+  8) e2e\cue-case-filtering.spec.js:27:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should display both cues and cases on initial load 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForSelector: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('[data-testid="cue-card"], .grommet-card') to be visible[22m
+
+
+      27 |   test('Should display both cues and cases on initial load', async ({ page }) => {
+      28 |     // Wait for listings to load
+    > 29 |     await page.waitForSelector('[data-testid="cue-card"], .grommet-card', { timeout: 30000 });
+         |                ^
+      30 |     
+      31 |     // Count the cards
+      32 |     const cards = await page.locator('.grommet-card').count();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:29:16
+
+  9) e2e\cue-case-filtering.spec.js:38:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cues when clicking Cues category 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByRole('button', { name: /Show Categories|Hide Categories/i })[22m
+
+
+      38 |   test('Should filter to show only cues when clicking Cues category', async ({ page }) => {
+      39 |     // Open the sidebar menu
+    > 40 |     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
+         |                                                                                  ^
+      41 |     await page.waitForTimeout(3000); // Wait for sidebar animation
+      42 |     
+      43 |     // Click on Cues category
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:40:82
+
+  10) e2e\cue-case-filtering.spec.js:53:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cases when clicking Cases category 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByRole('button', { name: /Show Categories|Hide Categories/i })[22m
+
+
+      53 |   test('Should filter to show only cases when clicking Cases category', async ({ page }) => {
+      54 |     // Open the sidebar menu
+    > 55 |     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
+         |                                                                                  ^
+      56 |     await page.waitForTimeout(3000); // Wait for sidebar animation
+      57 |     
+      58 |     // Click on Cases category
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:55:82
+
+  11) e2e\cue-case-filtering.spec.js:68:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should show all items when clicking All Items category 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByRole('button', { name: /Show Categories|Hide Categories/i })[22m
+
+
+      68 |   test('Should show all items when clicking All Items category', async ({ page }) => {
+      69 |     // Open the sidebar menu
+    > 70 |     await page.getByRole('button', { name: /Show Categories|Hide Categories/i }).click();
+         |                                                                                  ^
+      71 |     await page.waitForTimeout(3000); // Wait for sidebar animation
+      72 |     
+      73 |     // First filter to cues
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:70:82
+
+  12) e2e\cue-case-filtering.spec.js:87:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Complete filtering flow demonstration 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForSelector: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('.grommet-card') to be visible[22m
+
+
+      90 |     // Step 1: Initial state - show all items
+      91 |     console.log('Step 1: Initial state - All listings visible');
+    > 92 |     await page.waitForSelector('.grommet-card', { timeout: 30000 });
+         |                ^
+      93 |     const totalCards = await page.locator('.grommet-card').count();
+      94 |     console.log(`  Γ£ô Total listings: ${totalCards}`);
+      95 |     await page.screenshot({ path: 'test-results/filter-flow-1-all.png', fullPage: true });
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:92:16
+
+  13) e2e\cue-case-filtering.spec.js:140:3 ΓÇ║ Cue and Case Filtering ΓÇ║ API verification: Check both cues and cases are returned 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeGreaterThan[2m([22m[32mexpected[39m[2m)[22m
+
+    Expected: > [32m0[39m
+    Received:   [31m0[39m
+
+      154 |     
+      155 |     expect(cuesData.length).toBeGreaterThan(0);
+    > 156 |     expect(casesData.length).toBeGreaterThan(0);
+          |                              ^
+      157 |   });
+      158 | });
+      159 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-filtering.spec.js:156:30
+
+  14) e2e\cue-case-listing.spec.js:152:3 ΓÇ║ Cue Case Listing - Complete E2E Flow ΓÇ║ 1. Create new cue case listing via UI 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      146 |     // Login and get auth token
+      147 |     authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    > 148 |     expect(authToken).toBeTruthy();
+          |                       ^
+      149 |     console.log(`Γ£à Auth token obtained`);
+      150 |   });
+      151 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-listing.spec.js:148:23
+
+  15) e2e\cue-case-listing.spec.js:552:3 ΓÇ║ Cue Case vs Cue Product Type Selection ΓÇ║ 1. Product type selector is visible for new listings 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      543 |     // Register a new test user for this suite
+      544 |     const registered = await registerUser(request, testUser2);
+    > 545 |     expect(registered).toBeTruthy();
+          |                        ^
+      546 |     
+      547 |     // Login with test user
+      548 |     authToken = await loginAndGetToken(request, testUser2.username, testUser2.password);
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\cue-case-listing.spec.js:545:24
+
+  16) e2e\forum-complete-flow.spec.js:72:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 2: Register and login forum user 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      86 |     token = await getAuthToken(page);
+      87 |
+    > 88 |     expect(token).toBeTruthy();
+         |                   ^
+      89 |     console.log('Γ£ô User logged in');
+      90 |   });
+      91 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-complete-flow.spec.js:88:19
+
+  17) e2e\forum-complete-flow.spec.js:140:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 4: Create a new forum topic/discussion 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mundefined[39m
+
+      152 |     // Get first category ID
+      153 |     const categoryId = forumCategories[0]?.id || forumCategories[0]?.Id;
+    > 154 |     expect(categoryId).toBeTruthy();
+          |                        ^
+      155 |
+      156 |     // Prepare discussion data
+      157 |     const discussionData = generateSampleDiscussion();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-complete-flow.spec.js:154:24
+
+  18) e2e\forum-complete-flow.spec.js:188:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 5: Add a reply/post to the discussion 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      194 |     }
+      195 |
+    > 196 |     expect(createdDiscussion).toBeTruthy();
+          |                               ^
+      197 |
+      198 |     const discussionId = createdDiscussion.id || createdDiscussion.Id;
+      199 |     expect(discussionId).toBeTruthy();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-complete-flow.spec.js:196:31
+
+  19) e2e\forum-complete-flow.spec.js:232:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 6: Verify posts are visible in discussion 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      238 |     }
+      239 |
+    > 240 |     expect(createdDiscussion).toBeTruthy();
+          |                               ^
+      241 |     const discussionId = createdDiscussion.id || createdDiscussion.Id;
+      242 |
+      243 |     // Get posts via API
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-complete-flow.spec.js:240:31
+
+  20) e2e\forum-navigation-and-topics.spec.js:52:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown toggles on click 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('[data-testid="sidebar-forum"]')[22m
+
+
+      67 |
+      68 |     // Second click: Toggle dropdown (close it)
+    > 69 |     await forumButton.click();
+         |                       ^
+      70 |     await page.waitForTimeout(500);
+      71 |     
+      72 |     // Verify dropdown is closed by checking if category buttons are gone from visible area
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:69:23
+
+  21) e2e\forum-navigation-and-topics.spec.js:78:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown displays all categories 
+
+    Error: [31mTimed out 15000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByText('Billiard Clubs', { exact: true }).first()
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 15000ms[22m
+    [2m  - waiting for getByText('Billiard Clubs', { exact: true }).first()[22m
+
+
+       97 |     for (const category of expectedCategories) {
+       98 |       const categoryItem = page.getByText(category, { exact: true }).first();
+    >  99 |       await expect(categoryItem).toBeVisible({ timeout: 15000 });
+          |                                  ^
+      100 |       console.log(`Γ£ô Found category: ${category}`);
+      101 |     }
+      102 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:99:34
+
+  22) e2e\forum-navigation-and-topics.spec.js:106:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Clicking category navigates to forum page 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByText('Tournaments', { exact: true }).first()[22m
+
+
+      114 |     // Click on a specific category (e.g., "Tournaments")
+      115 |     const tournamentCategory = page.getByText('Tournaments', { exact: true }).first();
+    > 116 |     await tournamentCategory.click();
+          |                              ^
+      117 |     await page.waitForTimeout(1000);
+      118 |
+      119 |     // Verify navigation to forum page
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:116:30
+
+  23) e2e\forum-navigation-and-topics.spec.js:129:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum button click navigates to categories view 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByText('General', { exact: true }).first()[22m
+
+
+      137 |     // Click on any category to navigate to forum page
+      138 |     const generalCategory = page.getByText('General', { exact: true }).first();
+    > 139 |     await generalCategory.click();
+          |                           ^
+      140 |     await page.waitForTimeout(1000);
+      141 |
+      142 |     // Verify we're on forum page
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:139:27
+
+  24) e2e\forum-navigation-and-topics.spec.js:440:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Each category in dropdown is clickable 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for locator('[data-testid="sidebar-forum"]')[22m
+
+
+      459 |       const isDropdownVisible = await page.getByText(categoryName).first().isVisible().catch(() => false);
+      460 |       if (!isDropdownVisible) {
+    > 461 |         await forumButton.click();
+          |                           ^
+      462 |         await page.waitForTimeout(500);
+      463 |       }
+      464 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:461:27
+
+  25) e2e\forum-navigation-and-topics.spec.js:476:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Category selection persists in forum view 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: locator.click: Test timeout of 30000ms exceeded.
+    Call log:
+      [2m- waiting for getByText('Tournaments', { exact: true }).first()[22m
+
+
+      483 |
+      484 |     const tournamentsCategory = page.getByText('Tournaments', { exact: true }).first();
+    > 485 |     await tournamentsCategory.click();
+          |                               ^
+      486 |     await page.waitForTimeout(1000);
+      487 |
+      488 |     // Verify we're viewing Tournaments category
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\forum-navigation-and-topics.spec.js:485:31
+
+  26) e2e\mobile-nsfw-flow.spec.js:85:1 ΓÇ║ Step 2: User login ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      89 |   const token = await loginUser(request, testUser.username, testUser.password);
+      90 |   
+    > 91 |   expect(token).toBeTruthy();
+         |                 ^
+      92 |   authToken = token;
+      93 |   
+      94 |   console.log(`  Γ£à Login successful\n`);
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\mobile-nsfw-flow.spec.js:91:17
+
+  27) e2e\mobile-nsfw-flow.spec.js:97:1 ΓÇ║ Step 3: Create cue listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      123 |   }
+      124 |
+    > 125 |   expect(response.ok()).toBeTruthy();
+          |                         ^
+      126 |   console.log('  Γ£à Listing created successfully');
+      127 |   
+      128 |   const data = await response.json();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\mobile-nsfw-flow.spec.js:125:25
+
+  28) e2e\mobile-nsfw-flow.spec.js:183:1 ΓÇ║ Step 5: Register admin user ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      210 |   
+      211 |   const loginToken = await loginUser(request, testAdmin.username, testAdmin.password);
+    > 212 |   expect(loginToken).toBeTruthy();
+          |                      ^
+      213 |   adminToken = loginToken;
+      214 |   console.log('  Γ£à Admin login successful\n');
+      215 | });
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\mobile-nsfw-flow.spec.js:212:22
+
+  29) e2e\multiple-cue-types.spec.js:313:3 ΓÇ║ Multiple Cue Types - Complete Flow ΓÇ║ 1. Filter: Playing Cue 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      284 |     // Get token for API operations
+      285 |     authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    > 286 |     expect(authToken).toBeTruthy();
+          |                       ^
+      287 |     console.log('Γ£à Auth token obtained\n');
+      288 |
+      289 |     console.log('≡ƒôª Creating test cues via API...');
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\multiple-cue-types.spec.js:286:23
+
+  30) e2e\nsfw-moderation-test.spec.js:117:3 ΓÇ║ NSFW Moderation Flow ΓÇ║ NSFW Image Upload Rejection - Full Flow 
+
+    [31m"beforeAll" hook timeout of 30000ms exceeded.[39m
+
+      57 |   let cueId;
+      58 |
+    > 59 |   test.beforeAll(async ({ request }) => {
+         |        ^
+      60 |     console.log('\n≡ƒÜÇ SETUP: Registering test user...');
+      61 |     
+      62 |     // Register user with retry
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\nsfw-moderation-test.spec.js:59:8
+
+  31) e2e\problem-details-error-handling.spec.js:51:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Login Error: Invalid Credentials (401 Unauthorized) 
+
+    Error: [31mTimed out 15000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByRole('heading', { name: '≡ƒÄ▒ Sign In' })
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 15000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '≡ƒÄ▒ Sign In' })[22m
+
+
+      56 |     await page.waitForTimeout(500);
+      57 |     
+    > 58 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Sign In' })).toBeVisible({ timeout: 15000 });
+         |                                                                     ^
+      59 |     console.log('≡ƒôì On login page');
+      60 |     
+      61 |     // Enter invalid credentials
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:58:69
+
+  32) e2e\problem-details-error-handling.spec.js:107:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Validation - Password Too Short (400 Bad Request) 
+
+    Error: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      [2m- waiting for locator('button:has-text("Sign Up")').first()[22m
+
+
+      109 |     
+      110 |     // Navigate to registration page
+    > 111 |     await page.locator('button:has-text("Sign Up")').first().click();
+          |                                                              ^
+      112 |     await page.waitForTimeout(500);
+      113 |     
+      114 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Create Account' })).toBeVisible({ timeout: 15000 });
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:111:62
+
+  33) e2e\problem-details-error-handling.spec.js:182:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Duplicate Username (409 Conflict) 
+
+    Error: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      [2m- waiting for locator('button:has-text("Sign Up")').first()[22m
+
+
+      184 |     
+      185 |     // First, register a user successfully
+    > 186 |     await page.locator('button:has-text("Sign Up")').first().click();
+          |                                                              ^
+      187 |     await page.waitForTimeout(500);
+      188 |     
+      189 |     const uniqueUsername = `duplicate_test_${timestamp}`;
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:186:62
+
+  34) e2e\problem-details-error-handling.spec.js:287:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Profile Update Error: Invalid Email Format (400 Validation) 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('button:has-text("Profile")')
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 10000ms[22m
+    [2m  - waiting for locator('button:has-text("Profile")')[22m
+
+
+      297 |     
+      298 |     // Wait for successful login
+    > 299 |     await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
+          |                                                              ^
+      300 |     console.log('Γ£à Logged in successfully');
+      301 |     
+      302 |     // Navigate to profile page
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:299:62
+
+  35) e2e\problem-details-error-handling.spec.js:406:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Complete Error Flow: Multiple Validation Errors 
+
+    Error: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      [2m- waiting for locator('button:has-text("Sign Up")').first()[22m
+
+
+      407 |     console.log('\n≡ƒº¬ TEST: Multiple Validation Errors');
+      408 |     
+    > 409 |     await page.locator('button:has-text("Sign Up")').first().click();
+          |                                                              ^
+      410 |     await page.waitForTimeout(500);
+      411 |     
+      412 |     // Fill form with multiple invalid fields
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:409:62
+
+  36) e2e\problem-details-error-handling.spec.js:465:3 ΓÇ║ Problem Details - HTTP Cache Headers Verification ΓÇ║ Verify Cache Headers on Successful Requests 
+
+    [31mTest timeout of 30000ms exceeded.[39m
+
+    Error: page.waitForResponse: Test timeout of 30000ms exceeded.
+
+      475 |     
+      476 |     // Intercept the login request to check headers
+    > 477 |     const loginResponse = await page.waitForResponse(
+          |                                      ^
+      478 |       response => response.url().includes('/api/auth/login')
+      479 |     );
+      480 |     
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\problem-details-error-handling.spec.js:477:38
+
+  37) e2e\register-login-add-table.spec.js:44:3 ΓÇ║ E2E: Register ΓåÆ Login ΓåÆ Add Billiard Table ΓÇ║ should register via API, login via API, and create a billiard table via UI 
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mfalse[39m
+
+      72 |     });
+      73 |     
+    > 74 |     expect(loginResponse.ok()).toBeTruthy();
+         |                                ^
+      75 |     const loginData = await loginResponse.json();
+      76 |     const authToken = loginData.token || loginData.accessToken;
+      77 |     expect(authToken).toBeTruthy();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\register-login-add-table.spec.js:74:32
+
+  38) e2e\register-login-listing-nsfw-flow.spec.js:87:3 ΓÇ║ Step 2: User Login ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      92 |     const token = await loginUser(request, testUsername, testPassword);
+      93 |     
+    > 94 |     expect(token).toBeTruthy();
+         |                   ^
+      95 |     authToken = token;
+      96 |     
+      97 |     console.log(`  Γ£à Login successful`);
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\register-login-listing-nsfw-flow.spec.js:94:19
+
+  39) e2e\simple-flow-test.spec.js:22:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+
+    Error: [2mexpect([22m[31mreceived[39m[2m).[22mtoBeTruthy[2m()[22m
+
+    Received: [31mnull[39m
+
+      55 |   const token = await loginUser(request, testUsername, testPassword);
+      56 |   
+    > 57 |   expect(token).toBeTruthy();
+         |                 ^
+      58 |   expect(token).toBe(authToken);
+      59 |   console.log(`Γ£à Login successful\n`);
+      60 |
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\simple-flow-test.spec.js:57:17
+
+  40) e2e\table-listing.spec.js:50:3 ΓÇ║ E2E: Register, Login, Add Billiard Table ΓÇ║ Complete flow: register -> login -> add table 
+
+    Error: locator.waitFor: Timeout 15000ms exceeded.
+    Call log:
+      [2m- waiting for locator('input[type="password"]').first() to be visible[22m
+
+
+      85 |       await passwordByLabel.fill(testUser.password);
+      86 |     } else {
+    > 87 |       await passwordByType.waitFor({ state: 'visible', timeout: 15000 });
+         |                            ^
+      88 |       await passwordByType.fill(testUser.password);
+      89 |     }
+      90 |     await page.locator('button[type="submit"]').first().click();
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\table-listing.spec.js:87:28
+
+  41) e2e\ui-components-visibility.spec.js:335:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 7: Mobile responsive menu 
+
+    Error: locator.click: Timeout 10000ms exceeded.
+    Call log:
+      [2m- waiting for locator('button').filter({ hasText: /Login|Sign In/i }).first()[22m
+    [2m  -   locator resolved to <button class="items-center justify-center whitespace-noΓÇª>Sign In</button>[22m
+    [2m  - attempting click action[22m
+    [2m  -   waiting for element to be visible, enabled and stable[22m
+    [2m  -     element is not visible - waiting...[22m
+
+
+       at e2e\helpers\authHelper.js:84
+
+      82 |   // Click login button
+      83 |   const loginButton = page.locator('button').filter({ hasText: /Login|Sign In/i }).first();
+    > 84 |   await loginButton.click({ timeout: 10000 });
+         |                     ^
+      85 |   await page.waitForTimeout(500);
+      86 |   
+      87 |   // Fill email/username
+
+        at loginViaUI (C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\helpers\authHelper.js:84:21)
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\ui-components-visibility.spec.js:346:9
+
+  42) e2e\user-cue-listing.spec.js:119:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Complete workflow: Register -> Login -> Add Cue -> Manage Listing 
+
+    Error: [31mTimed out 5000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByRole('heading', { name: '≡ƒÄ▒ Create Account' })
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 5000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '≡ƒÄ▒ Create Account' })[22m
+
+
+      138 |     
+      139 |     // Verify registration form is visible
+    > 140 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Create Account' })).toBeVisible();
+          |                                                                            ^
+      141 |     console.log('  - Registration form opened');
+      142 |
+      143 |     // Fill registration form
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\user-cue-listing.spec.js:140:76
+
+  43) e2e\user-cue-listing.spec.js:430:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Quick test: Add cue with existing user and verify in database 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByRole('heading', { name: '≡ƒÄ▒ Sign In' })
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 10000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '≡ƒÄ▒ Sign In' })[22m
+
+
+      443 |
+      444 |     // Wait for the login form to be visible
+    > 445 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Sign In' })).toBeVisible({ timeout: 10000 });
+          |                                                                     ^
+      446 |
+      447 |     // Fill in admin credentials
+      448 |     await page.getByPlaceholder('Enter username').fill('admin');
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\user-cue-listing.spec.js:445:69
+
+  44) e2e\user-registration-flow.spec.js:43:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Direct login with valid credentials 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByRole('heading', { name: '≡ƒÄ▒ Sign In' })
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 10000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '≡ƒÄ▒ Sign In' })[22m
+
+
+      50 |     await page.locator('button:has-text("Sign In")').first().click();
+      51 |     await page.waitForTimeout(500);
+    > 52 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Sign In' })).toBeVisible({ timeout: 10000 });
+         |                                                                     ^
+      53 |
+      54 |     // Wait for form inputs to be ready
+      55 |     const usernameInput = page.getByPlaceholder('Enter username');
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\user-registration-flow.spec.js:52:69
+
+  45) e2e\user-registration-flow.spec.js:121:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Registration form validation 
+
+    Error: [31mTimed out 20000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: getByRole('heading', { name: '≡ƒÄ▒ Create Account' })
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 20000ms[22m
+    [2m  - waiting for getByRole('heading', { name: '≡ƒÄ▒ Create Account' })[22m
+
+
+      127 |     
+      128 |     // Wait for form to be in register mode
+    > 129 |     await expect(page.getByRole('heading', { name: '≡ƒÄ▒ Create Account' })).toBeVisible({ timeout: 20000 });
+          |                                                                            ^
+      130 |     console.log('Γ£ô Registration form visible');
+      131 |
+      132 |     // Fill form with test data
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\user-registration-flow.spec.js:129:76
+
+  46) e2e\user-registration-flow.spec.js:193:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ User can navigate app features 
+
+    Error: [31mTimed out 10000ms waiting for [39m[2mexpect([22m[31mlocator[39m[2m).[22mtoBeVisible[2m()[22m
+
+    Locator: locator('button:has-text("Profile")')
+    Expected: visible
+    Received: hidden
+    Call log:
+      [2m- expect.toBeVisible with timeout 10000ms[22m
+    [2m  - waiting for locator('button:has-text("Profile")')[22m
+
+
+      203 |     await page.locator('button[type="submit"]:has-text("Sign in")').click();
+      204 |     await page.waitForTimeout(2000);
+    > 205 |     await expect(page.locator('button:has-text("Profile")')).toBeVisible({ timeout: 10000 });
+          |                                                              ^
+      206 |     console.log('Γ£ô Logged in as admin');
+      207 |
+      208 |     // Test profile navigation
+
+        at C:\Users\karac\source\repos\CueFinder\CueFinderFE\cuefinderfe\e2e\user-registration-flow.spec.js:205:62
+
+  Slow test file: e2e\forum-navigation-and-topics.spec.js (3.6m)
+  Slow test file: e2e\cue-case-filtering.spec.js (2.5m)
+  Slow test file: e2e\problem-details-error-handling.spec.js (1.6m)
+  Slow test file: e2e\user-registration-flow.spec.js (46.7s)
+  Slow test file: e2e\ui-components-visibility.spec.js (38.6s)
+  Consider splitting slow test files to speed up parallel execution
+  46 failed
+    e2e\add-cue-and-case.spec.js:90:3 ΓÇ║ Add Cue and Case Listings - Complete Flow ΓÇ║ 1. Add Cue Listing via UI 
+    e2e\complete-e2e-flow.spec.js:24:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓåÆ NSFW Upload Test 
+    e2e\complete-user-journey.spec.js:79:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 2: Login user via UI 
+    e2e\complete-user-journey.spec.js:127:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 3: Add multiple listing types 
+    e2e\cue-case-api.spec.js:131:3 ΓÇ║ Cue Case API Tests ΓÇ║ 1. Create a new cue case listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\cue-case-complete-flow.spec.js:66:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Complete Flow: Registration ΓåÆ Login ΓåÆ Create Case ΓåÆ View ΓåÆ Navigate 
+    e2e\cue-case-complete-flow.spec.js:259:3 ΓÇ║ Complete Cue Case Flow - Visual Demo ΓÇ║ Quick Demo: Product Type Selection 
+    e2e\cue-case-filtering.spec.js:27:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should display both cues and cases on initial load 
+    e2e\cue-case-filtering.spec.js:38:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cues when clicking Cues category 
+    e2e\cue-case-filtering.spec.js:53:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cases when clicking Cases category 
+    e2e\cue-case-filtering.spec.js:68:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should show all items when clicking All Items category 
+    e2e\cue-case-filtering.spec.js:87:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Complete filtering flow demonstration 
+    e2e\cue-case-filtering.spec.js:140:3 ΓÇ║ Cue and Case Filtering ΓÇ║ API verification: Check both cues and cases are returned 
+    e2e\cue-case-listing.spec.js:152:3 ΓÇ║ Cue Case Listing - Complete E2E Flow ΓÇ║ 1. Create new cue case listing via UI 
+    e2e\cue-case-listing.spec.js:552:3 ΓÇ║ Cue Case vs Cue Product Type Selection ΓÇ║ 1. Product type selector is visible for new listings 
+    e2e\forum-complete-flow.spec.js:72:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 2: Register and login forum user 
+    e2e\forum-complete-flow.spec.js:140:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 4: Create a new forum topic/discussion 
+    e2e\forum-complete-flow.spec.js:188:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 5: Add a reply/post to the discussion 
+    e2e\forum-complete-flow.spec.js:232:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 6: Verify posts are visible in discussion 
+    e2e\forum-navigation-and-topics.spec.js:52:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown toggles on click 
+    e2e\forum-navigation-and-topics.spec.js:78:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown displays all categories 
+    e2e\forum-navigation-and-topics.spec.js:106:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Clicking category navigates to forum page 
+    e2e\forum-navigation-and-topics.spec.js:129:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum button click navigates to categories view 
+    e2e\forum-navigation-and-topics.spec.js:440:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Each category in dropdown is clickable 
+    e2e\forum-navigation-and-topics.spec.js:476:3 ΓÇ║ Forum Category Navigation from Sidebar ΓÇ║ Category selection persists in forum view 
+    e2e\mobile-nsfw-flow.spec.js:85:1 ΓÇ║ Step 2: User login ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\mobile-nsfw-flow.spec.js:97:1 ΓÇ║ Step 3: Create cue listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\mobile-nsfw-flow.spec.js:183:1 ΓÇ║ Step 5: Register admin user ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\multiple-cue-types.spec.js:313:3 ΓÇ║ Multiple Cue Types - Complete Flow ΓÇ║ 1. Filter: Playing Cue 
+    e2e\nsfw-moderation-test.spec.js:117:3 ΓÇ║ NSFW Moderation Flow ΓÇ║ NSFW Image Upload Rejection - Full Flow 
+    e2e\problem-details-error-handling.spec.js:51:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Login Error: Invalid Credentials (401 Unauthorized) 
+    e2e\problem-details-error-handling.spec.js:107:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Validation - Password Too Short (400 Bad Request) 
+    e2e\problem-details-error-handling.spec.js:182:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Registration Error: Duplicate Username (409 Conflict) 
+    e2e\problem-details-error-handling.spec.js:287:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Profile Update Error: Invalid Email Format (400 Validation) 
+    e2e\problem-details-error-handling.spec.js:406:3 ΓÇ║ Problem Details Error Handling - Visual Testing ΓÇ║ Complete Error Flow: Multiple Validation Errors 
+    e2e\problem-details-error-handling.spec.js:465:3 ΓÇ║ Problem Details - HTTP Cache Headers Verification ΓÇ║ Verify Cache Headers on Successful Requests 
+    e2e\register-login-add-table.spec.js:44:3 ΓÇ║ E2E: Register ΓåÆ Login ΓåÆ Add Billiard Table ΓÇ║ should register via API, login via API, and create a billiard table via UI 
+    e2e\register-login-listing-nsfw-flow.spec.js:87:3 ΓÇ║ Step 2: User Login ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\simple-flow-test.spec.js:22:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇΓöÇ
+    e2e\table-listing.spec.js:50:3 ΓÇ║ E2E: Register, Login, Add Billiard Table ΓÇ║ Complete flow: register -> login -> add table 
+    e2e\ui-components-visibility.spec.js:335:3 ΓÇ║ UI Components: Visibility and Menu Interactions ΓÇ║ STEP 7: Mobile responsive menu 
+    e2e\user-cue-listing.spec.js:119:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Complete workflow: Register -> Login -> Add Cue -> Manage Listing 
+    e2e\user-cue-listing.spec.js:430:3 ΓÇ║ E2E: User Registration and Cue Listing Management ΓÇ║ Quick test: Add cue with existing user and verify in database 
+    e2e\user-registration-flow.spec.js:43:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Direct login with valid credentials 
+    e2e\user-registration-flow.spec.js:121:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ Registration form validation 
+    e2e\user-registration-flow.spec.js:193:3 ΓÇ║ End-to-End: User Registration and Authentication ΓÇ║ User can navigate app features 
+  2 skipped
+  26 did not run
+  44 passed (3.9m)
+ΓÇëELIFECYCLEΓÇë Command failed with exit code 1.

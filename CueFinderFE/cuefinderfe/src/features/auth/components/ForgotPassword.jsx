@@ -33,7 +33,7 @@ export default function ForgotPassword() {
 
     // Check rate limiting (client-side for UX feedback)
     if (requestCount >= 5) {
-      setError('Too many reset requests. Please try again in a few minutes.');
+      setError('Πάρα πολλές αιτήσεις επαναφοράς. Παρακαλώ δοκιμάστε ξανά σε λίγα λεπτά.');
       setIsLoading(false);
       return;
     }
@@ -63,12 +63,12 @@ export default function ForgotPassword() {
     } catch (err) {
       // Even on error, show generic message to prevent enumeration
       if (err.response?.status === 429) {
-        setError('Too many reset requests. Please try again later.');
+        setError('Πάρα πολλές αιτήσεις επαναφοράς. Παρακαλώ δοκιμάστε ξανά αργότερα.');
       } else if (err.code === 'ECONNABORTED') {
-        setError('Request timeout. Please check your connection and try again.');
+        setError('Η αίτηση έληξε. Παρακαλώ ελέγξτε τη σύνδεσή σας και δοκιμάστε ξανά.');
       } else {
         // Show generic error
-        setError('We encountered an issue. Please try again later.');
+        setError('Αντιμετωπίσαμε ένα πρόβλημα. Παρακαλώ δοκιμάστε ξανά αργότερα.');
       }
       setRequestCount(requestCount + 1);
       console.error('Forgot password error:', err);
@@ -87,30 +87,30 @@ export default function ForgotPassword() {
                 <Mail className="h-8 w-8 text-primary-foreground" />
               </div>
             </div>
-            <CardTitle className="text-2xl text-center">Check Your Email</CardTitle>
+            <CardTitle className="text-2xl text-center">Ελέγξτε το Email Σας</CardTitle>
             <CardDescription className="text-center">
-              We've sent a secure password reset link
+              Στείλαμε ασφαλή σύνδεσμο επαναφοράς κωδικού
             </CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
             <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
               <p className="text-sm text-primary">
-                If an account is associated with <strong>{emailOrUsername}</strong>, we've sent a secure password reset link to your email.
+                Εάν υπάρχει λογαριασμός συνδεδεμένος με <strong>{emailOrUsername}</strong>, στείλαμε ασφαλή σύνδεσμο επαναφοράς κωδικού στο email σας.
               </p>
             </div>
             <div className="p-4 rounded-md bg-muted/50 border border-border">
               <p className="text-sm text-muted-foreground">
-                The link will expire in 30 minutes for security reasons.
+                Ο σύνδεσμος θα λήξει σε 30 λεπτά για λόγους ασφαλείας.
               </p>
             </div>
             <div className="text-center text-sm text-muted-foreground">
-              <p>Redirecting to login in a few seconds...</p>
+              <p>Ανακατεύθυνση στη σύνδεση σε λίγα δευτερόλεπτα...</p>
             </div>
             <Button 
               onClick={() => navigate('/login')}
               className="w-full"
             >
-              Back to Login
+              Επιστροφή στη Σύνδεση
             </Button>
           </CardContent>
         </Card>
@@ -127,9 +127,9 @@ export default function ForgotPassword() {
               <Lock className="h-8 w-8 text-primary-foreground" />
             </div>
           </div>
-          <CardTitle className="text-2xl text-center">Forgot Password</CardTitle>
+          <CardTitle className="text-2xl text-center">Ξέχασα τον Κωδικό</CardTitle>
           <CardDescription className="text-center">
-            We'll help you reset your password securely
+            Θα σας βοηθήσουμε να επαναφέρετε τον κωδικό σας ασφαλώς
           </CardDescription>
         </CardHeader>
 
@@ -144,11 +144,11 @@ export default function ForgotPassword() {
             <div className="space-y-2">
               <label className="text-sm font-medium flex items-center gap-2">
                 <Mail className="h-4 w-4 text-muted-foreground" />
-                Email or Username
+                Email ή Όνομα Χρήστη
               </label>
               <Input
                 type="text"
-                placeholder="Enter your email or username"
+                placeholder="Εισάγετε email ή όνομα χρήστη"
                 value={emailOrUsername}
                 onChange={(e) => setEmailOrUsername(e.target.value)}
                 disabled={isLoading}
@@ -156,7 +156,7 @@ export default function ForgotPassword() {
                 autoFocus
               />
               <p className="text-xs text-muted-foreground mt-1">
-                We'll verify your account and send a secure reset link.
+                Θα επαληθεύσουμε τον λογαριασμό σας και θα στείλουμε ασφαλή σύνδεσμο επαναφοράς.
               </p>
             </div>
 
@@ -165,7 +165,7 @@ export default function ForgotPassword() {
               className="w-full"
               disabled={isLoading}
             >
-              {isLoading ? 'Sending...' : 'Send Reset Link'}
+              {isLoading ? 'Αποστολή...' : 'Αποστολή Συνδέσμου Επαναφοράς'}
             </Button>
 
             <div className="flex items-center justify-center pt-2 border-t border-border">
@@ -174,7 +174,7 @@ export default function ForgotPassword() {
                 onClick={() => navigate('/login')}
                 className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
               >
-                Back to Login
+                Επιστροφή στη Σύνδεση
               </button>
             </div>
           </CardContent>

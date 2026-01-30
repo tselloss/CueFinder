@@ -135,7 +135,7 @@ export default function LoginPage() {
                     type="text"
                     value={username}
                     onChange={(e) => setUsername(e.target.value)}
-                    placeholder="Enter username"
+                    placeholder="Εισάγετε όνομα χρήστη"
                     required
                   />
                 </div>
@@ -150,7 +150,7 @@ export default function LoginPage() {
                     type="password"
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    placeholder="Enter password"
+                    placeholder="Εισάγετε κωδικό"
                     required
                   />
                 </div>
@@ -212,7 +212,7 @@ export default function LoginPage() {
                         type="text"
                         value={address.street}
                         onChange={(e) => setAddress({ ...address, street: e.target.value })}
-                        placeholder="Street address"
+                        placeholder="Διεύθυνση οδού"
                       />
                       
                       <div className="grid grid-cols-2 gap-2">
@@ -220,13 +220,13 @@ export default function LoginPage() {
                           type="text"
                           value={address.city}
                           onChange={(e) => setAddress({ ...address, city: e.target.value })}
-                          placeholder="City"
+                          placeholder="Πόλη"
                         />
                         <Input
                           type="text"
                           value={address.state}
                           onChange={(e) => setAddress({ ...address, state: e.target.value })}
-                          placeholder="State"
+                          placeholder="Περιφέρεια"
                         />
                       </div>
                       
@@ -235,13 +235,13 @@ export default function LoginPage() {
                           type="text"
                           value={address.postalCode}
                           onChange={(e) => setAddress({ ...address, postalCode: e.target.value })}
-                          placeholder="ZIP Code"
+                          placeholder="Τ.Κ."
                         />
                         <Input
                           type="text"
                           value={address.country}
                           onChange={(e) => setAddress({ ...address, country: e.target.value })}
-                          placeholder="Country"
+                          placeholder="Χώρα"
                         />
                       </div>
                     </div>

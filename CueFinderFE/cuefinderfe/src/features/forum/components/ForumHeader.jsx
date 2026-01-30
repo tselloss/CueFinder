@@ -18,8 +18,8 @@ export default function ForumHeader({ user, onBack, onNewDiscussion }) {
             <MessageCircle size={32} className="text-white" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold text-blue-400">Community Forum</h1>
-            <p className="text-sm text-slate-400 mt-1">Connect with the billiards community</p>
+            <h1 className="text-2xl font-bold text-blue-400">Φόρουμ Κοινότητας</h1>
+            <p className="text-sm text-slate-400 mt-1">Συνδεθείτε με την κοινότητα του μπιλιάρδου</p>
           </div>
         </div>
         <div className="flex gap-3 items-center">
@@ -27,7 +27,7 @@ export default function ForumHeader({ user, onBack, onNewDiscussion }) {
             onClick={onBack}
             className="px-6 py-2 bg-blue-500/15 border border-blue-500/40 text-slate-300 hover:bg-blue-500/25 rounded-lg transition-all hover:-translate-y-0.5"
           >
-            Back
+            Πίσω
           </Button>
           {user && (
             <Button
@@ -36,7 +36,7 @@ export default function ForumHeader({ user, onBack, onNewDiscussion }) {
               className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-bold rounded-lg hover:-translate-y-1 shadow-lg hover:shadow-xl transition-all"
             >
               <Plus size={20} />
-              New Topic
+              Νέο Θέμα
             </Button>
           )}
         </div>
