@@ -46,7 +46,7 @@ RUN apk add --no-cache curl
 COPY --from=build /app/packages/app/build /usr/share/nginx/html
 
 # Copy nginx config for serving static React files
-COPY packages/app/nginx-frontend.conf /etc/nginx/conf.d/default.conf
+COPY cuefinderfe/nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 # Expose standard HTTP port
 EXPOSE 80
