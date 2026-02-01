@@ -51,7 +51,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: detect-changes
     # Always run tests on push to release, skip if only manual dispatch with no changes
-    if: github.event_name == 'push' || needs.detect-changes.outputs.backend == 'true'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.backend == 'true'
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -79,7 +79,7 @@ jobs:
     runs-on: ubuntu-latest
     needs: [detect-changes, test-backend]
     # Always deploy on push, only deploy on manual if changes detected
-    if: github.event_name == 'push' || needs.detect-changes.outputs.has-changes == 'true'
+    if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.has-changes == 'true'
     environment:
       name: production
       url: https://billiardscuefinder.com
