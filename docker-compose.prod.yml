@@ -177,7 +177,7 @@ services:
     container_name: cuefinder-frontend-prod
     restart: always
     build:
-      context: ./CueFinderFE/cuefinderfe
+      context: ./CueFinderFE
       dockerfile: Dockerfile
       args:
         - REACT_APP_API_URL=${FRONTEND_API_URL}
