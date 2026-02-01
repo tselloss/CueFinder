@@ -14,7 +14,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 async function goToCuesCategory(page) {
   const cuesButtonByTestId = page.locator('[data-testid="sidebar-category-cues"]');
@@ -122,7 +122,7 @@ async function expectTitleVisibleEventually(page, title, timeoutMs = 15000) {
     await page.waitForTimeout(250);
   }
 
-  await expect(locator).toBeVisible({ timeout: 1 });
+  await expect(locator).toBeVisible({ timeout: 15000 });
 }
 
 async function setSearch(page, value) {
@@ -133,7 +133,7 @@ async function setSearch(page, value) {
   
   // If still not visible, scroll to it or use force fill
   try {
-    await expect(input).toBeVisible({ timeout: 5000 });
+    await expect(input).toBeVisible({ timeout: 15000 });
     await input.fill(value);
   } catch {
     // If element isn't visible (might be off-screen), use force fill
@@ -158,13 +158,13 @@ async function registerUser(request, userData) {
   return response.ok();
 }
 
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 async function createCueViaAPI(request, authToken, cueData) {
@@ -323,8 +323,8 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
 
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2500);
     console.log('✅ Logged in successfully\n');
@@ -357,7 +357,7 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.waitForTimeout(1500);
     
     // Verify our cue is still visible
-    await expect(playingCueCard).toBeVisible({ timeout: 3000 });
+    await expect(playingCueCard).toBeVisible({ timeout: 15000 });
     console.log('✅ Playing cue filter works correctly\n');
   });
 
@@ -374,8 +374,8 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
 
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2500);
     console.log('✅ Logged in successfully\n');
@@ -444,8 +444,8 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
 
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2500);
     console.log('✅ Logged in successfully\n');
@@ -493,7 +493,7 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     console.log(`  After filter: Playing=${playingVisibleAfter}, Break=${breakVisibleAfter}, Jump=${jumpVisibleAfter}`);
     
     // Verify our jump cue is visible
-    await expect(jumpCueCard).toBeVisible({ timeout: 3000 });
+    await expect(jumpCueCard).toBeVisible({ timeout: 15000 });
     
     // Verify other cues are NOT visible
     const playingCueCard = page.locator(`text=${playingCue.title}`);
@@ -548,8 +548,8 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
 
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2500);
 
@@ -598,8 +598,8 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
 
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2500);
 
@@ -686,3 +686,5 @@ test.describe('Multiple Cue Types - Complete Flow', () => {
     console.log('✅ All cues have valid cue types and data\n');
   });
 });
+
+

@@ -305,6 +305,24 @@ namespace CueFinder.Auth.Services
         }
 
         /// <summary>
+        /// Get user by ID (for password reset flows)
+        /// </summary>
+        public async Task<CueFinder.Database.Models.User?> GetUserByIdAsync(int userId)
+        {
+            await Task.Delay(0); // Simulate async operation
+            return null; // In-memory service doesn't support this
+        }
+
+        /// <summary>
+        /// Get user by email or username (for password reset flows)
+        /// </summary>
+        public async Task<CueFinder.Database.Models.User?> GetUserByEmailOrUsernameAsync(string emailOrUsername)
+        {
+            await Task.Delay(0); // Simulate async operation
+            return null; // In-memory service doesn't support this
+        }
+
+        /// <summary>
         /// Internal user data model
         /// </summary>
         private class UserData

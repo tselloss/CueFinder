@@ -109,9 +109,24 @@ export async function makeRequest(url, options = {}) {
       error.problemDetails = data; // Store full Problem Details for advanced handling
 
       // If unauthorized, clear auth and redirect to login
-      if (response.status === 401) {
+      // BUT don't redirect if this is an auth flow endpoint where user input can cause 401
+      // Only redirect for authenticated requests that get 401 (expired session)
+      const authFlowEndpoints = [
+        '/auth/login',
+        '/auth/register',
+        '/auth/forgot-password',
+        '/auth/reset-password',
+        '/auth/validate-reset-token',
+        '/auth/phone/verify-code',
+        '/auth/phone/send-verification',
+        '/auth/external'
+      ];
+      
+      const isAuthFlowEndpoint = authFlowEndpoints.some(endpoint => url.includes(endpoint));
+      
+      if (response.status === 401 && !isAuthFlowEndpoint) {
         clearAuth();
-        window.location.href = '/';
+        window.location.href = '/login';
       }
 
       throw error;

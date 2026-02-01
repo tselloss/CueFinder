@@ -6,6 +6,7 @@ using FluentAssertions;
 using Microsoft.Extensions.Logging;
 using Xunit;
 using CueFinder.Extensions.Images;
+using CueFinder.Extensions.Email;
 using Microsoft.AspNetCore.Http;
 
 namespace CueFinder.Cues.IntegrationTests
@@ -20,7 +21,8 @@ namespace CueFinder.Cues.IntegrationTests
             {
                 var logger = new TestLogger<CueService>();
                 var imageService = new TestImageService();
-                _service = new CueService(Context, logger, imageService);
+                var emailService = new TestEmailService();
+                _service = new CueService(Context, logger, imageService, emailService);
             }
         }
 
@@ -406,6 +408,13 @@ namespace CueFinder.Cues.IntegrationTests
             public IDisposable? BeginScope<TState>(TState state) where TState : notnull => null;
             public bool IsEnabled(LogLevel logLevel) => false;
             public void Log<TState>(LogLevel logLevel, EventId eventId, TState state, Exception? exception, Func<TState, Exception?, string> formatter) { }
+        }
+
+        private class TestEmailService : IEmailService
+        {
+            public Task SendAsync(string to, string subject, string body, bool isHtml = true) => Task.CompletedTask;
+            public Task SendBatchAsync(IEnumerable<string> recipients, string subject, string body, bool isHtml = true) => Task.CompletedTask;
+            public bool IsConfigured() => false;
         }
     }
 }

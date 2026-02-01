@@ -23,7 +23,7 @@
  * 6. Verify the listing appears in UI
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 
@@ -34,9 +34,11 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { registerUser: registerUserHelper, loginUser: loginUserHelper } = require('./helpers/authHelper');
 
 // API base URL for direct database queries
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 /**
  * Helper: Fetch all cues from the database via API
@@ -79,13 +81,13 @@ async function searchCuesInDB(request, query) {
 /**
  * Helper: Login and get auth token via API
  */
-async function loginAndGetToken(request, username, password) {
+async function loginAndGetToken(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.token;
+  return data.token || data.accessToken || null;
 }
 
 // Generate unique test user credentials
@@ -96,6 +98,7 @@ const testUser = {
   name: 'Cue Test User',
   email: `cuetest${timestamp}@example.com`,
   phone: '+15551234567',
+  acceptedTerms: true
 };
 
 // Test cue data - field names match the actual CueFormModal (camelCase)
@@ -432,23 +435,18 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     // Generate unique test title
     const testTitle = 'Quick Test Cue ' + Date.now();
 
-    // Navigate to home page first
-    await page.goto('http://localhost:3000');
-    await page.waitForTimeout(1000);
+    // Login via API and get token
+    const token = await loginUserHelper(request, 'admin', 'Admin123!');
+    expect(token).toBeTruthy();
+    console.log('✅ Auth token obtained');
 
-    // Click Sign In to go to login page
-    await page.locator('button:has-text("Sign In")').click();
-    await page.waitForTimeout(500);
+    // Set token in localStorage BEFORE navigating
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, token);
 
-    // Wait for the login form to be visible
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 10000 });
-
-    // Fill in admin credentials
-    await page.getByPlaceholder('Enter username').fill('admin');
-    await page.getByPlaceholder('Password').fill('Admin123!');
-
-    // Submit login
-    await page.locator('button[type="submit"]:has-text("Sign in")').click();
+    // Navigate to home page - user is already logged in
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(2000);
     
     // Verify logged in
@@ -552,3 +550,5 @@ test.describe('E2E: User Registration and Cue Listing Management', () => {
     console.log('✅ API tests complete - database queries working!\n');
   });
 });
+
+

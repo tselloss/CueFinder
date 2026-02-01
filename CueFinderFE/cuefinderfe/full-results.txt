@@ -1,0 +1,366 @@
+
+Γ£¿ Cue Case E2E Tests Ready
+
+
+Running 122 tests using 8 workers
+
+
+Γ£¿ Cue Case E2E Tests Ready
+
+
+========== E2E TEST: REGISTER ΓåÆ LOGIN ΓåÆ CREATE LISTING ΓåÆ NSFW UPLOAD ==========
+
+≡ƒô¥ STEP 1: Registering user...
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒô¥ Test User: e2e_user_1769773494807
+≡ƒôº Email: e2e_user_1769773494807@test.com
+
+
+≡ƒÜÇ Setting up test user...
+
+≡ƒÜÇ Setting up test user...
+Γ£à User registered: listinguser_1769773494669
+Γ£à User registered: flowuser_1769773494674
+Γ£à Registration successful (User ID: 691)
+
+≡ƒöÉ STEP 2: Logging in...
+Γ£à Auth token obtained
+
+Γ£à User registered: caseuser_1769773494698
+Γ£à Auth token obtained
+
+Γ£à User registered: caseuser_1769773494680
+Γ£à Login successful
+
+≡ƒôï STEP 3: Creating cue listing...
+Γ£à Auth token obtained
+Γ£à Auth token obtained
+
+Γ£à Listing created successfully (Cue ID: 57)
+
+≡ƒÜ½ STEP 4: Uploading NSFW image (should be rejected)...
+  Response Status: 404
+Γ£à Image correctly REJECTED by moderation
+
+  Rejection Reason: NSFW content detected
+Γ£à STEP 5: Uploading safe image (should succeed)...
+≡ƒô¥ Test 1: Creating new cue case...
+  Response Status: 404
+ΓÜá∩╕Å  Safe image was rejected: Unknown error
+
+
+========== TEST SUMMARY ==========
+Γ£à All tests completed!
+
+Results:
+  1. Γ£à User Registration: PASSED
+  2. Γ£à User Login: PASSED
+  3. Γ£à Create Listing: PASSED (ID: 57)
+  4. Γ£à NSFW Image Handling: TESTED
+  5. Γ£à Safe Image Handling: TESTED
+
+Key Findings:
+  ΓÇó Full registration and login flow works correctly
+  ΓÇó Cue listing creation is successful
+  ΓÇó Moderation system is active and rejecting NSFW content
+  ΓÇó Safe images are being accepted
+
+===================================
+
+  Γ£ô  1 e2e\complete-e2e-flow.spec.js:24:1 ΓÇ║ Complete Flow: Register ΓåÆ Login ΓåÆ Create Listing ΓåÆ NSFW Upload Test (427ms)
+Γ£à Case created successfully with ID: 352
+
+  Γ£ô  2 e2e\cue-case-api.spec.js:131:3 ΓÇ║ Cue Case API Tests ΓÇ║ 1. Create a new cue case listing (117ms)
+≡ƒöì Test 2: Retrieving case by ID...
+Γ£à Case retrieved successfully
+
+  Γ£ô  3 e2e\cue-case-api.spec.js:149:3 ΓÇ║ Cue Case API Tests ΓÇ║ 2. Retrieve case by ID (110ms)
+≡ƒôª Test 3: Fetching my cases...
+Γ£à Found 1 case(s) for user
+
+  Γ£ô  4 e2e\cue-case-api.spec.js:163:3 ΓÇ║ Cue Case API Tests ΓÇ║ 3. Get my cue cases (60ms)
+Γ£Å∩╕Å  Test 4: Updating case...
+Γ£à Case updated successfully
+
+  Γ£ô  5 e2e\cue-case-api.spec.js:179:3 ΓÇ║ Cue Case API Tests ΓÇ║ 4. Update the cue case (65ms)
+≡ƒöÄ Test 5: Searching for cases...
+Γ£à Search returned 1 result(s)
+
+  Γ£ô  6 e2e\cue-case-api.spec.js:200:3 ΓÇ║ Cue Case API Tests ΓÇ║ 5. Search for cue cases (33ms)
+≡ƒôª Test 6: Testing case capacity options...
+  Γ£ô Created case with capacity: 1x1
+  Γ£ô Created case with capacity: 1x2
+  Γ£ô Created case with capacity: 2x4
+  Γ£ô Created case with capacity: 3x5
+  Γ£ô Created case with capacity: 4x8
+Γ£à All capacity options validated
+
+  Γ£ô  7 e2e\cue-case-api.spec.js:215:3 ΓÇ║ Cue Case API Tests ΓÇ║ 6. Test all case capacity options (151ms)
+≡ƒöô Test 7: Testing case opening types...
+  Γ£ô Created case with opening: Butterfly
+  Γ£ô Created case with opening: Top Open
+  Γ£ô Created case with opening: Side Open
+  Γ£ô Created case with opening: Zipper
+Γ£à All opening types validated
+
+  Γ£ô  8 e2e\cue-case-api.spec.js:243:3 ΓÇ║ Cue Case API Tests ΓÇ║ 7. Test all case opening types (184ms)
+≡ƒÅù∩╕Å  Test 8: Testing case types...
+  Γ£ô Created case with type: Soft
+  Γ£ô Created case with type: Hard
+  Γ£ô Created case with type: Semi-Hard
+Γ£à All case types validated
+
+  Γ£ô  9 e2e\cue-case-api.spec.js:271:3 ΓÇ║ Cue Case API Tests ΓÇ║ 8. Test all case types (102ms)
+≡ƒùæ∩╕Å  Test 9: Deleting case...
+Γ£à Case deleted successfully
+
+≡ƒº╣ Cleanup completed
+
+  Γ£ô  10 e2e\cue-case-api.spec.js:299:3 ΓÇ║ Cue Case API Tests ΓÇ║ 9. Delete the cue case (41ms)
+
+≡ƒÄ▒ TEST 1: Adding a Cue Listing
+
+≡ƒôì STEP 1: Navigating to home page and logging in...
+
+=== LOGIN DEBUG ===
+
+
+≡ƒöÉ STEP 1: Register New User
+
+Registering: e2e_user_1769773494807
+Γ£ô Registration response status: 200
+  Γ£ô  11 e2e\complete-user-journey.spec.js:61:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 1: Register new user (684ms)
+
+≡ƒÄ¼ Starting Complete Cue Case Flow Demo...
+
+≡ƒôì STEP 1: Navigating to home page...
+
+≡ƒô¥ Test 1: Creating new cue case listing...
+
+≡ƒöæ STEP 2: Login User via UI
+
+Γ£à Navigated to home page
+Page title: CueFinder - Billiard Cue Marketplace
+React root exists: [33mtrue[39m
+Total buttons found: 22
+Button 0: Home
+Button 1: Forum
+Button 2: EN
+Button 3: Sign In
+Button 4: Register
+Button 5: Sign In
+Button 6: Γÿ░
+Button 7: 
+Button 8: ≡ƒÄ▒All Items
+Button 9: ≡ƒÄ»Cues
+Cards found: 0
+Card-like divs found: 52
+Screenshot saved
+Body text length: [33m4148[39m
+Contains "CueFinder": [33mtrue[39m
+  Γ£ô  12 e2e\debug-homepage.spec.js:3:1 ΓÇ║ Debug: Check what renders on homepage (1.9s)
+Γ£ô Home page loaded
+Γ£à Home page loaded
+
+≡ƒôì STEP 2: Opening login...
+Γ£ô Login modal opened
+Γ£ô Email entered
+Γ£ô Password entered
+Γ£ô Login submitted
+Γ£à Logged in successfully
+
+URL: http://localhost:3000/
+
+Clicking Sign In button...
+No auth token found in cookies or localStorage
+
+=== BEFORE LOGIN ===
+Navbar buttons: [ [32m'Home'[39m, [32m'Forum'[39m, [32m'EN'[39m, [32m'Sign In'[39m, [32m'Register'[39m ]
+  Γ£ÿ  13 e2e\complete-user-journey.spec.js:79:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 2: Login user via UI (3.0s)
+Γ£à Login modal opened
+
+≡ƒôì STEP 3: Logging in...
+Γ£à Opened listing modal
+
+≡ƒô¥ Test User: e2e_user_1769773505416
+≡ƒôº Email: e2e_user_1769773505416@test.com
+
+Γ£à Logged in successfully
+
+≡ƒôì STEP 2: Opening new listing modal...
+
+≡ƒô¥ STEP 3: Add Multiple Listings
+
+No auth token found in cookies or localStorage
+≡ƒöæ Logging in user: e2e_user_1769773505416@test.com
+After click URL: http://localhost:3000/#/login
+
+Form fields found:
+  Email inputs: 1
+  Password inputs: 1
+
+=== Attempting Login ===
+Email: testuser@example.com
+Password: password123
+Γ£ô Filled email
+Γ£ô Filled password
+Total listings displayed: 51
+  Γ£ô  14 e2e\cue-case-filtering.spec.js:30:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should display both cues and cases on initial load (6.6s)
+
+=== BUTTON DEBUG ===
+
+Total buttons: 22
+Button 0: "Home" | visible: true | hidden: false
+Button 1: "Forum" | visible: true | hidden: false
+Button 2: "EN" | visible: true | hidden: false
+Button 3: "Sign In" | visible: true | hidden: false
+Button 4: "Register" | visible: true | hidden: false
+Button 5: "Sign In" | visible: false | hidden: true
+Button 6: "Γÿ░" | visible: false | hidden: true
+Button 7: "" | visible: false | hidden: true
+Button 8: "≡ƒÄ▒All Items" | visible: true | hidden: false
+Button 9: "≡ƒÄ»Cues" | visible: true | hidden: false
+Button 10: "≡ƒÆ╝Cases" | visible: true | hidden: false
+Button 11: "≡ƒ¬æBilliard Tables" | visible: true | hidden: false
+Button 12: "≡ƒ¢á∩╕ÅAccessories" | visible: true | hidden: false
+Button 13: "≡ƒÆ¼ForumΓû╝" | visible: true | hidden: false
+Button 14: "All Conditions" | visible: true | hidden: false
+Button 15: "Newest First" | visible: true | hidden: false
+Button 16: "Clear All Filters" | visible: true | hidden: false
+Button 17: "Grid" | visible: true | hidden: false
+Button 18: "List" | visible: true | hidden: false
+Button 19: "" | visible: false | hidden: true
+Button 20: "Privacy" | visible: true | hidden: false
+Button 21: "Terms" | visible: true | hidden: false
+
+=== LOOKING FOR CUES BUTTON ===
+getByRole(button, Cues) count: 0
+locator(button).filter(Cues) count: 0
+
+Sidebar visible: true
+  Γ£ô  15 e2e\debug-buttons.spec.js:3:1 ΓÇ║ Debug: Find all buttons on page (7.2s)
+
+≡ƒô¥ Forum Test User: forum_user_1769773507520
+
+
+≡ƒôé STEP 1: Get Forum Categories
+
+Γ£ô Found 6 forum categories:
+  1. General (ID: 06f3a277-60e9-40b2-8795-78641bcaed5c)
+  2. Billiard Clubs (ID: 5c8843ab-3dfa-44ba-9822-c356b487a7ef)
+  3. Tournaments (ID: 1be045b5-171b-426d-abac-909b573fc433)
+  4. Sales (ID: e2f6d381-36f9-4dec-a3be-d4e5875aeadf)
+  5. Practise Drills (ID: 2f26708e-c984-4996-8fb8-3577c2e792f7)
+  6. Pool Lessons (ID: fc372d19-758e-422c-8c6d-d52aaccc4b76)
+  Γ£ô  16 e2e\forum-complete-flow.spec.js:58:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 1: Get forum categories (50ms)
+
+≡ƒöÉ STEP 2: Register and Login Forum User
+
+Γ£ô Registration response: 200
+≡ƒöæ Logging in user: forum_user_1769773507520@test.com
+Warning: Auth cookie not found after login
+
+=== AFTER LOGIN ===
+Navbar buttons: [
+  [32m'Home'[39m,     [32m'Forum'[39m,
+  [32m'EN'[39m,       [32m'Sign In'[39m,
+  [32m'Register'[39m, [32m'Sign In'[39m,
+  [32m'Γÿ░'[39m,        [32m'Sign In'[39m
+]
+Found user menu: YES
+
+=== COOKIES (0) ===
+
+=== LOCAL STORAGE (0 keys) ===
+
+=== SESSION STORAGE (0 keys) ===
+  Γ£ô  17 e2e\debug-login-token.spec.js:4:3 ΓÇ║ Debug Login Token ΓÇ║ Check if login worked and where token is stored (7.3s)
+Γ£ô User logged in successfully
+No auth token found in cookies or localStorage
+
+≡ƒôª Creating cue listing...
+Title: Premium Cue Stick 1769773509718
+Warning: Auth cookie not found after login
+Failed to create listing: 500 {"message":"Error creating cue","error":"User ID not found in token"}
+Γ£à User logged in successfully
+
+≡ƒôì STEP 4: Opening new listing modal...
+
+After submit URL: http://localhost:3000/#/login
+
+Cookies found: 0
+Γ£ô Testing forum button visibility...
+Γ£ô Forum button is visible
+
+Sign In button visible after login: true
+  Γ£ô  18 e2e\forum-navigation-and-topics.spec.js:42:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum button is visible in sidebar (508ms)
+  Γ£ÿ  19 e2e\complete-user-journey.spec.js:127:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 3: Add multiple listing types (3.4s)
+Screenshot saved: login-result.png
+  Γ£ô  20 e2e\debug-login-detailed.spec.js:4:3 ΓÇ║ Debug Login Flow ΓÇ║ Check login form and try login (9.9s)
+Γ£ô Testing forum dropdown toggle...
+Γ£ô User logged in successfully
+No auth token found in cookies or localStorage
+1∩╕ÅΓâú Starting test: Login and navigate to listing
+2∩╕ÅΓâú Clicking Sign In button...
+
+≡ƒô¥ Test User: e2e_user_1769773511086
+≡ƒôº Email: e2e_user_1769773511086@test.com
+
+Γ£ô First click opens dropdown
+Γ£ô Found 6 categories in dropdown
+  Γ£ÿ  21 e2e\forum-complete-flow.spec.js:72:3 ΓÇ║ Forum: Create Topics and Replies ΓÇ║ STEP 2: Register and login forum user (3.2s)
+
+Γ£Å∩╕Å STEP 4: Edit Listing via UI
+
+Γ£ô Dropdown toggle works correctly
+  Γ£ô  22 e2e\forum-navigation-and-topics.spec.js:52:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown toggles on click (2.7s)
+No auth token found in cookies or localStorage
+≡ƒöæ Logging in user: e2e_user_1769773511086@test.com
+
+≡ƒô¥ Forum Test User: forum_user_1769773513121
+
+Γ£ô Testing category list in dropdown...
+3∩╕ÅΓâú Waiting for Sign In page...
+4∩╕ÅΓâú Filling login credentials...
+5∩╕ÅΓâú Submitting login form...
+Found 3 Sign In button(s)
+6∩╕ÅΓâú Waiting for redirect to listings...
+
+≡ƒîÉ STEP 3: Navigate to Forum
+
+No auth token found in cookies or localStorage
+≡ƒöæ Logging in user: forum_user_1769773513121@test.com
+Γ£ô Found category: Billiard Clubs
+Γ£ô Found category: Tournaments
+Γ£ô Found category: Sales
+Γ£ô Found category: Practise Drills
+Γ£ô Found category: Pool Lessons
+Γ£ô Found category: General
+Γ£ô All 6 categories are displayed
+  Γ£ô  23 e2e\forum-navigation-and-topics.spec.js:78:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Forum dropdown displays all categories (2.1s)
+Warning: Auth cookie not found after login
+Γ£ô Testing category navigation...
+Cues displayed: 51
+Γ£ô User logged in successfully
+No auth token found in cookies or localStorage
+Navigating to listings page...
+  Γ£ô  24 e2e\cue-case-filtering.spec.js:42:3 ΓÇ║ Cue and Case Filtering ΓÇ║ Should filter to show only cues when clicking Cues category (9.2s)
+Warning: Auth cookie not found after login
+Γ£ô Successfully navigated to forum page
+  Γ£ô  25 e2e\forum-navigation-and-topics.spec.js:106:3 ΓÇ║ Forum Menu Bar Navigation ΓÇ║ Clicking category navigates to forum page (2.5s)
+Γ£ô Listings page loaded
+Γ£ô User logged in successfully
+No auth token found in cookies or localStorage
+ΓÜá∩╕Å No listings found to edit - creating one first
+Failed to create listing: 500 {"message":"Error creating cue","error":"User ID not found in token"}
+  Γ£ô  26 e2e\complete-user-journey.spec.js:171:3 ΓÇ║ Complete User Journey: Register ΓåÆ Login ΓåÆ Add Items ΓåÆ Edit Profile ΓÇ║ STEP 4: Edit listing via UI (5.1s)
+
+≡ƒæñ STEP 5: Edit User Profile
+
+No auth token found in cookies or localStorage
+≡ƒöæ Logging in user: e2e_user_1769773511086@test.com
+Γ£ô Testing direct forum navigation...

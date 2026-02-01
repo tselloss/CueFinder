@@ -1,0 +1,7 @@
+npm ERR! Missing script: "test:e2e"
+npm ERR! 
+npm ERR! To see a list of scripts, run:
+npm ERR!   npm run
+
+npm ERR! A complete log of this run can be found in:
+npm ERR!     C:\Users\karac\AppData\Local\npm-cache\_logs\2026-01-26T08_53_01_896Z-debug-0.log

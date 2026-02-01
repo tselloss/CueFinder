@@ -13,8 +13,8 @@ const { test, expect } = require('@playwright/test');
 const fs = require('fs');
 const path = require('path');
 
-const API_BASE_URL = 'http://localhost:5000/api';
-const UI_BASE_URL = 'http://localhost:3000';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const UI_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 // NSFW test image path
 const NSFW_IMAGE_PATH = 'C:\\Users\\karac\\Downloads\\nsfw-ida-testing-some-underwear-v0-mod5ylqkkmyc1.webp';
@@ -28,13 +28,13 @@ async function registerUser(request, userData) {
 }
 
 // Helper: Login via API
-async function loginUser(request, username, password) {
+async function loginUser(request, emailOrUsername, password) {
   const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
+    data: { emailOrUsername, password }
   });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 let timestamp;
@@ -74,10 +74,10 @@ test('Step 1: User Registration', async ({ request }) => {
     console.log('  ✅ Registration successful\n');
 
     const data = await response.json();
-    authToken = data.accessToken;
-    userId = data.userId;
+    authToken = data.token || data.accessToken;
+    userId = data.userId || data.user?.id;
     
-    console.log(`  Token: ${data.accessToken.substring(0, 50)}...`);
+    console.log(`  Token: ${authToken?.substring(0, 50)}...`);
     console.log(`  User ID: ${userId}`);
     expect(authToken).toBeTruthy();
     expect(userId).toBeTruthy();
@@ -298,3 +298,5 @@ test('Step 1: User Registration', async ({ request }) => {
     console.log(`  • Safe images are being allowed\n`);
     console.log('===================================\n');
   });
+
+

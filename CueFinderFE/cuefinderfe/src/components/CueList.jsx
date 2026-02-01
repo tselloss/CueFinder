@@ -3,7 +3,7 @@ import { Grid, List as ListIcon, ImageIcon } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
-import { HeroSearch } from './HeroSearch';
+import HeroSearch from '../layout/HeroSearch';
 
 // Helper to get full image URL from image object
 const getImageUrl = (images) => {
@@ -164,7 +164,8 @@ export default function CueList({
 
             return (
               <Card 
-                key={c.id} 
+                key={c.id}
+                data-testid="cue-card"
                 onClick={() => onSelect(c)}
                 className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50 group"
               >
@@ -221,7 +222,8 @@ export default function CueList({
 
             return (
               <Card 
-                key={c.id} 
+                key={c.id}
+                data-testid="cue-card"
                 onClick={() => onSelect(c)}
                 className="overflow-hidden cursor-pointer transition-all duration-300 hover:shadow-lg hover:border-primary/50"
               >

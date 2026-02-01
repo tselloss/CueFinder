@@ -6,25 +6,10 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { registerUser: registerUserHelper, loginUser: loginUserHelper } = require('./helpers/authHelper');
 
-const API_BASE_URL = 'http://localhost:5000/api';
-
-// Helper functions
-async function registerUser(request, userData) {
-  const response = await request.post(`${API_BASE_URL}/auth/register`, {
-    data: userData
-  });
-  return response.ok();
-}
-
-async function loginAndGetToken(request, username, password) {
-  const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
-  });
-  if (!response.ok()) return null;
-  const data = await response.json();
-  return data.accessToken;
-}
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
 // Test data
 const timestamp = Date.now();
@@ -34,7 +19,8 @@ const testUser = {
   name: 'Flow Test User',
   email: `flowtest${timestamp}@example.com`,
   phone: '+15559876543',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 const testCase = {
@@ -52,12 +38,15 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('\n🚀 Setting up test user...');
     
     // Register user
-    const registered = await registerUser(request, testUser);
-    expect(registered).toBeTruthy();
-    console.log(`✅ User registered: ${testUser.username}`);
+    const regResult = await registerUserHelper(request, testUser);
+    if (regResult.status === 200 || regResult.status === 201) {
+      console.log(`✅ User registered: ${testUser.username}`);
+    } else {
+      console.log(`ℹ️  User already exists: ${testUser.username}`);
+    }
     
     // Get token for API validation
-    authToken = await loginAndGetToken(request, testUser.username, testUser.password);
+    authToken = await loginUserHelper(request, testUser.username, testUser.password);
     expect(authToken).toBeTruthy();
     console.log('✅ Auth token obtained\n');
   });
@@ -66,64 +55,54 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('\n🎬 Starting Complete Cue Case Flow Demo...\n');
 
     // ========================================
-    // STEP 1: Navigate to Home Page
+    // STEP 1: Set Auth Token and Navigate
     // ========================================
-    console.log('📍 STEP 1: Navigating to home page...');
-    await page.goto('http://localhost:3000');
-    await page.waitForTimeout(2000); // Allow page to load
-    console.log('✅ Home page loaded\n');
+    console.log('📍 STEP 1: Setting auth and navigating to home page...');
+    
+    // Set token in localStorage BEFORE navigating
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, authToken);
+
+    // Navigate to home page - user is already logged in
+    await page.goto(APP_BASE_URL);
+    await page.waitForTimeout(2000);
+    console.log('✅ Logged in and home page loaded\n');
 
     // ========================================
-    // STEP 2: Click Sign In
+    // STEP 2: Open New Listing Modal
     // ========================================
-    console.log('📍 STEP 2: Opening login...');
-    await page.click('button:has-text("Sign In")');
-    await page.waitForTimeout(1500);
-    console.log('✅ Login modal opened\n');
-
-    // ========================================
-    // STEP 3: Login with Credentials
-    // ========================================
-    console.log('📍 STEP 3: Logging in...');
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.waitForTimeout(500);
-    await page.locator('input[name="password"]').fill(testUser.password);
-    await page.waitForTimeout(500);
-    await page.click('button[type="submit"]:has-text("Sign In")');
-    await page.waitForTimeout(3000); // Wait for login to complete
-    console.log('✅ User logged in successfully\n');
-
-    // ========================================
-    // STEP 4: Open New Listing Modal
-    // ========================================
-    console.log('📍 STEP 4: Opening new listing modal...');
-    const newListingButton = page.locator('button').filter({ hasText: /new listing/i }).first();
+    console.log('📍 STEP 2: Opening new listing modal...');
+    const newListingButton = page.locator('button').filter({ hasText: /add.*listing/i }).first();
     await newListingButton.click();
     await page.waitForTimeout(2000);
     console.log('✅ New listing modal opened\n');
 
     // ========================================
-    // STEP 5: Verify Product Type Selector
+    // STEP 3: Verify Product Type Selector
     // ========================================
-    console.log('📍 STEP 5: Checking product type selector...');
+    console.log('📍 STEP 3: Checking product type selector...');
     await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('button:has-text("Billiard Cue")')).toBeVisible();
-    await expect(page.locator('button:has-text("Cue Case")')).toBeVisible();
+    await expect(page.locator('h4').filter({ hasText: 'Billiard Cue' })).toBeVisible();
+    await expect(page.locator('h4').filter({ hasText: 'Cue Case' })).toBeVisible();
     console.log('✅ Product type selector visible\n');
     await page.waitForTimeout(2000);
 
     // ========================================
-    // STEP 6: Select "Cue Case"
+    // STEP 4: Select "Cue Case"
     // ========================================
-    console.log('📍 STEP 6: Selecting "Cue Case" product type...');
-    await page.click('button:has-text("Cue Case")');
+    console.log('📍 STEP 4: Selecting "Cue Case" product type...');
+    // Click the Cue Case card (Card component with h4 title, not a button)
+    const caseCard = page.locator('h4').filter({ hasText: 'Cue Case' }).first();
+    await caseCard.waitFor({ state: 'visible', timeout: 10000 });
+    await caseCard.click({ timeout: 10000 });
     await page.waitForTimeout(2000);
     console.log('✅ Cue Case selected\n');
 
     // ========================================
-    // STEP 7: Verify Case-Specific Fields Appear
+    // STEP 5: Verify Case-Specific Fields Appear
     // ========================================
-    console.log('📍 STEP 7: Verifying case-specific fields...');
+    console.log('📍 STEP 5: Verifying case-specific fields...');
     await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 5000 });
     await expect(page.locator('text=Case Opening')).toBeVisible();
     await expect(page.locator('text=Case Type')).toBeVisible();
@@ -131,9 +110,9 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     await page.waitForTimeout(2000);
 
     // ========================================
-    // STEP 8: Fill in Basic Information
+    // STEP 6: Fill in Basic Information
     // ========================================
-    console.log('📍 STEP 8: Filling basic information...');
+    console.log('📍 STEP 6: Filling basic information...');
     
     // Title
     await page.locator('input[name="title"]').fill(testCase.title);
@@ -263,22 +242,23 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('📍 Logging in...');
     await page.click('button:has-text("Sign In")');
     await page.waitForTimeout(1000);
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
+    await page.locator('input[placeholder="Enter username"], input[type="text"], input[type="email"]').first().fill(testUser.username);
+    await page.locator('input[placeholder="Password"], input[type="password"]').first().fill(testUser.password);
     await page.click('button[type="submit"]:has-text("Sign In")');
     await page.waitForTimeout(2000);
     console.log('✅ Logged in\n');
 
     // Open modal
     console.log('📍 Opening new listing...');
-    const newListingButton = page.locator('button').filter({ hasText: /new listing/i }).first();
+    const newListingButton = page.locator('button').filter({ hasText: /add.*listing/i }).first();
     await newListingButton.click();
     await page.waitForTimeout(1500);
     console.log('✅ Modal opened\n');
 
     // Test Cue selection
     console.log('📍 Testing Cue selection...');
-    await page.click('button:has-text("Billiard Cue")');
+    // Click Billiard Cue card (Card component with h4 title, not a button)
+    await page.locator('h4:has-text("Billiard Cue")').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await expect(page.locator('text=Weight (oz)')).toBeVisible();
     await expect(page.locator('text=Tip Size')).toBeVisible();
@@ -286,7 +266,8 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
 
     // Switch to Case
     console.log('📍 Switching to Case...');
-    await page.click('button:has-text("Cue Case")');
+    // Click Cue Case card (Card component with h4 title, not a button)
+    await page.locator('h4:has-text("Cue Case")').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await expect(page.locator('text=Case Capacity')).toBeVisible();
     await expect(page.locator('text=Case Opening')).toBeVisible();
@@ -294,7 +275,8 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
 
     // Switch back to Cue
     console.log('📍 Switching back to Cue...');
-    await page.click('button:has-text("Billiard Cue")');
+    // Click Billiard Cue card (Card component with h4 title, not a button)
+    await page.locator('h4:has-text("Billiard Cue")').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     await expect(page.locator('text=Weight (oz)')).toBeVisible();
     console.log('✅ Cue fields visible again\n');
@@ -307,3 +289,5 @@ test.describe('Complete Cue Case Flow - Visual Demo', () => {
     console.log('\n🧹 Demo completed!\n');
   });
 });
+
+

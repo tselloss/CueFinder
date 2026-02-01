@@ -97,6 +97,18 @@ public class ImageService : IImageService
                 await request.File.CopyToAsync(stream);
             }
 
+            // Ensure moderation service is available before scanning
+            if (_moderationService is null)
+            {
+                _logger.LogWarning("Moderation service is not configured; rejecting upload for cue {CueId}", request.CueId);
+                return new ImageUploadResponse
+                {
+                    Success = false,
+                    ErrorMessage = "Moderation service is not configured",
+                    UploadedAt = DateTime.UtcNow
+                };
+            }
+
             // NSFW Check BEFORE adding any CueImage records
             _logger.LogInformation("Checking image for NSFW content: {FilePath}", filePath);
             var moderationResult = await _moderationService.ScanImageAsync(filePath, userId, request.CueId);

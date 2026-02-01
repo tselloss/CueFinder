@@ -23,6 +23,15 @@ x-backend-common: &backend-common
     - ImageStorageSettings__AllowedExtensions=.jpg,.jpeg,.png,.gif,.webp
     - ImageStorageSettings__AllowedMimeTypes=image/jpeg,image/png,image/gif,image/webp
     - Moderation__NudeNetUrl=http://cuefinder-opennsfw-prod:8000
+    - EmailSettings__SmtpServer=${SMTP_SERVER:-smtp.gmail.com}
+    - EmailSettings__SmtpPort=${SMTP_PORT:-587}
+    - EmailSettings__FromEmail=${EMAIL_FROM:-cuefinderinfo@gmail.com}
+    - EmailSettings__SmtpPassword=${SMTP_PASSWORD}
+    - EmailSettings__EnableSsl=true
+    - GmailApi__ClientId=${GMAIL_CLIENT_ID}
+    - GmailApi__ClientSecret=${GMAIL_CLIENT_SECRET}
+    - GmailApi__ProjectId=${GMAIL_PROJECT_ID}
+    - GmailApi__FromEmail=${EMAIL_FROM:-cuefinderinfo@gmail.com}
   depends_on:
     postgres:
       condition: service_healthy
@@ -131,7 +140,7 @@ services:
     restart: always
     build:
       context: .
-      dockerfile: CueFinderModerator/Dockerfile
+      dockerfile: SolutionLibraries/CueFinderModerator/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
       - ASPNETCORE_URLS=http://+:5001

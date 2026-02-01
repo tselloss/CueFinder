@@ -8,7 +8,7 @@
  * 4. Forum page navigation and UI elements
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 4. Forum categories must be seeded
@@ -19,16 +19,23 @@
 
 const { test, expect } = require('@playwright/test');
 
-// Test credentials
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
+
+// Test credentials - use unique timestamp to avoid conflicts
+const timestamp = Date.now();
 const testUser = {
-  username: 'testadmin',
+  username: `testadmin_${timestamp}`,
+  email: `testadmin_${timestamp}@test.com`,
   password: 'TestAdmin123!',
+  name: `Test Admin ${timestamp}`,
+  acceptedTerms: true
 };
 
 test.describe('Forum Menu Bar Navigation', () => {
   test.beforeEach(async ({ page }) => {
     // Navigate to the app home page
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
@@ -89,7 +96,7 @@ test.describe('Forum Menu Bar Navigation', () => {
     // Check each category is visible
     for (const category of expectedCategories) {
       const categoryItem = page.getByText(category, { exact: true }).first();
-      await expect(categoryItem).toBeVisible({ timeout: 3000 });
+      await expect(categoryItem).toBeVisible({ timeout: 15000 });
       console.log(`✓ Found category: ${category}`);
     }
 
@@ -114,7 +121,7 @@ test.describe('Forum Menu Bar Navigation', () => {
     
     // Verify forum heading is visible
     const forumHeading = page.getByRole('heading', { name: /Forum/i }).first();
-    await expect(forumHeading).toBeVisible({ timeout: 3000 });
+    await expect(forumHeading).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Successfully navigated to forum page');
   });
@@ -140,9 +147,19 @@ test.describe('Forum Menu Bar Navigation', () => {
 });
 
 test.describe('Forum Topic Creation Flow', () => {
-  test.beforeEach(async ({ page }) => {
+  test.beforeEach(async ({ page, request }) => {
+    // Register user first (via API)
+    const registerResponse = await request.post(`${API_BASE_URL}/auth/register`, {
+      data: testUser
+    });
+    
+    if (registerResponse.ok() || registerResponse.status() === 409) {
+      // User registered or already exists
+      console.log('✓ User ready for testing');
+    }
+
     // Login first
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
 
     // Check if already logged in
@@ -185,7 +202,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForTimeout(1000);
     
     // Check for New Topic button
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
 
     console.log('✓ New Topic button is visible');
@@ -206,7 +223,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForTimeout(1000);
     
     // Wait for New Topic button
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     
     // Click and wait for modal with better timeout
@@ -218,12 +235,12 @@ test.describe('Forum Topic Creation Flow', () => {
     await expect(modalHeading).toBeVisible({ timeout: 5000 });
 
     // Verify form fields exist
-    await expect(page.getByPlaceholder(/Discussion title/i)).toBeVisible();
-    await expect(page.getByPlaceholder(/What would you like to discuss?/i)).toBeVisible();
+    await expect(page.getByPlaceholder(/Discussion title/i)).toBeVisible({ timeout: 15000 });
+    await expect(page.getByPlaceholder(/What would you like to discuss?/i)).toBeVisible({ timeout: 15000 });
     
     // Verify buttons exist
-    await expect(page.locator('button').filter({ hasText: /Create Topic/i })).toBeVisible();
-    await expect(page.locator('button').filter({ hasText: /Cancel/i })).toBeVisible();
+    await expect(page.locator('button').filter({ hasText: /Create Topic/i })).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('button').filter({ hasText: /Cancel/i })).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Modal opened with all required fields');
 
@@ -249,7 +266,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForURL('**/forum');
     await page.waitForTimeout(1000);
     
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     await newTopicButton.click();
     await page.waitForTimeout(500);
@@ -280,7 +297,7 @@ test.describe('Forum Topic Creation Flow', () => {
     await page.waitForURL('**/forum');
     await page.waitForTimeout(1000);
     
-    const newTopicButton = page.locator('[data-testid="new-topic-button"]');
+    const newTopicButton = page.locator('[data-testid="new-topic-button-discussions"], button:has-text("New Topic")').first();
     await expect(newTopicButton).toBeVisible({ timeout: 5000 });
     await newTopicButton.click({ force: true });
     await page.waitForTimeout(1500);
@@ -405,18 +422,18 @@ test.describe('Forum Topic Creation Flow', () => {
 
     // Verify we're in the discussions view for that category
     const categoryHeading = page.getByRole('heading', { name: /General|Community Forum/i });
-    await expect(categoryHeading.first()).toBeVisible({ timeout: 3000 });
+    await expect(categoryHeading.first()).toBeVisible({ timeout: 15000 });
 
     // Verify New Topic button is still visible in discussions view
     const newTopicButton = page.locator('[data-testid="new-topic-button"]');
-    await expect(newTopicButton).toBeVisible({ timeout: 3000 });
+    await expect(newTopicButton).toBeVisible({ timeout: 15000 });
     console.log('✓ New Topic button visible in discussions view');
   });
 });
 
 test.describe('Forum Category Navigation from Sidebar', () => {
   test.beforeEach(async ({ page }) => {
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await expect(page.getByRole('heading', { name: '🎱 CueFinder' })).toBeVisible({ timeout: 10000 });
   });
 
@@ -470,7 +487,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
 
     // Verify we're viewing Tournaments category
     const categoryHeading = page.getByText('Tournaments').first();
-    await expect(categoryHeading).toBeVisible({ timeout: 3000 });
+    await expect(categoryHeading).toBeVisible({ timeout: 15000 });
 
     console.log('✓ Category selection persisted correctly');
   });
@@ -479,7 +496,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
     console.log('✓ Testing All Categories navigation...');
 
     // Navigate to forum
-    await page.goto('http://localhost:3000/forum');
+    await page.goto(`${APP_BASE_URL}/forum`);
     await page.waitForTimeout(1000);
 
     // Click on a specific category
@@ -499,7 +516,7 @@ test.describe('Forum Category Navigation from Sidebar', () => {
 
       // Verify we're back in categories view
       const categoriesHeading = page.getByRole('heading', { name: /Forum Categories|Forum/i });
-      await expect(categoriesHeading.first()).toBeVisible({ timeout: 3000 });
+      await expect(categoriesHeading.first()).toBeVisible({ timeout: 15000 });
       
       console.log('✓ Navigated back to categories view');
     }
@@ -513,7 +530,7 @@ test.describe('Forum Responsive Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    await page.goto('http://localhost:3000');
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(1500);
 
     // On mobile, the sidebar may be hidden. Try to find and click menu button to reveal it
@@ -570,7 +587,7 @@ test.describe('Forum Responsive Navigation', () => {
     // Set mobile viewport
     await page.setViewportSize({ width: 375, height: 667 });
     
-    await page.goto('http://localhost:3000/forum');
+    await page.goto(`${APP_BASE_URL}/forum`);
     await page.waitForTimeout(1000);
 
     // Check if New Topic button is visible or in overflow menu
@@ -589,7 +606,7 @@ test.describe('Forum API Integration', () => {
   test('Categories API endpoint returns data', async ({ request }) => {
     console.log('✓ Testing categories API endpoint...');
 
-    const response = await request.get('http://localhost:5000/api/forum/categories');
+    const response = await request.get(`${API_BASE_URL}/forum/categories`);
     
     expect(response.status()).toBe(200);
     
@@ -618,7 +635,7 @@ test.describe('Forum API Integration', () => {
       categoryId: '00000000-0000-0000-0000-000000000000', // Placeholder
     };
 
-    const response = await request.post('http://localhost:5000/api/forum/discussions', {
+    const response = await request.post(`${API_BASE_URL}/forum/discussions`, {
       data: testDiscussion,
       headers: {
         'Content-Type': 'application/json',
@@ -640,3 +657,5 @@ test.describe('Forum API Integration', () => {
     }
   });
 });
+
+

@@ -26,11 +26,17 @@ namespace CueFinder.Database.Context
         public DbSet<CueImage> CueImages { get; set; } = null!;
         public DbSet<CueCase> CueCases { get; set; } = null!;
         public DbSet<CueCaseImage> CueCaseImages { get; set; } = null!;
+        public DbSet<BilliardTable> BilliardTables { get; set; } = null!;
+        public DbSet<BilliardTableImage> BilliardTableImages { get; set; } = null!;
+        public DbSet<Accessory> Accessories { get; set; } = null!;
+        public DbSet<AccessoryImage> AccessoryImages { get; set; } = null!;
         public DbSet<Rating> Ratings { get; set; } = null!;
         public DbSet<Message> Messages { get; set; } = null!;
         public DbSet<SavedCue> SavedCues { get; set; } = null!;
+        public DbSet<SavedBilliardTable> SavedBilliardTables { get; set; } = null!;
         public DbSet<Transaction> Transactions { get; set; } = null!;
         public DbSet<PhoneVerificationToken> PhoneVerificationTokens { get; set; } = null!;
+        public DbSet<PasswordResetToken> PasswordResetTokens { get; set; } = null!;
         public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
         public DbSet<ModerationQueue> ModerationQueues { get; set; } = null!;
         public DbSet<UserReport> UserReports { get; set; } = null!;
@@ -175,6 +181,99 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.CueId)
                     .HasDatabaseName("IX_CueImage_CueId");
+            });
+
+            // Accessory entity configuration
+            modelBuilder.Entity<Accessory>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasMany(e => e.Images)
+                    .WithOne(i => i.Accessory)
+                    .HasForeignKey(i => i.AccessoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Brand)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.Price)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.Condition)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.AccessoryType)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Material)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Size)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Color)
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.Location)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_Accessory_UserId");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_Accessory_IsSold");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_Accessory_CreatedAt");
+            });
+
+            // AccessoryImage entity configuration
+            modelBuilder.Entity<AccessoryImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.ImageUrl)
+                    .IsRequired()
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.AltText)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.IsPrimary)
+                    .HasDefaultValue(false);
+
+                entity.HasOne(e => e.Accessory)
+                    .WithMany(a => a.Images)
+                    .HasForeignKey(e => e.AccessoryId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.AccessoryId)
+                    .HasDatabaseName("IX_AccessoryImage_AccessoryId");
+
+                entity.HasIndex(e => new { e.AccessoryId, e.IsPrimary })
+                    .HasDatabaseName("IX_AccessoryImage_Primary");
             });
 
             // Rating entity configuration
@@ -377,6 +476,52 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
                     .HasDatabaseName("IX_PhoneVerification_User_Status");
+            });
+
+            // PasswordResetToken entity configuration
+            modelBuilder.Entity<PasswordResetToken>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.TokenHash)
+                    .IsRequired()
+                    .HasMaxLength(256); // SHA-256 hex = 64 chars, stored as text
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.ExpiresAt);
+
+                entity.Property(e => e.IsUsed)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.UsedAt);
+
+                entity.Property(e => e.RequestIpAddress)
+                    .HasMaxLength(45); // IPv6 max length
+
+                entity.Property(e => e.RequestUserAgent)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Purpose)
+                    .IsRequired()
+                    .HasMaxLength(50)
+                    .HasDefaultValue("password_reset");
+
+                entity.HasIndex(e => e.TokenHash)
+                    .IsUnique()
+                    .HasDatabaseName("IX_PasswordResetToken_Hash");
+
+                entity.HasIndex(e => new { e.UserId, e.IsUsed, e.ExpiresAt })
+                    .HasDatabaseName("IX_PasswordResetToken_User_Status");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_PasswordResetToken_CreatedAt");
             });
 
             // CueCase entity configuration
@@ -592,6 +737,93 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.FlaggedImageId)
                     .HasDatabaseName("IX_UserReport_FlaggedImageId");
+            });
+
+            // BilliardTable entity configuration
+            modelBuilder.Entity<BilliardTable>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.IsSold)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.Property(e => e.ViewCount)
+                    .HasDefaultValue(0);
+
+                entity.Property(e => e.IsFlagged)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.ModerationStatus)
+                    .HasDefaultValue("approved");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_BilliardTable_UserId");
+
+                entity.HasIndex(e => e.IsSold)
+                    .HasDatabaseName("IX_BilliardTable_IsSold");
+
+                entity.HasIndex(e => e.IsFlagged)
+                    .HasDatabaseName("IX_BilliardTable_IsFlagged");
+
+                entity.HasIndex(e => e.CreatedAt)
+                    .HasDatabaseName("IX_BilliardTable_CreatedAt");
+            });
+
+            // BilliardTableImage entity configuration
+            modelBuilder.Entity<BilliardTableImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.BilliardTable)
+                    .WithMany(t => t.Images)
+                    .HasForeignKey(e => e.BilliardTableId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.IsPrimary)
+                    .HasDefaultValue(false);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.BilliardTableId)
+                    .HasDatabaseName("IX_BilliardTableImage_BilliardTableId");
+
+                entity.HasIndex(e => new { e.BilliardTableId, e.IsPrimary })
+                    .HasDatabaseName("IX_BilliardTableImage_Primary");
+            });
+
+            // SavedBilliardTable entity configuration
+            modelBuilder.Entity<SavedBilliardTable>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.BilliardTable)
+                    .WithMany(t => t.SavedByUsers)
+                    .HasForeignKey(e => e.BilliardTableId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.SavedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => new { e.UserId, e.BilliardTableId })
+                    .IsUnique()
+                    .HasDatabaseName("IX_SavedBilliardTable_Unique_User_Table");
             });
         }
     }

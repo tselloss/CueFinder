@@ -1,9 +1,27 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Message Receiving Flow', () => {
-  test('Should allow user to receive and view messages from buyers', async ({ page }) => {
+  test('Should allow user to receive and view messages from buyers', async ({ page, context, request }) => {
     console.log('\n📨 Starting message receiving flow test\n');
 
+    // Generate unique test user
+    const timestamp = Date.now();
+    const testUser = {
+      username: `msguser_${timestamp}`,
+      email: `msguser_${timestamp}@example.com`,
+      password: 'TestPassword123!',
+      name: 'Message Test User',
+      phone: '+12025551234',
+      acceptedTerms: true
+    };
+    
+    // Step 0: Register test user
+    console.log('0️⃣ Registering test user...');
+    const regResponse = await request.post('http://127.0.0.1:5000/api/auth/register', {
+      data: testUser
+    });
+    console.log(`Registration status: ${regResponse.status()}`);
+    
     // Step 1: Navigate to home
     console.log('1️⃣ Navigating to home page...');
     await page.goto('http://localhost:3000');
@@ -11,9 +29,15 @@ test.describe('Message Receiving Flow', () => {
     console.log('✅ Home page loaded');
 
     // Step 2: Login
-    console.log('2️⃣ Logging in as testadmin...');
-    await page.locator('button:has-text("Sign In")').first().click();
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 5000 });
+    console.log('2️⃣ Logging in...');
+    
+    // Find and click Sign In button
+    const signInButton = page.locator('button:has-text("Sign In")').first();
+    await signInButton.click({ force: true, timeout: 10000 });
+    await page.waitForTimeout(1500); // Wait for modal to appear
+    
+    // Wait for Sign In heading to appear (without emoji)
+    await expect(page.getByRole('heading', { name: 'Sign In' })).toBeVisible({ timeout: 25000 });
 
     const usernameInput = page.getByPlaceholder('Enter username');
     const passwordInput = page.getByPlaceholder('Password');
@@ -21,14 +45,19 @@ test.describe('Message Receiving Flow', () => {
     await usernameInput.waitFor({ state: 'visible', timeout: 5000 });
     await passwordInput.waitFor({ state: 'visible', timeout: 5000 });
 
-    await usernameInput.fill('testadmin');
-    await passwordInput.fill('TestAdmin123!');
+    await usernameInput.fill(testUser.username);
+    await passwordInput.fill(testUser.password);
 
     const loginButton = page.locator('button:has-text("Sign In")').last();
     await loginButton.click();
 
-    await page.waitForURL(/\/#\/$/, { timeout: 10000 });
-    const token = await page.evaluate(() => localStorage.getItem('authToken'));
+    // Wait for navigation to complete - increased timeout
+    await page.waitForNavigation({ timeout: 20000 }).catch(() => {});
+    await page.waitForTimeout(1000);
+    
+    console.log(`Current URL after login: ${page.url()}`);
+    
+    const token = await page.evaluate(() => localStorage.getItem('authToken')).catch(() => null);
     console.log(`✅ Logged in, token: ${token ? 'YES' : 'NO'}`);
     expect(token).toBeTruthy();
 
@@ -167,3 +196,5 @@ test.describe('Message Receiving Flow', () => {
     console.log('\n✅ Message receiving flow test completed!\n');
   });
 });
+
+

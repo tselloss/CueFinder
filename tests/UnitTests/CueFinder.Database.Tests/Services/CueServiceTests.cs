@@ -69,9 +69,10 @@ namespace CueFinder.Database.Tests.Services
 
             // Assert
             result.Should().NotBeNull();
-            result!.Title.Should().Be("Test Cue");
-            result.User.Should().NotBeNull();
-            result.User.Username.Should().Be("testuser");
+            var cueResult = result!;
+            cueResult.Title.Should().Be("Test Cue");
+            cueResult.User.Should().NotBeNull();
+            cueResult.User!.Username.Should().Be("testuser");
         }
 
         [Fact]

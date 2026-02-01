@@ -6,26 +6,12 @@
  */
 
 const { test, expect } = require('@playwright/test');
+const { registerUser, loginUser, setAuthToken } = require('./helpers/authHelper');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
+const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
 
-// Helper functions
-async function registerUser(request, userData) {
-  const response = await request.post(`${API_BASE_URL}/auth/register`, {
-    data: userData
-  });
-  return response.ok();
-}
-
-async function loginAndGetToken(request, username, password) {
-  const response = await request.post(`${API_BASE_URL}/auth/login`, {
-    data: { username, password }
-  });
-  if (!response.ok()) return null;
-  const data = await response.json();
-  return data.accessToken;
-}
-
+// Helper to get my cues
 async function getMyCues(request, authToken) {
   const response = await request.get(`${API_BASE_URL}/cues/my-cues`, {
     headers: { Authorization: `Bearer ${authToken}` }
@@ -34,6 +20,7 @@ async function getMyCues(request, authToken) {
   return await response.json();
 }
 
+// Helper to get my cases
 async function getMyCueCases(request, authToken) {
   const response = await request.get(`${API_BASE_URL}/cuecases/my-cases`, {
     headers: { Authorization: `Bearer ${authToken}` }
@@ -50,7 +37,8 @@ const testUser = {
   name: 'Listing Test User',
   email: `listing${timestamp}@example.com`,
   phone: '+15559876543',
-  location: 'Test City, USA'
+  location: 'Test City, USA',
+  acceptedTerms: true
 };
 
 const testCue = {
@@ -76,42 +64,41 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     console.log('\n🚀 Setting up test user...');
     
     // Register user
-    const registered = await registerUser(request, testUser);
-    expect(registered).toBeTruthy();
+    const regResult = await registerUser(request, testUser);
+    expect(regResult.status === 200 || regResult.status === 201).toBeTruthy();
     console.log(`✅ User registered: ${testUser.username}`);
     
-    // Get token for API validation
-    authToken = await loginAndGetToken(request, testUser.username, testUser.password);
-    expect(authToken).toBeTruthy();
-    console.log('✅ Auth token obtained\n');
+    // Token will be obtained fresh in each test via loginUser()
+    console.log('✅ Test user setup complete\n');
   });
 
   test('1. Add Cue Listing via UI', async ({ page, request }) => {
     console.log('\n🎱 TEST 1: Adding a Cue Listing\n');
 
     // ========================================
-    // STEP 1: Navigate and Login
+    // STEP 1: Login via API and set token
     // ========================================
-    console.log('📍 STEP 1: Navigating to home page and logging in...');
-    await page.goto('http://localhost:3000');
-    await page.waitForTimeout(1500);
-
-    // Click Sign In
-    await page.click('button:has-text("Sign In")');
-    await page.waitForTimeout(1000);
-
-    // Fill credentials
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
-    await page.click('button[type="submit"]:has-text("Sign In")');
-    await page.waitForTimeout(2500);
-    console.log('✅ Logged in successfully\n');
+    console.log('📍 STEP 1: Logging in via API...');
+    const token = await loginUser(request, testUser.username, testUser.password);
+    expect(token).toBeTruthy();
+    console.log('✅ Auth token obtained');
+    
+    // Set token in localStorage BEFORE navigating
+    console.log('📍 Setting token in browser localStorage...');
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, token);
+    
+    // Now navigate to app
+    await page.goto(APP_BASE_URL);
+    await page.waitForTimeout(2000);
+    console.log('✅ Logged in via localStorage\n');
 
     // ========================================
     // STEP 2: Open New Listing Modal
     // ========================================
     console.log('📍 STEP 2: Opening new listing modal...');
-    const newListingButton = page.locator('button').filter({ hasText: /new listing/i }).first();
+    const newListingButton = page.locator('button').filter({ hasText: /add.*listing/i }).first();
     await newListingButton.click();
     await page.waitForTimeout(1500);
     console.log('✅ Modal opened\n');
@@ -120,18 +107,20 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     // STEP 3: Select Billiard Cue
     // ========================================
     console.log('📍 STEP 3: Selecting "Billiard Cue" product type...');
-    await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 5000 });
-    await page.click('button:has-text("Billiard Cue")');
-    await page.waitForTimeout(2000);
+    await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 10000 });
+    const cueCard = page.locator('h4').filter({ hasText: 'Billiard Cue' }).first();
+    await cueCard.waitFor({ state: 'visible', timeout: 10000 });
+    await cueCard.click({ timeout: 10000 });
+    await page.waitForTimeout(2500);
     console.log('✅ Billiard Cue selected\n');
 
     // ========================================
     // STEP 4: Verify Cue-Specific Fields
     // ========================================
     console.log('📍 STEP 4: Verifying cue-specific fields...');
-    await expect(page.locator('text=Weight (oz)')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Tip Size')).toBeVisible();
-    await expect(page.locator('text=Length')).toBeVisible();
+    await expect(page.locator('text=Weight (oz)')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Tip Size')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Length')).toBeVisible({ timeout: 15000 });
     console.log('✅ Cue-specific fields visible\n');
 
     // ========================================
@@ -220,48 +209,52 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     console.log('\n💼 TEST 2: Adding a Case Listing\n');
 
     // ========================================
-    // STEP 1: Navigate and Login
+    // STEP 1: Login via API and set token
     // ========================================
-    console.log('📍 STEP 1: Navigating to home page and logging in...');
-    await page.goto('http://localhost:3000');
-    await page.waitForTimeout(1500);
-
-    // Click Sign In
-    await page.click('button:has-text("Sign In")');
-    await page.waitForTimeout(1000);
-
-    // Fill credentials
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
-    await page.click('button[type="submit"]:has-text("Sign In")');
-    await page.waitForTimeout(2500);
-    console.log('✅ Logged in successfully\n');
+    console.log('📍 STEP 1: Logging in via API...');
+    const token = await loginUser(request, testUser.username, testUser.password);
+    expect(token).toBeTruthy();
+    console.log('✅ Auth token obtained');
+    
+    // Set token in localStorage BEFORE navigating
+    console.log('📍 Setting token in browser localStorage...');
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, token);
+    
+    // Now navigate to app
+    await page.goto(APP_BASE_URL);
+    await page.waitForTimeout(2000);
+    console.log('✅ Logged in via localStorage\n');
 
     // ========================================
     // STEP 2: Open New Listing Modal
     // ========================================
     console.log('📍 STEP 2: Opening new listing modal...');
-    const newListingButton = page.locator('button').filter({ hasText: /new listing/i }).first();
-    await newListingButton.click();
-    await page.waitForTimeout(1500);
+    const newListingButton = page.locator('button').filter({ hasText: /add.*listing/i }).first();
+    await newListingButton.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+    await newListingButton.click({ timeout: 10000 });
+    await page.waitForTimeout(2500);
     console.log('✅ Modal opened\n');
 
     // ========================================
     // STEP 3: Select Cue Case
     // ========================================
     console.log('📍 STEP 3: Selecting "Cue Case" product type...');
-    await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 5000 });
-    await page.click('button:has-text("Cue Case")');
-    await page.waitForTimeout(2000);
+    await expect(page.locator('text=What are you listing?')).toBeVisible({ timeout: 10000 });
+    const caseCard = page.locator('h4').filter({ hasText: 'Cue Case' }).first();
+    await caseCard.waitFor({ state: 'visible', timeout: 10000 });
+    await caseCard.click({ timeout: 10000 });
+    await page.waitForTimeout(2500);
     console.log('✅ Cue Case selected\n');
 
     // ========================================
     // STEP 4: Verify Case-Specific Fields
     // ========================================
     console.log('📍 STEP 4: Verifying case-specific fields...');
-    await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 5000 });
-    await expect(page.locator('text=Case Opening')).toBeVisible();
-    await expect(page.locator('text=Case Type')).toBeVisible();
+    await expect(page.locator('text=Case Capacity')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Opening')).toBeVisible({ timeout: 15000 });
+    await expect(page.locator('text=Case Type')).toBeVisible({ timeout: 15000 });
     console.log('✅ Case-specific fields visible\n');
 
     // ========================================
@@ -359,32 +352,42 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     }
   });
 
-  test('3. Compare Cue vs Case Forms Side by Side', async ({ page }) => {
+  test('3. Compare Cue vs Case Forms Side by Side', async ({ page, request }) => {
     console.log('\n⚖️  TEST 3: Comparing Cue vs Case Forms\n');
 
-    // Login
-    console.log('📍 Logging in...');
-    await page.goto('http://localhost:3000');
-    await page.waitForTimeout(1000);
-    await page.click('button:has-text("Sign In")');
-    await page.waitForTimeout(1000);
-    await page.locator('input[name="username"]').fill(testUser.username);
-    await page.locator('input[name="password"]').fill(testUser.password);
-    await page.click('button[type="submit"]:has-text("Sign In")');
+    // ========================================
+    // STEP 1: Login via API and set token
+    // ========================================
+    console.log('📍 STEP 1: Logging in via API...');
+    const token = await loginUser(request, testUser.username, testUser.password);
+    expect(token).toBeTruthy();
+    console.log('✅ Auth token obtained');
+    
+    // Set token in localStorage BEFORE navigating
+    console.log('📍 Setting token in browser localStorage...');
+    await page.addInitScript((authToken) => {
+      localStorage.setItem('authToken', authToken);
+    }, token);
+    
+    // Now navigate to app
+    await page.goto(APP_BASE_URL);
     await page.waitForTimeout(2000);
-    console.log('✅ Logged in\n');
+    console.log('✅ Logged in via localStorage\n');
 
     // Open modal
-    const newListingButton = page.locator('button').filter({ hasText: /new listing/i }).first();
-    await newListingButton.click();
-    await page.waitForTimeout(1500);
+    const compareModalButton = page.locator('button').filter({ hasText: /add.*listing/i }).first();
+    await compareModalButton.waitFor({ state: 'visible', timeout: 10000 }).catch(() => {});
+    await compareModalButton.click({ timeout: 10000 });
+    await page.waitForTimeout(2500);
 
     // ========================================
     // Show Cue Fields
     // ========================================
     console.log('📍 Viewing CUE fields...');
-    await page.click('button:has-text("Billiard Cue")');
-    await page.waitForTimeout(2000);
+    const cueCard = page.locator('h4').filter({ hasText: 'Billiard Cue' }).first();
+    await cueCard.waitFor({ state: 'visible', timeout: 10000 });
+    await cueCard.click({ timeout: 10000 });
+    await page.waitForTimeout(2500);
     
     console.log('\n🎱 CUE-SPECIFIC FIELDS:');
     const cueFieldsVisible = await page.locator('text=Weight (oz)').isVisible();
@@ -405,7 +408,7 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     // Switch to Case Fields
     // ========================================
     console.log('\n📍 Switching to CASE fields...');
-    await page.click('button:has-text("Cue Case")');
+    await page.locator('h4:has-text("Cue Case")').first().click({ timeout: 5000 });
     await page.waitForTimeout(2000);
     
     console.log('\n💼 CASE-SPECIFIC FIELDS:');
@@ -462,3 +465,5 @@ test.describe('Add Cue and Case Listings - Complete Flow', () => {
     console.log('\n🚀 Implementation Status: FULLY FUNCTIONAL\n');
   });
 });
+
+

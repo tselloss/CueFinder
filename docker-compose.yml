@@ -91,7 +91,7 @@ services:
   moderator:
     build:
       context: .
-      dockerfile: CueFinderModerator/Dockerfile
+      dockerfile: SolutionLibraries/CueFinderModerator/Dockerfile
     container_name: cuefinder-moderator
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
@@ -117,7 +117,7 @@ services:
 
   frontend:
     build:
-      context: ./CueFinderFE/cuefinderfe
+      context: ./CueFinderFE
       dockerfile: Dockerfile
       args:
         - REACT_APP_API_URL=http://localhost:5000/api

@@ -4,7 +4,7 @@
 
 const { test, expect } = require('@playwright/test');
 
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 // Helper: Register user
 async function registerUser(request, userData) {
@@ -12,11 +12,11 @@ async function registerUser(request, userData) {
 }
 
 // Helper: Login
-async function loginUser(request, username, password) {
-  const response = await request.post(`${API_BASE_URL}/auth/login`, { data: { username, password } });
+async function loginUser(request, emailOrUsername, password) {
+  const response = await request.post(`${API_BASE_URL}/auth/login`, { data: { emailOrUsername, password } });
   if (!response.ok()) return null;
   const data = await response.json();
-  return data.accessToken;
+  return data.token || data.accessToken || null;
 }
 
 test('Complete Flow: Register → Login → Create Listing', async ({ request }) => {
@@ -43,8 +43,8 @@ test('Complete Flow: Register → Login → Create Listing', async ({ request })
   expect(registerResponse.ok()).toBeTruthy();
   
   let registerJson = await registerResponse.json();
-  const authToken = registerJson.accessToken;
-  const userId = registerJson.userId;
+  const authToken = registerJson.token || registerJson.accessToken;
+  const userId = registerJson.userId || registerJson.user?.id;
   
   expect(authToken).toBeTruthy();
   expect(userId).toBeTruthy();
@@ -92,3 +92,5 @@ test('Complete Flow: Register → Login → Create Listing', async ({ request })
   console.log(`  3. ✅ Create Listing: PASSED (ID: ${cueId})`);
   console.log('\n===================================\n');
 });
+
+

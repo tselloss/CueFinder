@@ -3,33 +3,96 @@ bin/
 obj/
 out/
 publish/
+build/
+build-log.txt
+build-output.txt
+build-test.log
 
-# IDE
+# IDE & Editor
 .vs/
 .vscode/
+.idea/
 *.user
 *.suo
 *.userosscache
+*.sln.docstates
+*.swp
+*.swo
 
 # Test results
 TestResults/
 test-results/
+test-results*.log
+coverage/
+playwright-report/
+*.spec.js
+*.test.js
+e2e/
 
 # NuGet
 *.nupkg
 packages/
 
+# Node.js (for any JS tooling)
+node_modules/
+**/node_modules/
+.pnpm-store/
+**/.pnpm-store/
+npm-debug.log
+yarn-debug.log
+yarn-error.log
+package-lock.json
+
 # Documentation
 *.md
+DEPLOYMENT*.md
+FRONTEND*.md
+IMPLEMENTATION*.md
+MIGRATION*.md
+MODERATION*.md
+PRODUCTION*.md
+QUICK*.md
+REFACTORING*.md
+SERVICE*.md
+SESSION*.md
 
 # Logs
 *.log
+logs/
 
 # OS files
 .DS_Store
-Thumbs.db
+Thums.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Runtime data
+uploads/
+temp/
+*.tmp
+
+# Scripts (not needed in container)
+scripts/
+deployment/
+init.sql/
+*.ps1
+*.sh
 
 # Docker
 docker-compose*.yml
-Dockerfile
+Dockerfile*
 .dockerignore
+
+# Config files
+*.local
+.env.development
+.env.local
+admin-user.json
+login-test.json
+
+# SQL migration files (handled separately)
+*.sql
+!init.sql

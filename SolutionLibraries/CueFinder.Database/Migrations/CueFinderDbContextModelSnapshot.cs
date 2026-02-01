@@ -22,6 +22,317 @@ namespace CueFinder.Database.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
+            modelBuilder.Entity("CueFinder.Database.Models.Accessory", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("AccessoryType")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<decimal>("AverageRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Color")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<bool>("IsSold")
+                        .HasColumnType("boolean");
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("Material")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<decimal>("Price")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Size")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime?>("SoldDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ViewCount")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_Accessory_CreatedAt");
+
+                    b.HasIndex("IsSold")
+                        .HasDatabaseName("IX_Accessory_IsSold");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_Accessory_UserId");
+
+                    b.ToTable("Accessories");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.AccessoryImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("AccessoryId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("AltText")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("UploadedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AccessoryId")
+                        .HasDatabaseName("IX_AccessoryImage_AccessoryId");
+
+                    b.HasIndex("AccessoryId", "IsPrimary")
+                        .HasDatabaseName("IX_AccessoryImage_Primary");
+
+                    b.ToTable("AccessoryImages");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.BilliardTable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("AverageRating")
+                        .HasColumnType("numeric");
+
+                    b.Property<string>("Brand")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Condition")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Features")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FeltType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("FlagReason")
+                        .HasColumnType("text");
+
+                    b.Property<string>("FrameMaterial")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsFlagged")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("IsSold")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<string>("Location")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("ManufactureYear")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("ModeratedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int?>("ModeratedByUserId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ModerationNotes")
+                        .HasColumnType("text");
+
+                    b.Property<string>("ModerationStatus")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("text")
+                        .HasDefaultValue("approved");
+
+                    b.Property<string>("PlayingSurface")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("PocketType")
+                        .HasColumnType("text");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("RatingCount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("SoldDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("TableSize")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("TableType")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ViewCount")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasDefaultValue(0);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedAt")
+                        .HasDatabaseName("IX_BilliardTable_CreatedAt");
+
+                    b.HasIndex("IsFlagged")
+                        .HasDatabaseName("IX_BilliardTable_IsFlagged");
+
+                    b.HasIndex("IsSold")
+                        .HasDatabaseName("IX_BilliardTable_IsSold");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_BilliardTable_UserId");
+
+                    b.ToTable("BilliardTables");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.BilliardTableImage", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BilliardTableId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("DisplayOrder")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ImageUrl")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<bool>("IsPrimary")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BilliardTableId")
+                        .HasDatabaseName("IX_BilliardTableImage_BilliardTableId");
+
+                    b.HasIndex("BilliardTableId", "IsPrimary")
+                        .HasDatabaseName("IX_BilliardTableImage_Primary");
+
+                    b.ToTable("BilliardTableImages");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Cue", b =>
                 {
                     b.Property<int>("Id")
@@ -671,6 +982,9 @@ namespace CueFinder.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<int?>("BilliardTableId")
+                        .HasColumnType("integer");
+
                     b.Property<string>("Category")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -704,6 +1018,8 @@ namespace CueFinder.Database.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BilliardTableId");
+
                     b.HasIndex("RatedByUserId");
 
                     b.HasIndex("SellerUserId");
@@ -713,6 +1029,41 @@ namespace CueFinder.Database.Migrations
                         .HasDatabaseName("IX_Rating_Unique_User_Cue");
 
                     b.ToTable("Ratings");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.SavedBilliardTable", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BilliardTableId")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("SavedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("UserId1")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BilliardTableId");
+
+                    b.HasIndex("UserId1");
+
+                    b.HasIndex("UserId", "BilliardTableId")
+                        .IsUnique()
+                        .HasDatabaseName("IX_SavedBilliardTable_Unique_User_Table");
+
+                    b.ToTable("SavedBilliardTables");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.SavedCue", b =>
@@ -998,6 +1349,50 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("UserReports");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.Accessory", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.AccessoryImage", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.Accessory", "Accessory")
+                        .WithMany("Images")
+                        .HasForeignKey("AccessoryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Accessory");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.BilliardTable", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.BilliardTableImage", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.BilliardTable", "BilliardTable")
+                        .WithMany("Images")
+                        .HasForeignKey("BilliardTableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("BilliardTable");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Cue", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.User", "User")
@@ -1117,6 +1512,10 @@ namespace CueFinder.Database.Migrations
 
             modelBuilder.Entity("CueFinder.Database.Models.Rating", b =>
                 {
+                    b.HasOne("CueFinder.Database.Models.BilliardTable", null)
+                        .WithMany("Ratings")
+                        .HasForeignKey("BilliardTableId");
+
                     b.HasOne("CueFinder.Database.Models.Cue", "Cue")
                         .WithMany("Ratings")
                         .HasForeignKey("CueId")
@@ -1140,6 +1539,29 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("RatedByUser");
 
                     b.Navigation("SellerUser");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.SavedBilliardTable", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.BilliardTable", "BilliardTable")
+                        .WithMany("SavedByUsers")
+                        .HasForeignKey("BilliardTableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", null)
+                        .WithMany("SavedBilliardTables")
+                        .HasForeignKey("UserId1");
+
+                    b.Navigation("BilliardTable");
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.SavedCue", b =>
@@ -1207,6 +1629,20 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("ReportingUser");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.Accessory", b =>
+                {
+                    b.Navigation("Images");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.BilliardTable", b =>
+                {
+                    b.Navigation("Images");
+
+                    b.Navigation("Ratings");
+
+                    b.Navigation("SavedByUsers");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Cue", b =>
                 {
                     b.Navigation("Images");
@@ -1232,6 +1668,8 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("RatingsReceived");
 
                     b.Navigation("ReceivedMessages");
+
+                    b.Navigation("SavedBilliardTables");
 
                     b.Navigation("SavedCues");
 

@@ -21,6 +21,7 @@ namespace CueFinder.Auth.Extensions
             // Register DatabaseAuthService instead of mock AuthService
             services.AddScoped<IAuthService, DatabaseAuthService>();
             services.AddScoped<ITokenService, TokenService>();
+            services.AddScoped<IPasswordResetService, PasswordResetService>();
             
             // Register SMS and Phone Verification services
             services.AddHttpClient<ISmsService, SmsService>(); // This registers both ISmsService and HttpClient

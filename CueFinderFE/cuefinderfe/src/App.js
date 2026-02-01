@@ -1,22 +1,30 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { Routes, Route, useNavigate, Navigate, useLocation } from 'react-router-dom';
-import CueList from './components/CueList.jsx';
-import CueDetail from './components/CueDetail.jsx';
-import CueFormModal from './components/CueFormModal.jsx';
+import CueList from './components/CueList';
+import CueDetail from './components/CueDetail';
+import CueFormModal from './components/CueFormModal';
 import CueCaseDetail from './components/CueCaseDetail';
-import AdminPage from './components/AdminPage.jsx';
-import LoginPage from './components/LoginPage.jsx';
-import UserProfile from './components/UserProfile.jsx';
+import BilliardTableDetail from './components/BilliardTableDetail';
+import AccessoryDetail from './components/AccessoryDetail';
+import AdminPage from './components/AdminPage';
+import LoginPage from './components/LoginPage';
+import UserProfile from './components/UserProfile';
 import OAuthCallback from './components/OAuthCallback';
-import Inbox from './components/Inbox.jsx';
+import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
-import Forum from './components/Forum.jsx';
+import Forum from './components/Forum';
+import ForgotPassword from './features/auth/components/ForgotPassword';
+import ResetPassword from './features/auth/components/ResetPassword';
 import DesktopSidebar from './components/DesktopSidebar';
-import AppHeader from './components/AppHeader.jsx';
-import AppFooter from './components/AppFooter.jsx';
+import AppHeader from './components/AppHeader';
+import AppFooter from './components/AppFooter';
 import { AuthProvider, useAuth } from './auth/AuthContext';
+import { ToastProvider, useToast } from './contexts/ToastContext';
+import { initializeAxiosInterceptor } from './utils/axiosInterceptor';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
+import * as billiardTableService from './api/billiardTableService';
+import * as accessoryService from './api/accessoryService';
 import * as messageService from './api/messageService';
 import * as forumService from './api/forumService';
 
@@ -26,6 +34,13 @@ import { useTranslation } from 'react-i18next';
 
 function AppInner() {
   const { t, i18n } = useTranslation();
+  const { showError } = useToast();
+  
+  // Initialize axios interceptor for global error handling
+  useEffect(() => {
+    initializeAxiosInterceptor(showError);
+  }, [showError]);
+  
   // Load saved language from localStorage
   useEffect(() => {
     const saved = localStorage.getItem('lang');
@@ -109,41 +124,64 @@ function AppInner() {
   }, [category]);
 
   const refreshListings = useCallback(async () => {
-    // Fetch both cues and cases
-    const [cuesData, casesData] = await Promise.all([
-      cueService.getCues(),
-      cueCaseService.getCueCases()
-    ]);
+    try {
+      // Fetch cues, cases, tables, and accessories with individual error handling
+      const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
+        cueService.getCues().catch(err => { 
+          console.error('Error fetching cues:', err); 
+          return []; 
+        }),
+        cueCaseService.getCueCases().catch(err => { 
+          console.error('Error fetching cue cases:', err); 
+          return []; 
+        }),
+        billiardTableService.getTables().catch(err => { 
+          console.error('Error fetching tables:', err); 
+          return []; 
+        }),
+        accessoryService.getAccessories().catch(err => { 
+          console.error('Error fetching accessories:', err); 
+          return []; 
+        })
+      ]);
 
-    // Add itemType field to each item and combine (avoid colliding with backend 'category')
-    const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
-    const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
+      // Add itemType field to each item and combine (avoid colliding with backend 'category')
+      const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
+      const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
+      const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
+      const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
 
-    // Combine both arrays
-    const allListings = [...cuesWithCategory, ...casesWithCategory];
+      // Combine all arrays
+      const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
 
-    console.log('Loaded listings:', {
-      cues: cuesWithCategory.length,
-      cases: casesWithCategory.length,
-      total: allListings.length
-    });
-    
-    // Log first cue for debugging
-    if (cuesWithCategory.length > 0) {
-      console.log('Sample cue data:', {
-        title: cuesWithCategory[0].title,
-        cueType: cuesWithCategory[0].cueType,
-        cue_type: cuesWithCategory[0].cue_type,
-        itemType: cuesWithCategory[0].itemType,
-        keys: Object.keys(cuesWithCategory[0])
+      console.log('Loaded listings:', {
+        cues: cuesWithCategory.length,
+        cases: casesWithCategory.length,
+        tables: tablesWithCategory.length,
+        accessories: accessoriesWithCategory.length,
+        total: allListings.length
       });
-    }
+      
+      // Log first cue for debugging
+      if (cuesWithCategory.length > 0) {
+        console.log('Sample cue data:', {
+          title: cuesWithCategory[0].title,
+          cueType: cuesWithCategory[0].cueType,
+          cue_type: cuesWithCategory[0].cue_type,
+          itemType: cuesWithCategory[0].itemType,
+          keys: Object.keys(cuesWithCategory[0])
+        });
+      }
 
-    setCues(allListings);
-    
-    // Expose for debugging in E2E tests
-    if (typeof window !== 'undefined') {
-      window.__cuesData = allListings;
+      setCues(allListings);
+      
+      // Expose for debugging in E2E tests
+      if (typeof window !== 'undefined') {
+        window.__cuesData = allListings;
+      }
+    } catch (error) {
+      console.error('Error refreshing listings:', error);
+      setCues([]);
     }
   }, []);
 
@@ -151,18 +189,17 @@ function AppInner() {
   useEffect(() => {
     if (!isHomePage) return;
     
-    // Navigate to coming soon page for tables and accessories
-    if (category === 'tables' || category === 'accessories') {
-      navigate('/coming-soon');
-      return;
-    }
-    
+    // All categories now have listings, so no need to redirect to coming-soon
     refreshListings();
-  }, [isHomePage, category, refreshListings, navigate]);
+  }, [isHomePage, refreshListings]);
 
   const handleSelect = (item) => {
   if (item.itemType === 'case') {
       navigate(`/case/${item.id}`);
+    } else if (item.itemType === 'table') {
+      navigate(`/table/${item.id}`);
+    } else if (item.itemType === 'accessory') {
+      navigate(`/accessory/${item.id}`);
     } else {
       navigate(`/cue/${item.id}`);
     }
@@ -352,6 +389,14 @@ function AppInner() {
                 user ? <Navigate to="/" /> : <LoginPage />
               } />
               
+              <Route path="/forgot-password" element={
+                user ? <Navigate to="/" /> : <ForgotPassword />
+              } />
+              
+              <Route path="/reset-password" element={
+                user ? <Navigate to="/" /> : <ResetPassword />
+              } />
+              
               <Route path="/oauth-callback" element={<OAuthCallback />} />
               
               <Route path="/cue/:id" element={
@@ -359,6 +404,12 @@ function AppInner() {
               } />
               <Route path="/case/:id" element={
                 user ? <CueCaseDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/table/:id" element={
+                user ? <BilliardTableDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/accessory/:id" element={
+                user ? <AccessoryDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/profile" element={
@@ -378,7 +429,7 @@ function AppInner() {
               } />
               
               <Route path="/forum" element={
-                user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
+                <Forum onBack={handleBack} />
               } />
             </Routes>
           </div>
@@ -418,7 +469,9 @@ function AppInner() {
 export default function App() {
   return (
     <AuthProvider>
-      <AppInner />
+      <ToastProvider>
+        <AppInner />
+      </ToastProvider>
     </AuthProvider>
   );
 }

@@ -25,7 +25,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CueFinder.Auth\CueFinder.Auth.csproj" />
     <ProjectReference Include="..\..\CueFinder.Database\CueFinder.Database.csproj" />
   </ItemGroup>
 

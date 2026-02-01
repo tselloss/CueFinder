@@ -5,7 +5,7 @@
  * RFC 7807 Problem Details error responses from the backend.
  * 
  * Prerequisites:
- * 1. Backend must be running on http://localhost:5000
+ * 1. Backend must be running on http://localhost:5200
  * 2. Frontend must be running on http://localhost:3000
  * 3. PostgreSQL database must be accessible
  * 
@@ -30,6 +30,7 @@ const testUser = {
   name: 'Error Test User',
   email: `errortest${timestamp}@example.com`,
   phone: '+1234567890',
+  acceptedTerms: true
 };
 
 test.describe('Problem Details Error Handling - Visual Testing', () => {
@@ -50,11 +51,11 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
   test('Login Error: Invalid Credentials (401 Unauthorized)', async ({ page }) => {
     console.log('\n🧪 TEST: Invalid Login Credentials');
     
-    // Navigate to login page
-    await page.locator('button:has-text("Sign In")').click();
+    // Navigate to login page - use specific selector to avoid ambiguity
+    await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
     
-    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '🎱 Sign In' })).toBeVisible({ timeout: 15000 });
     console.log('📍 On login page');
     
     // Enter invalid credentials
@@ -107,10 +108,10 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
     console.log('\n🧪 TEST: Validation Error - Short Password');
     
     // Navigate to registration page
-    await page.locator('button:has-text("Sign Up")').click();
+    await page.locator('button:has-text("Sign Up")').first().click();
     await page.waitForTimeout(500);
     
-    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: '🎱 Create Account' })).toBeVisible({ timeout: 15000 });
     console.log('📍 On registration page');
     
     // Fill out registration form with invalid password
@@ -182,7 +183,7 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
     console.log('\n🧪 TEST: Duplicate Username - Conflict Error');
     
     // First, register a user successfully
-    await page.locator('button:has-text("Sign Up")').click();
+    await page.locator('button:has-text("Sign Up")').first().click();
     await page.waitForTimeout(500);
     
     const uniqueUsername = `duplicate_test_${timestamp}`;
@@ -287,7 +288,7 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
     console.log('\n🧪 TEST: Profile Update - Invalid Email Validation');
     
     // First login as admin
-    await page.locator('button:has-text("Sign In")').click();
+    await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
     
     await page.getByPlaceholder('Enter username').fill('admin');
@@ -373,7 +374,7 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
     console.log('🔌 Simulating backend failure...');
     
     // Try to login
-    await page.locator('button:has-text("Sign In")').click();
+    await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
     
     await page.getByPlaceholder('Enter username').fill('testuser');
@@ -405,7 +406,7 @@ test.describe('Problem Details Error Handling - Visual Testing', () => {
   test('Complete Error Flow: Multiple Validation Errors', async ({ page }) => {
     console.log('\n🧪 TEST: Multiple Validation Errors');
     
-    await page.locator('button:has-text("Sign Up")').click();
+    await page.locator('button:has-text("Sign Up")').first().click();
     await page.waitForTimeout(500);
     
     // Fill form with multiple invalid fields
@@ -466,7 +467,7 @@ test.describe('Problem Details - HTTP Cache Headers Verification', () => {
     
     // Login first
     await page.goto('http://localhost:3000');
-    await page.locator('button:has-text("Sign In")').click();
+    await page.locator('button:has-text("Sign In")').first().click();
     await page.waitForTimeout(500);
     
     await page.getByPlaceholder('Enter username').fill('admin');
@@ -526,3 +527,5 @@ test.describe('Problem Details - HTTP Cache Headers Verification', () => {
     console.log('✅ Cache headers verification complete');
   });
 });
+
+

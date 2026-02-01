@@ -57,7 +57,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum", "..\Solut
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.Forum.Tests", "..\tests\UnitTests\CueFinder.Forum.Tests\CueFinder.Forum.Tests.csproj", "{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinderModerator", "..\CueFinderModerator\CueFinderModerator.csproj", "{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.BilliardTables", "CueFinder.BilliardTables", "{95067AB8-035C-458A-B881-A8FE99323F20}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.BilliardTables", "..\SolutionLibraries\CueFinder.BilliardTables\CueFinder.BilliardTables\CueFinder.BilliardTables.csproj", "{5FE77429-4D0D-47CE-AB95-64309547DCBD}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.Accessories", "CueFinder.Accessories", "{C304B2A6-D2BD-483B-9769-3DCA1F54A39A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.Accessories", "..\SolutionLibraries\CueFinder.Accessories\CueFinder.Accessories\CueFinder.Accessories.csproj", "{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -133,10 +139,14 @@ Global
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7}.Release|Any CPU.Build.0 = Release|Any CPU
-		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{F3C25330-0FE2-4B45-A15A-2BC0A3D9FA65}.Release|Any CPU.Build.0 = Release|Any CPU
+		{5FE77429-4D0D-47CE-AB95-64309547DCBD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{5FE77429-4D0D-47CE-AB95-64309547DCBD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{5FE77429-4D0D-47CE-AB95-64309547DCBD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{5FE77429-4D0D-47CE-AB95-64309547DCBD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -166,6 +176,10 @@ Global
 		{145E8EFD-EC82-4B7F-A0B0-2A1203FC4B56} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
 		{58CE5F44-CA54-4C4C-ACE2-D106FF053A7C} = {145E8EFD-EC82-4B7F-A0B0-2A1203FC4B56}
 		{2681DF5D-4DA4-4B9E-8252-67C94438D2E7} = {03C80F52-D111-4F96-BEE2-38C776169402}
+		{95067AB8-035C-458A-B881-A8FE99323F20} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
+		{5FE77429-4D0D-47CE-AB95-64309547DCBD} = {95067AB8-035C-458A-B881-A8FE99323F20}
+		{C304B2A6-D2BD-483B-9769-3DCA1F54A39A} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
+		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD} = {C304B2A6-D2BD-483B-9769-3DCA1F54A39A}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {50ADDDDF-C3D8-41DA-A1C2-A83864BFC928}

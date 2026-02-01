@@ -40,7 +40,9 @@ export default function ItemDetail({
   item, 
   itemType = 'cue',
   onBack,
-  specifications = []
+  specifications = [],
+  loading = false,
+  error = null
 }) {
   const { user } = useAuth();
   const [imageIndex, setImageIndex] = useState(0);
@@ -104,7 +106,23 @@ export default function ItemDetail({
     }
   };
 
-  if (!item) {
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen p-4">
+        <div className="text-center">
+          <p className="text-destructive text-lg font-semibold mb-4">{error}</p>
+          {onBack && (
+            <Button onClick={onBack} variant="outline">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Go Back
+            </Button>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  if (loading || !item) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>

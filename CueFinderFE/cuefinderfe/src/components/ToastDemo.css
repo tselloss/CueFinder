@@ -1,0 +1,123 @@
+.toast-demo {
+  max-width: 800px;
+  margin: 40px auto;
+  padding: 20px;
+}
+
+.toast-demo h2 {
+  color: #333;
+  margin-bottom: 10px;
+}
+
+.toast-demo p {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+.toast-demo-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 30px;
+}
+
+.toast-demo-buttons .btn {
+  padding: 12px 24px;
+  border: none;
+  border-radius: 6px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  color: white;
+}
+
+.btn-success {
+  background: #28a745;
+}
+
+.btn-success:hover {
+  background: #218838;
+}
+
+.btn-error {
+  background: #dc3545;
+}
+
+.btn-error:hover {
+  background: #c82333;
+}
+
+.btn-info {
+  background: #17a2b8;
+}
+
+.btn-info:hover {
+  background: #138496;
+}
+
+.btn-warning {
+  background: #ffc107;
+  color: #333;
+}
+
+.btn-warning:hover {
+  background: #e0a800;
+}
+
+.btn-secondary {
+  background: #6c757d;
+}
+
+.btn-secondary:hover {
+  background: #5a6268;
+}
+
+.btn-primary {
+  background: #007bff;
+}
+
+.btn-primary:hover {
+  background: #0069d9;
+}
+
+.toast-demo-info {
+  background: #f8f9fa;
+  border-radius: 8px;
+  padding: 20px;
+  margin-top: 30px;
+}
+
+.toast-demo-info h3 {
+  color: #333;
+  margin-bottom: 12px;
+  font-size: 18px;
+}
+
+.toast-demo-info ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.toast-demo-info li {
+  padding: 6px 0;
+  color: #555;
+  font-size: 14px;
+}
+
+@media (max-width: 768px) {
+  .toast-demo {
+    margin: 20px;
+    padding: 15px;
+  }
+
+  .toast-demo-buttons .btn {
+    padding: 10px 20px;
+    font-size: 13px;
+  }
+
+  .toast-demo-info {
+    padding: 15px;
+  }
+}

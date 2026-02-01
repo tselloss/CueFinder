@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Caching.Memory;
 using System;
+using System.Globalization;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -38,14 +39,14 @@ namespace CueFinder.Auth.Middleware
                 var clientIp = GetClientIp(context);
                 var cacheKey = $"RateLimit_{clientIp}";
 
-                if (_cache.TryGetValue<RateLimitInfo>(cacheKey, out var rateLimitInfo))
+                if (_cache.TryGetValue(cacheKey, out RateLimitInfo? rateLimitInfo) && rateLimitInfo is not null)
                 {
                     if (rateLimitInfo.RequestCount >= _requestLimit)
                     {
                         // Rate limit exceeded
                         var retryAfter = (int)(rateLimitInfo.ExpiresAt - DateTime.UtcNow).TotalSeconds;
                         context.Response.StatusCode = (int)HttpStatusCode.TooManyRequests;
-                        context.Response.Headers.Add("Retry-After", retryAfter.ToString());
+                        context.Response.Headers["Retry-After"] = retryAfter.ToString(CultureInfo.InvariantCulture);
                         context.Response.ContentType = "application/json";
                         
                         await context.Response.WriteAsJsonAsync(new 

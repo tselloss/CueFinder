@@ -1,4 +1,5 @@
 using CueFinder.Auth.Models;
+using CueFinder.Database.Models;
 
 namespace CueFinder.Auth.Interfaces
 {
@@ -28,6 +29,20 @@ namespace CueFinder.Auth.Interfaces
         /// <param name="userId">User ID</param>
         /// <returns>User profile information</returns>
         Task<UserProfile?> GetUserProfileAsync(int userId);
+
+        /// <summary>
+        /// Get user by ID
+        /// </summary>
+        /// <param name="userId">User ID</param>
+        /// <returns>User entity if found, null otherwise</returns>
+        Task<User?> GetUserByIdAsync(int userId);
+
+        /// <summary>
+        /// Get user by email or username (for password reset flows)
+        /// </summary>
+        /// <param name="emailOrUsername">User's email address or username</param>
+        /// <returns>User entity if found, null otherwise</returns>
+        Task<User?> GetUserByEmailOrUsernameAsync(string emailOrUsername);
 
         /// <summary>
         /// Update user profile
