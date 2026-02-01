@@ -10,7 +10,7 @@ ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Copy workspace files and dependency manifests only (better caching)
-COPY pnpm-workspace.yaml .npmrc package.json pnpm-lock.yaml* ./
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
 COPY packages/api/package.json ./packages/api/package.json
 COPY packages/app/package.json ./packages/app/package.json
 COPY packages/auth/package.json ./packages/auth/package.json
