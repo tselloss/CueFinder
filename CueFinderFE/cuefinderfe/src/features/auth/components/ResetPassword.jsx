@@ -101,20 +101,6 @@ export default function ResetPassword() {
     setPasswordStrength(Math.min(strength, 100));
   }, [newPassword, confirmPassword]);
 
-  const getPasswordStrengthColor = () => {
-    if (passwordStrength < 30) return 'danger';
-    if (passwordStrength < 60) return 'warning';
-    if (passwordStrength < 80) return 'info';
-    return 'success';
-  };
-
-  const getPasswordStrengthText = () => {
-    if (passwordStrength < 30) return 'Weak';
-    if (passwordStrength < 60) return 'Fair';
-    if (passwordStrength < 80) return 'Good';
-    return 'Strong';
-  };
-
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
@@ -140,7 +126,7 @@ export default function ResetPassword() {
     }
 
     try {
-      const response = await axios.post(
+      await axios.post(
         `${API_BASE_URL}/auth/reset-password`,
         {
           token,
