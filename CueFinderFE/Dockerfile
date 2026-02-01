@@ -2,39 +2,22 @@
 FROM node:18-alpine AS build
 WORKDIR /app
 
-# Install pnpm
-RUN npm install -g pnpm
-
 # Accept API URL as build argument
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Copy workspace files and dependency manifests only (better caching)
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml* ./
-COPY packages/api/package.json ./packages/api/package.json
-COPY packages/app/package.json ./packages/app/package.json
-COPY packages/auth/package.json ./packages/auth/package.json
-COPY packages/common/package.json ./packages/common/package.json
-COPY packages/ui/package.json ./packages/ui/package.json
-COPY cuefinderfe/package.json ./cuefinderfe/package.json
+# Copy package files first for better caching
+COPY cuefinderfe/package*.json ./cuefinderfe/
 
-# Install dependencies (monorepo)
-RUN pnpm install --frozen-lockfile --ignore-scripts
+# Change to cuefinderfe directory and install dependencies
+WORKDIR /app/cuefinderfe
+RUN npm install
 
-# Copy full source after dependencies are cached
-COPY packages ./packages
-COPY cuefinderfe ./cuefinderfe
-COPY scripts ./scripts
+# Copy source files
+COPY cuefinderfe/ ./
 
-# Run build helper to sync old source to new structure
-RUN node scripts/build-helper.js
-
-# Debug: Print environment variable and list files to verify copy worked
-RUN echo "Building with REACT_APP_API_URL=$REACT_APP_API_URL" && \
-    grep -c "data-testid" cuefinderfe/src/features/cues/components/CueCard.jsx || echo "CueCard not found or no data-testid"
-
-# Build the app package (add --reset-cache to force rebuild)
-RUN pnpm --filter @cuefinder/app build --
+# Build the application
+RUN npm run build
 
 # Production stage
 FROM nginx:alpine
@@ -42,10 +25,10 @@ FROM nginx:alpine
 # Install curl for health checks
 RUN apk add --no-cache curl
 
-# Copy built files from app package
-COPY --from=build /app/packages/app/build /usr/share/nginx/html
+# Copy built files
+COPY --from=build /app/cuefinderfe/build /usr/share/nginx/html
 
-# Copy nginx config for serving static React files
+# Copy nginx config
 COPY cuefinderfe/nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 # Expose standard HTTP port
