@@ -12,24 +12,14 @@ RUN npm install -g pnpm
 # Copy workspace configuration files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy package.json files for all workspace packages
-COPY cuefinderfe/package.json ./cuefinderfe/
-COPY packages/api/package.json ./packages/api/
-COPY packages/app/package.json ./packages/app/
-COPY packages/auth/package.json ./packages/auth/
-COPY packages/common/package.json ./packages/common/
-COPY packages/ui/package.json ./packages/ui/
-
-# Install all dependencies
-RUN pnpm install --frozen-lockfile
-
-# Copy the actual source code for packages
+# Copy all source code (needed for workspace symlinks)
 COPY packages ./packages
-
-# Copy cuefinderfe source files
 COPY cuefinderfe/ ./cuefinderfe/
 
-# Build the application (run from workspace root)
+# Install all dependencies (this will set up workspace symlinks correctly)
+RUN pnpm install --frozen-lockfile
+
+# Build the application
 RUN cd cuefinderfe && pnpm run build
 
 # Production stage
