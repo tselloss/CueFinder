@@ -94,24 +94,70 @@ namespace CueFinder.Extensions.Controllers
                     };
                 }
 
-                // Image passed - move to public storage or return temp path
-                // For now, return the path (you'll need to implement MoveToPublicStorageAsync)
-                var publicPath = $"/uploads/approved/{filename}";
-                
-                // Create approved directory
-                var approvedDir = Path.Combine(_hostEnvironment.ContentRootPath, "uploads", "approved");
-                Directory.CreateDirectory(approvedDir);
+                // Image passed moderation - move to public storage and attach to cue/case
+                var imageUrlBase = _configuration["ImageStorage:ImageUrlBase"] ?? "/uploads/cues";
+                var storagePath = _configuration["ImageStorage:StoragePath"] ?? "uploads/cues";
 
-                var publicFullPath = Path.Combine(approvedDir, filename);
-                System.IO.File.Move(tempPath, publicFullPath);
+                string publicImageUrl = "";
 
-                _logger.LogInformation($"Image uploaded successfully: {filename} by user {userId}");
+                if (cueId.HasValue)
+                {
+                    // Move to cue's folder
+                    var publicCueFolder = Path.Combine(_hostEnvironment.ContentRootPath, storagePath, cueId.Value.ToString());
+                    Directory.CreateDirectory(publicCueFolder);
+
+                    var newFilePath = Path.Combine(publicCueFolder, filename);
+                    System.IO.File.Move(tempPath, newFilePath);
+
+                    publicImageUrl = $"{imageUrlBase}/{cueId.Value}/{filename}";
+
+                    // Attach to cue
+                    var cueImage = new CueFinder.Database.Models.CueImage
+                    {
+                        CueId = cueId.Value,
+                        ImageUrl = publicImageUrl,
+                        AltText = $"Cue image {filename}",
+                        DisplayOrder = 0,
+                        IsPrimary = false,
+                        UploadedAt = DateTime.UtcNow,
+                        ContentType = file.ContentType ?? "image/jpeg"
+                    };
+                    _context.CueImages.Add(cueImage);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"Image uploaded and attached to Cue {cueId.Value}: {publicImageUrl}");
+                }
+                else if (cueCaseId.HasValue)
+                {
+                    // Move to case's folder
+                    var publicCaseFolder = Path.Combine(_hostEnvironment.ContentRootPath, "uploads", "cases", cueCaseId.Value.ToString());
+                    Directory.CreateDirectory(publicCaseFolder);
+
+                    var newFilePath = Path.Combine(publicCaseFolder, filename);
+                    System.IO.File.Move(tempPath, newFilePath);
+
+                    publicImageUrl = $"/uploads/cases/{cueCaseId.Value}/{filename}";
+
+                    // Attach to case
+                    var caseImage = new CueFinder.Database.Models.CueCaseImage
+                    {
+                        CueCaseId = cueCaseId.Value,
+                        ImageUrl = publicImageUrl,
+                        DisplayOrder = 0,
+                        IsPrimary = false,
+                        UploadedAt = DateTime.UtcNow
+                    };
+                    _context.CueCaseImages.Add(caseImage);
+                    await _context.SaveChangesAsync();
+
+                    _logger.LogInformation($"Image uploaded and attached to CueCase {cueCaseId.Value}: {publicImageUrl}");
+                }
 
                 return Ok(new
                 {
-                    message = "Image uploaded successfully",
+                    message = "Image uploaded and approved successfully",
                     filename = filename,
-                    url = publicPath,
+                    url = publicImageUrl,
                     size = file.Length
                 });
             }
