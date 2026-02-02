@@ -2,6 +2,8 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
+import * as billiardTableService from '../api/billiardTableService';
+import * as accessoryService from '../api/accessoryService';
 import CueFormModal from './CueFormModal.jsx';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
@@ -32,14 +34,24 @@ export default function MyCues() {
     setLoading(true);
     try {
       console.log('Fetching my listings from API...');
-      const [cues, cases] = await Promise.all([
+      const [cues, cases, tables, accessories] = await Promise.all([
         cueService.getMyCues(),
-        cueCaseService.getMyCueCases()
+        cueCaseService.getMyCueCases(),
+        billiardTableService.getMyTables(),
+        accessoryService.getMyAccessories()
       ]);
       const cuesWithCategory = (cues || []).map(c => ({ ...c, category: 'cue' }));
       const casesWithCategory = (cases || []).map(cs => ({ ...cs, category: 'case' }));
-      const combined = [...cuesWithCategory, ...casesWithCategory];
-      console.log('Received listings:', { cues: cuesWithCategory.length, cases: casesWithCategory.length, total: combined.length });
+      const tablesWithCategory = (tables || []).map(t => ({ ...t, category: 'table' }));
+      const accessoriesWithCategory = (accessories || []).map(a => ({ ...a, category: 'accessory' }));
+      const combined = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
+      console.log('Received listings:', { 
+        cues: cuesWithCategory.length, 
+        cases: casesWithCategory.length, 
+        tables: tablesWithCategory.length,
+        accessories: accessoriesWithCategory.length,
+        total: combined.length 
+      });
       setMyListings(combined);
     } catch (error) {
       console.error('Error loading my cues:', error);
@@ -71,7 +83,11 @@ export default function MyCues() {
   };
 
   const handleDelete = async (item) => {
-    const itemType = item.category === 'case' ? 'case' : 'cue';
+    let itemType = 'cue';
+    if (item.category === 'case') itemType = 'case';
+    else if (item.category === 'table') itemType = 'table';
+    else if (item.category === 'accessory') itemType = 'accessory';
+    
     if (!window.confirm(`⚠️ Delete ${itemType} listing?\n\nThis will permanently remove your listing and cannot be undone.`)) {
       return;
     }
@@ -79,12 +95,17 @@ export default function MyCues() {
     try {
       if (item.category === 'case') {
         await cueCaseService.deleteCueCase(item.id);
+      } else if (item.category === 'table') {
+        await billiardTableService.deleteTable(item.id);
+      } else if (item.category === 'accessory') {
+        await accessoryService.deleteAccessory(item.id);
       } else {
         await cueService.deleteCue(item.id);
       }
       setMyListings(myListings.filter(c => c.id !== item.id));
       showMessage('success', `✅ Your ${itemType} listing has been deleted successfully`);
     } catch (error) {
+      console.error('Delete error:', error);
       showMessage('error', `❌ Unable to delete your ${itemType} listing. Please try again.`);
     }
   };
@@ -96,6 +117,14 @@ export default function MyCues() {
         updated = await cueCaseService.updateCueCase(item.id, {
           isSold: !item.isSold
         });
+      } else if (item.category === 'table') {
+        updated = await billiardTableService.updateTable(item.id, {
+          isSold: !item.isSold
+        });
+      } else if (item.category === 'accessory') {
+        updated = await accessoryService.updateAccessory(item.id, {
+          isSold: !item.isSold
+        });
       } else {
         updated = await cueService.updateCue(item.id, {
           isSold: !item.isSold
@@ -104,6 +133,7 @@ export default function MyCues() {
       setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
       showMessage('success', `✅ Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
     } catch (error) {
+      console.error('Toggle sold error:', error);
       showMessage('error', '❌ Unable to update listing status. Please try again.');
     }
   };
