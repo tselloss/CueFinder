@@ -154,11 +154,11 @@ export async function deleteCue(id) {
 export async function uploadCueImages(cueId, files, onProgress) {
   const formData = new FormData();
   formData.append('cueId', cueId);
-  files.forEach(file => formData.append('files', file));
+  files.forEach(file => formData.append('file', file));
   
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/images/upload-multiple`,
+      `${API_BASE_URL}/ext/moderation/upload-image?cueId=${cueId}`,
       formData,
       {
         headers: {
