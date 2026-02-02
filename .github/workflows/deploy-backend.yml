@@ -132,13 +132,19 @@ jobs:
 
           cd "$APP_DIR"
 
+          # Backup existing .env if it exists
+          if [ -f .env ]; then
+            echo "💾 Backing up existing .env..."
+            cp .env .env.backup
+          fi
+
           echo "📦 Pulling latest changes..."
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/ -e .env
 
-          echo "⚙️  Updating environment..."
+          echo "⚙️  Creating/Updating environment..."
           cat > .env << ENVEOF
           DB_PASSWORD="$DB_PASSWORD"
           JWT_SECRET="$JWT_SECRET"
