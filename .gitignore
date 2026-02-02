@@ -368,11 +368,14 @@ FodyWeavers.xsd
 # CueFinder Specific
 ##########################
 
-# Environment files with secrets
+# Environment files with secrets - NEVER commit these!
 .env
+.env.prod
 .env.local
+.env.development
 .env.production
 .env.*.local
+.env.*
 
 # Test files with real credentials
 test-register.json
