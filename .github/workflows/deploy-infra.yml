@@ -245,10 +245,10 @@ jobs:
           chmod +x deploy-infra.sh
           
           scp -o StrictHostKeyChecking=no deploy-infra.sh \
-            "\$SERVER_USER@\$SERVER_IP:/home/\$SERVER_USER/app/"
+            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
           
           ssh -o StrictHostKeyChecking=no \
-            "\$SERVER_USER@\$SERVER_IP" \
+            "$SERVER_USER@$SERVER_IP" \
             'bash /home/cuefinder/app/deploy-infra.sh'
 
       - name: Verify deployment
