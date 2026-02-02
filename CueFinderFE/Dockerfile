@@ -6,18 +6,27 @@ WORKDIR /app
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Copy package files first for better caching
-COPY cuefinderfe/package*.json ./cuefinderfe/
+# Install pnpm
+RUN npm install -g pnpm
 
-# Change to cuefinderfe directory and install dependencies
-WORKDIR /app/cuefinderfe
-RUN npm install
+# Copy workspace configuration files
+COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy source files
-COPY cuefinderfe/ ./
+# Copy cuefinderfe package files
+COPY cuefinderfe/package.json ./cuefinderfe/
+
+# Copy packages folder if it exists (for workspace dependencies)
+COPY packages ./packages
+
+# Install all dependencies (workspace + cuefinderfe)
+RUN pnpm install --frozen-lockfile
+
+# Copy cuefinderfe source files
+COPY cuefinderfe/ ./cuefinderfe/
 
 # Build the application
-RUN npm run build
+WORKDIR /app/cuefinderfe
+RUN pnpm run build
 
 # Production stage
 FROM nginx:alpine
