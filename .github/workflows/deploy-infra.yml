@@ -156,7 +156,7 @@ jobs:
           GMAIL_PROJECT_ID: ${{ secrets.GMAIL_PROJECT_ID }}
         shell: bash
         run: |
-          cat > deploy-infra.sh << 'DEPLOY_SCRIPT'
+          cat > deploy-infra.sh << DEPLOY_SCRIPT
           #!/bin/bash
           set -e
           
