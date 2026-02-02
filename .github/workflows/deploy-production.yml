@@ -1,13 +1,27 @@
 name: Deploy to Production (Orchestrator)
 
-# DISABLED: Using deploy.yml for simple deployment
-# on:
-#   push:
-#     branches:
-#       - release
-#   workflow_dispatch:
 on:
+  push:
+    branches:
+      - release
   workflow_dispatch:
+    inputs:
+      deployment-mode:
+        description: 'Deployment mode'
+        required: true
+        type: choice
+        default: 'full'
+        options:
+          - 'full'
+          - 'smart'
+          - 'backend-only'
+          - 'frontend-only'
+          - 'infra-only'
+      skip-migrations:
+        description: 'Skip database migrations'
+        required: false
+        type: boolean
+        default: false
 
 jobs:
   # Detect what components changed
@@ -129,7 +143,10 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               workflow_id: 'deploy-infra.yml',
-              ref: 'release'
+              ref: 'release',
+              inputs: {
+                'skip-migrations': '${{ github.event.inputs.skip-migrations || false }}'
+              }
             });
 
       - name: Notify - Deployment Started
