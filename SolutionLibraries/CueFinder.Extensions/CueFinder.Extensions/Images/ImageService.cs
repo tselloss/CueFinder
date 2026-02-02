@@ -37,11 +37,21 @@ public class ImageService : IImageService
 
     private string GetCueFolderPath(int cueId)
     {
-        // If StoragePath is absolute, use it directly; otherwise combine with WebRootPath
-        var storageRoot = Path.IsPathRooted(_settings.StoragePath)
-            ? _settings.StoragePath
-            : Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
-        return Path.Combine(storageRoot, cueId.ToString());
+        // If StoragePath is absolute, use it directly
+        if (Path.IsPathRooted(_settings.StoragePath))
+        {
+            return Path.Combine(_settings.StoragePath, cueId.ToString());
+        }
+        
+        // If WebRootPath is set, combine with it
+        if (!string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
+        {
+            return Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath, cueId.ToString());
+        }
+        
+        // Fall back to current directory + storage path (for Docker environments without WebRootPath)
+        var appRoot = Directory.GetCurrentDirectory();
+        return Path.Combine(appRoot, _settings.StoragePath, cueId.ToString());
     }
 
     private string GetCueFolderUrl(int cueId)
