@@ -153,7 +153,12 @@ export default function MyCues() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Loading your listings...</p>
+        <div className="text-center space-y-2">
+          <div className="inline-block animate-spin">
+            <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          </div>
+          <p className="text-muted-foreground">Loading your listings... | Φόρτωση καταχωρήσεων...</p>
+        </div>
       </div>
     );
   }
@@ -239,7 +244,7 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
         {/* Category Badge */}
         {cue.category && (
           <Badge className="absolute top-3 left-3 bg-blue-600">
-            {cue.category === 'case' ? 'Case' : 'Cue'}
+            {cue.category === 'case' ? 'Case' : cue.category === 'table' ? 'Table' : cue.category === 'accessory' ? 'Accessory' : 'Cue'}
           </Badge>
         )}
         

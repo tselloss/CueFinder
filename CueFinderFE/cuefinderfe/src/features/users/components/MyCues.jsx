@@ -33,29 +33,30 @@ export default function MyCues() {
   const loadMyCues = useCallback(async () => {
     setLoading(true);
     try {
-      console.log('Fetching my listings from API...');
+      console.log('[MyCues] Fetching my listings from API...');
       const [cues, cases, tables, accessories] = await Promise.all([
-        cueService.getMyCues(),
-        cueCaseService.getMyCueCases(),
-        billiardTableService.getMyTables(),
-        accessoryService.getMyAccessories()
+        cueService.getMyCues().catch(err => { console.error('[MyCues] Error fetching cues:', err); return []; }),
+        cueCaseService.getMyCueCases().catch(err => { console.error('[MyCues] Error fetching cases:', err); return []; }),
+        billiardTableService.getMyTables().catch(err => { console.error('[MyCues] Error fetching tables:', err); return []; }),
+        accessoryService.getMyAccessories().catch(err => { console.error('[MyCues] Error fetching accessories:', err); return []; })
       ]);
       const cuesWithCategory = (cues || []).map(c => ({ ...c, category: 'cue' }));
       const casesWithCategory = (cases || []).map(cs => ({ ...cs, category: 'case' }));
       const tablesWithCategory = (tables || []).map(t => ({ ...t, category: 'table' }));
       const accessoriesWithCategory = (accessories || []).map(a => ({ ...a, category: 'accessory' }));
       const combined = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
-      console.log('Received listings:', { 
+      console.log('[MyCues] Received listings:', { 
         cues: cuesWithCategory.length, 
         cases: casesWithCategory.length, 
         tables: tablesWithCategory.length,
         accessories: accessoriesWithCategory.length,
-        total: combined.length 
+        total: combined.length,
+        data: combined
       });
       setMyListings(combined);
     } catch (error) {
-      console.error('Error loading my cues:', error);
-      showMessage('error', '❌ Αδυναμία φόρτωσης των καταχωρήσεών σας. Παρακαλώ ανανεώστε τη σελίδα ή δοκιμάστε ξανά αργότερα.');
+      console.error('[MyCues] Error loading my cues:', error);
+      showMessage('error', '❌ Unable to load listings. Please refresh or try again. | Αδυναμία φόρτωσης καταχωρήσεων.');
     } finally {
       setLoading(false);
     }
@@ -83,12 +84,12 @@ export default function MyCues() {
   };
 
   const handleDelete = async (item) => {
-    let itemType = 'μπιλιάρδο';
-    if (item.category === 'case') itemType = 'θήκη';
-    else if (item.category === 'table') itemType = 'τραπέζι';
-    else if (item.category === 'accessory') itemType = 'αξεσουάρ';
+    let itemType = 'Cue';
+    if (item.category === 'case') itemType = 'Case';
+    else if (item.category === 'table') itemType = 'Table';
+    else if (item.category === 'accessory') itemType = 'Accessory';
     
-    if (!window.confirm(`⚠️ Διαγραφή καταχώρησης ${itemType};\n\nΑυτή η ενέργεια θα αφαιρέσει οριστικά την καταχώρησή σας και δεν μπορεί να αναιρεθεί.`)) {
+    if (!window.confirm(`⚠️ Delete ${itemType}? | Διαγραφή ${itemType};\n\nThis cannot be undone. | Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.`)) {
       return;
     }
 
@@ -153,7 +154,12 @@ export default function MyCues() {
   if (loading) {
     return (
       <div className="flex items-center justify-center py-12">
-        <p className="text-muted-foreground">Φόρτωση των καταχωρήσεών σας...</p>
+        <div className="text-center space-y-2">
+          <div className="inline-block animate-spin">
+            <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
+          </div>
+          <p className="text-muted-foreground">Loading your listings... | Φόρτωση καταχωρήσεων...</p>
+        </div>
       </div>
     );
   }
@@ -185,7 +191,7 @@ export default function MyCues() {
         <Card className="border-2 border-dashed border-primary/20">
           <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
             <p className="text-lg text-muted-foreground text-center">
-              Δεν έχετε δημιουργήσει ακόμα καμία καταχώρηση.
+              You haven't created any listings yet. | Δεν έχετε δημιουργήσει ακόμα καμία καταχώρηση.
             </p>
             <Button
               onClick={handleCreateNew}
@@ -239,7 +245,7 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
         {/* Category Badge */}
         {cue.category && (
           <Badge className="absolute top-3 left-3 bg-blue-600">
-            {cue.category === 'case' ? 'Case' : 'Cue'}
+            {cue.category === 'case' ? 'Case' : cue.category === 'table' ? 'Table' : cue.category === 'accessory' ? 'Accessory' : 'Cue'}
           </Badge>
         )}
         
