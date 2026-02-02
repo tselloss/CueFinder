@@ -4,6 +4,7 @@ name: Deploy Infrastructure (DB, Moderation, etc)
 # - Database migrations
 # - Moderation service updates
 # - Infrastructure changes
+# - Manual workflow dispatch
 on:
   push:
     branches:
