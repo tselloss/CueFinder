@@ -1,0 +1,22 @@
+{
+  "name": "@cuefinder/auth",
+  "version": "1.0.0",
+  "description": "Authentication utilities and hooks",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./hooks": "./src/hooks.js",
+    "./context": "./src/context.js",
+    "./utils": "./src/utils.js"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "jwt-decode": "^4.0.0"
+  },
+  "files": [
+    "src"
+  ]
+}

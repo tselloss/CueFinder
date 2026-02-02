@@ -1,0 +1,32 @@
+{
+  "name": "@cuefinder/ui",
+  "version": "1.0.0",
+  "description": "Reusable UI components built with React and Tailwind",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./button": "./src/components/Button.jsx",
+    "./card": "./src/components/Card.jsx",
+    "./input": "./src/components/Input.jsx",
+    "./dialog": "./src/components/Dialog.jsx",
+    "./alert": "./src/components/Alert.jsx",
+    "./badge": "./src/components/Badge.jsx",
+    "./utils": "./src/utils.js"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0"
+  },
+  "dependencies": {
+    "@radix-ui/react-dialog": "^1.1.0",
+    "@radix-ui/react-slot": "^1.2.4",
+    "class-variance-authority": "^0.7.0",
+    "clsx": "^2.0.0",
+    "lucide-react": "^0.292.0",
+    "tailwind-merge": "^2.0.0"
+  },
+  "files": [
+    "src"
+  ]
+}

@@ -1,0 +1,18 @@
+{
+  "name": "@cuefinder/common",
+  "version": "1.0.0",
+  "description": "Shared hooks, utilities, and helpers",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./hooks": "./src/hooks/index.js",
+    "./utils": "./src/utils/index.js"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "files": [
+    "src"
+  ]
+}

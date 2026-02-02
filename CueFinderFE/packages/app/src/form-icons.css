@@ -1,0 +1,34 @@
+.grommetux-textinput__icon {
+  margin-right: 0.75em !important;
+}
+
+/*
+  IMPORTANT:
+  Don't force a global left-padding for *all* TextInput inputs.
+  Grommet already accounts for the `icon` prop by rendering an icon container
+  before the input. Adding extra padding globally can cause the icon to appear
+  "on top" of the text/placeholder and misalign many inputs.
+*/
+.grommetux-textinput input {
+  padding-left: initial;
+}
+
+/* Ensure the icon and input sit inline and vertically centered */
+.grommetux-textinput {
+  align-items: center;
+}
+
+/* For custom wrapper if needed in the future */
+.input-icon-wrapper {
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+.input-icon-wrapper .input-icon {
+  position: absolute;
+  left: 0.75em;
+  pointer-events: none;
+}
+.input-icon-wrapper input {
+  padding-left: 2.5em;
+}

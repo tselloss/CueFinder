@@ -1,0 +1,24 @@
+{
+  "name": "@cuefinder/api",
+  "version": "1.0.0",
+  "description": "API clients and services - organized by domain",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js",
+    "./cue": "./src/services/cue/index.js",
+    "./auth": "./src/services/auth/index.js",
+    "./forum": "./src/services/forum/index.js",
+    "./admin": "./src/services/admin/index.js",
+    "./message": "./src/services/message/index.js"
+  },
+  "peerDependencies": {
+    "react": "^19.0.0"
+  },
+  "dependencies": {
+    "axios": "^1.13.2"
+  },
+  "files": [
+    "src"
+  ]
+}
