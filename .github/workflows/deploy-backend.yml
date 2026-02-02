@@ -140,26 +140,26 @@ jobs:
 
           echo "⚙️  Updating environment..."
           cat > .env << ENVEOF
-DB_PASSWORD="$DB_PASSWORD"
-JWT_SECRET="$JWT_SECRET"
-FRONTEND_API_URL="$FRONTEND_API_URL"
-CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
-SMTP_PASSWORD="$SMTP_PASSWORD"
-SMTP_SERVER="$SMTP_SERVER"
-SMTP_PORT="$SMTP_PORT"
-EMAIL_FROM="$EMAIL_FROM"
-GMAIL_CLIENT_ID="$GMAIL_CLIENT_ID"
-GMAIL_CLIENT_SECRET="$GMAIL_CLIENT_SECRET"
-GMAIL_PROJECT_ID="$GMAIL_PROJECT_ID"
-ENVEOF
-          
-                    echo "📋 Environment file created:"
-                    cat .env | grep -v PASSWORD | head -n 3
-                    echo "✓ Environment configured"
-          
-                    mkdir -p .deployment
-                    cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
-                    chmod +x ./deploy-backend-blue-green.sh
+          DB_PASSWORD="$DB_PASSWORD"
+          JWT_SECRET="$JWT_SECRET"
+          FRONTEND_API_URL="$FRONTEND_API_URL"
+          CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
+          SMTP_PASSWORD="$SMTP_PASSWORD"
+          SMTP_SERVER="$SMTP_SERVER"
+          SMTP_PORT="$SMTP_PORT"
+          EMAIL_FROM="$EMAIL_FROM"
+          GMAIL_CLIENT_ID="$GMAIL_CLIENT_ID"
+          GMAIL_CLIENT_SECRET="$GMAIL_CLIENT_SECRET"
+          GMAIL_PROJECT_ID="$GMAIL_PROJECT_ID"
+          ENVEOF
+                    
+                              echo "📋 Environment file created:"
+                              cat .env | grep -v PASSWORD | head -n 3
+                              echo "✓ Environment configured"
+                    
+                              mkdir -p .deployment
+                              cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
+                              chmod +x ./deploy-backend-blue-green.sh
 
           # Ensure upstream file exists so nginx can start/reload cleanly
           if [ ! -f .deployment/backend-upstream.conf ]; then
