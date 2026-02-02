@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Configuration;
 using CueFinder.Extensions.Moderation;
 using CueFinder.Database.Context;
 using Microsoft.EntityFrameworkCore;
