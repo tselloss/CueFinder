@@ -19,8 +19,8 @@ COPY cuefinderfe/ ./cuefinderfe/
 # Install all dependencies (this will set up workspace symlinks correctly)
 RUN pnpm install --frozen-lockfile
 
-# Build the application
-RUN cd cuefinderfe && pnpm run build
+# Build the application using pnpm filter to run within workspace context
+RUN pnpm --filter ./cuefinderfe run build
 
 # Production stage
 FROM nginx:alpine
