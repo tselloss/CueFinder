@@ -103,11 +103,11 @@ export async function uploadCueCaseImages(cueCaseId, files, onProgress) {
   try {
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append('files', file);
+      formData.append('file', file);
     });
 
     const response = await axios.post(
-      `${API_BASE_URL}/cuecases/${cueCaseId}/images`,
+      `${API_BASE_URL}/ext/moderation/upload-image?cueCaseId=${cueCaseId}`,
       formData,
       {
         headers: {
