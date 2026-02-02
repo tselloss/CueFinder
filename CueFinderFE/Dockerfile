@@ -23,15 +23,14 @@ COPY packages/ui/package.json ./packages/ui/
 # Install all dependencies
 RUN pnpm install --frozen-lockfile
 
-# Copy the actual source code
+# Copy the actual source code for packages
 COPY packages ./packages
 
 # Copy cuefinderfe source files
 COPY cuefinderfe/ ./cuefinderfe/
 
-# Build the application
-WORKDIR /app/cuefinderfe
-RUN pnpm run build
+# Build the application (run from workspace root)
+RUN cd cuefinderfe && pnpm run build
 
 # Production stage
 FROM nginx:alpine
