@@ -191,30 +191,30 @@ jobs:
           echo "✓ Environment configured"
           
           # Run database migrations (if needed)
-          if [ "$SKIP_MIGRATIONS" != "true" ]; then
+          if [ "\$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
             
             # Create backup before migrations (assumes cuefinder-postgres-prod container exists)
             mkdir -p /home/cuefinder/backups
-            BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_$(date +%Y%m%d_%H%M%S).sql"
-            docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "$BACKUP_FILE"
-            echo "   Backup created: $BACKUP_FILE"
+            BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S).sql"
+            docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE"
+            echo "   Backup created: \$BACKUP_FILE"
             
             # Run migrations
             if [ -d "init.sql" ]; then
               for migration in init.sql/*.sql; do
-                if [ -f "$migration" ]; then
-                  echo "   Running: $(basename $migration)"
-                  docker exec -i cuefinder-postgres-prod psql -U postgres -d cuefinder < "$migration" || echo "   ⚠️  Migration had warnings"
+                if [ -f "\$migration" ]; then
+                  echo "   Running: \$(basename \$migration)"
+                  docker exec -i cuefinder-postgres-prod psql -U postgres -d cuefinder < "\$migration" || echo "   ⚠️  Migration had warnings"
                 fi
               done
             fi
             
             if [ -d "scripts" ]; then
               for migration in scripts/*.sql; do
-                if [ -f "$migration" ]; then
-                  echo "   Running: $(basename $migration)"
-                  docker exec -i cuefinder-postgres-prod psql -U postgres -d cuefinder < "$migration" || echo "   ⚠️  Migration had warnings"
+                if [ -f "\$migration" ]; then
+                  echo "   Running: \$(basename \$migration)"
+                  docker exec -i cuefinder-postgres-prod psql -U postgres -d cuefinder < "\$migration" || echo "   ⚠️  Migration had warnings"
                 fi
               done
             fi
@@ -245,10 +245,10 @@ jobs:
           chmod +x deploy-infra.sh
           
           scp -o StrictHostKeyChecking=no deploy-infra.sh \
-            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
+            "\$SERVER_USER@\$SERVER_IP:/home/\$SERVER_USER/app/"
           
           ssh -o StrictHostKeyChecking=no \
-            "$SERVER_USER@$SERVER_IP" \
+            "\$SERVER_USER@\$SERVER_IP" \
             'bash /home/cuefinder/app/deploy-infra.sh'
 
       - name: Verify deployment
