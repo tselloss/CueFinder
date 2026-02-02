@@ -45,7 +45,8 @@ x-backend-common: &backend-common
       - curl -f http://localhost:5000/health || exit 1
     interval: 30s
     timeout: 10s
-    retries: 3
+    retries: 5
+    start_period: 40s
   deploy:
     resources:
       limits:
