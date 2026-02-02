@@ -21,17 +21,20 @@ namespace CueFinder.Extensions.Controllers
         private readonly CueFinderDbContext _context;
         private readonly ILogger<ModerationController> _logger;
         private readonly IWebHostEnvironment _hostEnvironment;
+        private readonly IConfiguration _configuration;
 
         public ModerationController(
             IModerationService moderationService,
             CueFinderDbContext context,
             ILogger<ModerationController> logger,
-            IWebHostEnvironment hostEnvironment)
+            IWebHostEnvironment hostEnvironment,
+            IConfiguration configuration)
         {
             _moderationService = moderationService;
             _context = context;
             _logger = logger;
             _hostEnvironment = hostEnvironment;
+            _configuration = configuration;
         }
 
         /// <summary>
