@@ -1,10 +1,6 @@
 name: Deploy Infrastructure (DB, Moderation, etc)
 
-# Trigger on:
-# - Database migrations
-# - Moderation service updates
-# - Infrastructure changes
-# - Manual workflow dispatch
+# Triggers: Database migrations, Moderation updates, Infrastructure changes, Manual dispatch
 on:
   push:
     branches:
