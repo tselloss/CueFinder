@@ -183,7 +183,8 @@ services:
         - REACT_APP_API_URL=${FRONTEND_API_URL}
     ports: []
     depends_on:
-      - backend
+      backend-blue:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
       interval: 30s
@@ -216,8 +217,10 @@ services:
       - ./uploads:/app/uploads:ro
       - ./.deployment/backend-upstream.conf:/etc/nginx/conf.d/backend-upstream.conf:ro
     depends_on:
-      - frontend
-      - backend-blue
+      frontend:
+        condition: service_healthy
+      backend-blue:
+        condition: service_healthy
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
       interval: 30s
