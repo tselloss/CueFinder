@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import * as cueService from '../../../api/cueService';
 import * as cueCaseService from '../../../api/cueCaseService';
@@ -24,6 +25,51 @@ const getImageUrl = (img) => {
 };
 
 export default function MyCues() {
+  const { i18n } = useTranslation();
+  const isGreek = i18n.language?.startsWith('el');
+  const text = {
+    title: isGreek ? '📋 Οι Καταχωρήσεις μου' : '📋 My Listings',
+    addNewListing: isGreek ? 'Προσθήκη Νέας Καταχώρησης' : 'Add New Listing',
+    addShort: isGreek ? 'Προσθήκη' : 'Add',
+    loading: isGreek ? 'Φόρτωση καταχωρήσεων...' : 'Loading your listings...',
+    empty: isGreek
+      ? 'Δεν έχετε δημιουργήσει ακόμα καμία καταχώρηση.'
+      : "You haven't created any listings yet.",
+    loadError: isGreek
+      ? '❌ Αδυναμία φόρτωσης καταχωρήσεων. Παρακαλώ δοκιμάστε ξανά.'
+      : '❌ Unable to load listings. Please refresh or try again.',
+    deleteSuccess: (itemType) => isGreek
+      ? `✅ Η καταχώρησή σας ${itemType} διαγράφηκε επιτυχώς`
+      : `✅ Your ${itemType} listing has been deleted successfully`,
+    deleteError: (itemType) => isGreek
+      ? `❌ Αδυναμία διαγραφής της καταχώρησής σας ${itemType}. Παρακαλώ δοκιμάστε ξανά.`
+      : `❌ Unable to delete your ${itemType} listing. Please try again.`,
+    deleteConfirm: (itemType) => isGreek
+      ? `⚠️ Διαγραφή ${itemType};\n\nΑυτή η ενέργεια δεν μπορεί να αναιρεθεί.`
+      : `⚠️ Delete ${itemType}?\n\nThis cannot be undone.`,
+    soldMessage: (isSold) => isGreek
+      ? (isSold ? '✅ Η καταχώρηση σημάνθηκε ως διαθέσιμη' : '✅ Η καταχώρηση σημάνθηκε ως πωλημένη')
+      : `✅ Listing marked as ${isSold ? 'available' : 'sold'}`,
+    soldError: isGreek
+      ? '❌ Αδυναμία ενημέρωσης της κατάστασης. Παρακαλώ δοκιμάστε ξανά.'
+      : '❌ Unable to update listing status. Please try again.',
+    saveNew: isGreek
+      ? '✅ Η νέα σας καταχώρηση δημιουργήθηκε επιτυχώς'
+      : '✅ Your new listing has been created successfully',
+    saveUpdate: isGreek
+      ? '✅ Η καταχώρησή σας ενημερώθηκε επιτυχώς'
+      : '✅ Your listing has been updated successfully',
+    edit: isGreek ? 'Επεξεργασία' : 'Edit',
+    markSold: isGreek ? 'Σήμανση Πωλημένου' : 'Mark Sold',
+    markAvailable: isGreek ? 'Σήμανση Διαθέσιμου' : 'Mark Available',
+    soldBadge: isGreek ? 'ΠΩΛΗΘΗΚΕ' : 'SOLD',
+    categoryLabel: (category) => {
+      if (category === 'case') return isGreek ? 'Θήκη' : 'Case';
+      if (category === 'table') return isGreek ? 'Τραπέζι' : 'Table';
+      if (category === 'accessory') return isGreek ? 'Αξεσουάρ' : 'Accessory';
+      return isGreek ? 'Στέκα' : 'Cue';
+    }
+  };
   const [myListings, setMyListings] = useState([]); // cues + cases
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
@@ -56,7 +102,7 @@ export default function MyCues() {
       setMyListings(combined);
     } catch (error) {
       console.error('[MyCues] Error loading my cues:', error);
-      showMessage('error', '❌ Unable to load listings. Please refresh or try again. | Αδυναμία φόρτωσης καταχωρήσεων.');
+      showMessage('error', text.loadError);
     } finally {
       setLoading(false);
     }
@@ -84,12 +130,9 @@ export default function MyCues() {
   };
 
   const handleDelete = async (item) => {
-    let itemType = 'Cue';
-    if (item.category === 'case') itemType = 'Case';
-    else if (item.category === 'table') itemType = 'Table';
-    else if (item.category === 'accessory') itemType = 'Accessory';
-    
-    if (!window.confirm(`⚠️ Delete ${itemType}? | Διαγραφή ${itemType};\n\nThis cannot be undone. | Αυτή η ενέργεια δεν μπορεί να αναιρεθεί.`)) {
+    let itemType = text.categoryLabel(item.category);
+
+    if (!window.confirm(text.deleteConfirm(itemType))) {
       return;
     }
 
@@ -104,10 +147,10 @@ export default function MyCues() {
         await cueService.deleteCue(item.id);
       }
       setMyListings(myListings.filter(c => c.id !== item.id));
-      showMessage('success', `✅ Η καταχώρησή σας ${itemType} διαγράφηκε επιτυχώς`);
+      showMessage('success', text.deleteSuccess(itemType));
     } catch (error) {
       console.error('Delete error:', error);
-      showMessage('error', `❌ Αδυναμία διαγραφής της καταχώρησής σας ${itemType}. Παρακαλώ δοκιμάστε ξανά.`);
+      showMessage('error', text.deleteError(itemType));
     }
   };
 
@@ -132,10 +175,10 @@ export default function MyCues() {
         });
       }
       setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
-      showMessage('success', `✅ Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
+      showMessage('success', text.soldMessage(!item.isSold));
     } catch (error) {
       console.error('Toggle sold error:', error);
-      showMessage('error', '❌ Unable to update listing status. Please try again.');
+      showMessage('error', text.soldError);
     }
   };
 
@@ -143,7 +186,7 @@ export default function MyCues() {
     setShowCreateModal(false);
     setEditingCue(null);
     await loadMyCues();
-    showMessage('success', editingCue ? '✅ Your listing has been updated successfully' : '✅ Your new listing has been created successfully');
+    showMessage('success', editingCue ? text.saveUpdate : text.saveNew);
   };
 
   const handleCloseModal = () => {
@@ -158,7 +201,7 @@ export default function MyCues() {
           <div className="inline-block animate-spin">
             <div className="h-8 w-8 border-4 border-blue-500 border-t-transparent rounded-full"></div>
           </div>
-          <p className="text-muted-foreground">Loading your listings... | Φόρτωση καταχωρήσεων...</p>
+          <p className="text-muted-foreground">{text.loading}</p>
         </div>
       </div>
     );
@@ -167,13 +210,13 @@ export default function MyCues() {
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-        <h2 className="text-2xl md:text-3xl font-bold">📋 Οι Καταχωρήσεις μου</h2>
+        <h2 className="text-2xl md:text-3xl font-bold">{text.title}</h2>
         <Button
           onClick={handleCreateNew}
           className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold w-full sm:w-auto"
         >
           <Plus className="mr-2 h-4 w-4" />
-          <span className="hidden sm:inline">Προσθήκη Νέας Καταχώρησης</span><span className="sm:hidden">Προσθήκη</span>
+          <span className="hidden sm:inline">{text.addNewListing}</span><span className="sm:hidden">{text.addShort}</span>
         </Button>
       </div>
 
@@ -191,14 +234,14 @@ export default function MyCues() {
         <Card className="border-2 border-dashed border-primary/20">
           <CardContent className="flex flex-col items-center justify-center py-12 gap-4">
             <p className="text-lg text-muted-foreground text-center">
-              You haven't created any listings yet. | Δεν έχετε δημιουργήσει ακόμα καμία καταχώρηση.
+              {text.empty}
             </p>
             <Button
               onClick={handleCreateNew}
               className="bg-gradient-to-r from-blue-500 to-blue-600 hover:from-blue-600 hover:to-blue-700 text-white shadow-lg hover:shadow-xl transition-all h-10 px-4 text-sm sm:text-base font-semibold"
             >
               <Plus className="mr-2 h-4 w-4" />
-              <span className="hidden sm:inline">Προσθήκη Νέας Καταχώρησης</span><span className="sm:hidden">Προσθήκη</span>
+              <span className="hidden sm:inline">{text.addNewListing}</span><span className="sm:hidden">{text.addShort}</span>
             </Button>
           </CardContent>
         </Card>
@@ -211,6 +254,7 @@ export default function MyCues() {
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item)}
               onToggleSold={() => handleToggleSold(item)}
+              text={text}
             />
           ))}
         </div>
@@ -227,7 +271,7 @@ export default function MyCues() {
   );
 }
 
-function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
+function CueCard({ cue, onEdit, onDelete, onToggleSold, text }) {
   const primaryImage = cue.images?.find(img => img.isPrimary) || cue.images?.[0];
   const imageUrl = getImageUrl(primaryImage);
 
@@ -245,14 +289,14 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
         {/* Category Badge */}
         {cue.category && (
           <Badge className="absolute top-3 left-3 bg-blue-600">
-            {cue.category === 'case' ? 'Case' : cue.category === 'table' ? 'Table' : cue.category === 'accessory' ? 'Accessory' : 'Cue'}
+            {text.categoryLabel(cue.category)}
           </Badge>
         )}
         
         {/* Sold Badge */}
         {cue.isSold && (
           <Badge className="absolute top-3 right-3 bg-red-600">
-            SOLD
+            {text.soldBadge}
           </Badge>
         )}
       </div>
@@ -285,7 +329,7 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
             className="flex-1"
           >
             <Edit2 className="w-4 h-4 mr-1" />
-            Επεξεργασία
+            {text.edit}
           </Button>
           <Button
             variant="outline"
@@ -296,12 +340,12 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold }) {
             {cue.isSold ? (
               <>
                 <CheckCircle className="w-4 h-4 mr-1" />
-                Σήμανση Διαθέσιμου
+                {text.markAvailable}
               </>
             ) : (
               <>
                 <AlertCircle className="w-4 h-4 mr-1" />
-                Σήμανση Πωλημένου
+                {text.markSold}
               </>
             )}
           </Button>

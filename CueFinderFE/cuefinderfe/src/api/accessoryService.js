@@ -41,7 +41,7 @@ export async function getAccessoryById(id) {
 // Get current user's accessories (requires auth)
 export async function getMyAccessories() {
   try {
-    const response = await axios.get(`${API_BASE_URL}/accessories/user/my-accessories`, {
+    const response = await axios.get(`${API_BASE_URL}/accessories/my-accessories`, {
       headers: getAuthHeaders()
     });
     return response.data;
