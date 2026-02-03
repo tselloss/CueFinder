@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Plus, Edit2, Trash2, CheckCircle, AlertCircle } from 'lucide-react';
 import * as cueService from '../../../api/cueService';
@@ -27,7 +27,8 @@ const getImageUrl = (img) => {
 export default function MyCues() {
   const { i18n } = useTranslation();
   const isGreek = i18n.language?.startsWith('el');
-  const text = {
+  
+  const text = useMemo(() => ({
     title: isGreek ? '📋 Οι Καταχωρήσεις μου' : '📋 My Listings',
     addNewListing: isGreek ? 'Προσθήκη Νέας Καταχώρησης' : 'Add New Listing',
     addShort: isGreek ? 'Προσθήκη' : 'Add',
@@ -69,7 +70,7 @@ export default function MyCues() {
       if (category === 'accessory') return isGreek ? 'Αξεσουάρ' : 'Accessory';
       return isGreek ? 'Στέκα' : 'Cue';
     }
-  };
+  }), [isGreek]);
   const [myListings, setMyListings] = useState([]); // cues + cases
   const [loading, setLoading] = useState(true);
   const [showCreateModal, setShowCreateModal] = useState(false);
