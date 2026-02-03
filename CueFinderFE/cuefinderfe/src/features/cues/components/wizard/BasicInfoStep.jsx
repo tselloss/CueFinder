@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Label } from '../../../../components/ui/label';
 import { Input } from '../../../../components/ui/input';
@@ -8,8 +9,12 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '.
  * BasicInfoStep - Step 2: Basic listing information
  * Title, brand, price, condition, and optional location
  * Mobile-optimized with larger touch targets
+ * Multilanguage support for English and Greek
  */
 export default function BasicInfoStep({ formData, onChange, productType }) {
+  const { i18n } = useTranslation();
+  const isGreek = i18n.language?.startsWith('el');
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     onChange({ ...formData, [name]: value });
@@ -20,23 +25,37 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
   };
 
   const getProductLabel = () => {
-    switch (productType) {
-      case 'cue': return 'cue';
-      case 'case': return 'case';
-      case 'table': return 'table';
-      case 'accessory': return 'accessory';
-      default: return 'item';
+    if (isGreek) {
+      switch (productType) {
+        case 'cue': return 'στέκα';
+        case 'case': return 'θήκη';
+        case 'table': return 'τραπέζι';
+        case 'accessory': return 'αξεσουάρ';
+        default: return 'αντικείμενο';
+      }
+    } else {
+      switch (productType) {
+        case 'cue': return 'cue';
+        case 'case': return 'case';
+        case 'table': return 'table';
+        case 'accessory': return 'accessory';
+        default: return 'item';
+      }
     }
   };
+
+  const conditionOptions = isGreek 
+    ? { 'New': 'Καινούργιο', 'Excellent': 'Άριστη', 'Good': 'Καλή', 'Fair': 'Μέτρια', 'Poor': 'Χαμηλή' }
+    : { 'New': 'New', 'Excellent': 'Excellent', 'Good': 'Good', 'Fair': 'Fair', 'Poor': 'Poor' };
 
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-          Basic Information
+          {isGreek ? 'Βασικές Πληροφορίες' : 'Basic Information'}
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          Tell us about your {getProductLabel()}
+          {isGreek ? `Πείτε μας για το ${getProductLabel()} σας` : `Tell us about your ${getProductLabel()}`}
         </p>
       </div>
 
@@ -45,7 +64,7 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           {/* Title */}
           <div>
             <Label htmlFor="title" className="text-sm font-semibold mb-2 flex items-center gap-1">
-              Title <span className="text-destructive">*</span>
+              {isGreek ? 'Τίτλος' : 'Title'} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
@@ -53,23 +72,23 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
               value={formData.title}
               onChange={handleInputChange}
               placeholder={
-                productType === 'cue' ? 'e.g., Predator REVO 12.9mm' :
-                productType === 'case' ? 'e.g., 2x4 Hard Case' :
-                productType === 'table' ? 'e.g., 8ft Brunswick Gold Crown' :
-                'e.g., Kamui Black Soft Tip'
+                productType === 'cue' ? (isGreek ? 'π.χ., Predator REVO 12.9mm' : 'e.g., Predator REVO 12.9mm') :
+                productType === 'case' ? (isGreek ? 'π.χ., Θήκη 2x4' : 'e.g., 2x4 Hard Case') :
+                productType === 'table' ? (isGreek ? 'π.χ., 8ft Brunswick Gold Crown' : 'e.g., 8ft Brunswick Gold Crown') :
+                (isGreek ? 'π.χ., Kamui Black Soft Tip' : 'e.g., Kamui Black Soft Tip')
               }
               required
               className="h-11 text-base"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Choose a descriptive title that buyers will search for
+              {isGreek ? 'Επιλέξτε περιγραφικό τίτλο που θα ψάχνουν οι αγοραστές' : 'Choose a descriptive title that buyers will search for'}
             </p>
           </div>
 
           {/* Brand */}
           <div>
             <Label htmlFor="brand" className="text-sm font-semibold mb-2 flex items-center gap-1">
-              Brand <span className="text-destructive">*</span>
+              {isGreek ? 'Μάρκα' : 'Brand'} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="brand"
@@ -77,10 +96,10 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
               value={formData.brand}
               onChange={handleInputChange}
               placeholder={
-                productType === 'cue' ? 'e.g., Predator, Cuetec, McDermott' :
-                productType === 'case' ? 'e.g., Instroke, Predator, J&J' :
-                productType === 'table' ? 'e.g., Brunswick, Diamond, Olhausen' :
-                'e.g., Kamui, Tiger, Moori'
+                productType === 'cue' ? (isGreek ? 'π.χ., Predator, Cuetec, McDermott' : 'e.g., Predator, Cuetec, McDermott') :
+                productType === 'case' ? (isGreek ? 'π.χ., Instroke, Predator, J&J' : 'e.g., Instroke, Predator, J&J') :
+                productType === 'table' ? (isGreek ? 'π.χ., Brunswick, Diamond, Olhausen' : 'e.g., Brunswick, Diamond, Olhausen') :
+                (isGreek ? 'π.χ., Kamui, Tiger, Moori' : 'e.g., Kamui, Tiger, Moori')
               }
               required
               className="h-11 text-base"
@@ -91,7 +110,7 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="price" className="text-sm font-semibold mb-2 flex items-center gap-1">
-                Price (€) <span className="text-destructive">*</span>
+                {isGreek ? 'Τιμή (€)' : 'Price (€)'} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="price"
@@ -108,15 +127,15 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
             </div>
             <div>
               <Label htmlFor="condition" className="text-sm font-semibold mb-2 flex items-center gap-1">
-                Condition <span className="text-destructive">*</span>
+                {isGreek ? 'Κατάσταση' : 'Condition'} <span className="text-destructive">*</span>
               </Label>
               <Select value={formData.condition} onValueChange={(value) => handleSelectChange('condition', value)}>
                 <SelectTrigger id="condition" className="h-11 text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {['New', 'Excellent', 'Good', 'Fair', 'Poor'].map(opt => (
-                    <SelectItem key={opt} value={opt}>{opt}</SelectItem>
+                  {Object.entries(conditionOptions).map(([key, label]) => (
+                    <SelectItem key={key} value={key}>{label}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
@@ -127,7 +146,7 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           {productType === 'cue' && (
             <div>
               <Label htmlFor="cueType" className="text-sm font-semibold mb-2">
-                Cue Type
+                {isGreek ? 'Τύπος Στέκας' : 'Cue Type'}
               </Label>
               <Select value={formData.cueType} onValueChange={(value) => handleSelectChange('cueType', value)}>
                 <SelectTrigger id="cueType" className="h-11 text-base">
