@@ -94,9 +94,6 @@ export default function CueListContainer({
 
       {/* Listings Content */}
       <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
-        {/* View Mode Toggle */}
-        <CueViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-
         {/* Grid or List View */}
         {viewMode === 'grid' ? (
           <CueGridView
@@ -114,6 +111,11 @@ export default function CueListContainer({
 
         {/* Results Info */}
         <CueResultsInfo count={filteredItems.length} category={category} />
+
+        {/* View Mode Toggle - Bottom */}
+        <div className="flex justify-center mt-6">
+          <CueViewToggle viewMode={viewMode} setViewMode={setViewMode} />
+        </div>
       </div>
     </div>
   );
