@@ -76,6 +76,11 @@ export default function MyCues() {
   const [editingCue, setEditingCue] = useState(null);
   const [message, setMessage] = useState(null);
 
+  const showMessage = useCallback((type, messageText) => {
+    setMessage({ type, text: messageText });
+    setTimeout(() => setMessage(null), 4000);
+  }, []);
+
   const loadMyCues = useCallback(async () => {
     setLoading(true);
     try {
@@ -106,18 +111,13 @@ export default function MyCues() {
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [showMessage, text]);
 
   useEffect(() => {
     loadMyCues();
   }, [loadMyCues]);
 
   // loadMyCues defined above with useCallback
-
-  const showMessage = (type, text) => {
-    setMessage({ type, text });
-    setTimeout(() => setMessage(null), 4000);
-  };
 
   const handleCreateNew = () => {
     setEditingCue(null);
