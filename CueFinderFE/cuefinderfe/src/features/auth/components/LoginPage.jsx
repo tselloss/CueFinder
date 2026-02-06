@@ -247,16 +247,19 @@ export default function LoginPage() {
                     </div>
 
                     {/* Terms Checkbox */}
-                    <div className="flex items-start space-x-2 pt-2">
+                    <label
+                      htmlFor="terms"
+                      className="mt-2 flex items-start gap-3 rounded-lg border border-border/60 bg-muted/30 p-3 sm:p-4 cursor-pointer"
+                    >
                       <input
                         type="checkbox"
                         id="terms"
                         checked={acceptedTerms}
                         onChange={(e) => setAcceptedTerms(e.target.checked)}
-                        className="mt-1 h-4 w-4 rounded border-input bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                        className="mt-1 h-5 w-5 sm:h-4 sm:w-4 rounded border-input bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                         required
                       />
-                      <label htmlFor="terms" className="text-sm text-muted-foreground leading-tight">
+                      <span className="text-sm text-muted-foreground leading-snug">
                         {t('registration.terms.accept', 'I accept the')}{' '}
                         <a
                           href={i18n.language === 'gr' ? '/terms-gr.html' : '/terms-en.html'}
@@ -266,8 +269,8 @@ export default function LoginPage() {
                         >
                           {t('registration.terms.link', 'Terms and Conditions')}
                         </a>
-                      </label>
-                    </div>
+                      </span>
+                    </label>
                   </>
                 )}
               </>

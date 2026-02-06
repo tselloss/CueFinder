@@ -4,13 +4,13 @@ import { Check, Edit2, Trash2, X, User } from 'lucide-react';
 export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow }) {
   return (
     <tr className={`transition-colors ${isAltRow ? 'bg-slate-800' : 'bg-slate-750'} hover:bg-slate-700`}>
-      <td className="px-4 py-4">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
         <div>
-          <p className="font-semibold text-slate-100 text-sm">{user.name}</p>
+          <p className="font-semibold text-slate-100 text-xs sm:text-sm">{user.name}</p>
           <p className="text-slate-400 text-xs">{user.email}</p>
         </div>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
         <span
           className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-semibold ${
             user.role === 'admin'
@@ -22,7 +22,7 @@ export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow 
           {user.role === 'admin' ? 'Admin' : 'User'}
         </span>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
         <span
           className={`inline-block px-3 py-1.5 rounded-full text-xs font-bold text-white ${
             user.isActive === false ? 'bg-red-600 shadow-sm' : 'bg-green-600 shadow-sm'
@@ -31,8 +31,8 @@ export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow 
           {user.isActive === false ? '✕ INACTIVE' : '✓ ACTIVE'}
         </span>
       </td>
-      <td className="px-4 py-4">
-        <div className="flex items-center gap-2">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <button
             onClick={() => onEdit(user)}
             title="Edit user"

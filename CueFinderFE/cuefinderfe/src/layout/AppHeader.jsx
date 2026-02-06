@@ -52,7 +52,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
     <header className="fixed top-0 left-0 right-0 w-full bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/90 border-b border-border z-50">
       <div className="container mx-auto px-4 py-3 flex items-center justify-between gap-2">
         <div className="flex items-center gap-3 min-w-0">
-          <h2 className="font-bold tracking-tight text-foreground text-lg sm:text-xl whitespace-nowrap">🎱 {title}</h2>
+          <h2 className="font-bold tracking-tight text-foreground text-lg sm:text-xl whitespace-nowrap truncate">🎱 {title}</h2>
           <nav className="hidden md:flex items-center gap-2">
             {navLinks.filter(l => !l.requiresAuth || user).map(link => {
               const active = currentPath === link.path || (link.path !== '/' && currentPath.startsWith(link.path));

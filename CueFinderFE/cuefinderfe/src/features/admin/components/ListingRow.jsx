@@ -4,20 +4,20 @@ import { Flag, Trash2 } from 'lucide-react';
 export default function ListingRow({ item, onFlag, onDelete, isAltRow }) {
   return (
     <tr className={`transition-colors ${isAltRow ? 'bg-slate-800' : 'bg-slate-750'} hover:bg-slate-700`}>
-      <td className="px-4 py-4">
-        <div className="flex items-center gap-2">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex items-center gap-2 min-w-0">
           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold text-white ${
             item.itemType === 'cue' ? 'bg-blue-700' : 'bg-indigo-700'
           }`}>
             {item.itemType === 'cue' ? '🎱 Cue' : item.itemType === 'case' ? '📦 Case' : item.itemType === 'table' ? '🎰 Table' : '⚙️ Accessory'}
           </span>
-          <span className="font-semibold text-slate-100 text-sm truncate">{item.title}</span>
+          <span className="font-semibold text-slate-100 text-xs sm:text-sm truncate">{item.title}</span>
         </div>
       </td>
-      <td className="px-4 py-4">
-        <span className="font-bold text-slate-100 text-sm">€{Number(item.price || 0).toFixed(2)}</span>
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
+        <span className="font-bold text-slate-100 text-xs sm:text-sm">€{Number(item.price || 0).toFixed(2)}</span>
       </td>
-      <td className="px-4 py-4">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
         {item.flagged ? (
           <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-900 text-orange-300 text-xs font-bold rounded-full border border-orange-700">
             ⚠️ FLAGGED
@@ -28,8 +28,8 @@ export default function ListingRow({ item, onFlag, onDelete, isAltRow }) {
           </span>
         )}
       </td>
-      <td className="px-4 py-4">
-        <div className="flex items-center gap-2">
+      <td className="px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex flex-col sm:flex-row sm:items-center gap-2">
           <button
             onClick={() => {
               if (window.confirm(`Are you sure you want to flag "${item.title}"?`)) {

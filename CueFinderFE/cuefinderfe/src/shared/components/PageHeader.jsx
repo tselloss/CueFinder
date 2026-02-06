@@ -26,16 +26,16 @@ export default function PageHeader({
 }) {
   return (
     <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 md:gap-6 mb-6">
-      <div className="flex items-center gap-3 flex-1">
-        {icon && <div className="text-3xl">{icon}</div>}
-        <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-purple-400">{title}</h1>
+      <div className="flex items-center gap-3 flex-1 min-w-0">
+        {icon && <div className="text-2xl sm:text-3xl flex-shrink-0">{icon}</div>}
+        <div className="min-w-0">
+          <h1 className="text-xl sm:text-2xl md:text-3xl font-bold text-purple-400 truncate sm:whitespace-normal">{title}</h1>
           {subtitle && (
             <p className="text-sm text-slate-400 mt-1">{subtitle}</p>
           )}
         </div>
       </div>
-      {actions && <div className="flex gap-2 items-center">{actions}</div>}
+      {actions && <div className="flex flex-wrap gap-2 items-center w-full md:w-auto">{actions}</div>}
     </div>
   );
 }
