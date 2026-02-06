@@ -14,7 +14,7 @@ export default function UsersManagementView({
   onToggleBan,
   onDelete,
 }) {
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const filteredUsers = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -31,66 +31,82 @@ export default function UsersManagementView({
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-slate-800 shadow-lg border border-slate-700">
       <CardContent className="p-6">
-        <h3 className="text-lg font-bold mb-4">Users</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-slate-100">Users Management</h3>
+          <div className="flex gap-2">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900 border border-blue-700 text-blue-300 text-sm font-medium rounded-lg">
+              📊 Total: <strong>{users.length}</strong>
+            </span>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-900 border border-green-700 text-green-300 text-sm font-medium rounded-lg">
+              🔍 Filtered: <strong>{filteredUsers.length}</strong>
+            </span>
+          </div>
+        </div>
 
         {/* Search and filters */}
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <div className="mb-6">
           <MaterialInput
-            placeholder="Search users (name or email)"
+            placeholder="🔍 Search users by name or email..."
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            style={{ minWidth: '250px' }}
+            style={{ minWidth: '100%' }}
+            className="w-full"
           />
-          <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-            Total: {users.length}
-          </span>
-          <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-            Filtered: {filteredUsers.length}
-          </span>
         </div>
 
         {/* Users Table */}
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Name
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Role
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Status
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {paginatedUsers.map((user) => (
-                <UserRow
-                  key={user.id}
-                  user={user}
-                  onEdit={onEdit}
-                  onToggleBan={onToggleBan}
-                  onDelete={onDelete}
-                />
-              ))}
-            </tbody>
-          </table>
-        </div>
+        {paginatedUsers.length > 0 ? (
+          <div className="overflow-x-auto border border-slate-700 rounded-lg bg-slate-800">
+            <table className="w-full text-sm">
+              <thead className="bg-gradient-to-r from-slate-700 to-slate-600 border-b-2 border-slate-500">
+                <tr>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Name
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {paginatedUsers.map((user, idx) => (
+                  <UserRow
+                    key={user.id}
+                    user={user}
+                    onEdit={onEdit}
+                    onToggleBan={onToggleBan}
+                    onDelete={onDelete}
+                    isAltRow={idx % 2 === 1}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-16 text-center border border-gray-200 rounded-lg bg-gray-50">
+            <div className="text-5xl mb-3">👥</div>
+            <p className="text-gray-600 font-medium mb-1">No users found</p>
+            <p className="text-gray-500 text-sm">{query ? `Try adjusting your search "${query}"` : 'No users to display'}</p>
+          </div>
+        )}
 
         {/* Pagination */}
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPrevious={() => onPageChange(Math.max(1, page - 1))}
-          onNext={() => onPageChange(Math.min(totalPages, page + 1))}
-        />
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPrevious={() => onPageChange(Math.max(1, page - 1))}
+            onNext={() => onPageChange(Math.min(totalPages, page + 1))}
+          />
+        )}
       </CardContent>
     </Card>
   );

@@ -1,7 +1,7 @@
 import React from 'react';
 
 export default function AdminTabs({ activeTab, onTabChange }) {
-  const tabs = ['all', 'cues', 'cases'];
+  const tabs = ['all', 'cues', 'cases', 'tables', 'accessories'];
 
   return (
     <div className="mb-4 border-b border-gray-200">
@@ -16,7 +16,11 @@ export default function AdminTabs({ activeTab, onTabChange }) {
                 : 'border-transparent text-gray-600 hover:text-gray-900'
             }`}
           >
-            {tab.charAt(0).toUpperCase() + tab.slice(1)}
+            {tab === 'all' && 'All'}
+            {tab === 'cues' && '🎱 Cues'}
+            {tab === 'cases' && '📦 Cases'}
+            {tab === 'tables' && '🎰 Tables'}
+            {tab === 'accessories' && '⚙️ Accessories'}
           </button>
         ))}
       </div>
