@@ -105,6 +105,7 @@ export default function UsersManagementView({
             totalPages={totalPages}
             onPrevious={() => onPageChange(Math.max(1, page - 1))}
             onNext={() => onPageChange(Math.min(totalPages, page + 1))}
+            onPageChange={onPageChange}
           />
         )}
       </CardContent>

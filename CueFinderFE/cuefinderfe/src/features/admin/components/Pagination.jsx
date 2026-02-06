@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '../../../components/ui/button.jsx';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-export default function Pagination({ currentPage, totalPages, onPrevious, onNext }) {
+export default function Pagination({ currentPage, totalPages, onPrevious, onNext, onPageChange }) {
   if (totalPages <= 1) return null;
 
   // Generate page numbers to display
@@ -36,12 +36,12 @@ export default function Pagination({ currentPage, totalPages, onPrevious, onNext
   const pages = getPageNumbers();
 
   return (
-    <div className="flex items-center justify-between mt-6 pt-4 border-t border-gray-200">
+    <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mt-6 pt-4 border-t border-gray-200">
       <div className="text-sm text-gray-600">
         Showing page <strong className="text-gray-900">{currentPage}</strong> of <strong className="text-gray-900">{totalPages}</strong>
       </div>
       
-      <div className="flex items-center gap-2">
+      <div className="flex flex-wrap items-center gap-2">
         <Button
           variant="outline"
           size="sm"
@@ -54,7 +54,7 @@ export default function Pagination({ currentPage, totalPages, onPrevious, onNext
           Previous
         </Button>
 
-        <div className="flex gap-1">
+        <div className="flex gap-1 flex-wrap max-w-full overflow-x-auto">
           {pages.map((page, idx) => (
             page === '...' ? (
               <span key={`dots-${idx}`} className="px-2 py-1.5 text-gray-500">•••</span>
@@ -62,9 +62,8 @@ export default function Pagination({ currentPage, totalPages, onPrevious, onNext
               <button
                 key={page}
                 onClick={() => {
-                  // This would need callback support
-                  if (page !== currentPage) {
-                    // For now, this is visual only. You'd need to pass a handler
+                  if (page !== currentPage && onPageChange) {
+                    onPageChange(page);
                   }
                 }}
                 disabled={page === currentPage}

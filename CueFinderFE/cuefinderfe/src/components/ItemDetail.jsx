@@ -144,16 +144,21 @@ export default function ItemDetail({
 
   return (
     <div className="min-h-screen bg-background">
-      {/* Back Button */}
+      {/* Header */}
       <div className="p-4 md:p-6">
-        <Button 
-          variant="ghost" 
-          onClick={onBack}
-          className="gap-2"
-        >
-          <ArrowLeft className="w-4 h-4" />
-          Back to Listings
-        </Button>
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+          <Button
+            variant="outline"
+            onClick={onBack}
+            className="gap-2 w-full sm:w-auto"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Listings
+          </Button>
+          <h1 className="text-xl sm:text-2xl font-bold text-foreground truncate">
+            {item.brand} {item.title}
+          </h1>
+        </div>
       </div>
 
       {/* Main Content */}
