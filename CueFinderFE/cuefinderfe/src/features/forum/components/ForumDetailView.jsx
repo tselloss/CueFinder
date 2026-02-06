@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageSquare } from 'lucide-react';
+import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import ForumPost from './ForumPost';
 
@@ -28,8 +28,8 @@ export default function ForumDetailView({
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-6">
-        <div className="flex-1">
-          <h2 className="text-2xl font-bold text-blue-400">
+        <div className="flex-1 min-w-0">
+          <h2 className="text-xl sm:text-2xl font-bold text-blue-400 truncate sm:whitespace-normal">
             {discussion.title}
             {discussion.isPinned && <span className="ml-2">📌</span>}
             {discussion.isLocked && <span className="ml-2">🔒</span>}
@@ -37,8 +37,9 @@ export default function ForumDetailView({
         </div>
         <Button
           onClick={onBack}
-          className="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-slate-300 hover:bg-blue-500/20 rounded-lg text-sm transition-all"
+          className="px-4 py-2 bg-blue-500/10 border border-blue-500/30 text-slate-200 hover:bg-blue-500/20 rounded-lg text-sm transition-all"
         >
+          <ArrowLeft className="w-4 h-4 mr-2" />
           Πίσω
         </Button>
       </div>

@@ -1,5 +1,5 @@
 import React from 'react';
-import { MessageCircle, Plus } from 'lucide-react';
+import { ArrowLeft, Plus } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import { SearchInput, EmptyState } from '../../../shared/components';
 
@@ -33,11 +33,11 @@ export default function ForumDiscussionsView({
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-6">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 min-w-0">
           <div className="w-1 h-6 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full" />
-          <h2 className="text-xl font-bold text-blue-400">{category.name}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-blue-400 truncate">{category.name}</h2>
         </div>
-        <div className="flex gap-2 items-center">
+        <div className="flex flex-wrap gap-2 items-center">
           {user && (
             <Button
               onClick={onNewDiscussion}
@@ -50,9 +50,9 @@ export default function ForumDiscussionsView({
           )}
           <Button
             onClick={onBackToCategories}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 text-slate-300 hover:bg-blue-600/20 rounded-lg text-sm transition-all"
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600/10 border border-blue-500/30 text-slate-200 hover:bg-blue-600/20 rounded-lg text-sm transition-all"
           >
-            <MessageCircle size={16} />
+            <ArrowLeft size={16} />
             Όλες οι Κατηγορίες
           </Button>
         </div>
