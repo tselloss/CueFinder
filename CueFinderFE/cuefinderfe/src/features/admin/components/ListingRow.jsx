@@ -1,50 +1,59 @@
 import React from 'react';
 import { Flag, Trash2 } from 'lucide-react';
-import { Button } from '../../../components/ui/button.jsx';
 
-export default function ListingRow({ item, onFlag, onDelete }) {
+export default function ListingRow({ item, onFlag, onDelete, isAltRow }) {
   return (
-    <tr className="hover:bg-gray-50">
-      <td className="px-2 sm:px-4 py-3">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <span className="inline-block px-1 sm:px-2 py-0.5 sm:py-1 bg-gray-200 text-gray-700 text-[10px] sm:text-xs font-bold rounded">
-            {item.itemType.toUpperCase()}
+    <tr className={`transition-colors ${isAltRow ? 'bg-slate-800' : 'bg-slate-750'} hover:bg-slate-700`}>
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-2">
+          <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-bold text-white ${
+            item.itemType === 'cue' ? 'bg-blue-700' : 'bg-indigo-700'
+          }`}>
+            {item.itemType === 'cue' ? '🎱 Cue' : item.itemType === 'case' ? '📦 Case' : item.itemType === 'table' ? '🎰 Table' : '⚙️ Accessory'}
           </span>
-          <span className="font-bold text-gray-900 text-xs sm:text-sm">{item.title}</span>
+          <span className="font-semibold text-slate-100 text-sm truncate">{item.title}</span>
         </div>
       </td>
-      <td className="px-2 sm:px-4 py-3 text-gray-600 text-xs sm:text-sm">
-        €{Number(item.price || 0).toFixed(2)}
+      <td className="px-4 py-4">
+        <span className="font-bold text-slate-100 text-sm">€{Number(item.price || 0).toFixed(2)}</span>
       </td>
-      <td className="px-2 sm:px-4 py-3">
+      <td className="px-4 py-4">
         {item.flagged ? (
-          <span className="inline-block px-1.5 sm:px-2.5 py-0.5 sm:py-1 bg-orange-500 text-white text-[10px] sm:text-xs font-medium rounded">
-            FLAGGED
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-900 text-orange-300 text-xs font-bold rounded-full border border-orange-700">
+            ⚠️ FLAGGED
           </span>
         ) : (
-          <span className="text-gray-400 text-[10px] sm:text-xs">—</span>
+          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-green-900 text-green-300 text-xs font-bold rounded-full border border-green-700">
+            ✓ ACTIVE
+          </span>
         )}
       </td>
-      <td className="px-2 sm:px-4 py-3">
-        <div className="flex items-center gap-1 sm:gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onFlag(item)}
-            title="Flag"
-            className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
+      <td className="px-4 py-4">
+        <div className="flex items-center gap-2">
+          <button
+            onClick={() => {
+              if (window.confirm(`Are you sure you want to flag "${item.title}"?`)) {
+                onFlag(item);
+              }
+            }}
+            title="Flag this listing"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-orange-600 hover:bg-orange-700 text-white text-xs font-medium rounded-lg transition-colors"
           >
-            <Flag className="w-4 h-4 sm:w-4 sm:h-4 text-orange-600" />
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => onDelete(item)}
-            title="Delete"
-            className="min-w-[44px] min-h-[44px] sm:w-8 sm:h-8 p-0 touch-manipulation"
+            <Flag className="w-3.5 h-3.5" />
+            <span>Flag</span>
+          </button>
+          <button
+            onClick={() => {
+              if (window.confirm(`Are you sure you want to delete "${item.title}"? This action cannot be undone.`)) {
+                onDelete(item);
+              }
+            }}
+            title="Delete this listing"
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-600 hover:bg-red-700 text-white text-xs font-medium rounded-lg transition-colors"
           >
-            <Trash2 className="w-4 h-4 sm:w-4 sm:h-4 text-red-600" />
-          </Button>
+            <Trash2 className="w-3.5 h-3.5" />
+            <span>Delete</span>
+          </button>
         </div>
       </td>
     </tr>

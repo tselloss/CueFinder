@@ -1,0 +1,1 @@
+SELECT table_name, STRING_AGG(column_name, ', ' ORDER BY ordinal_position) as required_columns FROM information_schema.columns WHERE table_name IN ('Cues', 'CueCases', 'BilliardTables') AND is_nullable = 'NO' GROUP BY table_name;

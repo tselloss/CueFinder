@@ -18,6 +18,7 @@ import ResetPassword from './features/auth/components/ResetPassword';
 import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader';
 import AppFooter from './components/AppFooter';
+import OldListingsModal from './components/OldListingsModal';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import { ToastProvider, useToast } from './contexts/ToastContext';
 import { initializeAxiosInterceptor } from './utils/axiosInterceptor';
@@ -65,6 +66,8 @@ function AppInner() {
   const [unreadMessageCount, setUnreadMessageCount] = useState(0);
   const [forumCategories, setForumCategories] = useState([]);
   const [showForumCategories, setShowForumCategories] = useState(false);
+  const [oldListings, setOldListings] = useState([]);
+  const [showOldListingsModal, setShowOldListingsModal] = useState(false);
   // Price range slider [min,max] in USD
   const [priceRange, setPriceRange] = useState([0, 5000]);
   const PRICE_MIN_LIMIT = 0;
@@ -240,6 +243,153 @@ function AppInner() {
   const handleLogout = async () => {
     await logout();
     navigate('/'); // Ensure we navigate to home page after logout
+  };
+
+  // Check for old listings (30+ days) when user logs in
+  const checkOldListings = useCallback(async () => {
+    if (!user) return;
+    
+    try {
+      // Check if we've already shown the modal in this session
+      const lastCheck = sessionStorage.getItem('oldListingsChecked');
+      if (lastCheck) return; // Already checked this session
+      const [userCues, userCases, userTables, userAccessories] = await Promise.all([
+        cueService.getCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
+        cueCaseService.getCueCases().catch(err => { console.error('Error fetching cases:', err); return []; }),
+        billiardTableService.getTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
+        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
+      ]);
+
+      // Combine and filter for user's listings that are old and not sold
+      const allUserListings = [
+        ...userCues.map(c => ({ ...c, itemType: 'cue' })),
+        ...userCases.map(c => ({ ...c, itemType: 'case' })),
+        ...userTables.map(t => ({ ...t, itemType: 'table' })),
+        ...userAccessories.map(a => ({ ...a, itemType: 'accessory' }))
+      ];
+
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const oldUserListings = allUserListings.filter(listing => {
+        // Check all possible user ID field names (different APIs return different field names)
+        // Note: JSON serialization converts C# PascalCase to camelCase, so SellerId becomes sellerId
+        const isOwner = listing.userId === user.id || listing.user_id === user.id || listing.owner_id === user.id || 
+                        listing.sellerId === user.id ||
+                        String(listing.userId) === String(user.id) || String(listing.user_id) === String(user.id) || String(listing.owner_id) === String(user.id) ||
+                        String(listing.sellerId) === String(user.id);
+        const createdDate = new Date(listing.createdAt || listing.created_at);
+        const isOld = createdDate < thirtyDaysAgo;
+        const notSold = !listing.sold && !listing.isSold && listing.status !== 'sold';
+
+        return isOwner && isOld && notSold;
+      });
+
+      if (oldUserListings.length > 0) {
+        setOldListings(oldUserListings);
+        setShowOldListingsModal(true);
+        sessionStorage.setItem('oldListingsChecked', 'true');
+      } else {
+        sessionStorage.setItem('oldListingsChecked', 'true');
+      }
+    } catch (error) {
+      console.error('Error checking old listings:', error);
+    }
+  }, [user]);
+
+  // Check for old listings when user logs in
+  useEffect(() => {
+    if (user) {
+      // Delay check slightly to let the app load
+      const timer = setTimeout(() => {
+        checkOldListings();
+      }, 2000);
+      return () => clearTimeout(timer);
+    }
+  }, [user, checkOldListings]);
+
+  const handleKeepListing = async (listingId) => {
+    // Renew the listing by updating CreatedAt to today
+    const listing = oldListings.find(l => (l.uid || l.id) === listingId);
+    if (!listing) return;
+
+    try {
+      const updatedListing = { ...listing, createdAt: new Date().toISOString() };
+      
+      // Update the listing's CreatedAt date based on type
+      if (listing.itemType === 'cue') {
+        await cueService.updateCue(listingId, updatedListing);
+      } else if (listing.itemType === 'case') {
+        await cueCaseService.updateCueCase(listingId, updatedListing);
+      } else if (listing.itemType === 'table') {
+        await billiardTableService.updateTable(listingId, updatedListing);
+      } else if (listing.itemType === 'accessory') {
+        await accessoryService.updateAccessory(listingId, updatedListing);
+      }
+
+      setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
+      if (oldListings.length <= 1) {
+        setShowOldListingsModal(false);
+      }
+      await refreshListings();
+    } catch (error) {
+      console.error('Error renewing listing:', error);
+      alert('Failed to renew listing. Please try again.');
+    }
+  };
+
+  const handleMarkSold = async (listingId) => {
+    const listing = oldListings.find(l => (l.uid || l.id) === listingId);
+    if (!listing) return;
+
+    try {
+      // Update the listing as sold based on type
+      if (listing.itemType === 'cue') {
+        await cueService.updateCue(listingId, { ...listing, sold: true, status: 'sold' });
+      } else if (listing.itemType === 'case') {
+        await cueCaseService.updateCueCase(listingId, { ...listing, sold: true, status: 'sold' });
+      } else if (listing.itemType === 'table') {
+        await billiardTableService.updateTable(listingId, { ...listing, sold: true, status: 'sold' });
+      } else if (listing.itemType === 'accessory') {
+        await accessoryService.updateAccessory(listingId, { ...listing, sold: true, status: 'sold' });
+      }
+
+      setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
+      if (oldListings.length <= 1) {
+        setShowOldListingsModal(false);
+      }
+      await refreshListings();
+    } catch (error) {
+      console.error('Error marking listing as sold:', error);
+      alert('Failed to mark listing as sold. Please try again.');
+    }
+  };
+
+  const handleDeleteListing = async (listingId) => {
+    const listing = oldListings.find(l => (l.uid || l.id) === listingId);
+    if (!listing) return;
+
+    try {
+      // Delete the listing based on type
+      if (listing.itemType === 'cue') {
+        await cueService.deleteCue(listingId);
+      } else if (listing.itemType === 'case') {
+        await cueCaseService.deleteCueCase(listingId);
+      } else if (listing.itemType === 'table') {
+        await billiardTableService.deleteTable(listingId);
+      } else if (listing.itemType === 'accessory') {
+        await accessoryService.deleteAccessory(listingId);
+      }
+
+      setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
+      if (oldListings.length <= 1) {
+        setShowOldListingsModal(false);
+      }
+      await refreshListings();
+    } catch (error) {
+      console.error('Error deleting listing:', error);
+      alert('Failed to delete listing. Please try again.');
+    }
   };
 
   useEffect(() => {
@@ -460,6 +610,17 @@ function AppInner() {
           cue={editingCue}
           onClose={handleCloseModal}
           onSave={handleModalSave}
+        />
+      )}
+
+      {/* Old Listings Review Modal */}
+      {showOldListingsModal && oldListings.length > 0 && (
+        <OldListingsModal
+          listings={oldListings}
+          onClose={() => setShowOldListingsModal(false)}
+          onKeep={handleKeepListing}
+          onMarkSold={handleMarkSold}
+          onDelete={handleDeleteListing}
         />
       )}
     </div>

@@ -16,9 +16,16 @@ const normalizeApiBaseUrl = (raw) => {
   return `${withoutTrailingSlash}/api`;
 };
 
+const defaultApiBaseUrl = (() => {
+  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+    return 'http://localhost:5000/api';
+  }
+  return 'https://billiardscuefinder.com/api';
+})();
+
 export const API_BASE_URL =
   normalizeApiBaseUrl(process.env.REACT_APP_API_URL) ||
-  'https://billiardscuefinder.com/api';
+  defaultApiBaseUrl;
 
 // Public website origin (same host as the API, but without the "/api" prefix).
 // Use this when you need to build URLs for static files (e.g. uploaded images at "/uploads/*").

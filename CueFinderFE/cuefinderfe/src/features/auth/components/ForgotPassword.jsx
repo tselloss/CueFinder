@@ -23,6 +23,7 @@ export default function ForgotPassword() {
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
+  const [submittedIdentifier, setSubmittedIdentifier] = useState('');
   const [requestCount, setRequestCount] = useState(0);
   const timeoutRef = useRef(null);
   const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
@@ -62,6 +63,7 @@ export default function ForgotPassword() {
 
       // Always show success message (even if account doesn't exist)
       // This prevents account enumeration attacks
+      setSubmittedIdentifier(emailOrUsername);
       setSuccess(true);
       setEmailOrUsername('');
       setRequestCount(requestCount + 1);
@@ -110,7 +112,7 @@ export default function ForgotPassword() {
           <CardContent className="space-y-4">
             <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
               <p className="text-sm text-primary">
-                {t('auth.forgotPassword.success', { email: <strong>{emailOrUsername}</strong> })}
+                {t('auth.forgotPassword.success', { email: <strong>{submittedIdentifier}</strong> })}
               </p>
             </div>
             <div className="p-4 rounded-md bg-muted/50 border border-border">

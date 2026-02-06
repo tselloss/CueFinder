@@ -16,7 +16,7 @@ export default function ListingsManagementView({
   onFlag,
   onDelete,
 }) {
-  const itemsPerPage = 10;
+  const itemsPerPage = 5;
 
   const filteredListings = useMemo(() => {
     const q = query.trim().toLowerCase();
@@ -31,6 +31,10 @@ export default function ListingsManagementView({
       data = filteredListings.filter(l => l.itemType === 'cue');
     } else if (activeTab === 'cases') {
       data = filteredListings.filter(l => l.itemType === 'case');
+    } else if (activeTab === 'tables') {
+      data = filteredListings.filter(l => l.itemType === 'table');
+    } else if (activeTab === 'accessories') {
+      data = filteredListings.filter(l => l.itemType === 'accessory');
     }
     const start = (page - 1) * itemsPerPage;
     return data.slice(start, start + itemsPerPage);
@@ -42,76 +46,98 @@ export default function ListingsManagementView({
       data = filteredListings.filter(l => l.itemType === 'cue');
     } else if (activeTab === 'cases') {
       data = filteredListings.filter(l => l.itemType === 'case');
+    } else if (activeTab === 'tables') {
+      data = filteredListings.filter(l => l.itemType === 'table');
+    } else if (activeTab === 'accessories') {
+      data = filteredListings.filter(l => l.itemType === 'accessory');
     }
     return Math.ceil(data.length / itemsPerPage);
   }, [filteredListings, activeTab]);
 
   return (
-    <Card className="bg-white">
+    <Card className="bg-slate-800 shadow-lg border border-slate-700">
       <CardContent className="p-6">
-        <h3 className="text-lg font-bold mb-4">Listings</h3>
+        <div className="flex items-center justify-between mb-6">
+          <h3 className="text-xl font-bold text-slate-100">Listings Management</h3>
+          <div className="flex gap-2">
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-blue-900 border border-blue-700 text-blue-300 text-sm font-medium rounded-lg">
+              📊 Total: <strong>{listings.length}</strong>
+            </span>
+            <span className="inline-flex items-center gap-2 px-3 py-1.5 bg-green-900 border border-green-700 text-green-300 text-sm font-medium rounded-lg">
+              🔍 Filtered: <strong>{filteredListings.length}</strong>
+            </span>
+          </div>
+        </div>
 
         {/* Search and filters */}
-        <div className="flex items-center gap-3 mb-4 flex-wrap">
+        <div className="mb-6">
           <MaterialInput
-            placeholder="Search listings (title or price)"
+            placeholder="🔍 Search listings by title or price..."
             value={query}
             onChange={(e) => onQueryChange(e.target.value)}
-            style={{ minWidth: '250px' }}
+            style={{ minWidth: '100%' }}
+            className="w-full"
           />
-          <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-            Total: {listings.length}
-          </span>
-          <span className="inline-block px-3 py-1 bg-gray-100 text-gray-700 text-sm font-medium rounded">
-            Filtered: {filteredListings.length}
-          </span>
         </div>
 
         {/* Tabs */}
-        <AdminTabs activeTab={activeTab} onTabChange={(tab) => {
-          onTabChange(tab);
-          onPageChange(1);
-        }} />
-
-        {/* Listings Table */}
-        <div className="overflow-x-auto border border-gray-200 rounded-lg">
-          <table className="w-full text-sm">
-            <thead className="bg-gray-50 border-b border-gray-200">
-              <tr>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Title
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Price (€)
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Status
-                </th>
-                <th className="px-2 sm:px-4 py-3 text-left font-bold text-gray-900 text-xs sm:text-sm">
-                  Actions
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-200">
-              {paginatedListings.map((item) => (
-                <ListingRow
-                  key={item.uid}
-                  item={item}
-                  onFlag={onFlag}
-                  onDelete={onDelete}
-                />
-              ))}
-            </tbody>
-          </table>
+        <div className="mb-6">
+          <AdminTabs activeTab={activeTab} onTabChange={(tab) => {
+            onTabChange(tab);
+            onPageChange(1);
+          }} />
         </div>
 
+        {/* Listings Table */}
+        {paginatedListings.length > 0 ? (
+          <div className="overflow-x-auto border border-slate-700 rounded-lg bg-slate-800">
+            <table className="w-full text-sm">
+              <thead className="bg-gradient-to-r from-slate-700 to-slate-600 border-b-2 border-slate-500">
+                <tr>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Title
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Price (€)
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-4 py-4 text-left font-bold text-slate-200 text-xs uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-slate-700">
+                {paginatedListings.map((item, idx) => (
+                  <ListingRow
+                    key={item.uid}
+                    item={item}
+                    onFlag={onFlag}
+                    onDelete={onDelete}
+                    isAltRow={idx % 2 === 1}
+                  />
+                ))}
+              </tbody>
+            </table>
+          </div>
+        ) : (
+          <div className="py-16 text-center border border-slate-700 rounded-lg bg-slate-750">
+            <div className="text-5xl mb-3">📦</div>
+            <p className="text-slate-300 font-medium mb-1">No listings found</p>
+            <p className="text-slate-400 text-sm">{query ? `Try adjusting your search "${query}"` : 'No listings to display'}</p>
+          </div>
+        )}
+
         {/* Pagination */}
-        <Pagination
-          currentPage={page}
-          totalPages={totalPages}
-          onPrevious={() => onPageChange(Math.max(1, page - 1))}
-          onNext={() => onPageChange(Math.min(totalPages, page + 1))}
-        />
+        {totalPages > 1 && (
+          <Pagination
+            currentPage={page}
+            totalPages={totalPages}
+            onPrevious={() => onPageChange(Math.max(1, page - 1))}
+            onNext={() => onPageChange(Math.min(totalPages, page + 1))}
+          />
+        )}
       </CardContent>
     </Card>
   );

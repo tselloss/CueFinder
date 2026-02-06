@@ -96,6 +96,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-cues"
           onClick={() => {
             setCategory('cues');
+            setMobileMenuOpen(false);
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
