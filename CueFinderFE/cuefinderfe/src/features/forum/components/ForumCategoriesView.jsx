@@ -15,7 +15,17 @@ export default function ForumCategoriesView({
   sortBy,
   onSortChange,
 }) {
-  const sortedCategories = [...categories].sort((a, b) => {
+  const uniqueCategories = (() => {
+    const seen = new Set();
+    return (categories || []).filter((cat) => {
+      const key = `${cat?.id ?? ''}-${(cat?.name || '').toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  })();
+
+  const sortedCategories = [...uniqueCategories].sort((a, b) => {
     if (sortBy === 'name') return a.name.localeCompare(b.name);
     if (sortBy === 'discussions') return (b.discussionCount || 0) - (a.discussionCount || 0);
     if (sortBy === 'recent') return new Date(b.modifiedAt || b.createdAt) - new Date(a.modifiedAt || a.createdAt);
