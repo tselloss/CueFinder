@@ -424,10 +424,20 @@ function AppInner() {
 
   // Load forum categories on mount
   useEffect(() => {
+    const dedupeCategories = (items = []) => {
+      const seen = new Set();
+      return items.filter((cat) => {
+        const key = `${cat?.id ?? ''}-${(cat?.name || '').toLowerCase()}`;
+        if (seen.has(key)) return false;
+        seen.add(key);
+        return true;
+      });
+    };
+
     const loadForumCategories = async () => {
       try {
         const categories = await forumService.getCategories();
-        setForumCategories(categories);
+        setForumCategories(dedupeCategories(categories));
       } catch (error) {
         console.error('Failed to load forum categories:', error);
       }

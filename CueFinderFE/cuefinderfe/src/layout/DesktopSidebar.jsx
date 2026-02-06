@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export default function DesktopSidebar({
@@ -13,6 +13,15 @@ export default function DesktopSidebar({
   setShowForumCategories
 }) {
   const navigate = useNavigate();
+  const uniqueForumCategories = useMemo(() => {
+    const seen = new Set();
+    return (forumCategories || []).filter((cat) => {
+      const key = `${cat?.id ?? ''}-${(cat?.name || '').toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, [forumCategories]);
 
   return (
     <div 
@@ -291,7 +300,7 @@ export default function DesktopSidebar({
               Forum
             </span>
           </div>
-          {forumCategories.length > 0 && (
+          {uniqueForumCategories.length > 0 && (
             <span 
               style={{ 
                 transform: showForumCategories ? 'rotate(180deg)' : 'rotate(0)', 
@@ -308,7 +317,7 @@ export default function DesktopSidebar({
         </button>
 
         {/* Forum Categories Sub-menu */}
-        {showForumCategories && forumCategories.length > 0 && (
+        {showForumCategories && uniqueForumCategories.length > 0 && (
           <div 
             className="gap-0.5 mt-2 ml-2 mr-1 pl-4 pr-2 pt-1 pb-1 rounded-sm border-l-4"
             style={{
@@ -351,7 +360,7 @@ export default function DesktopSidebar({
             </button>
             
             {/* Individual Categories */}
-            {forumCategories.map(forumCat => (
+            {uniqueForumCategories.map(forumCat => (
               <button
                 key={forumCat.id}
                 onClick={(e) => {
