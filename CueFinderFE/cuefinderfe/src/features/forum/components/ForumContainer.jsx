@@ -149,7 +149,11 @@ export default function ForumContainer({ onBack }) {
   return (
     <div className="min-h-screen bg-background overflow-auto">
       {/* Forum Header */}
-      <ForumHeader user={user} onBack={onBack} onNewDiscussion={handleOpenNewDiscussionModal} />
+      <ForumHeader
+        user={user}
+        onBack={onBack}
+        onNewDiscussion={handleOpenNewDiscussionModal}
+      />
 
       {/* Main Content */}
       <div
@@ -204,6 +208,7 @@ export default function ForumContainer({ onBack }) {
             }}
           />
         )}
+
       </div>
 
       {/* Modals */}

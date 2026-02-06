@@ -12,6 +12,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
   const [langDropdownOpen, setLangDropdownOpen] = useState(false);
   const navLinks = [
     { label: t('nav.home'), path: '/' },
+    { label: 'Billiard Clubs', path: '/clubs' },
     { label: t('nav.forum'), path: '/forum' },
     { label: t('nav.inbox'), path: '/inbox', requiresAuth: true }
   ];

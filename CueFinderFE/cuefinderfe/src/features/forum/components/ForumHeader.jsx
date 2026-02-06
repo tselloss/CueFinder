@@ -29,7 +29,7 @@ export default function ForumHeader({ user, onBack, onNewDiscussion }) {
           >
             Πίσω
           </Button>
-          {user && (
+          {user && onNewDiscussion && (
             <Button
               onClick={onNewDiscussion}
               data-testid="new-topic-button"
