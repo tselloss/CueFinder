@@ -114,7 +114,7 @@ services:
     <<: *backend-common
     container_name: cuefinder-backend-blue-prod
     ports:
-      - "5001:5000"
+      - "5010:5010"
 
   backend-green:
     <<: *backend-common
@@ -130,7 +130,7 @@ services:
       dockerfile: SolutionLibraries/CueFinderModerator/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:5001
+      - ASPNETCORE_URLS=http://+:5010
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
       - JwtSettings__SecretKey=${JWT_SECRET}
       - JwtSettings__Issuer=cuefinder.com
