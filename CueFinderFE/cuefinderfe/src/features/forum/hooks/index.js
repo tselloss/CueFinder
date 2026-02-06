@@ -35,18 +35,28 @@ export function useForumState(initialCategory) {
     return roots;
   }, [posts]);
 
+  const dedupeCategories = useCallback((items = []) => {
+    const seen = new Set();
+    return items.filter((cat) => {
+      const key = `${cat?.id ?? ''}-${(cat?.name || '').toLowerCase()}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+  }, []);
+
   const loadCategories = useCallback(async () => {
     try {
       setLoading(true);
       const data = await forumService.getCategories();
-      setCategories(data || []);
+      setCategories(dedupeCategories(data || []));
     } catch (error) {
       console.error('Forum: failed to load categories', error);
       setCategories([]);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [dedupeCategories]);
 
   const loadDiscussions = useCallback(async (categoryId) => {
     try {
