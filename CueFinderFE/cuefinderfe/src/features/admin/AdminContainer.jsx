@@ -280,7 +280,7 @@ export default function AdminContainer({ onBack }) {
   return (
     <div className="min-h-screen bg-slate-900 text-slate-100">
       {/* Header */}
-      <div className="bg-slate-800 border-b border-slate-700 px-6 py-4 flex items-center gap-3">
+      <div className="bg-slate-800 border-b border-slate-700 px-4 sm:px-6 py-4 flex flex-col sm:flex-row sm:items-center gap-3">
         <Button
           variant="outline"
           size="sm"
@@ -290,10 +290,10 @@ export default function AdminContainer({ onBack }) {
           <ArrowLeft className="w-4 h-4" />
           Back
         </Button>
-        <h2 className="text-2xl font-bold text-slate-100">Admin — Dashboard</h2>
+        <h2 className="text-xl sm:text-2xl font-bold text-slate-100">Admin — Dashboard</h2>
       </div>
 
-      <div className="p-6">
+      <div className="p-4 sm:p-6">
         {(flaggedImages.length > 0 || bannedUsers.length > 0) && (
           <Card className="mb-8 border border-slate-600 shadow-lg bg-gradient-to-br from-slate-800 to-slate-900">
             <CardHeader className="bg-gradient-to-r from-indigo-600 to-purple-600 text-white rounded-t-lg">
@@ -302,9 +302,9 @@ export default function AdminContainer({ onBack }) {
                 🛡️ Moderation Center
               </CardTitle>
             </CardHeader>
-            <CardContent className="p-6">
+            <CardContent className="p-4 sm:p-6">
               {/* Stats Grid */}
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
                 <div className="bg-slate-700 rounded-lg p-4 border-2 border-blue-500 shadow-sm">
                   <div className="text-2xl font-bold text-blue-400">{moderationStats.total}</div>
                   <div className="text-xs text-slate-300 font-medium mt-1">Total Flags</div>
@@ -324,7 +324,7 @@ export default function AdminContainer({ onBack }) {
               </div>
 
               <Tabs defaultValue="blocked" className="w-full">
-                <TabsList className="grid w-full grid-cols-2 bg-slate-700">
+                <TabsList className="grid w-full grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-0 bg-slate-700">
                   <TabsTrigger value="blocked" className="data-[state=active]:bg-slate-600 data-[state=active]:text-blue-400">
                     🚫 Blocked Images ({flaggedImages.length})
                   </TabsTrigger>
@@ -335,29 +335,29 @@ export default function AdminContainer({ onBack }) {
 
                 <TabsContent value="blocked" className="mt-4">
                   {flaggedImages.length > 0 ? (
-                    <div className="rounded-lg border border-slate-600 overflow-hidden bg-slate-800">
-                      <Table>
+                    <div className="rounded-lg border border-slate-600 overflow-x-auto bg-slate-800">
+                      <Table className="min-w-[720px] text-xs sm:text-sm">
                         <TableHeader>
                           <TableRow className="bg-gradient-to-r from-slate-700 to-slate-600 border-b-2 border-slate-500">
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Image</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Reason</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Status</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Confidence</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Reported By</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Actions</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Image</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Reason</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Status</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Confidence</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Reported By</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody className="divide-y divide-slate-700">
                           {flaggedImages.slice(0, 10).map((flag, idx) => (
                             <TableRow key={flag.id || flag.image_id || flag.flag_id} className={idx % 2 === 0 ? 'bg-slate-800' : 'bg-slate-750'}>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <div className="flex items-center gap-2">
                                   <ImageIcon className="w-4 h-4 text-purple-400" />
                                   <span className="text-xs font-medium text-slate-300">#{flag.id ?? flag.image_id ?? '-'}</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="px-4 py-3 text-xs text-slate-400">{getFlagReason(flag)}</TableCell>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3 text-xs text-slate-400">{getFlagReason(flag)}</TableCell>
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <Badge 
                                   className={`text-xs font-bold capitalize ${
                                     (flag.status || 'pending') === 'approved' ? 'bg-green-900 text-green-300 border border-green-700' :
@@ -368,11 +368,11 @@ export default function AdminContainer({ onBack }) {
                                   {(flag.status || 'pending') === 'pending' && '⏳ '}{flag.status || 'pending'}
                                 </Badge>
                               </TableCell>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <span className="text-xs font-semibold text-slate-200">{getConfidence(flag)}</span>
                               </TableCell>
-                              <TableCell className="px-4 py-3 text-xs text-slate-400">{flag.userName || flag.username || flag.display_name || '—'}</TableCell>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3 text-xs text-slate-400">{flag.userName || flag.username || flag.display_name || '—'}</TableCell>
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <div className="flex items-center gap-1.5">
                                   {(flag.status || 'pending') === 'pending' ? (
                                     <>
@@ -410,32 +410,32 @@ export default function AdminContainer({ onBack }) {
 
                 <TabsContent value="banned" className="mt-4">
                   {bannedUsers.length > 0 ? (
-                    <div className="rounded-lg border border-slate-600 overflow-hidden bg-slate-800">
-                      <Table>
+                    <div className="rounded-lg border border-slate-600 overflow-x-auto bg-slate-800">
+                      <Table className="min-w-[640px] text-xs sm:text-sm">
                         <TableHeader>
                           <TableRow className="bg-gradient-to-r from-slate-700 to-slate-600 border-b-2 border-slate-500">
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">User</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Email</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Total Flags</TableHead>
-                            <TableHead className="px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Actions</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">User</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Email</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Total Flags</TableHead>
+                            <TableHead className="px-3 sm:px-4 py-3 text-xs uppercase font-bold text-slate-200 tracking-wider">Actions</TableHead>
                           </TableRow>
                         </TableHeader>
                         <TableBody className="divide-y divide-slate-700">
                           {bannedUsers.slice(0, 10).map((user, idx) => (
                             <TableRow key={user.id || user.user_id || user.email} className={idx % 2 === 0 ? 'bg-slate-800' : 'bg-slate-750'}>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <div className="flex items-center gap-2">
                                   <Users className="w-4 h-4 text-red-400" />
                                   <span className="text-xs font-medium text-slate-300">{user.username || user.display_name || user.name || '—'}</span>
                                 </div>
                               </TableCell>
-                              <TableCell className="px-4 py-3 text-xs text-slate-400">{user.email || '—'}</TableCell>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3 text-xs text-slate-400">{user.email || '—'}</TableCell>
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <span className="inline-block px-2.5 py-1 bg-red-900 text-red-300 text-xs font-bold rounded-full border border-red-700">
                                   {user.total_flags ?? user.flagCount ?? 0}
                                 </span>
                               </TableCell>
-                              <TableCell className="px-4 py-3">
+                              <TableCell className="px-3 sm:px-4 py-3">
                                 <button className="inline-flex items-center gap-1 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-medium rounded transition-colors">
                                   👁️ View
                                 </button>

@@ -85,6 +85,13 @@ function AppInner() {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Ensure mobile starts at top on route change
+  useEffect(() => {
+    if (window.innerWidth <= 768) {
+      window.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+    }
+  }, [location.pathname]);
+
   // Disable body scroll when modal is open
   useEffect(() => {
     if (showAddModal) {
