@@ -1,0 +1,38 @@
+services:
+  booking-backend:
+    build:
+      context: .
+      dockerfile: CueFinderBookingBE/Dockerfile
+    container_name: cuefinder-booking-backend
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__BookingConnection=Host=cuefinder-postgres;Port=5432;Database=cuefinder;Username=postgres;Password=admin;SslMode=Disable;
+      - JwtSettings__SecretKey=your-super-secret-jwt-key-change-this-in-production-must-be-at-least-32-characters
+      - JwtSettings__Issuer=CueFinder
+      - JwtSettings__Audience=CueFinderUsers
+      - JwtSettings__ExpirationMinutes=60
+    ports:
+      - "5202:5202"
+    networks:
+      - cuefinder-network
+    restart: unless-stopped
+
+  booking-frontend:
+    build:
+      context: ./CueFinderBookingFE
+      dockerfile: Dockerfile
+      args:
+        - VITE_BOOKING_API_BASE_URL=http://localhost:5202
+        - VITE_AUTH_API_BASE_URL=http://localhost:5000/api
+    container_name: cuefinder-booking-frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - booking-backend
+    networks:
+      - cuefinder-network
+    restart: unless-stopped
+
+networks:
+  cuefinder-network:
+    external: true
