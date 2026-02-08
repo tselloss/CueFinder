@@ -1,4 +1,5 @@
 using CueFinder.Auth.Extensions;
+using CueFinder.Database.Context;
 using CueFinderBookingBE.Data;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
@@ -18,11 +19,17 @@ builder.Services
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-var connectionString = builder.Configuration.GetConnectionString("BookingConnection")
+var bookingConnectionString = builder.Configuration.GetConnectionString("BookingConnection")
     ?? throw new InvalidOperationException("Connection string 'BookingConnection' not found.");
 
+var cueFinderConnectionString = builder.Configuration.GetConnectionString("CueFinderConnection")
+    ?? bookingConnectionString;
+
 builder.Services.AddDbContext<BookingDbContext>(options =>
-    options.UseNpgsql(connectionString));
+    options.UseNpgsql(bookingConnectionString));
+
+builder.Services.AddDbContext<CueFinderDbContext>(options =>
+    options.UseNpgsql(cueFinderConnectionString));
 
 builder.Services.AddAuthServices(builder.Configuration);
 
@@ -80,6 +87,12 @@ builder.Services.AddCors(options =>
 });
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var bookingDb = scope.ServiceProvider.GetRequiredService<BookingDbContext>();
+    bookingDb.Database.EnsureCreated();
+}
 
 if (app.Environment.IsDevelopment())
 {

@@ -22,6 +22,33 @@ body, #root {
   flex-direction: column;
 }
 
+/* Floating chat button - match mobile menu style */
+.chat-float-button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: fixed;
+  bottom: 24px;
+  left: 24px;
+  height: 56px;
+  padding: 0 14px;
+  border-radius: 9999px;
+  background: linear-gradient(135deg, #3b82f6 0%, #2563eb 100%);
+  box-shadow: 0 4px 16px rgba(59, 130, 246, 0.6), 0 0 0 0 rgba(59, 130, 246, 0.7);
+  z-index: 900;
+  border: 2px solid rgba(255, 255, 255, 0.2);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  animation: menuButtonPulse 2s ease-in-out infinite;
+  color: #ffffff;
+}
+
+.chat-float-button:hover {
+  transform: scale(1.08);
+  box-shadow: 0 8px 24px rgba(59, 130, 246, 0.8), 0 0 0 8px rgba(59, 130, 246, 0.2);
+  animation: none;
+}
+
 @media (max-width: 768px) {
   .mobile-filters-toolbar {
     display: flex !important;

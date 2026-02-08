@@ -15,6 +15,7 @@ public class BilliardClubRecord
 
     public ICollection<BilliardClubLocation> Locations { get; set; } = new List<BilliardClubLocation>();
     public ICollection<BilliardClubCoOwner> CoOwners { get; set; } = new List<BilliardClubCoOwner>();
+    public ICollection<BilliardClubBooking> Bookings { get; set; } = new List<BilliardClubBooking>();
 }
 
 public class BilliardClubLocation
@@ -46,6 +47,8 @@ public class BilliardClubTable
     public string Name { get; set; } = string.Empty;
     public string Notes { get; set; } = string.Empty;
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+
+    public ICollection<BilliardClubBooking> Bookings { get; set; } = new List<BilliardClubBooking>();
 }
 
 public class BilliardClubCoOwner
@@ -61,4 +64,29 @@ public class BilliardClubCoOwner
     public Guid? ApprovedByUserId { get; set; }
     public DateTime? ApprovedAt { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+}
+
+public class BilliardClubBooking
+{
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public Guid RecordId { get; set; }
+    public BilliardClubRecord? Record { get; set; }
+
+    public Guid LocationId { get; set; }
+    public BilliardClubLocation? Location { get; set; }
+
+    public Guid TableId { get; set; }
+    public BilliardClubTable? Table { get; set; }
+
+    public Guid CreatedByUserId { get; set; }
+
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string Status { get; set; } = "pending";
+    public string Notes { get; set; } = string.Empty;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 }

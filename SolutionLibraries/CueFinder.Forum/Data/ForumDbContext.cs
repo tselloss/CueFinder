@@ -30,6 +30,7 @@ public class ForumDbContext : DbContext
     public DbSet<BilliardClubLocation> BilliardClubLocations { get; set; } = null!;
     public DbSet<BilliardClubCoOwner> BilliardClubCoOwners { get; set; } = null!;
     public DbSet<BilliardClubTable> BilliardClubTables { get; set; } = null!;
+    public DbSet<BilliardClubBooking> BilliardClubBookings { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -153,6 +154,33 @@ public class ForumDbContext : DbContext
             entity.Property(e => e.Name).HasMaxLength(120);
             entity.Property(e => e.Notes).HasMaxLength(500);
             entity.HasIndex(e => new { e.LocationId, e.Name }).IsUnique(false);
+        });
+
+        modelBuilder.Entity<BilliardClubBooking>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CustomerName).HasMaxLength(200);
+            entity.Property(e => e.CustomerEmail).HasMaxLength(200);
+            entity.Property(e => e.CustomerPhone).HasMaxLength(50);
+            entity.Property(e => e.Status).HasMaxLength(30);
+            entity.Property(e => e.Notes).HasMaxLength(500);
+            entity.HasIndex(e => e.CreatedByUserId);
+            entity.HasIndex(e => e.RecordId);
+            entity.HasIndex(e => e.LocationId);
+            entity.HasIndex(e => e.TableId);
+            entity.HasIndex(e => e.StartTime);
+            entity.HasOne(e => e.Record)
+                .WithMany(r => r.Bookings)
+                .HasForeignKey(e => e.RecordId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Location)
+                .WithMany()
+                .HasForeignKey(e => e.LocationId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(e => e.Table)
+                .WithMany(t => t.Bookings)
+                .HasForeignKey(e => e.TableId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<BilliardClubCoOwner>(entity =>

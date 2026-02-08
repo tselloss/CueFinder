@@ -13,7 +13,7 @@ import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum';
-import BilliardClubsPage from './features/forum/components/BilliardClubsPage';
+import { BOOKING_SITE_URL } from './config/apiConfig';
 import ForgotPassword from './features/auth/components/ForgotPassword';
 import ResetPassword from './features/auth/components/ResetPassword';
 import DesktopSidebar from './components/DesktopSidebar';
@@ -34,6 +34,14 @@ import * as forumService from './api/forumService';
 import './mobile-responsive.css';
 import { useTranslation } from 'react-i18next';
 
+function ExternalRedirect({ to }) {
+  useEffect(() => {
+    window.location.href = to;
+  }, [to]);
+
+  return null;
+}
+
 function AppInner() {
   const { t, i18n } = useTranslation();
   const { showError } = useToast();
@@ -50,6 +58,12 @@ function AppInner() {
       i18n.changeLanguage(saved);
     }
   }, [i18n]);
+
+  useEffect(() => {
+    if (window.location.hash?.includes('/clubs')) {
+      window.location.href = BOOKING_SITE_URL;
+    }
+  }, []);
   const [cues, setCues] = useState([]);
   const [search, setSearch] = useState('');
   // Set default view mode based on screen size
@@ -603,7 +617,10 @@ function AppInner() {
                 <Forum onBack={handleBack} />
               } />
               <Route path="/clubs" element={
-                <BilliardClubsPage />
+                <ExternalRedirect to={BOOKING_SITE_URL} />
+              } />
+              <Route path="/clubs/bookings" element={
+                <ExternalRedirect to={BOOKING_SITE_URL} />
               } />
             </Routes>
           </div>
@@ -622,6 +639,23 @@ function AppInner() {
             <line x1="3" y1="12" x2="21" y2="12"></line>
             <line x1="3" y1="18" x2="21" y2="18"></line>
           </svg>
+        </button>
+      )}
+
+      {/* Floating Chat Button */}
+      {user && (
+        <button
+          className="chat-float-button"
+          onClick={() => navigate('/inbox')}
+          title="Chat"
+        >
+          <span className="text-lg" aria-hidden="true">💬</span>
+          <span className="sr-only">Chat</span>
+          {unreadMessageCount > 0 && (
+            <span className="ml-1 inline-flex items-center justify-center min-w-[22px] h-6 px-2 rounded-full bg-red-500 text-xs font-bold unread-badge">
+              {unreadMessageCount > 99 ? '99+' : unreadMessageCount}
+            </span>
+          )}
         </button>
       )}
 

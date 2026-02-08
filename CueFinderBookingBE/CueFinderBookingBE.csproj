@@ -20,6 +20,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Auth\CueFinder.Auth.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.Database\CueFinder.Database.csproj" />
   </ItemGroup>
 
 </Project>

@@ -102,6 +102,36 @@ public class ForumController : ControllerBase
             && c.CoOwnerUserId.Value == userId);
     }
 
+    private static string NormalizeBookingStatus(string? status)
+    {
+        var normalized = (status ?? string.Empty).Trim().ToLowerInvariant();
+        return normalized switch
+        {
+            "confirmed" => "confirmed",
+            "cancelled" => "cancelled",
+            "completed" => "completed",
+            "pending" => "pending",
+            _ => "pending"
+        };
+    }
+
+    private async Task<List<Guid>> GetEditableRecordIdsAsync(Guid userId, bool isAdmin)
+    {
+        if (isAdmin)
+        {
+            return await _context.BilliardClubRecords.Select(r => r.Id).ToListAsync();
+        }
+
+        return await _context.BilliardClubRecords
+            .Include(r => r.CoOwners)
+            .Where(r => r.OwnerUserId == userId || r.CoOwners.Any(c =>
+                (c.Status ?? string.Empty).ToLower() == "approved"
+                && c.CoOwnerUserId.HasValue
+                && c.CoOwnerUserId.Value == userId))
+            .Select(r => r.Id)
+            .ToListAsync();
+    }
+
     [HttpGet("clubs")]
     public async Task<ActionResult<IEnumerable<ClubRecordResponseDto>>> GetClubRecords()
     {
@@ -443,6 +473,398 @@ public class ForumController : ControllerBase
         {
             _logger.LogError(ex, "Error approving co-owner");
             return StatusCode(500, "Error approving co-owner");
+        }
+    }
+
+    [HttpGet("clubs/bookings")]
+    [Authorize(Roles = "admin,club_owner,clubowner,club owner,owner")]
+    public async Task<ActionResult<IEnumerable<ClubBookingResponseDto>>> GetClubBookings([FromQuery] Guid? recordId, [FromQuery] Guid? tableId, [FromQuery] DateTime? from, [FromQuery] DateTime? to)
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            var isAdmin = IsAdminRole(GetUserRoleFromClaims());
+            var editableRecordIds = await GetEditableRecordIdsAsync(userId, isAdmin);
+            if (!isAdmin && editableRecordIds.Count == 0)
+            {
+                return Ok(new List<ClubBookingResponseDto>());
+            }
+
+            var query = _context.BilliardClubBookings
+                .Include(b => b.Location)
+                .Include(b => b.Table)
+                .Where(b => isAdmin || editableRecordIds.Contains(b.RecordId));
+
+            if (recordId.HasValue)
+            {
+                query = query.Where(b => b.RecordId == recordId.Value);
+            }
+
+            if (tableId.HasValue)
+            {
+                query = query.Where(b => b.TableId == tableId.Value);
+            }
+
+            if (from.HasValue)
+            {
+                query = query.Where(b => b.EndTime >= from.Value);
+            }
+
+            if (to.HasValue)
+            {
+                query = query.Where(b => b.StartTime <= to.Value);
+            }
+
+            var bookings = await query
+                .OrderByDescending(b => b.StartTime)
+                .ToListAsync();
+
+            var result = bookings.Select(b => new ClubBookingResponseDto
+            {
+                Id = b.Id,
+                RecordId = b.RecordId,
+                LocationId = b.LocationId,
+                TableId = b.TableId,
+                LocationName = b.Location?.Name ?? string.Empty,
+                TableName = b.Table?.Name ?? string.Empty,
+                CustomerName = b.CustomerName,
+                CustomerEmail = b.CustomerEmail,
+                CustomerPhone = b.CustomerPhone,
+                StartTime = b.StartTime,
+                EndTime = b.EndTime,
+                Status = b.Status,
+                Notes = b.Notes,
+                CreatedByUserId = b.CreatedByUserId,
+                CreatedAt = b.CreatedAt,
+                UpdatedAt = b.UpdatedAt
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting club bookings");
+            return StatusCode(500, "Error retrieving club bookings");
+        }
+    }
+
+    [HttpPost("clubs/bookings")]
+    [Authorize]
+    public async Task<ActionResult<ClubBookingResponseDto>> CreateClubBooking([FromBody] ClubBookingCreateDto dto)
+    {
+        try
+        {
+            if (dto.StartTime >= dto.EndTime)
+            {
+                return BadRequest("End time must be after start time");
+            }
+
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            var table = await _context.BilliardClubTables
+                .Include(t => t.Location)
+                .ThenInclude(l => l.Record)
+                .FirstOrDefaultAsync(t => t.Id == dto.TableId);
+
+            if (table == null || table.Location?.Record == null)
+            {
+                return NotFound("Table not found");
+            }
+
+            var record = table.Location.Record;
+            var isAdmin = IsAdminRole(GetUserRoleFromClaims());
+            var canEdit = CanEditClubRecord(record, userId, isAdmin);
+
+            var hasOverlap = await _context.BilliardClubBookings.AnyAsync(b =>
+                b.TableId == table.Id
+                && (b.Status ?? string.Empty).ToLower() != "cancelled"
+                && b.StartTime < dto.EndTime
+                && b.EndTime > dto.StartTime);
+
+            if (hasOverlap)
+            {
+                return BadRequest("Table already has a booking in that time range");
+            }
+
+            var booking = new BilliardClubBooking
+            {
+                Id = Guid.NewGuid(),
+                RecordId = record.Id,
+                LocationId = table.Location.Id,
+                TableId = table.Id,
+                CreatedByUserId = userId,
+                CustomerName = dto.CustomerName ?? string.Empty,
+                CustomerEmail = dto.CustomerEmail ?? string.Empty,
+                CustomerPhone = dto.CustomerPhone ?? string.Empty,
+                StartTime = dto.StartTime,
+                EndTime = dto.EndTime,
+                Status = canEdit ? NormalizeBookingStatus(dto.Status) : "pending",
+                Notes = dto.Notes ?? string.Empty,
+                CreatedAt = DateTime.UtcNow,
+                UpdatedAt = DateTime.UtcNow
+            };
+
+            _context.BilliardClubBookings.Add(booking);
+            await _context.SaveChangesAsync();
+
+            return Ok(new ClubBookingResponseDto
+            {
+                Id = booking.Id,
+                RecordId = booking.RecordId,
+                LocationId = booking.LocationId,
+                TableId = booking.TableId,
+                LocationName = table.Location.Name ?? string.Empty,
+                TableName = table.Name ?? string.Empty,
+                CustomerName = booking.CustomerName,
+                CustomerEmail = booking.CustomerEmail,
+                CustomerPhone = booking.CustomerPhone,
+                StartTime = booking.StartTime,
+                EndTime = booking.EndTime,
+                Status = booking.Status,
+                Notes = booking.Notes,
+                CreatedByUserId = booking.CreatedByUserId,
+                CreatedAt = booking.CreatedAt,
+                UpdatedAt = booking.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error creating club booking");
+            return StatusCode(500, "Error creating club booking");
+        }
+    }
+
+    [HttpPut("clubs/bookings/{id}")]
+    [Authorize(Roles = "admin,club_owner,clubowner,club owner,owner")]
+    public async Task<ActionResult<ClubBookingResponseDto>> UpdateClubBooking(Guid id, [FromBody] ClubBookingUpdateDto dto)
+    {
+        try
+        {
+            var booking = await _context.BilliardClubBookings
+                .Include(b => b.Location)
+                .Include(b => b.Table)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            var record = await _context.BilliardClubRecords
+                .Include(r => r.CoOwners)
+                .FirstOrDefaultAsync(r => r.Id == booking.RecordId);
+
+            if (record == null)
+            {
+                return NotFound("Club record not found");
+            }
+
+            var isAdmin = IsAdminRole(GetUserRoleFromClaims());
+            if (!CanEditClubRecord(record, userId, isAdmin))
+            {
+                return Forbid();
+            }
+
+            var newStart = dto.StartTime ?? booking.StartTime;
+            var newEnd = dto.EndTime ?? booking.EndTime;
+            if (newStart >= newEnd)
+            {
+                return BadRequest("End time must be after start time");
+            }
+
+            var hasOverlap = await _context.BilliardClubBookings.AnyAsync(b =>
+                b.Id != booking.Id
+                && b.TableId == booking.TableId
+                && (b.Status ?? string.Empty).ToLower() != "cancelled"
+                && b.StartTime < newEnd
+                && b.EndTime > newStart);
+
+            if (hasOverlap)
+            {
+                return BadRequest("Table already has a booking in that time range");
+            }
+
+            booking.CustomerName = dto.CustomerName ?? booking.CustomerName;
+            booking.CustomerEmail = dto.CustomerEmail ?? booking.CustomerEmail;
+            booking.CustomerPhone = dto.CustomerPhone ?? booking.CustomerPhone;
+            booking.StartTime = newStart;
+            booking.EndTime = newEnd;
+            booking.Status = NormalizeBookingStatus(dto.Status ?? booking.Status);
+            booking.Notes = dto.Notes ?? booking.Notes;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new ClubBookingResponseDto
+            {
+                Id = booking.Id,
+                RecordId = booking.RecordId,
+                LocationId = booking.LocationId,
+                TableId = booking.TableId,
+                LocationName = booking.Location?.Name ?? string.Empty,
+                TableName = booking.Table?.Name ?? string.Empty,
+                CustomerName = booking.CustomerName,
+                CustomerEmail = booking.CustomerEmail,
+                CustomerPhone = booking.CustomerPhone,
+                StartTime = booking.StartTime,
+                EndTime = booking.EndTime,
+                Status = booking.Status,
+                Notes = booking.Notes,
+                CreatedByUserId = booking.CreatedByUserId,
+                CreatedAt = booking.CreatedAt,
+                UpdatedAt = booking.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating club booking");
+            return StatusCode(500, "Error updating club booking");
+        }
+    }
+
+    [HttpDelete("clubs/bookings/{id}")]
+    [Authorize(Roles = "admin,club_owner,clubowner,club owner,owner")]
+    public async Task<ActionResult> DeleteClubBooking(Guid id)
+    {
+        try
+        {
+            var booking = await _context.BilliardClubBookings.FirstOrDefaultAsync(b => b.Id == id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            var record = await _context.BilliardClubRecords
+                .Include(r => r.CoOwners)
+                .FirstOrDefaultAsync(r => r.Id == booking.RecordId);
+
+            if (record == null)
+            {
+                return NotFound("Club record not found");
+            }
+
+            var isAdmin = IsAdminRole(GetUserRoleFromClaims());
+            if (!CanEditClubRecord(record, userId, isAdmin))
+            {
+                return Forbid();
+            }
+
+            _context.BilliardClubBookings.Remove(booking);
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error deleting club booking");
+            return StatusCode(500, "Error deleting club booking");
+        }
+    }
+
+    [HttpGet("clubs/bookings/availability")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<ClubBookingAvailabilityDto>>> GetBookingAvailability([FromQuery] Guid tableId, [FromQuery] DateTime from, [FromQuery] DateTime to)
+    {
+        try
+        {
+            if (tableId == Guid.Empty)
+            {
+                return BadRequest("TableId is required");
+            }
+
+            if (from >= to)
+            {
+                return BadRequest("Invalid time range");
+            }
+
+            var bookings = await _context.BilliardClubBookings
+                .Where(b => b.TableId == tableId
+                    && (b.Status ?? string.Empty).ToLower() != "cancelled"
+                    && b.StartTime < to
+                    && b.EndTime > from)
+                .OrderBy(b => b.StartTime)
+                .Select(b => new ClubBookingAvailabilityDto
+                {
+                    StartTime = b.StartTime,
+                    EndTime = b.EndTime
+                })
+                .ToListAsync();
+
+            return Ok(bookings);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting booking availability");
+            return StatusCode(500, "Error retrieving booking availability");
+        }
+    }
+
+    [HttpGet("clubs/bookings/mine")]
+    [Authorize]
+    public async Task<ActionResult<IEnumerable<ClubBookingResponseDto>>> GetMyBookings()
+    {
+        try
+        {
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            var bookings = await _context.BilliardClubBookings
+                .Include(b => b.Location)
+                .Include(b => b.Table)
+                .Where(b => b.CreatedByUserId == userId)
+                .OrderByDescending(b => b.StartTime)
+                .ToListAsync();
+
+            var result = bookings.Select(b => new ClubBookingResponseDto
+            {
+                Id = b.Id,
+                RecordId = b.RecordId,
+                LocationId = b.LocationId,
+                TableId = b.TableId,
+                LocationName = b.Location?.Name ?? string.Empty,
+                TableName = b.Table?.Name ?? string.Empty,
+                CustomerName = b.CustomerName,
+                CustomerEmail = b.CustomerEmail,
+                CustomerPhone = b.CustomerPhone,
+                StartTime = b.StartTime,
+                EndTime = b.EndTime,
+                Status = b.Status,
+                Notes = b.Notes,
+                CreatedByUserId = b.CreatedByUserId,
+                CreatedAt = b.CreatedAt,
+                UpdatedAt = b.UpdatedAt
+            });
+
+            return Ok(result);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting my bookings");
+            return StatusCode(500, "Error retrieving bookings");
         }
     }
 
@@ -1094,4 +1516,53 @@ public class ClubCoOwnerDto
 public class ClubCoOwnerRequestDto
 {
     public string EmailOrUsername { get; set; } = string.Empty;
+}
+
+public class ClubBookingCreateDto
+{
+    public Guid TableId { get; set; }
+    public string? CustomerName { get; set; }
+    public string? CustomerEmail { get; set; }
+    public string? CustomerPhone { get; set; }
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string? Status { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class ClubBookingUpdateDto
+{
+    public string? CustomerName { get; set; }
+    public string? CustomerEmail { get; set; }
+    public string? CustomerPhone { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
+    public string? Status { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class ClubBookingResponseDto
+{
+    public Guid Id { get; set; }
+    public Guid RecordId { get; set; }
+    public Guid LocationId { get; set; }
+    public Guid TableId { get; set; }
+    public string LocationName { get; set; } = string.Empty;
+    public string TableName { get; set; } = string.Empty;
+    public string CustomerName { get; set; } = string.Empty;
+    public string CustomerEmail { get; set; } = string.Empty;
+    public string CustomerPhone { get; set; } = string.Empty;
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
+    public string Status { get; set; } = string.Empty;
+    public string Notes { get; set; } = string.Empty;
+    public Guid CreatedByUserId { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public DateTime UpdatedAt { get; set; }
+}
+
+public class ClubBookingAvailabilityDto
+{
+    public DateTime StartTime { get; set; }
+    public DateTime EndTime { get; set; }
 }

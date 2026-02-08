@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { useAuth } from '../auth/AuthContext.jsx';
+import { CUEFINDER_SITE_URL } from '../config/siteConfig.js';
 
 export default function Login() {
   const { login } = useAuth();
@@ -41,6 +42,12 @@ export default function Login() {
         <button className="primary" disabled={loading} onClick={handleSubmit}>
           Sign in
         </button>
+        <a className="secondary" href={`${CUEFINDER_SITE_URL}/login`}>
+          Go to CueFinder Login
+        </a>
+        <a className="secondary" href={`${CUEFINDER_SITE_URL}/register`}>
+          Go to CueFinder Register
+        </a>
       </div>
     </section>
   );

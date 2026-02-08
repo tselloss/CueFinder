@@ -84,3 +84,31 @@ export const requestClubCoOwner = (id, emailOrUsername) =>
 
 export const approveClubCoOwner = (id, coOwnerId) =>
   post(`${BASE_URL}/clubs/${id}/coowners/${coOwnerId}/approve`);
+
+// Club Bookings
+export const getClubBookings = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.recordId) query.set('recordId', params.recordId);
+  if (params.tableId) query.set('tableId', params.tableId);
+  if (params.from) query.set('from', params.from);
+  if (params.to) query.set('to', params.to);
+  const queryString = query.toString();
+  return get(`${BASE_URL}/clubs/bookings${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getClubBookingAvailability = (params = {}) => {
+  const query = new URLSearchParams();
+  if (params.tableId) query.set('tableId', params.tableId);
+  if (params.from) query.set('from', params.from);
+  if (params.to) query.set('to', params.to);
+  const queryString = query.toString();
+  return get(`${BASE_URL}/clubs/bookings/availability${queryString ? `?${queryString}` : ''}`);
+};
+
+export const getMyClubBookings = () => get(`${BASE_URL}/clubs/bookings/mine`);
+
+export const createClubBooking = (data) => post(`${BASE_URL}/clubs/bookings`, data);
+
+export const updateClubBooking = (id, data) => put(`${BASE_URL}/clubs/bookings/${id}`, data);
+
+export const deleteClubBooking = (id) => delete_(`${BASE_URL}/clubs/bookings/${id}`);

@@ -164,7 +164,7 @@ namespace CueFinder.Auth.Services
                 State = request.State,
                 ZipCode = request.ZipCode,
                 Country = request.Country,
-                Role = "user",
+                Role = request.WantsClubOwner ? "club_owner_pending" : "user",
                 IsActive = true,
                 IsEmailVerified = false,
                 AcceptedTerms = request.AcceptedTerms,

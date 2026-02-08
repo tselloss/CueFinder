@@ -7,6 +7,7 @@ import { Button } from '../../../components/ui/button.jsx';
 import { Input } from '../../../components/ui/input.jsx';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '../../../components/ui/card.jsx';
 import { getErrorMessage, isValidationError, formatValidationErrors } from '../../../utils/errorUtils';
+import { BOOKING_SITE_URL } from '../../../config/apiConfig';
 
 export default function LoginPage() {
   const { login, register, sendSms, verifySms } = useAuth();
@@ -21,6 +22,7 @@ export default function LoginPage() {
   const [email, setEmail] = useState('');
   const [address, setAddress] = useState({ street: '', city: '', state: '', postalCode: '', country: '' });
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [wantsClubOwner, setWantsClubOwner] = useState(false);
   const [codeSent, setCodeSent] = useState(false);
   const [verificationToken, setVerificationToken] = useState('');
   const [code, setCode] = useState('');
@@ -41,7 +43,7 @@ export default function LoginPage() {
           if (!phone) throw new Error('📱 Mobile phone number is required for account verification');
           if (!acceptedTerms) throw new Error(t('registration.terms.required', '✅ You must accept the Terms and Conditions to create an account'));
           
-          await register(username, password, name, phone, email, address, acceptedTerms);
+          await register(username, password, name, phone, email, address, acceptedTerms, wantsClubOwner);
           const response = await sendSms(phone, 'SMS');
           setVerificationToken(response.token);
           setCodeSent(true);
@@ -271,6 +273,22 @@ export default function LoginPage() {
                         </a>
                       </span>
                     </label>
+
+                    <label
+                      htmlFor="clubOwner"
+                      className="mt-2 flex items-start gap-3 rounded-lg border border-border/60 bg-muted/20 p-3 sm:p-4 cursor-pointer"
+                    >
+                      <input
+                        type="checkbox"
+                        id="clubOwner"
+                        checked={wantsClubOwner}
+                        onChange={(e) => setWantsClubOwner(e.target.checked)}
+                        className="mt-1 h-5 w-5 sm:h-4 sm:w-4 rounded border-input bg-background ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                      />
+                      <span className="text-sm text-muted-foreground leading-snug">
+                        Register as a billiard club owner (requires admin approval).
+                      </span>
+                    </label>
                   </>
                 )}
               </>
@@ -321,6 +339,15 @@ export default function LoginPage() {
                   </button>
                 </>
               )}
+            </div>
+
+            <div className="flex w-full flex-col gap-2">
+              <Button variant="outline" asChild>
+                <a href={`${BOOKING_SITE_URL}/login`}>Go to BookBilliard Login</a>
+              </Button>
+              <Button variant="outline" asChild>
+                <a href={`${BOOKING_SITE_URL}/register`}>Go to BookBilliard Register</a>
+              </Button>
             </div>
 
             {!isRegister && !codeSent && (

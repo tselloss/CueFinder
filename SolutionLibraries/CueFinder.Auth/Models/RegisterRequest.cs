@@ -59,5 +59,10 @@ namespace CueFinder.Auth.Models
     /// Whether the user accepts the terms and conditions
     /// </summary>
     public bool AcceptedTerms { get; set; } = false;
+
+    /// <summary>
+    /// Whether the user is requesting club owner access
+    /// </summary>
+    public bool WantsClubOwner { get; set; } = false;
 }
 }

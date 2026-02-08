@@ -197,6 +197,16 @@ export default function AdminContainer({ onBack }) {
     setUsers((s) => s.filter((u) => u.id !== id));
   };
 
+  const handleApproveClubOwner = async (user) => {
+    const updated = await adminUsers.updateUser(user.id, { role: 'club_owner' });
+    setUsers((s) => s.map((u) => (u.id === updated.id ? updated : u)));
+  };
+
+  const handleRejectClubOwner = async (user) => {
+    const updated = await adminUsers.updateUser(user.id, { role: 'user' });
+    setUsers((s) => s.map((u) => (u.id === updated.id ? updated : u)));
+  };
+
   // Listing management handlers
   const handleFlagListing = async (item) => {
     if (item.itemType === 'cue') {
@@ -469,6 +479,8 @@ export default function AdminContainer({ onBack }) {
             onEdit={setEditingUser}
             onToggleBan={handleToggleBan}
             onDelete={handleDeleteUser}
+            onApproveClubOwner={handleApproveClubOwner}
+            onRejectClubOwner={handleRejectClubOwner}
           />
 
           {/* Listings Management */}

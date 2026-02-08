@@ -11,6 +11,7 @@ WORKDIR /src
 
 COPY ["CueFinderBookingBE/CueFinderBookingBE.csproj", "CueFinderBookingBE/"]
 COPY ["SolutionLibraries/CueFinder.Auth/CueFinder.Auth.csproj", "SolutionLibraries/CueFinder.Auth/"]
+COPY ["SolutionLibraries/CueFinder.Database/CueFinder.Database.csproj", "SolutionLibraries/CueFinder.Database/"]
 
 RUN dotnet restore "CueFinderBookingBE/CueFinderBookingBE.csproj"
 

@@ -1,6 +1,7 @@
 using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
+using CueFinder.Database.Context;
 using CueFinderBookingBE.Data;
 using CueFinderBookingBE.Models;
 using Microsoft.AspNetCore.Authorization;
@@ -14,11 +15,13 @@ namespace CueFinderBookingBE.Controllers;
 public class BookingsController : ControllerBase
 {
     private readonly BookingDbContext _context;
+    private readonly CueFinderDbContext _dbContext;
     private readonly ILogger<BookingsController> _logger;
 
-    public BookingsController(BookingDbContext context, ILogger<BookingsController> logger)
+    public BookingsController(BookingDbContext context, CueFinderDbContext dbContext, ILogger<BookingsController> logger)
     {
         _context = context;
+        _dbContext = dbContext;
         _logger = logger;
     }
 
@@ -93,6 +96,37 @@ public class BookingsController : ControllerBase
         return null;
     }
 
+    private async Task<(string Email, string Username)> GetUserIdentityAsync()
+    {
+        var username = User.FindFirst(ClaimTypes.Name)?.Value ?? string.Empty;
+        var email = User.FindFirst(ClaimTypes.Email)?.Value ?? string.Empty;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+
+        if ((string.IsNullOrWhiteSpace(email) || string.IsNullOrWhiteSpace(username))
+            && !string.IsNullOrWhiteSpace(userIdClaim)
+            && int.TryParse(userIdClaim, out var intUserId))
+        {
+            var userProfile = await _dbContext.Users
+                .AsNoTracking()
+                .FirstOrDefaultAsync(u => u.Id == intUserId);
+
+            if (userProfile != null)
+            {
+                if (string.IsNullOrWhiteSpace(email))
+                {
+                    email = userProfile.Email ?? string.Empty;
+                }
+
+                if (string.IsNullOrWhiteSpace(username))
+                {
+                    username = userProfile.Username ?? string.Empty;
+                }
+            }
+        }
+
+        return (email ?? string.Empty, username ?? string.Empty);
+    }
+
     private async Task<List<Guid>> GetEditableRecordIdsAsync(Guid userId, bool isAdmin)
     {
         if (isAdmin)
@@ -100,12 +134,21 @@ public class BookingsController : ControllerBase
             return await _context.BilliardClubRecords.Select(r => r.Id).ToListAsync();
         }
 
+        var identity = await GetUserIdentityAsync();
+        var emailLower = (identity.Email ?? string.Empty).ToLowerInvariant();
+        var usernameLower = (identity.Username ?? string.Empty).ToLowerInvariant();
+
         return await _context.BilliardClubRecords
             .Include(r => r.CoOwners)
-            .Where(r => r.OwnerUserId == userId || r.CoOwners.Any(c =>
-                (c.Status ?? string.Empty).ToLower() == "approved"
-                && c.CoOwnerUserId.HasValue
-                && c.CoOwnerUserId.Value == userId))
+            .Where(r =>
+                (userId != Guid.Empty && r.OwnerUserId == userId)
+                || (!string.IsNullOrWhiteSpace(emailLower) && (r.OwnerEmail ?? string.Empty).ToLower() == emailLower)
+                || (!string.IsNullOrWhiteSpace(usernameLower) && (r.OwnerName ?? string.Empty).ToLower() == usernameLower)
+                || r.CoOwners.Any(c =>
+                    (c.Status ?? string.Empty).ToLower() == "approved"
+                    && ((userId != Guid.Empty && c.CoOwnerUserId.HasValue && c.CoOwnerUserId.Value == userId)
+                        || (!string.IsNullOrWhiteSpace(emailLower) && (c.Email ?? string.Empty).ToLower() == emailLower)
+                        || (!string.IsNullOrWhiteSpace(usernameLower) && (c.CoOwnerUsername ?? string.Empty).ToLower() == usernameLower))))
             .Select(r => r.Id)
             .ToListAsync();
     }
@@ -225,7 +268,7 @@ public class BookingsController : ControllerBase
                 return NotFound("Table not found");
             }
 
-            var record = table.Location.Record;
+            var record = table.Location!.Record!;
             var isAdmin = IsAdminRole(GetUserRoleFromClaims());
             var canEdit = CanEditClubRecord(record, userId, isAdmin);
             var tenantRecordId = GetTenantRecordId();
@@ -389,6 +432,96 @@ public class BookingsController : ControllerBase
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error updating booking");
+            return StatusCode(500, "Error updating booking");
+        }
+    }
+
+    [HttpPut("mine/{id}")]
+    [Authorize]
+    public async Task<ActionResult<BookingResponseDto>> UpdateMyBooking(Guid id, [FromBody] BookingMyUpdateDto dto)
+    {
+        try
+        {
+            var booking = await _context.BilliardClubBookings
+                .Include(b => b.Location)
+                .Include(b => b.Table)
+                .FirstOrDefaultAsync(b => b.Id == id);
+
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            if (booking.CreatedByUserId != userId)
+            {
+                return Forbid();
+            }
+
+            var status = (booking.Status ?? string.Empty).ToLower();
+            if (status == "completed")
+            {
+                return BadRequest("Completed bookings cannot be edited");
+            }
+
+            var newStart = dto.StartTime ?? booking.StartTime;
+            var newEnd = dto.EndTime ?? booking.EndTime;
+            if (newStart >= newEnd)
+            {
+                return BadRequest("End time must be after start time");
+            }
+
+            var hasOverlap = await _context.BilliardClubBookings.AnyAsync(b =>
+                b.Id != booking.Id
+                && b.TableId == booking.TableId
+                && (b.Status ?? string.Empty).ToLower() != "cancelled"
+                && b.StartTime < newEnd
+                && b.EndTime > newStart);
+
+            if (hasOverlap)
+            {
+                return BadRequest("Table already has a booking in that time range");
+            }
+
+            booking.CustomerName = dto.CustomerName ?? booking.CustomerName;
+            booking.CustomerEmail = dto.CustomerEmail ?? booking.CustomerEmail;
+            booking.CustomerPhone = dto.CustomerPhone ?? booking.CustomerPhone;
+            booking.StartTime = newStart;
+            booking.EndTime = newEnd;
+            booking.Status = "pending";
+            booking.Notes = dto.Notes ?? booking.Notes;
+            booking.UpdatedAt = DateTime.UtcNow;
+
+            await _context.SaveChangesAsync();
+
+            return Ok(new BookingResponseDto
+            {
+                Id = booking.Id,
+                RecordId = booking.RecordId,
+                LocationId = booking.LocationId,
+                TableId = booking.TableId,
+                LocationName = booking.Location?.Name ?? string.Empty,
+                TableName = booking.Table?.Name ?? string.Empty,
+                CustomerName = booking.CustomerName,
+                CustomerEmail = booking.CustomerEmail,
+                CustomerPhone = booking.CustomerPhone,
+                StartTime = booking.StartTime,
+                EndTime = booking.EndTime,
+                Status = booking.Status,
+                Notes = booking.Notes,
+                CreatedByUserId = booking.CreatedByUserId,
+                CreatedAt = booking.CreatedAt,
+                UpdatedAt = booking.UpdatedAt
+            });
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error updating my booking");
             return StatusCode(500, "Error updating booking");
         }
     }
@@ -557,6 +690,16 @@ public class BookingUpdateDto
     public DateTime? StartTime { get; set; }
     public DateTime? EndTime { get; set; }
     public string? Status { get; set; }
+    public string? Notes { get; set; }
+}
+
+public class BookingMyUpdateDto
+{
+    public string? CustomerName { get; set; }
+    public string? CustomerEmail { get; set; }
+    public string? CustomerPhone { get; set; }
+    public DateTime? StartTime { get; set; }
+    public DateTime? EndTime { get; set; }
     public string? Notes { get; set; }
 }
 

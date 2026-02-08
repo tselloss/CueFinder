@@ -233,25 +233,34 @@ export default function Inbox({ onBack }) {
             </DialogHeader>
 
             <div className="space-y-4 py-4">
-              {/* Subject */}
-              <div>
-                <h4 className="font-semibold mb-1">Subject</h4>
-                <p>{selectedMessage.subject}</p>
+              <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-sm text-muted-foreground">
+                  Subject: {selectedMessage.subject || 'No subject'}
+                </p>
+                {selectedMessage.cueId && (
+                  <Badge variant="outline">Related to a listing</Badge>
+                )}
               </div>
 
-              {/* Meta */}
-              {selectedMessage.cueId && (
-                <Badge variant="outline">Related to a listing</Badge>
-              )}
+              <div className="space-y-3">
+                <div className="flex">
+                  <div className="bg-muted/60 text-foreground rounded-2xl px-4 py-3 max-w-[80%]">
+                    <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
+                    <div className="text-xs text-muted-foreground mt-2">
+                      {new Date(selectedMessage.createdAt).toLocaleString()}
+                    </div>
+                  </div>
+                </div>
 
-              {/* Message Content */}
-              <Card className="bg-muted/50">
-                <CardContent className="p-4">
-                  <p className="whitespace-pre-wrap">{selectedMessage.content}</p>
-                </CardContent>
-              </Card>
+                {replyBody.trim() && (
+                  <div className="flex justify-end">
+                    <div className="bg-primary text-primary-foreground rounded-2xl px-4 py-3 max-w-[80%]">
+                      <p className="whitespace-pre-wrap">{replyBody}</p>
+                    </div>
+                  </div>
+                )}
+              </div>
 
-              {/* Reply Box */}
               <div className="border-t pt-4 space-y-3">
                 <h4 className="font-semibold">Reply</h4>
                 <Textarea

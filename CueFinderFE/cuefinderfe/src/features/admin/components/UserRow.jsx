@@ -1,7 +1,8 @@
 import React from 'react';
 import { Check, Edit2, Trash2, X, User } from 'lucide-react';
 
-export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow }) {
+export default function UserRow({ user, onEdit, onToggleBan, onDelete, onApproveClubOwner, onRejectClubOwner, isAltRow }) {
+  const isClubOwnerPending = (user.role || '').toLowerCase() === 'club_owner_pending';
   return (
     <tr className={`transition-colors ${isAltRow ? 'bg-slate-800' : 'bg-slate-750'} hover:bg-slate-700`}>
       <td className="px-3 sm:px-4 py-2 sm:py-4">
@@ -19,7 +20,13 @@ export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow 
           }`}
         >
           <User className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
-          {user.role === 'admin' ? 'Admin' : 'User'}
+          {user.role === 'admin'
+            ? 'Admin'
+            : isClubOwnerPending
+              ? 'Club Owner (Pending)'
+              : user.role === 'club_owner'
+                ? 'Club Owner'
+                : 'User'}
         </span>
       </td>
       <td className="px-3 sm:px-4 py-2 sm:py-4">
@@ -33,6 +40,26 @@ export default function UserRow({ user, onEdit, onToggleBan, onDelete, isAltRow 
       </td>
       <td className="px-3 sm:px-4 py-2 sm:py-4">
         <div className="flex flex-col sm:flex-row sm:items-center gap-1.5 sm:gap-2">
+          {isClubOwnerPending && (
+            <>
+              <button
+                onClick={() => onApproveClubOwner(user)}
+                title="Approve club owner"
+                className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-green-600 hover:bg-green-700 text-white text-[11px] sm:text-xs font-medium rounded-md sm:rounded-lg transition-colors"
+              >
+                <Check className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>Approve Owner</span>
+              </button>
+              <button
+                onClick={() => onRejectClubOwner(user)}
+                title="Reject club owner"
+                className="inline-flex items-center gap-1.5 px-2 py-1 sm:px-3 sm:py-1.5 bg-slate-600 hover:bg-slate-700 text-white text-[11px] sm:text-xs font-medium rounded-md sm:rounded-lg transition-colors"
+              >
+                <X className="w-3 h-3 sm:w-3.5 sm:h-3.5" />
+                <span>Reject Owner</span>
+              </button>
+            </>
+          )}
           <button
             onClick={() => onEdit(user)}
             title="Edit user"

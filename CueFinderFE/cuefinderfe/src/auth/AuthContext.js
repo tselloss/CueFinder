@@ -53,8 +53,8 @@ export function AuthProvider({ children }) {
     return u;
   };
 
-  const register = async (username, password, name, phone, email, addressObj, acceptedTerms = false) => {
-    const u = await authService.register(username, password, name, phone, email, addressObj, acceptedTerms);
+  const register = async (username, password, name, phone, email, addressObj, acceptedTerms = false, wantsClubOwner = false) => {
+    const u = await authService.register(username, password, name, phone, email, addressObj, acceptedTerms, wantsClubOwner);
     setUser(u);
     return u;
   };

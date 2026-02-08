@@ -52,6 +52,11 @@ export const updateBooking = (id, payload) => request(`/api/bookings/${id}`, {
   body: JSON.stringify(payload)
 });
 
+export const updateMyBooking = (id, payload) => request(`/api/bookings/mine/${id}`, {
+  method: 'PUT',
+  body: JSON.stringify(payload)
+});
+
 export const deleteBooking = (id) => request(`/api/bookings/${id}`, {
   method: 'DELETE'
 });

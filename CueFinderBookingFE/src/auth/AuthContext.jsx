@@ -44,10 +44,18 @@ export function AuthProvider({ children }) {
     return u;
   };
 
-  const register = async (username, password, name, phone, email) => {
-    const u = await authService.register(username, password, name, phone, email, true, false);
+  const register = async (username, password, name, phone, email, addressObj, acceptedTerms = false, wantsClubOwner = false) => {
+    const u = await authService.register(username, password, name, phone, email, addressObj, acceptedTerms, wantsClubOwner);
     setUser(u);
     return u;
+  };
+
+  const sendSms = async (phoneNumber, method = 'SMS') => {
+    return authService.sendPhoneVerification(phoneNumber, method);
+  };
+
+  const verifySms = async (verificationToken, code) => {
+    return authService.verifyPhoneCode(verificationToken, code);
   };
 
   const logout = async () => {
@@ -56,7 +64,7 @@ export function AuthProvider({ children }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, loading, login, register, sendSms, verifySms, logout }}>
       {loading ? <div className="card">Loading...</div> : children}
     </AuthContext.Provider>
   );

@@ -46,7 +46,7 @@ export async function login(username, password) {
 /**
  * Register a new user
  */
-export async function register(username, password, name, phone, email, addressObj, acceptedTerms = false) {
+export async function register(username, password, name, phone, email, addressObj, acceptedTerms = false, wantsClubOwner = false) {
   try {
     const data = await post(API_ENDPOINTS.AUTH.REGISTER, {
       username,
@@ -60,6 +60,7 @@ export async function register(username, password, name, phone, email, addressOb
       zipCode: addressObj?.postalCode,
       country: addressObj?.country,
       acceptedTerms,
+      wantsClubOwner,
     });
 
     // Store token and user info

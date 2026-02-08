@@ -123,7 +123,7 @@ namespace CueFinder.Auth.Services
                 Email = request.Email ?? string.Empty,
                 Phone = request.Phone ?? string.Empty,
                 HidePhone = false,
-                Role = "user",
+                Role = request.WantsClubOwner ? "club_owner_pending" : "user",
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow
             };

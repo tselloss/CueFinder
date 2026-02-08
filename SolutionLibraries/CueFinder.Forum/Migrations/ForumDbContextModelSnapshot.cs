@@ -133,6 +133,76 @@ namespace CueFinder.Forum.Migrations
                     b.ToTable("BilliardClubLocations");
                 });
 
+            modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubBooking", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("CreatedByUserId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("CustomerEmail")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CustomerName")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<string>("CustomerPhone")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<DateTime>("EndTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<Guid>("LocationId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Notes")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<Guid>("RecordId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("StartTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)");
+
+                    b.Property<Guid>("TableId")
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CreatedByUserId");
+
+                    b.HasIndex("LocationId");
+
+                    b.HasIndex("RecordId");
+
+                    b.HasIndex("StartTime");
+
+                    b.HasIndex("TableId");
+
+                    b.ToTable("BilliardClubBookings");
+                });
+
             modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubTable", b =>
                 {
                     b.Property<Guid>("Id")
@@ -604,6 +674,33 @@ namespace CueFinder.Forum.Migrations
                     b.Navigation("Location");
                 });
 
+            modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubBooking", b =>
+                {
+                    b.HasOne("CueFinder.Forum.Models.BilliardClubLocation", "Location")
+                        .WithMany()
+                        .HasForeignKey("LocationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Forum.Models.BilliardClubRecord", "Record")
+                        .WithMany("Bookings")
+                        .HasForeignKey("RecordId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Forum.Models.BilliardClubTable", "Table")
+                        .WithMany("Bookings")
+                        .HasForeignKey("TableId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Location");
+
+                    b.Navigation("Record");
+
+                    b.Navigation("Table");
+                });
+
             modelBuilder.Entity("CueFinder.Forum.Models.DiscussionSubscription", b =>
                 {
                     b.HasOne("CueFinder.Forum.Models.Discussion", "Discussion")
@@ -682,6 +779,8 @@ namespace CueFinder.Forum.Migrations
 
             modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubRecord", b =>
                 {
+                    b.Navigation("Bookings");
+
                     b.Navigation("CoOwners");
 
                     b.Navigation("Locations");
@@ -690,6 +789,11 @@ namespace CueFinder.Forum.Migrations
             modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubLocation", b =>
                 {
                     b.Navigation("Tables");
+                });
+
+            modelBuilder.Entity("CueFinder.Forum.Models.BilliardClubTable", b =>
+                {
+                    b.Navigation("Bookings");
                 });
 
             modelBuilder.Entity("CueFinder.Forum.Models.Post", b =>

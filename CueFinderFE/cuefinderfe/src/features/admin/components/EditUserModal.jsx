@@ -109,6 +109,8 @@ export default function EditUserModal({ user, onSave, onClose }) {
 
         {/* Password Section */}
         <div className="space-y-4">
+              <option value="club_owner">Club Owner</option>
+              <option value="club_owner_pending">Club Owner (Pending)</option>
           <button
             type="button"
             onClick={() => {
