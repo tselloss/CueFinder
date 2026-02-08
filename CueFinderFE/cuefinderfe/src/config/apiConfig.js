@@ -27,6 +27,17 @@ export const API_BASE_URL =
   normalizeApiBaseUrl(process.env.REACT_APP_API_URL) ||
   defaultApiBaseUrl;
 
+const defaultBookingSiteUrl = (() => {
+  if (typeof window !== 'undefined' && window.location?.hostname === 'localhost') {
+    return 'http://localhost:3001';
+  }
+  return 'https://bookbilliard.com';
+})();
+
+export const BOOKING_SITE_URL =
+  (process.env.REACT_APP_BOOKING_SITE_URL || '').trim() ||
+  defaultBookingSiteUrl;
+
 // Public website origin (same host as the API, but without the "/api" prefix).
 // Use this when you need to build URLs for static files (e.g. uploaded images at "/uploads/*").
 export const SITE_BASE_URL = API_BASE_URL.replace(/\/+api$/i, '');
