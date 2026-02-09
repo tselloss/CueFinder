@@ -8,6 +8,7 @@ import ForumDiscussionsView from './ForumDiscussionsView';
 import ForumDetailView from './ForumDetailView';
 import ForumNewDiscussionModal from './ForumNewDiscussionModal';
 import ForumNewPostModal from './ForumNewPostModal';
+import { createDefaultDrill, encodeDrillContent, isPracticeDrillsCategory } from '../utils/drillUtils';
 
 /**
  * ForumContainer - Main forum component
@@ -50,6 +51,7 @@ export default function ForumContainer({ onBack }) {
     title: '',
     content: '',
     categoryId: '',
+    drill: createDefaultDrill(),
   });
   const [newPostContent, setNewPostContent] = useState('');
   const [replyToPostId, setReplyToPostId] = useState(null);
@@ -60,12 +62,37 @@ export default function ForumContainer({ onBack }) {
       title: '',
       content: '',
       categoryId: selectedCategory?.id || '',
+      drill: createDefaultDrill(),
     });
     setShowNewDiscussionModal(true);
   };
 
+  const handleDiscussionFormChange = (field, value) => {
+    setNewDiscussionForm((prev) => {
+      if (field === 'categoryId') {
+        const category = categories.find((c) => c.id === value);
+        const isPracticeDrills = isPracticeDrillsCategory(category?.name);
+        return {
+          ...prev,
+          categoryId: value,
+          drill: isPracticeDrills ? prev.drill || createDefaultDrill() : prev.drill,
+        };
+      }
+
+      return { ...prev, [field]: value };
+    });
+  };
+
   const handleCreateDiscussion = async () => {
-    if (!newDiscussionForm.title || !newDiscussionForm.content || !newDiscussionForm.categoryId) {
+    const selected = categories.find((c) => c.id === newDiscussionForm.categoryId);
+    const isPracticeDrills = isPracticeDrillsCategory(selected?.name);
+
+    if (!newDiscussionForm.title || !newDiscussionForm.categoryId) {
+      alert('Please fill all fields');
+      return;
+    }
+
+    if (!isPracticeDrills && !newDiscussionForm.content) {
       alert('Please fill all fields');
       return;
     }
@@ -76,13 +103,21 @@ export default function ForumContainer({ onBack }) {
     }
 
     try {
+      const content = isPracticeDrills
+        ? encodeDrillContent({
+          notes: newDiscussionForm.content || 'Drill layout',
+          balls: newDiscussionForm.drill?.balls || createDefaultDrill().balls,
+          table: newDiscussionForm.drill?.table || createDefaultDrill().table,
+        })
+        : newDiscussionForm.content;
+
       await createDiscussion({
         title: newDiscussionForm.title,
-        content: newDiscussionForm.content,
+        content,
         categoryId: newDiscussionForm.categoryId,
       });
       setShowNewDiscussionModal(false);
-      setNewDiscussionForm({ title: '', content: '', categoryId: '' });
+      setNewDiscussionForm({ title: '', content: '', categoryId: '', drill: createDefaultDrill() });
     } catch (error) {
       alert(`Αποτυχία δημιουργίας συζήτησης: ${error.message}`);
     }
@@ -215,9 +250,7 @@ export default function ForumContainer({ onBack }) {
       <ForumNewDiscussionModal
         isOpen={showNewDiscussionModal}
         formData={newDiscussionForm}
-        onFormChange={(field, value) =>
-          setNewDiscussionForm({ ...newDiscussionForm, [field]: value })
-        }
+        onFormChange={handleDiscussionFormChange}
         categories={categories}
         onSubmit={handleCreateDiscussion}
         onClose={() => setShowNewDiscussionModal(false)}
