@@ -3,8 +3,8 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import { SearchInput, EmptyState } from '../../../shared/components';
 import { parseDrillContent } from '../utils/drillUtils';
-import DrillDesigner from './DrillDesigner';
 import { isDesignDrillEnabled } from '../../../config/featureFlags';
+const DrillDesigner = isDesignDrillEnabled ? React.lazy(() => import('./DrillDesigner')) : null;
 
 /**
  * ForumDiscussionsView - Displays discussions for a category
@@ -161,10 +161,14 @@ export default function ForumDiscussionsView({
 
           <div className="mt-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
             <div className="space-y-4">
-              <DrillDesigner
-                drill={quickDrillLayout}
-                onChange={onQuickDrillLayoutChange}
-              />
+              {DrillDesigner ? (
+                <React.Suspense fallback={<div className="p-4">Loading...</div>}>
+                  <DrillDesigner
+                    drill={quickDrillLayout}
+                    onChange={onQuickDrillLayoutChange}
+                  />
+                </React.Suspense>
+              ) : null}
             </div>
             <div className="space-y-4">
               <div className="rounded-xl border border-blue-500/20 bg-slate-900/70 p-4 space-y-4">
