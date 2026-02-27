@@ -14,10 +14,10 @@ COPY packages ./packages
 COPY cuefinderfe/ ./cuefinderfe/
 
 # Install dependencies using pnpm via npx (avoids global installs/corepack issues)
-RUN npx -y pnpm@8 install --frozen-lockfile
+RUN npx -y pnpm@8.15.9 install --frozen-lockfile
 
 # Build the application using pnpm invoked via npx
-RUN npx -y pnpm@8 --filter ./cuefinderfe run build
+RUN npx -y pnpm@8.15.9 --filter ./cuefinderfe run build
 
 # Production stage
 FROM nginx:alpine
