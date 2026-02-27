@@ -21,7 +21,7 @@ public interface ICueCaseService
     /// <summary>
     /// Get all cue cases created by a specific user
     /// </summary>
-    Task<List<CueCaseResponseDto>> GetUserCueCasesAsync(int userId);
+    Task<List<CueCaseResponseDto>> GetUserCueCasesAsync(int userId, bool? hidden = null);
     
     /// <summary>
     /// Create a new cue case listing

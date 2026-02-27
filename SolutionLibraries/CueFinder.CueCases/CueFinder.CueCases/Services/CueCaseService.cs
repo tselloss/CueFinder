@@ -1,7 +1,10 @@
 using CueFinder.CueCases.Interfaces;
+using CueFinder.CueCases.Models;
 using CueFinder.Database.Context;
 using CueFinder.Database.Models;
 using Microsoft.Extensions.Logging;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace CueFinder.CueCases.Services;
 
@@ -27,4 +30,5 @@ public partial class CueCaseService : ICueCaseService
         _logger = logger;
         _imageService = imageService;
     }
+    
 }

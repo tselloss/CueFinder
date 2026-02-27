@@ -12,6 +12,7 @@ namespace CueFinder.Accessories.Services;
 /// - DeleteAccessoryAsync: Soft-delete an accessory by marking as sold
 /// </summary>
 public partial class AccessoryService
+{
 
     /// <summary>
     /// Process old accessory listings: prompt, hide, or delete based on inactivity (new business rules).
@@ -58,7 +59,7 @@ public partial class AccessoryService
         }
         await _context.SaveChangesAsync();
     }
-{
+
     public async Task<AccessoryResponseDto> CreateAccessoryAsync(CreateAccessoryDto dto, int userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -118,14 +119,7 @@ public partial class AccessoryService
         if (dto.Color != null) accessory.Color = dto.Color;
         if (dto.Location != null) accessory.Location = dto.Location;
         if (dto.IsSold.HasValue) accessory.IsSold = dto.IsSold.Value;
-        // Reactivation: if isHidden is being set to false, reset prompt timers
-        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && accessory.IsHidden)
-        {
-            accessory.IsHidden = false;
-            accessory.HiddenAt = null;
-            accessory.LastPromptedAt = null;
-            accessory.LastUserResponseAt = null;
-        }
+        // Reactivation logic removed: UpdateAccessoryDto does not contain IsHidden
         
         accessory.UpdatedAt = DateTime.UtcNow;
 

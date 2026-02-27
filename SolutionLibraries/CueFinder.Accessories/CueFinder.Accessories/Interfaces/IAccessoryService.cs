@@ -21,7 +21,7 @@ public interface IAccessoryService
     /// <summary>
     /// Get all accessories created by a specific user
     /// </summary>
-    Task<List<AccessoryResponseDto>> GetUserAccessoriesAsync(int userId);
+    Task<List<AccessoryResponseDto>> GetUserAccessoriesAsync(int userId, bool? hidden = null);
     
     /// <summary>
     /// Create a new accessory listing

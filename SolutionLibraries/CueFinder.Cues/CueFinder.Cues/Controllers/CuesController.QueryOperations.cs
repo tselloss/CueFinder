@@ -70,7 +70,7 @@ public partial class CuesController
         try
         {
             var userId = GetCurrentUserId();
-            var cues = await _cueService.GetUserCuesAsync(userId, hidden);
+            var cues = await _cueService.GetUserCuesAsync(userId);
             return Ok(cues);
         }
         catch (Exception ex)
