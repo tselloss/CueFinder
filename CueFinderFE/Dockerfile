@@ -1,4 +1,4 @@
-FROM pnpm/pnpm:8 AS build
+FROM node:18-bullseye AS build
 WORKDIR /app
 
 # Accept API URL as build argument
@@ -13,11 +13,11 @@ COPY .npmrc ./
 COPY packages ./packages
 COPY cuefinderfe/ ./cuefinderfe/
 
-# Install all dependencies (this will set up workspace symlinks correctly)
-RUN pnpm install --frozen-lockfile
+# Install dependencies using pnpm via npx (avoids global installs/corepack issues)
+RUN npx -y pnpm@8 install --frozen-lockfile
 
-# Build the application using pnpm filter to run within workspace context
-RUN pnpm --filter ./cuefinderfe run build
+# Build the application using pnpm invoked via npx
+RUN npx -y pnpm@8 --filter ./cuefinderfe run build
 
 # Production stage
 FROM nginx:alpine
