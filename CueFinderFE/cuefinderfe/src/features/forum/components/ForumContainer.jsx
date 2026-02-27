@@ -70,8 +70,6 @@ export default function ForumContainer({ onBack }) {
   };
 
   const handleCreateDiscussion = async () => {
-    const selected = categories.find((c) => c.id === newDiscussionForm.categoryId);
-
     if (!newDiscussionForm.title || !newDiscussionForm.categoryId) {
       alert('Please fill all fields');
       return;
