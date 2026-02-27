@@ -5,23 +5,14 @@ WORKDIR /app
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Enable Corepack and prepare pnpm (safer than global npm install)
-# Corepack is included with Node 18+ and is the recommended way to use pnpm in CI/images
-RUN corepack enable && corepack prepare pnpm@latest --activate
-
 # Copy workspace configuration files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-COPY .npmrc ./
-
-# Copy all source code (needed for workspace symlinks)
-COPY packages ./packages
+# Copy only the frontend package for standalone build (avoid workspace/pnpm complexity)
+COPY cuefinderfe/package.json cuefinderfe/package-lock.json* ./cuefinderfe/
 COPY cuefinderfe/ ./cuefinderfe/
 
-# Install all dependencies (this will set up workspace symlinks correctly)
-RUN pnpm install --frozen-lockfile
-
-# Build the application using pnpm filter to run within workspace context
-RUN pnpm --filter ./cuefinderfe run build
+# Install dependencies and build the frontend using npm (standalone)
+RUN cd cuefinderfe && npm install --legacy-peer-deps --no-audit
+RUN cd cuefinderfe && npm run build
 
 # Production stage
 FROM nginx:alpine
