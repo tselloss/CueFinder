@@ -8,7 +8,7 @@ import ForumDiscussionsView from './ForumDiscussionsView';
 import ForumDetailView from './ForumDetailView';
 import ForumNewDiscussionModal from './ForumNewDiscussionModal';
 import ForumNewPostModal from './ForumNewPostModal';
-import { createDefaultDrill, encodeDrillContent, isPracticeDrillsCategory } from '../utils/drillUtils';
+// Drill utilities removed for this branch
 
 /**
  * ForumContainer - Main forum component
@@ -51,11 +51,7 @@ export default function ForumContainer({ onBack }) {
     title: '',
     content: '',
     categoryId: '',
-    drill: createDefaultDrill(),
   });
-  const [quickDrillTitle, setQuickDrillTitle] = useState('');
-  const [quickDrillNotes, setQuickDrillNotes] = useState('');
-  const [quickDrillLayout, setQuickDrillLayout] = useState(createDefaultDrill());
   const [newPostContent, setNewPostContent] = useState('');
   const [replyToPostId, setReplyToPostId] = useState(null);
 
@@ -65,25 +61,12 @@ export default function ForumContainer({ onBack }) {
       title: '',
       content: '',
       categoryId: selectedCategory?.id || '',
-      drill: createDefaultDrill(),
     });
     setShowNewDiscussionModal(true);
   };
 
   const handleDiscussionFormChange = (field, value) => {
-    setNewDiscussionForm((prev) => {
-      if (field === 'categoryId') {
-        const category = categories.find((c) => c.id === value);
-        const isPracticeDrills = isPracticeDrillsCategory(category?.name);
-        return {
-          ...prev,
-          categoryId: value,
-          drill: isPracticeDrills ? prev.drill || createDefaultDrill() : prev.drill,
-        };
-      }
-
-      return { ...prev, [field]: value };
-    });
+    setNewDiscussionForm((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleCreateDiscussion = async () => {
@@ -106,61 +89,19 @@ export default function ForumContainer({ onBack }) {
     }
 
     try {
-      const content = isPracticeDrills
-        ? encodeDrillContent({
-          notes: newDiscussionForm.content || 'Drill layout',
-          balls: newDiscussionForm.drill?.balls || createDefaultDrill().balls,
-          table: newDiscussionForm.drill?.table || createDefaultDrill().table,
-        })
-        : newDiscussionForm.content;
-
       await createDiscussion({
         title: newDiscussionForm.title,
-        content,
+        content: newDiscussionForm.content,
         categoryId: newDiscussionForm.categoryId,
       });
       setShowNewDiscussionModal(false);
-      setNewDiscussionForm({ title: '', content: '', categoryId: '', drill: createDefaultDrill() });
+      setNewDiscussionForm({ title: '', content: '', categoryId: '' });
     } catch (error) {
       alert(`Αποτυχία δημιουργίας συζήτησης: ${error.message}`);
     }
   };
 
-  const handleQuickCreateDrill = async () => {
-    if (!selectedCategory) return;
-    const isPracticeDrills = isPracticeDrillsCategory(selectedCategory?.name);
-    if (!isPracticeDrills) return;
-
-    if (!quickDrillTitle) {
-      alert('Παρακαλώ προσθέστε τίτλο για το drill');
-      return;
-    }
-
-    if (!user) {
-      alert('Παρακαλώ συνδεθείτε για να αποθηκεύσετε drill');
-      return;
-    }
-
-    try {
-      const content = encodeDrillContent({
-        notes: quickDrillNotes || 'Drill layout',
-        balls: quickDrillLayout?.balls || createDefaultDrill().balls,
-        table: quickDrillLayout?.table || createDefaultDrill().table,
-      });
-
-      await createDiscussion({
-        title: quickDrillTitle,
-        content,
-        categoryId: selectedCategory.id,
-      });
-
-      setQuickDrillTitle('');
-      setQuickDrillNotes('');
-      setQuickDrillLayout(createDefaultDrill());
-    } catch (error) {
-      alert(`Αποτυχία δημιουργίας drill: ${error.message}`);
-    }
-  };
+  // Quick drill creation removed
 
   const handleCreatePost = async () => {
     if (!newPostContent) {
@@ -259,14 +200,7 @@ export default function ForumContainer({ onBack }) {
             searchTerm={searchTerm}
             onSearchChange={setSearchTerm}
             user={user}
-            quickDrillTitle={quickDrillTitle}
-            quickDrillNotes={quickDrillNotes}
-            quickDrillLayout={quickDrillLayout}
-            onQuickDrillTitleChange={setQuickDrillTitle}
-            onQuickDrillNotesChange={setQuickDrillNotes}
-            onQuickDrillLayoutChange={setQuickDrillLayout}
-            onQuickCreateDrill={handleQuickCreateDrill}
-            quickDrillLoading={loading}
+            
           />
         )}
 

@@ -2,8 +2,7 @@ import React from 'react';
 import { ArrowLeft, MessageSquare } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import ForumPost from './ForumPost';
-import DrillPreview from './DrillPreview';
-import { parseDrillContent } from '../utils/drillUtils';
+// Drill feature removed
 
 /**
  * ForumDetailView - Displays a single discussion with all its posts
@@ -27,8 +26,6 @@ export default function ForumDetailView({
   onMarkHelpful,
   onNewPost,
 }) {
-  const drill = parseDrillContent(discussion.content);
-
   return (
     <div className="space-y-4">
       <div className="flex flex-col md:flex-row justify-between md:items-start gap-3 md:gap-6">
@@ -48,7 +45,7 @@ export default function ForumDetailView({
         </Button>
       </div>
 
-      {drill && <DrillPreview drill={drill} />}
+      {/* Drill preview removed in this branch */}
 
       {/* Posts Title */}
       <h3 className="text-lg font-bold text-slate-300">Αναρτήσεις ({postTree.length})</h3>
