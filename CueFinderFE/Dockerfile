@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:18-bullseye AS build
 WORKDIR /app
 
 # Accept API URL as build argument
