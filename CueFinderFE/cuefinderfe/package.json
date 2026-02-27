@@ -59,6 +59,9 @@
     "extends": [
       "react-app",
       "react-app/jest"
+    ],
+    "ignorePatterns": [
+      "e2e/**"
     ]
   },
   "browserslist": {

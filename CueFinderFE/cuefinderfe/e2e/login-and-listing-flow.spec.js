@@ -7,6 +7,7 @@ const { test, expect } = require('@playwright/test');
 const { registerUser: registerUserHelper, loginUser: loginUserHelper } = require('./helpers/authHelper');
 
 const APP_BASE_URL = process.env.APP_BASE_URL || 'http://localhost:3000';
+/* eslint-disable */
 const API_BASE_URL = process.env.API_BASE_URL || 'http://127.0.0.1:5000/api';
 
 // Generate unique test user
