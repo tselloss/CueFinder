@@ -6,18 +6,13 @@ ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
 # Copy workspace configuration files
-COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
-COPY .npmrc ./
-
-# Copy all source code (needed for workspace symlinks)
-COPY packages ./packages
+# Copy only the frontend package for standalone build (avoid workspace/pnpm complexity)
+COPY cuefinderfe/package.json cuefinderfe/package-lock.json* ./cuefinderfe/
 COPY cuefinderfe/ ./cuefinderfe/
 
-# Install dependencies using pnpm via npx (avoids global installs/corepack issues)
-RUN npx -y pnpm@8.15.9 install --frozen-lockfile
-
-# Build the application using pnpm invoked via npx
-RUN npx -y pnpm@8.15.9 --filter ./cuefinderfe run build
+# Install dependencies and build the frontend using npm (standalone)
+RUN cd cuefinderfe && npm install --legacy-peer-deps --no-audit
+RUN cd cuefinderfe && npm run build
 
 # Production stage
 FROM nginx:alpine
