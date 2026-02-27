@@ -4,6 +4,7 @@ import { Button } from '../../../components/ui/button.jsx';
 import { SearchInput, EmptyState } from '../../../shared/components';
 import { parseDrillContent } from '../utils/drillUtils';
 import DrillDesigner from './DrillDesigner';
+import { isDesignDrillEnabled } from '../../../config/featureFlags';
 
 /**
  * ForumDiscussionsView - Displays discussions for a category
@@ -99,7 +100,7 @@ export default function ForumDiscussionsView({
         </div>
       </div>
 
-      {isPracticeDrills && (
+      {isPracticeDrills && isDesignDrillEnabled && (
         <div className="rounded-2xl border border-blue-500/30 bg-gradient-to-br from-slate-900 via-slate-900 to-blue-950/60 p-6 sm:p-8 shadow-xl">
           <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
             <div className="space-y-3">
