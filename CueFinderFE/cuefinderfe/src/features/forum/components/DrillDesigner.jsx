@@ -84,6 +84,7 @@ export default function DrillDesigner({ drill, onChange }) {
         balls={normalizedBalls}
         selectedBallId={selectedBallId}
         onTableClick={(x, y) => updateBall(selectedBallId, x, y)}
+        onBallMove={(ballId, x, y) => updateBall(ballId, x, y)}
         onBallClick={(ballId) => {
           if (ballId === selectedBallId) {
             removeBall(ballId);

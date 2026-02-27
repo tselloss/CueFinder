@@ -3,6 +3,7 @@ import { ArrowLeft, Plus } from 'lucide-react';
 import { Button } from '../../../components/ui/button.jsx';
 import { SearchInput, EmptyState } from '../../../shared/components';
 import { parseDrillContent } from '../utils/drillUtils';
+import DrillDesigner from './DrillDesigner';
 
 /**
  * ForumDiscussionsView - Displays discussions for a category
@@ -25,6 +26,14 @@ export default function ForumDiscussionsView({
   searchTerm,
   onSearchChange,
   user,
+  quickDrillTitle,
+  quickDrillNotes,
+  quickDrillLayout,
+  onQuickDrillTitleChange,
+  onQuickDrillNotesChange,
+  onQuickDrillLayoutChange,
+  onQuickCreateDrill,
+  quickDrillLoading,
 }) {
   const normalizedSearch = searchTerm.toLowerCase();
   const filteredDiscussions = discussions.filter((d) => {
@@ -146,6 +155,47 @@ export default function ForumDiscussionsView({
             </button>
             <div className="px-4 py-2 text-sm font-semibold rounded-lg border border-blue-500/20 text-blue-200 bg-blue-500/10">
               Προτεινόμενα: Aim • Position • Safety
+            </div>
+          </div>
+
+          <div className="mt-8 grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+            <div className="space-y-4">
+              <DrillDesigner
+                drill={quickDrillLayout}
+                onChange={onQuickDrillLayoutChange}
+              />
+            </div>
+            <div className="space-y-4">
+              <div className="rounded-xl border border-blue-500/20 bg-slate-900/70 p-4 space-y-4">
+                <div>
+                  <label className="text-xs font-semibold text-slate-400">Τίτλος Drill</label>
+                  <input
+                    type="text"
+                    value={quickDrillTitle}
+                    onChange={(e) => onQuickDrillTitleChange(e.target.value)}
+                    placeholder="π.χ. 3-Ball Cut Drill"
+                    className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <div>
+                  <label className="text-xs font-semibold text-slate-400">Σημειώσεις</label>
+                  <textarea
+                    rows={6}
+                    value={quickDrillNotes}
+                    onChange={(e) => onQuickDrillNotesChange(e.target.value)}
+                    placeholder="Στόχος, tips, δυσκολία..."
+                    className="mt-2 w-full px-3 py-2 rounded-lg border border-slate-700 bg-slate-800 text-slate-100 text-sm focus:outline-none focus:border-blue-500"
+                  />
+                </div>
+                <button
+                  type="button"
+                  onClick={onQuickCreateDrill}
+                  disabled={quickDrillLoading}
+                  className="w-full px-4 py-2 text-sm font-semibold rounded-lg bg-gradient-to-r from-blue-600 to-blue-700 text-white shadow-lg hover:-translate-y-0.5 transition-all disabled:opacity-60"
+                >
+                  {user ? 'Αποθήκευση Drill' : 'Συνδεθείτε για αποθήκευση'}
+                </button>
+              </div>
             </div>
           </div>
         </div>

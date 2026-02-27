@@ -1,0 +1,9 @@
+{
+  "rules": {
+    "no-unused-vars": "off",
+    "jest/no-conditional-expect": "off",
+    "testing-library/prefer-screen-queries": "off",
+    "testing-library/await-async-queries": "off",
+    "testing-library/await-async-utils": "off"
+  }
+}

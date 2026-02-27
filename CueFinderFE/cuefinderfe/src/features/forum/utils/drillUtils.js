@@ -15,13 +15,13 @@ export const getBallStyle = (id) => {
     6: { background: '#22c55e', color: '#0f172a' },
     7: { background: '#7c2d12', color: '#f8fafc' },
     8: { background: '#0f172a', color: '#f8fafc' },
-    9: { background: '#facc15', color: '#0f172a', border: '2px solid #0f172a' },
-    10: { background: '#3b82f6', color: '#f8fafc', border: '2px solid #0f172a' },
-    11: { background: '#ef4444', color: '#f8fafc', border: '2px solid #0f172a' },
-    12: { background: '#a855f7', color: '#f8fafc', border: '2px solid #0f172a' },
-    13: { background: '#fb923c', color: '#0f172a', border: '2px solid #0f172a' },
-    14: { background: '#22c55e', color: '#0f172a', border: '2px solid #0f172a' },
-    15: { background: '#7c2d12', color: '#f8fafc', border: '2px solid #0f172a' },
+    9: { background: '#facc15', color: '#0f172a', border: '2px solid #0f172a', stripe: true },
+    10: { background: '#3b82f6', color: '#f8fafc', border: '2px solid #0f172a', stripe: true },
+    11: { background: '#ef4444', color: '#f8fafc', border: '2px solid #0f172a', stripe: true },
+    12: { background: '#a855f7', color: '#f8fafc', border: '2px solid #0f172a', stripe: true },
+    13: { background: '#fb923c', color: '#0f172a', border: '2px solid #0f172a', stripe: true },
+    14: { background: '#22c55e', color: '#0f172a', border: '2px solid #0f172a', stripe: true },
+    15: { background: '#7c2d12', color: '#f8fafc', border: '2px solid #0f172a', stripe: true },
   };
 
   return styles[id] || styles[0];
