@@ -12,7 +12,7 @@ namespace CueFinder.Database.Services
     {
         Task<BilliardTable?> GetTableWithDetailsAsync(int id);
         Task<List<BilliardTable>> GetActiveTablesWithPaginationAsync(int pageNumber, int pageSize);
-        Task<List<BilliardTable>> GetUserTablesAsync(int userId);
+        Task<List<BilliardTable>> GetUserTablesAsync(int userId, bool? hidden = null);
         Task<List<BilliardTable>> SearchTablesAsync(string query, int pageNumber, int pageSize);
         Task<List<BilliardTable>> GetTablesWithFiltersAsync(string? tableSize = null, string? tableType = null, decimal? minPrice = null, decimal? maxPrice = null, string? condition = null, int pageNumber = 1, int pageSize = 20);
         Task<BilliardTable> CreateTableAsync(BilliardTable table);
@@ -29,52 +29,57 @@ namespace CueFinder.Database.Services
     /// Service implementation for BilliardTable operations
     /// </summary>
     public class BilliardTableService : IBilliardTableService
-
-            /// <summary>
-            /// Process old listings: prompt, hide, or delete based on inactivity (new business rules).
-            /// </summary>
-            public async Task ProcessOldListingsAsync()
+    {
+        // Overload to match interface
+        public async Task<List<BilliardTable>> GetUserTablesAsync(int userId)
+        {
+            return await GetUserTablesAsync(userId, null);
+        }
+        /// <summary>
+        /// Process old listings: prompt, hide, or delete based on inactivity (new business rules).
+        /// </summary>
+        public async Task ProcessOldListingsAsync()
+        {
+            var now = DateTime.UtcNow;
+            var listings = await _context.BilliardTables.ToListAsync();
+            foreach (var listing in listings)
             {
-                var now = DateTime.UtcNow;
-                var listings = await _context.BilliardTables.ToListAsync();
-                foreach (var listing in listings)
-                {
-                    if (listing.IsSold)
-                        continue;
+                if (listing.IsSold)
+                    continue;
 
-                    // If hidden for over 6 months, delete
-                    if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
+                // If hidden for over 6 months, delete
+                if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
+                {
+                    _context.BilliardTables.Remove(listing);
+                    continue;
+                }
+
+                if (!listing.IsHidden)
+                {
+                    // First prompt: 2 months after creation
+                    var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
+                    // Re-prompt: 2 months after last prompt if user pressed 'active'
+                    var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
+
+                    if (firstPromptDue || rePromptDue)
                     {
-                        _context.BilliardTables.Remove(listing);
-                        continue;
+                        // TODO: Send prompt to user (notification/email/etc.)
+                        listing.LastPromptedAt = now;
                     }
 
-                    if (!listing.IsHidden)
+                    // If last prompt was over 2 months ago and no user response since, hide
+                    if (listing.LastPromptedAt.HasValue &&
+                        (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
+                        (now - listing.LastPromptedAt.Value).TotalDays >= 60)
                     {
-                        // First prompt: 2 months after creation
-                        var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
-                        // Re-prompt: 2 months after last prompt if user pressed 'active'
-                        var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
-
-                        if (firstPromptDue || rePromptDue)
-                        {
-                            // TODO: Send prompt to user (notification/email/etc.)
-                            listing.LastPromptedAt = now;
-                        }
-
-                        // If last prompt was over 2 months ago and no user response since, hide
-                        if (listing.LastPromptedAt.HasValue &&
-                            (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
-                            (now - listing.LastPromptedAt.Value).TotalDays >= 60)
-                        {
-                            listing.IsHidden = true;
-                            listing.HiddenAt = now;
-                        }
+                        listing.IsHidden = true;
+                        listing.HiddenAt = now;
                     }
                 }
-                await _context.SaveChangesAsync();
             }
-    {
+            await _context.SaveChangesAsync();
+        }
+
         private readonly CueFinderDbContext _context;
         private readonly ILogger<BilliardTableService> _logger;
 

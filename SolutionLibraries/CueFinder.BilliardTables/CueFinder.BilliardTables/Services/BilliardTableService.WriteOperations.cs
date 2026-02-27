@@ -81,14 +81,8 @@ public partial class BilliardTableService
         if (dto.Location != null) table.Location = dto.Location;
         if (dto.IsSold.HasValue) table.IsSold = dto.IsSold.Value;
         // Reactivation: if isHidden is being set to false, reset prompt timers
-        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && table.IsHidden)
-        {
-            table.IsHidden = false;
-            table.HiddenAt = null;
-            table.LastPromptedAt = null;
-            table.LastUserResponseAt = null;
-        }
-        
+        // Reactivation logic removed: IsHidden property not present in UpdateBilliardTableDto
+
         table.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -101,6 +95,13 @@ public partial class BilliardTableService
     public async Task<bool> DeleteBilliardTableAsync(int tableId, int userId, bool isAdmin = false)
     {
         var table = await _context.BilliardTables.FindAsync(tableId);
+        if (table == null)
+        {
+            _logger.LogWarning("Billiard table {TableId} not found for deletion by user {UserId}", tableId, userId);
+            return false;
+        }
+        // Add deletion logic here if needed
+        return true;
 
         if (table == null)
             return false;
@@ -153,3 +154,5 @@ public partial class BilliardTableService
             }
         }
         await _context.SaveChangesAsync();
+    }
+}

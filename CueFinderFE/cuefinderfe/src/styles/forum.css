@@ -239,6 +239,27 @@
   box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
 }
 
+/* Drill table responsive sizing */
+/* Drill table responsive sizing */
+.drill-table {
+  --ball-size: clamp(14px, 2.2vw, 22px);
+}
+
+.drill-ball {
+  width: var(--ball-size);
+  height: var(--ball-size);
+}
+
+@media (max-width: 640px) {
+  .drill-table {
+    --ball-size: clamp(8px, 2.6vw, 12px);
+  }
+
+  .drill-ball {
+    font-size: 7px;
+  }
+}
+
 .forum-button {
   display: inline-flex;
   align-items: center;

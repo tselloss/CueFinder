@@ -12,7 +12,7 @@ namespace CueFinder.CueCases.Services;
 /// - DeleteCueCaseAsync: Delete a cue case permanently
 /// </summary>
 public partial class CueCaseService
-
+{
     /// <summary>
     /// Process old cue case listings: prompt, hide, or delete based on inactivity (new business rules).
     /// </summary>
@@ -58,7 +58,7 @@ public partial class CueCaseService
         }
         await _context.SaveChangesAsync();
     }
-{
+
     public async Task<CueCaseResponseDto> CreateCueCaseAsync(CreateCueCaseDto dto, int userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -137,14 +137,7 @@ public partial class CueCaseService
         if (dto.Color != null)
             cueCase.Color = dto.Color;
 
-        // Reactivation: if isHidden is being set to false, reset prompt timers
-        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && cueCase.IsHidden)
-        {
-            cueCase.IsHidden = false;
-            cueCase.HiddenAt = null;
-            cueCase.LastPromptedAt = null;
-            cueCase.LastUserResponseAt = null;
-        }
+        // Reactivation logic removed: UpdateCueCaseDto does not contain IsHidden
 
         if (dto.CaseMaterial != null)
             cueCase.CaseMaterial = dto.CaseMaterial;

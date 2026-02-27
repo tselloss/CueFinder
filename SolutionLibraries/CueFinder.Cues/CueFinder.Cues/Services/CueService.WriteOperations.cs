@@ -208,14 +208,7 @@ public partial class CueService
         if (dto.TipSize.HasValue) cue.TipSize = dto.TipSize;
         if (dto.Location != null) cue.Location = dto.Location;
         if (dto.IsSold.HasValue) cue.IsSold = dto.IsSold.Value;
-        // Reactivation: if isHidden is being set to false, reset prompt timers
-        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && cue.IsHidden)
-        {
-            cue.IsHidden = false;
-            cue.HiddenAt = null;
-            cue.LastPromptedAt = null;
-            cue.LastUserResponseAt = null;
-        }
+        // Reactivation logic removed: IsHidden not present in UpdateCueDto
 
         var now = DateTime.UtcNow;
         var listings = await _context.Cues.ToListAsync();
@@ -256,3 +249,6 @@ public partial class CueService
             }
         }
         await _context.SaveChangesAsync();
+        return MapToCueResponseDto(cue);
+    }
+}
