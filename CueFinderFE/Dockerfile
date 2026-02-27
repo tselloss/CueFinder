@@ -5,8 +5,9 @@ WORKDIR /app
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Install pnpm
-RUN npm install -g pnpm
+# Enable Corepack and prepare pnpm (safer than global npm install)
+# Corepack is included with Node 18+ and is the recommended way to use pnpm in CI/images
+RUN corepack enable && corepack prepare pnpm@latest --activate
 
 # Copy workspace configuration files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
