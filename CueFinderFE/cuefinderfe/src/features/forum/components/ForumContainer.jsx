@@ -71,14 +71,13 @@ export default function ForumContainer({ onBack }) {
 
   const handleCreateDiscussion = async () => {
     const selected = categories.find((c) => c.id === newDiscussionForm.categoryId);
-    const isPracticeDrills = isPracticeDrillsCategory(selected?.name);
 
     if (!newDiscussionForm.title || !newDiscussionForm.categoryId) {
       alert('Please fill all fields');
       return;
     }
 
-    if (!isPracticeDrills && !newDiscussionForm.content) {
+    if (!newDiscussionForm.content) {
       alert('Please fill all fields');
       return;
     }
