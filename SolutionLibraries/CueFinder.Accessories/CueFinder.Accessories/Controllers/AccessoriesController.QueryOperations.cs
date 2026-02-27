@@ -89,12 +89,12 @@ public partial class AccessoriesController
     [Authorize]
     [ProducesResponseType(typeof(List<AccessoryResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<AccessoryResponseDto>>> GetMyAccessories()
+    public async Task<ActionResult<List<AccessoryResponseDto>>> GetMyAccessories([FromQuery] bool? hidden = null)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var accessories = await _accessoryService.GetUserAccessoriesAsync(userId);
+            var accessories = await _accessoryService.GetUserAccessoriesAsync(userId, hidden);
             return Ok(accessories);
         }
         catch (Exception ex)

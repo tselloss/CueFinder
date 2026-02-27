@@ -65,15 +65,22 @@ public partial class CueCaseService
         return MapToCueCaseResponseDto(cueCase);
     }
 
-    public async Task<List<CueCaseResponseDto>> GetUserCueCasesAsync(int userId)
+    public async Task<List<CueCaseResponseDto>> GetUserCueCasesAsync(int userId, bool? hidden = null)
     {
-        var cueCases = await _context.CueCases
+        var query = _context.CueCases
             .Include(c => c.Images)
             .Include(c => c.User)
-            .Where(c => c.UserId == userId && !c.IsSold)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+            .Where(c => c.UserId == userId && !c.IsSold);
 
+        if (hidden.HasValue)
+        {
+            if (hidden.Value)
+                query = query.Where(c => c.IsHidden);
+            else
+                query = query.Where(c => !c.IsHidden);
+        }
+
+        var cueCases = await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
         return cueCases.Select(MapToCueCaseResponseDto).ToList();
     }
 

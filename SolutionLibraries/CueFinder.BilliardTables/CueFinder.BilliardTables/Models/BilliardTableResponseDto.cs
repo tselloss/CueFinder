@@ -32,4 +32,7 @@ public class BilliardTableResponseDto
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
     public List<BilliardTableImageDto> Images { get; set; } = new();
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

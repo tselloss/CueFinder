@@ -34,7 +34,9 @@ public partial class AccessoryService
             SellerPhone = accessory.User?.Phone,
             SellerHidePhone = accessory.User?.HidePhone ?? false,
             AverageRating = (double)accessory.AverageRating,
-            RatingCount = accessory.RatingCount
+            RatingCount = accessory.RatingCount,
+            IsHidden = accessory.IsHidden,
+            HiddenAt = accessory.HiddenAt
         };
     }
 }

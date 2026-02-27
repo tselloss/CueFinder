@@ -65,12 +65,12 @@ public partial class CuesController
     [Authorize]
     [ProducesResponseType(typeof(List<CueResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<CueResponseDto>>> GetMyCues()
+    public async Task<ActionResult<List<CueResponseDto>>> GetMyCues([FromQuery] bool? hidden = null)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var cues = await _cueService.GetUserCuesAsync(userId);
+            var cues = await _cueService.GetUserCuesAsync(userId, hidden);
             return Ok(cues);
         }
         catch (Exception ex)

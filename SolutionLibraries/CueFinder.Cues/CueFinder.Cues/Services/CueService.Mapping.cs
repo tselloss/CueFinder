@@ -45,7 +45,9 @@ public partial class CueService
                 UploadedAt = i.UploadedAt
             }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<CueImageDto>(),
             AverageRating = (double)cue.AverageRating,
-            RatingCount = cue.RatingCount
+            RatingCount = cue.RatingCount,
+            IsHidden = cue.IsHidden,
+            HiddenAt = cue.HiddenAt
         };
     }
 }
