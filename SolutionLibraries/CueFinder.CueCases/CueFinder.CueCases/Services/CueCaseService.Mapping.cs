@@ -50,7 +50,9 @@ public partial class CueCaseService
                 DisplayOrder = img.DisplayOrder,
                 IsPrimary = img.IsPrimary,
                 UploadedAt = img.UploadedAt
-            }).OrderBy(img => img.DisplayOrder).ToList() ?? new List<CueCaseImageDto>()
+            }).OrderBy(img => img.DisplayOrder).ToList() ?? new List<CueCaseImageDto>(),
+            IsHidden = cueCase.IsHidden,
+            HiddenAt = cueCase.HiddenAt
         };
     }
 }

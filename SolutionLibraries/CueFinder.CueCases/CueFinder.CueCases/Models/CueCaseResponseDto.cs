@@ -38,4 +38,7 @@ public class CueCaseResponseDto
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CueCaseImageDto> Images { get; set; } = new();
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

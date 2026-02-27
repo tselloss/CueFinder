@@ -143,7 +143,7 @@ namespace CueFinderBE.Controllers
         /// </summary>
         [HttpGet("user/my-tables")]
         [Authorize]
-        public async Task<ActionResult<IEnumerable<object>>> GetMyTables()
+        public async Task<ActionResult<IEnumerable<object>>> GetMyTables([FromQuery] bool? hidden = null)
         {
             try
             {
@@ -151,7 +151,7 @@ namespace CueFinderBE.Controllers
                 if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                     return Unauthorized("Invalid user ID");
 
-                var tables = await _billiardTableService.GetUserTablesAsync(userId);
+                var tables = await _billiardTableService.GetUserTablesAsync(userId, hidden);
                 var response = tables.Select(t => new
                 {
                     id = t.Id,

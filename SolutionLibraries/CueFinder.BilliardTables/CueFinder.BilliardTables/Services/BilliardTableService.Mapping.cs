@@ -47,7 +47,9 @@ public partial class BilliardTableService
                 DisplayOrder = i.DisplayOrder,
                 IsPrimary = i.IsPrimary,
                 UploadedAt = i.CreatedAt
-            }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<BilliardTableImageDto>()
+            }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<BilliardTableImageDto>(),
+            IsHidden = table.IsHidden,
+            HiddenAt = table.HiddenAt
         };
     }
 }

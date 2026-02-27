@@ -67,15 +67,22 @@ public partial class AccessoryService
         return MapToAccessoryResponseDto(accessory);
     }
 
-    public async Task<List<AccessoryResponseDto>> GetUserAccessoriesAsync(int userId)
+    public async Task<List<AccessoryResponseDto>> GetUserAccessoriesAsync(int userId, bool? hidden = null)
     {
-        var accessories = await _context.Accessories
+        var query = _context.Accessories
             .Include(a => a.Images)
             .Include(a => a.User)
-            .Where(a => a.UserId == userId && !a.IsSold)
-            .OrderByDescending(a => a.CreatedAt)
-            .ToListAsync();
+            .Where(a => a.UserId == userId && !a.IsSold);
 
+        if (hidden.HasValue)
+        {
+            if (hidden.Value)
+                query = query.Where(a => a.IsHidden);
+            else
+                query = query.Where(a => !a.IsHidden);
+        }
+
+        var accessories = await query.OrderByDescending(a => a.CreatedAt).ToListAsync();
         return accessories.Select(MapToAccessoryResponseDto).ToList();
     }
 

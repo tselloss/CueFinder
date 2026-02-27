@@ -27,4 +27,7 @@ public class AccessoryResponseDto
     public bool SellerHidePhone { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

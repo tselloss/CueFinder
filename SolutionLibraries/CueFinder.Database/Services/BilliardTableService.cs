@@ -29,6 +29,51 @@ namespace CueFinder.Database.Services
     /// Service implementation for BilliardTable operations
     /// </summary>
     public class BilliardTableService : IBilliardTableService
+
+            /// <summary>
+            /// Process old listings: prompt, hide, or delete based on inactivity (new business rules).
+            /// </summary>
+            public async Task ProcessOldListingsAsync()
+            {
+                var now = DateTime.UtcNow;
+                var listings = await _context.BilliardTables.ToListAsync();
+                foreach (var listing in listings)
+                {
+                    if (listing.IsSold)
+                        continue;
+
+                    // If hidden for over 6 months, delete
+                    if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
+                    {
+                        _context.BilliardTables.Remove(listing);
+                        continue;
+                    }
+
+                    if (!listing.IsHidden)
+                    {
+                        // First prompt: 2 months after creation
+                        var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
+                        // Re-prompt: 2 months after last prompt if user pressed 'active'
+                        var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
+
+                        if (firstPromptDue || rePromptDue)
+                        {
+                            // TODO: Send prompt to user (notification/email/etc.)
+                            listing.LastPromptedAt = now;
+                        }
+
+                        // If last prompt was over 2 months ago and no user response since, hide
+                        if (listing.LastPromptedAt.HasValue &&
+                            (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
+                            (now - listing.LastPromptedAt.Value).TotalDays >= 60)
+                        {
+                            listing.IsHidden = true;
+                            listing.HiddenAt = now;
+                        }
+                    }
+                }
+                await _context.SaveChangesAsync();
+            }
     {
         private readonly CueFinderDbContext _context;
         private readonly ILogger<BilliardTableService> _logger;
@@ -90,15 +135,23 @@ namespace CueFinder.Database.Services
         /// <summary>
         /// Get all tables posted by a specific user
         /// </summary>
-        public async Task<List<BilliardTable>> GetUserTablesAsync(int userId)
+        public async Task<List<BilliardTable>> GetUserTablesAsync(int userId, bool? hidden = null)
         {
             try
             {
-                return await _context.BilliardTables
+                var query = _context.BilliardTables
                     .Include(t => t.Images)
-                    .Where(t => t.UserId == userId)
-                    .OrderByDescending(t => t.CreatedAt)
-                    .ToListAsync();
+                    .Where(t => t.UserId == userId);
+
+                if (hidden.HasValue)
+                {
+                    if (hidden.Value)
+                        query = query.Where(t => t.IsHidden);
+                    else
+                        query = query.Where(t => !t.IsHidden);
+                }
+
+                return await query.OrderByDescending(t => t.CreatedAt).ToListAsync();
             }
             catch (Exception ex)
             {
