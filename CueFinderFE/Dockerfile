@@ -1,4 +1,4 @@
-FROM node:18-alpine AS build
+FROM node:18-bullseye AS build
 WORKDIR /app
 
 # Accept API URL as build argument
@@ -11,8 +11,10 @@ RUN npm install -g pnpm
 # Copy workspace configuration files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Copy all source code (needed for workspace symlinks)
-COPY packages ./packages
+# Create packages dir (workspace may list packages/* but this repo only has cuefinderfe)
+RUN mkdir -p packages
+
+# Copy app package (monorepo app lives in cuefinderfe)
 COPY cuefinderfe/ ./cuefinderfe/
 
 # Install all dependencies (this will set up workspace symlinks correctly)      

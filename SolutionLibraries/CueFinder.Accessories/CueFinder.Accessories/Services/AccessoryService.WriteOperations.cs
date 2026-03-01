@@ -1,3 +1,4 @@
+using CueFinder.Accessories.Interfaces;
 using CueFinder.Accessories.Models;
 using CueFinder.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -13,6 +14,16 @@ namespace CueFinder.Accessories.Services;
 /// </summary>
 public partial class AccessoryService
 {
+    private readonly ApplicationDbContext _context;
+    private readonly IImageService _imageService;
+    private readonly ILogger _logger;
+
+    public AccessoryService(ApplicationDbContext context, IImageService imageService, ILogger logger)
+    {
+        _context = context;
+        _imageService = imageService;
+        _logger = logger;
+    }
 
     /// <summary>
     /// Process old accessory listings: prompt, hide, or delete based on inactivity (new business rules).
@@ -119,7 +130,14 @@ public partial class AccessoryService
         if (dto.Color != null) accessory.Color = dto.Color;
         if (dto.Location != null) accessory.Location = dto.Location;
         if (dto.IsSold.HasValue) accessory.IsSold = dto.IsSold.Value;
-        // Reactivation logic removed: UpdateAccessoryDto does not contain IsHidden
+        // Reactivation: if isHidden is being set to false, reset prompt timers
+        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && accessory.IsHidden)
+        {
+            accessory.IsHidden = false;
+            accessory.HiddenAt = null;
+            accessory.LastPromptedAt = null;
+            accessory.LastUserResponseAt = null;
+        }
         
         accessory.UpdatedAt = DateTime.UtcNow;
 
