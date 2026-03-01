@@ -11,17 +11,15 @@ RUN npm install -g pnpm
 # Copy workspace configuration files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
 
-# Create packages dir (workspace may list packages/* but this repo only has cuefinderfe)
-RUN mkdir -p packages
-
-# Copy app package (monorepo app lives in cuefinderfe)
+# Copy all source code (needed for workspace symlinks)
+COPY packages ./packages
 COPY cuefinderfe/ ./cuefinderfe/
 
 # Install all dependencies (this will set up workspace symlinks correctly)      
 RUN pnpm install --frozen-lockfile
 
-# Build the application using pnpm filter to run within workspace context       
-RUN pnpm --filter ./cuefinderfe run build
+# Build the application using pnpm filter to run within workspace context
+RUN pnpm --filter @cuefinder/app run build
 
 # Production stage
 FROM nginx:alpine
@@ -30,10 +28,10 @@ FROM nginx:alpine
 RUN apk add --no-cache curl
 
 # Copy built files
-COPY --from=build /app/cuefinderfe/build /usr/share/nginx/html
+COPY --from=build /app/packages/app/build /usr/share/nginx/html
 
 # Copy nginx config
-COPY cuefinderfe/nginx-frontend.conf /etc/nginx/conf.d/default.conf
+COPY packages/app/nginx-frontend.conf /etc/nginx/conf.d/default.conf
 
 # Expose standard HTTP port
 EXPOSE 80
