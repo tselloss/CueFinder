@@ -17,6 +17,7 @@ const ModerationDashboard = () => {
   const [activeTab, setActiveTab] = useState('pending'); // 'pending' or 'rejected'
 
   // Fetch pending flags on mount
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   useEffect(() => {
     fetchPendingFlags();
     fetchRejectedImages();
@@ -99,6 +100,7 @@ const ModerationDashboard = () => {
   // Load image preview for selected flag
   const [flagPreviewUrl, setFlagPreviewUrl] = useState(null);
   useEffect(() => {
+    let previewUrl = null;
     const loadPreview = async () => {
       if (!selectedFlag) { setFlagPreviewUrl(null); return; }
       try {
@@ -106,8 +108,8 @@ const ModerationDashboard = () => {
           headers: { Authorization: `Bearer ${localStorage.getItem('token')}` },
           responseType: 'blob'
         });
-        const url = URL.createObjectURL(response.data);
-        setFlagPreviewUrl(url);
+        previewUrl = URL.createObjectURL(response.data);
+        setFlagPreviewUrl(previewUrl);
       } catch (err) {
         console.error('Failed to load preview image:', err);
         setFlagPreviewUrl(null);
@@ -115,7 +117,7 @@ const ModerationDashboard = () => {
     };
     loadPreview();
     return () => {
-      if (flagPreviewUrl) URL.revokeObjectURL(flagPreviewUrl);
+      if (previewUrl) URL.revokeObjectURL(previewUrl);
     };
   }, [selectedFlag]);
 

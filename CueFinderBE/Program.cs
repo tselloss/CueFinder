@@ -2,6 +2,8 @@ using CueFinder.Auth.Extensions;
 using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
 using CueFinder.Accessories.Extensions;
+using CueFinder.BilliardTables.Extensions;
+using CueFinder.Raffles.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
 using CueFinder.Extensions.Caching;
@@ -25,6 +27,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services
     .AddControllers()
     .AddApplicationPart(typeof(ModerationController).Assembly)
+    .AddApplicationPart(typeof(CueFinder.Raffles.Controllers.RafflesController).Assembly)
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
@@ -44,7 +47,9 @@ builder.Services.AddDatabaseServices(connectionString);
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
+builder.Services.AddBilliardTablesServices();
 builder.Services.AddAccessoriesServices();
+builder.Services.AddRaffleServices();
 builder.Services.AddMessageServices();
 builder.Services.AddForumServices(connectionString);
 

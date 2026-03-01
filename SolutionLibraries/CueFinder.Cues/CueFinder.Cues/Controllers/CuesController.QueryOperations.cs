@@ -65,7 +65,7 @@ public partial class CuesController
     [Authorize]
     [ProducesResponseType(typeof(List<CueResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<CueResponseDto>>> GetMyCues()
+    public async Task<ActionResult<List<CueResponseDto>>> GetMyCues([FromQuery] bool? hidden = null)
     {
         try
         {

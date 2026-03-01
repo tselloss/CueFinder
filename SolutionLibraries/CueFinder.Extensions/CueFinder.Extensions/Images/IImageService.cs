@@ -34,4 +34,10 @@ public interface IImageService
     Task<bool> DeleteCueIfFlaggedAsync(int cueId, int userId);
     Task<bool> HasFlaggedCueCaseImagesAsync(int cueCaseId);
     Task<bool> DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId);
+
+    /// <summary>
+    /// Upload a standalone image (e.g. for a raffle) that is not tied to a cue.
+    /// Returns an ImageUploadResponse with the public URL on success.
+    /// </summary>
+    Task<ImageUploadResponse> UploadStandaloneAsync(IFormFile file);
 }

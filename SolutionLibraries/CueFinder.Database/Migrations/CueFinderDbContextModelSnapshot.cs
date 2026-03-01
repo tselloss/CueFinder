@@ -1349,6 +1349,165 @@ namespace CueFinder.Database.Migrations
                     b.ToTable("UserReports");
                 });
 
+            modelBuilder.Entity("CueFinder.Database.Models.Raffle", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("AcceptBankTransfer")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("AcceptDM")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(true);
+
+                    b.Property<bool>("AcceptIris")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("AcceptPayPal")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("AcceptRevolut")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<bool>("AcceptViva")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("boolean")
+                        .HasDefaultValue(false);
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("character varying(2000)");
+
+                    b.Property<DateTime?>("DrawnAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<DateTime>("EndsAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("ItemImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<int>("OrganizerId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("PaymentDetails")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
+                    b.Property<decimal>("PricePerSpot")
+                        .HasPrecision(10, 2)
+                        .HasColumnType("numeric(10,2)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("open");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("TotalSpots")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WinnerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("WinnerSpotNumber")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EndsAt")
+                        .HasDatabaseName("IX_Raffle_EndsAt");
+
+                    b.HasIndex("OrganizerId")
+                        .HasDatabaseName("IX_Raffle_OrganizerId");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_Raffle_Status");
+
+                    b.HasIndex("WinnerId");
+
+                    b.ToTable("Raffles");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.RaffleEntry", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<DateTime>("CreatedAt")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("timestamp without time zone")
+                        .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                    b.Property<DateTime?>("PaidAt")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
+
+                    b.Property<string>("PaymentReference")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)");
+
+                    b.Property<int>("RaffleId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SpotNumber")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasDefaultValue("pending");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("IX_RaffleEntry_Status");
+
+                    b.HasIndex("UserId")
+                        .HasDatabaseName("IX_RaffleEntry_UserId");
+
+                    b.HasIndex(new[] { "RaffleId", "SpotNumber" }, "IX_RaffleEntry_Raffle_Spot")
+                        .IsUnique();
+
+                    b.ToTable("RaffleEntries");
+                });
+
             modelBuilder.Entity("CueFinder.Database.Models.Accessory", b =>
                 {
                     b.HasOne("CueFinder.Database.Models.User", "User")
@@ -1627,6 +1786,48 @@ namespace CueFinder.Database.Migrations
                     b.Navigation("FlaggedImage");
 
                     b.Navigation("ReportingUser");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.Raffle", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.User", "Organizer")
+                        .WithMany()
+                        .HasForeignKey("OrganizerId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", "Winner")
+                        .WithMany()
+                        .HasForeignKey("WinnerId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("Organizer");
+
+                    b.Navigation("Winner");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.RaffleEntry", b =>
+                {
+                    b.HasOne("CueFinder.Database.Models.Raffle", "Raffle")
+                        .WithMany("Entries")
+                        .HasForeignKey("RaffleId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CueFinder.Database.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Raffle");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("CueFinder.Database.Models.Raffle", b =>
+                {
+                    b.Navigation("Entries");
                 });
 
             modelBuilder.Entity("CueFinder.Database.Models.Accessory", b =>

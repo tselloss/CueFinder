@@ -1,42 +1,119 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
- 
+
 @layer base {
   :root {
-    --background: 222.2 84% 4.9%;
-    --foreground: 210 40% 98%;
-    --card: 222.2 84% 4.9%;
-    --card-foreground: 210 40% 98%;
-    --popover: 222.2 84% 4.9%;
-    --popover-foreground: 210 40% 98%;
-    --primary: 217.2 91.2% 59.8%;
-    --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 217.2 32.6% 17.5%;
-    --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-    --accent: 217.2 32.6% 17.5%;
-    --accent-foreground: 210 40% 98%;
-    --destructive: 0 62.8% 30.6%;
-    --destructive-foreground: 210 40% 98%;
-    --border: 217.2 32.6% 17.5%;
-    --input: 217.2 32.6% 17.5%;
-    --ring: 224.3 76.3% 48%;
-    --radius: 0.5rem;
+    /* ============================================================
+       CUEFINDER DESIGN SYSTEM — DARK THEME
+       Color space: HSL for easy manipulation
+       ============================================================ */
+
+    /* --- Backgrounds (layered depth system) --- */
+    --background:        224 71% 3%;      /* #050e1e  deepest page bg */
+    --surface-1:         222 55% 7%;      /* #0b1628  card bg */
+    --surface-2:         220 44% 11%;     /* #111f35  elevated card */
+    --surface-3:         218 38% 15%;     /* #182a42  hover surface */
+    --surface-4:         216 32% 20%;     /* #21344f  active surface */
+
+    /* --- Foreground / Text --- */
+    --foreground:        210 40% 96%;     /* #f0f4fa  primary text */
+    --foreground-muted:  215 28% 70%;     /* #a0b0c8  secondary text */
+    --foreground-subtle: 215 22% 50%;     /* #6a82a0  tertiary / hints */
+
+    /* --- Primary — Electric Blue --- */
+    --primary:           213 94% 58%;     /* #1e9eff  vibrant blue */
+    --primary-hover:     213 94% 53%;     /* #1890f4  slightly deeper */
+    --primary-muted:     213 60% 30%;     /* #1d4d80  dark blue for borders */
+    --primary-foreground: 224 71% 3%;     /* text on primary button */
+    --primary-glow:      213 94% 58%;     /* used in box-shadow alpha */
+
+    /* --- Secondary --- */
+    --secondary:         218 38% 14%;     /* #182640  secondary surface */
+    --secondary-foreground: 210 40% 96%;
+
+    /* --- Accent — Cyan spark --- */
+    --accent:            195 85% 55%;     /* #17caf4  cyan accent */
+    --accent-foreground: 224 71% 3%;
+
+    /* --- Semantic Colors --- */
+    --success:           152 69% 42%;     /* #22c55e  emerald green */
+    --success-muted:     152 40% 20%;
+    --warning:           38 92% 55%;      /* #f59e0b  amber */
+    --warning-muted:     38 55% 20%;
+    --destructive:       0 72% 51%;       /* #ef4444  vivid red */
+    --destructive-muted: 0 40% 22%;
+    --destructive-foreground: 210 40% 96%;
+    --info:              213 94% 58%;     /* same as primary */
+
+    /* --- Borders --- */
+    --border:            218 38% 16%;     /* subtle border */
+    --border-strong:     213 50% 28%;     /* blue-tinted border */
+    --border-focus:      213 94% 58%;     /* focus ring color */
+
+    /* --- Semantic aliases (used by Tailwind / shadcn) --- */
+    --card:              var(--surface-1);
+    --card-foreground:   var(--foreground);
+    --popover:           var(--surface-2);
+    --popover-foreground: var(--foreground);
+    --muted:             var(--surface-2);
+    --muted-foreground:  var(--foreground-muted);
+    --input:             var(--surface-2);
+    --ring:              var(--primary);
+
+    /* --- Radius scale --- */
+    --radius-xs:  4px;
+    --radius-sm:  6px;
+    --radius:     10px;   /* default card/input radius */
+    --radius-lg:  14px;
+    --radius-xl:  20px;
+    --radius-2xl: 28px;
+
+    /* --- Elevation shadows (with blue glow) --- */
+    --shadow-sm:  0 1px 3px rgba(0,0,0,0.4), 0 1px 2px rgba(0,0,0,0.3);
+    --shadow-md:  0 4px 12px rgba(0,0,0,0.4), 0 2px 4px rgba(0,0,0,0.3);
+    --shadow-lg:  0 8px 24px rgba(0,0,0,0.5), 0 4px 8px rgba(0,0,0,0.3);
+    --shadow-xl:  0 16px 48px rgba(0,0,0,0.6), 0 8px 16px rgba(0,0,0,0.4);
+    --shadow-glow-sm: 0 0 12px rgba(30,158,255,0.25);
+    --shadow-glow-md: 0 0 24px rgba(30,158,255,0.30);
+    --shadow-glow-lg: 0 0 40px rgba(30,158,255,0.35);
+
+    /* --- Typography --- */
+    --font-sans:  'Inter', 'SF Pro Display', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    --font-mono:  'JetBrains Mono', 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, monospace;
+
+    /* --- Transition --- */
+    --transition-fast:   150ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-base:   250ms cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-slow:   400ms cubic-bezier(0.4, 0, 0.2, 1);
   }
 }
- 
+
+/* ============================================================
+   GLOBAL BASE RESETS
+   ============================================================ */
 @layer base {
   * {
     @apply border-border;
     box-sizing: border-box;
   }
+
+  html {
+    scroll-behavior: smooth;
+  }
+
   body {
     @apply bg-background text-foreground;
-    font-feature-settings: "rlig" 1, "calt" 1;
+    font-family: var(--font-sans);
+    font-feature-settings: "rlig" 1, "calt" 1, "cv02" 1, "cv03" 1, "cv04" 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    line-height: 1.6;
+  }
+
+  code, pre, kbd, samp {
+    font-family: var(--font-mono);
   }
 }
 
@@ -52,9 +129,9 @@ html, body, #root {
   display: flex;
   flex-direction: column;
   min-height: 100vh;
+  background: hsl(var(--background));
 }
 
-/* Ensure Grommet main wrapper takes full height */
 #root > div {
   display: flex;
   flex-direction: column;
@@ -62,102 +139,339 @@ html, body, #root {
   flex: 1;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
-}
-
-/* Smooth transitions for interactive elements */
-@layer components {
-  button, a, [role="button"] {
-    @apply transition-all duration-200 ease-in-out;
-  }
-  
-  /* Smooth hover effects for buttons */
-  .group:hover, 
-  button:not(:disabled):hover, 
-  a:hover {
-    @apply transform transition-transform duration-150;
-  }
-  
-  /* Smooth nav link transitions */
-  nav a, [role="navigation"] a {
-    @apply relative;
-  }
-  
-  /* Pulse animation for unread badges */
-  .unread-badge {
-    animation: pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-  }
-  
-  /* Fade in animation for modals and overlays */
-  @keyframes fadeIn {
-    from {
-      opacity: 0;
-    }
-    to {
-      opacity: 1;
-    }
-  }
-  
-  /* Slide down animation for dropdowns */
-  @keyframes slideDown {
-    from {
-      opacity: 0;
-      transform: translateY(-8px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  
-  .fade-in {
-    animation: fadeIn 0.2s ease-in;
-  }
-  
-  .slide-down {
-    animation: slideDown 0.2s ease-out;
-  }
-}
-
-/* Modern Sidebar Animation */
-@keyframes slideIn {
-  from {
-    opacity: 0;
-    transform: translateX(-20px);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0);
-  }
-}
-
-/* Smooth scrollbar for sidebar */
+/* ============================================================
+   CUSTOM SCROLLBAR
+   ============================================================ */
 ::-webkit-scrollbar {
-  width: 8px;
+  width: 6px;
+  height: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: rgba(15, 23, 42, 0.3);
-  border-radius: 10px;
+  background: hsl(var(--surface-1));
 }
 
 ::-webkit-scrollbar-thumb {
-  background: rgba(59, 130, 246, 0.5);
-  border-radius: 10px;
+  background: hsl(var(--surface-4));
+  border-radius: 100px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(59, 130, 246, 0.7);
+  background: hsl(var(--primary-muted));
 }
 
-/* Pulse animation for loading states */
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
+/* ============================================================
+   GLOBAL COMPONENT STYLES
+   ============================================================ */
+@layer components {
+
+  /* --- Interactive transitions --- */
+  button, a, [role="button"] {
+    @apply transition-all duration-200 ease-in-out;
   }
-  50% {
-    opacity: 0.7;
+
+  /* --- Card surface --- */
+  .cf-card {
+    background: hsl(var(--surface-1));
+    border: 1px solid hsl(var(--border));
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-sm);
+    transition: box-shadow var(--transition-base), border-color var(--transition-base), transform var(--transition-base);
+  }
+
+  .cf-card:hover {
+    border-color: hsl(var(--border-strong));
+    box-shadow: var(--shadow-md), var(--shadow-glow-sm);
+    transform: translateY(-2px);
+  }
+
+  /* --- Glassmorphism surface --- */
+  .cf-glass {
+    background: rgba(11, 22, 40, 0.72);
+    backdrop-filter: blur(16px) saturate(180%);
+    -webkit-backdrop-filter: blur(16px) saturate(180%);
+    border: 1px solid rgba(30, 158, 255, 0.12);
+  }
+
+  /* --- Primary button --- */
+  .cf-btn-primary {
+    background: linear-gradient(135deg, hsl(var(--primary)), hsl(213 94% 48%));
+    color: hsl(var(--primary-foreground));
+    border: none;
+    border-radius: var(--radius);
+    padding: 0.625rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.01em;
+    box-shadow: 0 2px 8px rgba(30, 158, 255, 0.3);
+    transition: all var(--transition-fast);
+  }
+
+  .cf-btn-primary:hover:not(:disabled) {
+    background: linear-gradient(135deg, hsl(var(--primary-hover)), hsl(213 94% 44%));
+    box-shadow: 0 4px 16px rgba(30, 158, 255, 0.45);
+    transform: translateY(-1px);
+  }
+
+  .cf-btn-primary:active:not(:disabled) {
+    transform: translateY(0);
+    box-shadow: 0 1px 4px rgba(30, 158, 255, 0.3);
+  }
+
+  /* --- Outline button --- */
+  .cf-btn-outline {
+    background: transparent;
+    color: hsl(var(--primary));
+    border: 1.5px solid hsl(var(--primary-muted));
+    border-radius: var(--radius);
+    padding: 0.625rem 1.25rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+  }
+
+  .cf-btn-outline:hover:not(:disabled) {
+    background: rgba(30, 158, 255, 0.08);
+    border-color: hsl(var(--primary));
+    box-shadow: var(--shadow-glow-sm);
+  }
+
+  /* --- Ghost button --- */
+  .cf-btn-ghost {
+    background: transparent;
+    color: hsl(var(--foreground-muted));
+    border: 1px solid transparent;
+    border-radius: var(--radius);
+    padding: 0.625rem 1.25rem;
+    font-weight: 500;
+    font-size: 0.875rem;
+    transition: all var(--transition-fast);
+  }
+
+  .cf-btn-ghost:hover:not(:disabled) {
+    background: hsl(var(--surface-3));
+    color: hsl(var(--foreground));
+    border-color: hsl(var(--border));
+  }
+
+  /* --- Input fields --- */
+  .cf-input {
+    background: hsl(var(--surface-2));
+    border: 1.5px solid hsl(var(--border));
+    border-radius: var(--radius);
+    color: hsl(var(--foreground));
+    font-family: var(--font-sans);
+    font-size: 0.875rem;
+    padding: 0.625rem 0.875rem;
+    line-height: 1.5;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast), background var(--transition-fast);
+    outline: none;
+    width: 100%;
+  }
+
+  .cf-input::placeholder {
+    color: hsl(var(--foreground-subtle));
+  }
+
+  .cf-input:hover {
+    border-color: hsl(var(--border-strong));
+  }
+
+  .cf-input:focus {
+    border-color: hsl(var(--border-focus));
+    background: hsl(var(--surface-1));
+    box-shadow: 0 0 0 3px rgba(30, 158, 255, 0.12), var(--shadow-glow-sm);
+  }
+
+  /* --- Badge --- */
+  .cf-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.7rem;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+  }
+
+  .cf-badge-primary {
+    background: rgba(30, 158, 255, 0.15);
+    color: hsl(var(--primary));
+    border: 1px solid rgba(30, 158, 255, 0.25);
+  }
+
+  .cf-badge-success {
+    background: rgba(34, 197, 94, 0.15);
+    color: #4ade80;
+    border: 1px solid rgba(34, 197, 94, 0.25);
+  }
+
+  .cf-badge-warning {
+    background: rgba(245, 158, 11, 0.15);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.25);
+  }
+
+  .cf-badge-danger {
+    background: rgba(239, 68, 68, 0.15);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.25);
+  }
+
+  .cf-badge-muted {
+    background: hsl(var(--surface-3));
+    color: hsl(var(--foreground-muted));
+    border: 1px solid hsl(var(--border));
+  }
+
+  /* --- Divider --- */
+  .cf-divider {
+    border: none;
+    border-top: 1px solid hsl(var(--border));
+    margin: 1rem 0;
+  }
+
+  /* --- Pulse animation for badges --- */
+  .unread-badge {
+    animation: cf-pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite;
   }
 }
+
+/* ============================================================
+   KEYFRAME ANIMATIONS
+   ============================================================ */
+@keyframes cf-pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.65; }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+
+@keyframes slideDown {
+  from { opacity: 0; transform: translateY(-10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes slideUp {
+  from { opacity: 1; transform: translateY(0); }
+  to   { opacity: 0; transform: translateY(-10px); }
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(-16px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(100%); }
+  to   { transform: translateX(0); }
+}
+
+@keyframes shimmer {
+  0%   { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes progress {
+  from { width: 100%; }
+  to   { width: 0%; }
+}
+
+@keyframes menuButtonPulse {
+  0%, 100% {
+    box-shadow: 0 6px 20px rgba(30, 158, 255, 0.5), 0 0 0 0 rgba(30, 158, 255, 0.7);
+  }
+  50% {
+    box-shadow: 0 6px 20px rgba(30, 158, 255, 0.5), 0 0 0 10px rgba(30, 158, 255, 0);
+  }
+}
+
+.fade-in     { animation: fadeIn 0.2s ease-out; }
+.slide-down  { animation: slideDown 0.2s ease-out; }
+.slide-in    { animation: slideIn 0.3s ease-out; }
+
+/* ============================================================
+   SKELETON / LOADING SHIMMER
+   ============================================================ */
+.cf-skeleton {
+  background: linear-gradient(
+    90deg,
+    hsl(var(--surface-2)) 25%,
+    hsl(var(--surface-3)) 50%,
+    hsl(var(--surface-2)) 75%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 1.6s ease-in-out infinite;
+  border-radius: var(--radius);
+}
+
+/* ============================================================
+   TOAST NOTIFICATIONS
+   ============================================================ */
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: none;
+}
+
+.toast {
+  pointer-events: all;
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: var(--radius-lg);
+  background: hsl(var(--surface-2));
+  border: 1px solid hsl(var(--border-strong));
+  box-shadow: var(--shadow-xl), var(--shadow-glow-sm);
+  min-width: 300px;
+  max-width: 420px;
+  animation: slideIn 0.25s ease-out;
+  backdrop-filter: blur(12px);
+  overflow: hidden;
+  position: relative;
+}
+
+.toast-error   { border-color: rgba(239, 68, 68, 0.4); }
+.toast-success { border-color: rgba(34, 197, 94, 0.4); }
+.toast-info    { border-color: rgba(30, 158, 255, 0.4); }
+.toast-warning { border-color: rgba(245, 158, 11, 0.4); }
+
+.toast-message {
+  font-size: 0.875rem;
+  color: hsl(var(--foreground));
+  line-height: 1.5;
+  flex: 1;
+}
+
+.toast-progress-bar {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 2px;
+  background: hsl(var(--primary));
+  animation: progress 4s linear forwards;
+}
+
+.toast-error   .toast-progress-bar { background: hsl(var(--destructive)); }
+.toast-success .toast-progress-bar { background: hsl(var(--success)); }
+.toast-warning .toast-progress-bar { background: hsl(var(--warning)); }
