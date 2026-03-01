@@ -31,6 +31,7 @@ import * as forumService from './api/forumService';
 
 // import './form-icons.css';
 import './mobile-responsive.css';
+import './styles/design-system.css';
 import { useTranslation } from 'react-i18next';
 
 function AppInner() {

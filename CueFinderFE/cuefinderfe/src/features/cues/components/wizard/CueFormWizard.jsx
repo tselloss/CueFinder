@@ -39,7 +39,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
     return '';
   };
 
-  const [currentStep, setCurrentStep] = useState(isEditing ? 1 : 0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [productType, setProductType] = useState(getInitialProductType());
   const [formData, setFormData] = useState({
     title: '',

@@ -16,7 +16,7 @@ COPY packages ./packages
 COPY cuefinderfe/ ./cuefinderfe/
 
 # Install all dependencies (this will set up workspace symlinks correctly)      
-RUN pnpm install --frozen-lockfile
+RUN pnpm install --no-frozen-lockfile
 
 # Build the application using pnpm filter to run within workspace context
 RUN pnpm --filter @cuefinder/app run build
