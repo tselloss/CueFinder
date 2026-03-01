@@ -4,7 +4,6 @@ using CueFinder.Database.Context;
 using CueFinder.Database.Models;
 using CueFinder.Extensions.Email;
 using Microsoft.Extensions.Logging;
-using Microsoft.EntityFrameworkCore;
 
 namespace CueFinder.Cues.Services;
 
@@ -33,32 +32,14 @@ public partial class CueService : ICueService
         _emailService = emailService;
     }
 
-    // Implements ICueService.GetUserCuesAsync(int)
-    public async Task<List<CueResponseDto>> GetUserCuesAsync(int userId)
+    public Task<bool> DeleteCueAsync(int cueId, int userId, bool isAdmin = false)
     {
-        var cues = await _context.Cues
-            .Include(c => c.Images)
-            .Include(c => c.Ratings)
-            .Include(c => c.User)
-            .AsSplitQuery()
-            .Where(c => c.UserId == userId && !c.IsSold)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
-        return cues.Select(MapToCueResponseDto).ToList();
+        throw new NotImplementedException();
     }
 
-    // Implements ICueService.DeleteCueAsync(int, int, bool)
-    public async Task<bool> DeleteCueAsync(int cueId, int userId, bool isAdmin = false)
+    public Task<List<CueResponseDto>> GetUserCuesAsync(int userId)
     {
-        var cue = await _context.Cues.FirstOrDefaultAsync(c => c.Id == cueId);
-        if (cue == null)
-            return false;
-        if (!isAdmin && cue.UserId != userId)
-            throw new UnauthorizedAccessException("You can only delete your own cues unless you are admin.");
-        await _imageService.DeleteCueImagesInternalAsync(cueId);
-        _context.Cues.Remove(cue);
-        await _context.SaveChangesAsync();
-        return true;
+        throw new NotImplementedException();
     }
 }
 
