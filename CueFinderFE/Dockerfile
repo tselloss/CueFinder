@@ -5,8 +5,8 @@ WORKDIR /app
 ARG REACT_APP_API_URL
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
 
-# Install pnpm
-RUN npm install -g pnpm
+# Install pnpm via corepack (avoids npm install -g runc issues in CI)
+RUN corepack enable && corepack prepare pnpm@10 --activate
 
 # Copy workspace configuration files
 COPY pnpm-workspace.yaml package.json pnpm-lock.yaml ./
