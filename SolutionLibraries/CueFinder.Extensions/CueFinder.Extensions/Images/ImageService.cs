@@ -59,12 +59,67 @@ public class ImageService : IImageService
         return $"{_settings.ImageUrlBase}/{cueId}";
     }
 
+    private string GetMiscFolderPath()
+    {
+        if (Path.IsPathRooted(_settings.StoragePath))
+            return Path.Combine(_settings.StoragePath, "misc");
+        if (!string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
+            return Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath, "misc");
+        return Path.Combine(Directory.GetCurrentDirectory(), _settings.StoragePath, "misc");
+    }
+
+    public async Task<ImageUploadResponse> UploadStandaloneAsync(IFormFile file)
+    {
+        try
+        {
+            var (isValid, errorMessage) = await ValidateImageAsync(file);
+            if (!isValid)
+                return new ImageUploadResponse { Success = false, ErrorMessage = errorMessage };
+
+            var miscFolder = GetMiscFolderPath();
+            Directory.CreateDirectory(miscFolder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(miscFolder, fileName);
+
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            if (_moderationService != null)
+            {
+                var result = await _moderationService.ScanImageAsync(filePath, 0);
+                if (result.IsUnsafe)
+                {
+                    File.Delete(filePath);
+                    return new ImageUploadResponse { Success = false, ErrorMessage = "Image rejected by content moderation." };
+                }
+            }
+
+            return new ImageUploadResponse
+            {
+                Success = true,
+                ImageUrl = $"{_settings.ImageUrlBase}/misc/{fileName}",
+                FileSize = file.Length,
+                MimeType = file.ContentType,
+                UploadedAt = DateTime.UtcNow
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading standalone image");
+            return new ImageUploadResponse { Success = false, ErrorMessage = "Upload failed." };
+        }
+    }
+
     public void EnsureStorageRootExists()
     {
-        // If StoragePath is absolute, use it directly; otherwise combine with WebRootPath
-        var storageRoot = Path.IsPathRooted(_settings.StoragePath)
-            ? _settings.StoragePath
-            : Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        string storageRoot;
+        if (Path.IsPathRooted(_settings.StoragePath))
+            storageRoot = _settings.StoragePath;
+        else if (!string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
+            storageRoot = Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        else
+            storageRoot = Path.Combine(Directory.GetCurrentDirectory(), _settings.StoragePath);
         Directory.CreateDirectory(storageRoot);
     }
 

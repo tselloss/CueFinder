@@ -1,4 +1,3 @@
-using CueFinder.Accessories.Interfaces;
 using CueFinder.Accessories.Models;
 using CueFinder.Database.Models;
 using Microsoft.EntityFrameworkCore;
@@ -14,17 +13,6 @@ namespace CueFinder.Accessories.Services;
 /// </summary>
 public partial class AccessoryService
 {
-    private readonly ApplicationDbContext _context;
-    private readonly IImageService _imageService;
-    private readonly ILogger _logger;
-
-    public AccessoryService(ApplicationDbContext context, IImageService imageService, ILogger logger)
-    {
-        _context = context;
-        _imageService = imageService;
-        _logger = logger;
-    }
-
     /// <summary>
     /// Process old accessory listings: prompt, hide, or delete based on inactivity (new business rules).
     /// </summary>

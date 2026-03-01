@@ -16,4 +16,5 @@ public class UpdateAccessoryDto
     public string? Color { get; set; }
     public string? Location { get; set; }
     public bool? IsSold { get; set; }
+    public bool? IsHidden { get; set; }
 }

@@ -121,11 +121,7 @@ public partial class AccessoriesController
 
     private int? GetUserIdFromClaims()
     {
-        if (User?.FindFirst("sub")?.Value is string userIdStr &&
-            int.TryParse(userIdStr, out int userId))
-        {
-            return userId;
-        }
-        return null;
+        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdStr, out int userId) ? userId : null;
     }
 }

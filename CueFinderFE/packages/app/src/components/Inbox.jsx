@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
-import { Send, Search, Trash2, ArrowLeft, Inbox as InboxIcon, X } from 'lucide-react';
+import { Send, Search, Trash2, ArrowLeft, Inbox as InboxIcon, X, Gavel, CheckCircle, XCircle, RefreshCw } from 'lucide-react';
 import * as messageService from '../api/messageService';
 import '../styles/inbox.css';
 
@@ -36,6 +36,10 @@ function avatarColor(name = '') {
   return AVATAR_COLORS[name.charCodeAt(0) % AVATAR_COLORS.length];
 }
 
+function parseOfferContent(content) {
+  try { return JSON.parse(content); } catch { return null; }
+}
+
 /* ─── Sub-components ──────────────────────────────────────── */
 
 function Avatar({ name, size = 'md' }) {
@@ -51,6 +55,7 @@ function Avatar({ name, size = 'md' }) {
 }
 
 function ThreadItem({ message, active, onClick }) {
+  const isOffer = ['offer', 'accepted', 'rejected', 'counter_offer'].includes(message.messageType);
   return (
     <button
       type="button"
@@ -69,7 +74,8 @@ function ThreadItem({ message, active, onClick }) {
         </div>
         <div className="msng-thread-sub">
           <span className="msng-thread-preview">
-            {message.subject ? `${message.subject}: ` : ''}{message.content}
+            {isOffer && <span style={{ marginRight: 4 }}>🔨</span>}
+            {message.subject ? `${message.subject}: ` : ''}{isOffer ? 'Offer message' : message.content}
           </span>
           {!message.isRead && <span className="msng-thread-dot" />}
         </div>
@@ -85,6 +91,157 @@ function Bubble({ text, sent, time, senderName }) {
       <div className="msng-bubble-col">
         <div className={`msng-bubble${sent ? ' msng-bubble-sent' : ' msng-bubble-recv'}`}>
           <span className="msng-bubble-text">{text}</span>
+        </div>
+        <span className="msng-bubble-time">{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function OfferCard({ data, time, senderName, onAccept, onReject, onCounter, responding }) {
+  const [showCounter, setShowCounter] = useState(false);
+  const [counterVal, setCounterVal] = useState('');
+  const [counterMsg, setCounterMsg] = useState('');
+
+  const discount = data.originalPrice
+    ? Math.round((1 - data.amount / data.originalPrice) * 100)
+    : 0;
+
+  return (
+    <div className="msng-bubble-row">
+      <Avatar name={senderName} size="sm" />
+      <div className="msng-bubble-col" style={{ maxWidth: '100%' }}>
+        <div style={{
+          border: '1.5px solid #f59e0b',
+          borderRadius: 12,
+          padding: '14px 16px',
+          background: 'var(--card, #1c1c1e)',
+          minWidth: 260,
+        }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 10 }}>
+            <Gavel size={16} color="#f59e0b" />
+            <span style={{ fontWeight: 700, color: '#f59e0b', fontSize: 14 }}>Bid Offer</span>
+            {data.itemTitle && (
+              <span style={{ fontSize: 12, color: 'var(--muted-foreground)', marginLeft: 4 }}>
+                — {data.itemTitle}
+              </span>
+            )}
+          </div>
+          <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: 8 }}>
+            <div>
+              <div style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>Offered amount</div>
+              <div style={{ fontSize: 22, fontWeight: 800, color: '#f59e0b' }}>€{Number(data.amount).toFixed(2)}</div>
+            </div>
+            {data.originalPrice && (
+              <div style={{ textAlign: 'right' }}>
+                <div style={{ fontSize: 11, color: 'var(--muted-foreground)' }}>Asking price</div>
+                <div style={{ fontSize: 16, fontWeight: 600, color: 'var(--foreground)' }}>€{Number(data.originalPrice).toFixed(2)}</div>
+                {discount > 0 && (
+                  <div style={{ fontSize: 11, color: '#f59e0b' }}>−{discount}% off</div>
+                )}
+              </div>
+            )}
+          </div>
+          {data.note && (
+            <div style={{ fontSize: 13, color: 'var(--muted-foreground)', fontStyle: 'italic', marginBottom: 10, borderTop: '1px solid rgba(255,255,255,0.07)', paddingTop: 8 }}>
+              "{data.note}"
+            </div>
+          )}
+          {onAccept && (
+            <div style={{ display: 'flex', gap: 8, flexWrap: 'wrap', marginTop: 10 }}>
+              <button
+                onClick={onAccept}
+                disabled={responding}
+                style={{ flex: 1, minWidth: 80, padding: '7px 12px', borderRadius: 8, border: 'none', background: '#22c55e', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+              >
+                <CheckCircle size={14} /> Accept
+              </button>
+              <button
+                onClick={onReject}
+                disabled={responding}
+                style={{ flex: 1, minWidth: 80, padding: '7px 12px', borderRadius: 8, border: 'none', background: '#ef4444', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+              >
+                <XCircle size={14} /> Decline
+              </button>
+              <button
+                onClick={() => setShowCounter(v => !v)}
+                disabled={responding}
+                style={{ flex: 1, minWidth: 80, padding: '7px 12px', borderRadius: 8, border: '1.5px solid #f59e0b', background: 'transparent', color: '#f59e0b', fontWeight: 700, fontSize: 13, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 5 }}
+              >
+                <RefreshCw size={14} /> Counter
+              </button>
+            </div>
+          )}
+          {onAccept && showCounter && (
+            <div style={{ marginTop: 10, display: 'flex', flexDirection: 'column', gap: 6 }}>
+              <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                <span style={{ color: 'var(--muted-foreground)', fontSize: 13 }}>€</span>
+                <input
+                  type="number"
+                  min={0}
+                  step={0.01}
+                  value={counterVal}
+                  onChange={e => setCounterVal(e.target.value)}
+                  placeholder="Your price"
+                  style={{ flex: 1, padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'var(--background)', color: 'var(--foreground)', fontSize: 14 }}
+                />
+              </div>
+              <textarea
+                value={counterMsg}
+                onChange={e => setCounterMsg(e.target.value)}
+                placeholder="Message (optional)"
+                rows={2}
+                style={{ padding: '6px 10px', borderRadius: 6, border: '1px solid rgba(255,255,255,0.15)', background: 'var(--background)', color: 'var(--foreground)', fontSize: 13, resize: 'vertical' }}
+              />
+              <button
+                onClick={() => onCounter(parseFloat(counterVal) || 0, counterMsg)}
+                disabled={responding || !counterVal}
+                style={{ padding: '7px 12px', borderRadius: 8, border: 'none', background: '#f59e0b', color: '#fff', fontWeight: 700, fontSize: 13, cursor: 'pointer' }}
+              >
+                Send Counter Offer
+              </button>
+            </div>
+          )}
+        </div>
+        <span className="msng-bubble-time">{time}</span>
+      </div>
+    </div>
+  );
+}
+
+function ResponseCard({ messageType, data, time, senderName }) {
+  const configs = {
+    accepted: { icon: <CheckCircle size={20} color="#22c55e" />, label: 'Offer Accepted!', color: '#22c55e', bg: 'rgba(34,197,94,0.1)', border: '#22c55e' },
+    rejected: { icon: <XCircle size={20} color="#ef4444" />, label: 'Offer Declined', color: '#ef4444', bg: 'rgba(239,68,68,0.1)', border: '#ef4444' },
+    counter_offer: { icon: <RefreshCw size={20} color="#f59e0b" />, label: 'Counter Offer', color: '#f59e0b', bg: 'rgba(245,158,11,0.1)', border: '#f59e0b' },
+  };
+  const cfg = configs[messageType];
+  if (!cfg) return null;
+
+  return (
+    <div className="msng-bubble-row">
+      <Avatar name={senderName} size="sm" />
+      <div className="msng-bubble-col">
+        <div style={{ border: `1.5px solid ${cfg.border}`, borderRadius: 12, padding: '14px 16px', background: cfg.bg, minWidth: 220 }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 6 }}>
+            {cfg.icon}
+            <span style={{ fontWeight: 700, color: cfg.color, fontSize: 14 }}>{cfg.label}</span>
+          </div>
+          {messageType === 'counter_offer' && data?.counterAmount != null && (
+            <div style={{ fontSize: 20, fontWeight: 800, color: cfg.color, marginBottom: 4 }}>
+              €{Number(data.counterAmount).toFixed(2)}
+            </div>
+          )}
+          {messageType === 'accepted' && data?.amount != null && (
+            <div style={{ fontSize: 16, color: 'var(--foreground)' }}>
+              Your offer of €{Number(data.amount).toFixed(2)} was accepted.
+            </div>
+          )}
+          {data?.message && (
+            <div style={{ fontSize: 13, color: 'var(--muted-foreground)', fontStyle: 'italic', marginTop: 6 }}>
+              "{data.message}"
+            </div>
+          )}
         </div>
         <span className="msng-bubble-time">{time}</span>
       </div>
@@ -114,6 +271,7 @@ export default function Inbox({ onBack }) {
   const [filterUnread, setFilterUnread] = useState(false);
   // sentReplies: { [messageId]: [{text, time}] }
   const [sentReplies,  setSentReplies]  = useState({});
+  const [offerResponding, setOfferResponding] = useState(false);
 
   const chatEndRef = useRef(null);
   const inputRef   = useRef(null);
@@ -172,6 +330,31 @@ export default function Inbox({ onBack }) {
     }
   };
 
+  /* offer response */
+  const handleOfferResponse = async (action, counterAmount, counterMsg) => {
+    if (!selected || offerResponding) return;
+    setOfferResponding(true);
+    try {
+      await messageService.respondToOffer({
+        recipientId: selected.senderId,
+        cueId: selected.cueId,
+        action,
+        counterAmount: counterAmount || null,
+        message: counterMsg || '',
+      });
+      // Add a local "sent" indicator in the reply list
+      const labels = { accepted: 'Offer accepted ✓', rejected: 'Offer declined ✗', counter: `Counter offer sent: €${counterAmount?.toFixed(2)}` };
+      setSentReplies((prev) => ({
+        ...prev,
+        [selected.id]: [...(prev[selected.id] || []), { text: labels[action] || 'Response sent', time: new Date().toISOString() }],
+      }));
+    } catch {
+      alert('Failed to send response. Please try again.');
+    } finally {
+      setOfferResponding(false);
+    }
+  };
+
   /* delete */
   const handleDelete = async (msgId) => {
     if (!window.confirm('Delete this message?')) return;
@@ -216,6 +399,14 @@ export default function Inbox({ onBack }) {
   const unreadCount    = messages.filter((m) => !m.isRead).length;
   const sessionReplies = selected ? (sentReplies[selected.id] || []) : [];
   const chatOpen       = !!selected;
+
+  // Determine if the selected message is an offer-type
+  const offerData = selected ? parseOfferContent(selected.content) : null;
+  const isOfferMsg = selected?.messageType === 'offer' && offerData?.type === 'offer';
+  const isResponseMsg = ['accepted', 'rejected', 'counter_offer'].includes(selected?.messageType);
+
+  // Whether the current user already responded (has session replies)
+  const alreadyResponded = sessionReplies.length > 0;
 
   return (
     <div className={`msng-root${chatOpen ? ' chat-open' : ''}`}>
@@ -307,7 +498,15 @@ export default function Inbox({ onBack }) {
                   <span className="msng-chat-header-sub">Re: {selected.subject}</span>
                 )}
               </div>
-              {selected.cueId && (
+              {isOfferMsg && (
+                <span className="msng-listing-badge" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>
+                  🔨 Bid Offer
+                </span>
+              )}
+              {isResponseMsg && (
+                <span className="msng-listing-badge">Offer Response</span>
+              )}
+              {!isOfferMsg && !isResponseMsg && selected.cueId && (
                 <span className="msng-listing-badge">About a listing</span>
               )}
               <div className="msng-chat-header-actions">
@@ -340,13 +539,32 @@ export default function Inbox({ onBack }) {
                 </span>
               </div>
 
-              {/* original received message */}
-              <Bubble
-                text={selected.content}
-                sent={false}
-                time={formatBubbleTime(selected.createdAt)}
-                senderName={selected.senderName}
-              />
+              {/* Offer or regular message bubble */}
+              {isOfferMsg ? (
+                <OfferCard
+                  data={offerData}
+                  time={formatBubbleTime(selected.createdAt)}
+                  senderName={selected.senderName}
+                  onAccept={!alreadyResponded ? () => handleOfferResponse('accepted') : null}
+                  onReject={!alreadyResponded ? () => handleOfferResponse('rejected') : null}
+                  onCounter={!alreadyResponded ? (amt, msg) => handleOfferResponse('counter', amt, msg) : null}
+                  responding={offerResponding}
+                />
+              ) : isResponseMsg ? (
+                <ResponseCard
+                  messageType={selected.messageType}
+                  data={offerData}
+                  time={formatBubbleTime(selected.createdAt)}
+                  senderName={selected.senderName}
+                />
+              ) : (
+                <Bubble
+                  text={selected.content}
+                  sent={false}
+                  time={formatBubbleTime(selected.createdAt)}
+                  senderName={selected.senderName}
+                />
+              )}
 
               {/* replies sent this session */}
               {sessionReplies.map((r, i) => (
@@ -362,32 +580,34 @@ export default function Inbox({ onBack }) {
               <div ref={chatEndRef} />
             </div>
 
-            {/* input bar */}
-            <div className="msng-input-bar">
-              <div className="msng-input-wrap">
-                <textarea
-                  ref={inputRef}
-                  className="msng-input"
-                  placeholder="Aa"
-                  value={replyText}
-                  onChange={handleInputChange}
-                  onKeyDown={handleKeyDown}
-                  rows={1}
-                />
+            {/* input bar — hide for offer messages that were already responded */}
+            {(!isOfferMsg || alreadyResponded) && !isResponseMsg && (
+              <div className="msng-input-bar">
+                <div className="msng-input-wrap">
+                  <textarea
+                    ref={inputRef}
+                    className="msng-input"
+                    placeholder="Aa"
+                    value={replyText}
+                    onChange={handleInputChange}
+                    onKeyDown={handleKeyDown}
+                    rows={1}
+                  />
+                </div>
+                <button
+                  type="button"
+                  className={`msng-send-btn${replyText.trim() ? ' active' : ''}`}
+                  onClick={handleSend}
+                  disabled={!replyText.trim() || sending}
+                  aria-label="Send"
+                >
+                  {sending
+                    ? <div className="msng-spinner msng-spinner-sm" />
+                    : <Send size={18} />
+                  }
+                </button>
               </div>
-              <button
-                type="button"
-                className={`msng-send-btn${replyText.trim() ? ' active' : ''}`}
-                onClick={handleSend}
-                disabled={!replyText.trim() || sending}
-                aria-label="Send"
-              >
-                {sending
-                  ? <div className="msng-spinner msng-spinner-sm" />
-                  : <Send size={18} />
-                }
-              </button>
-            </div>
+            )}
           </>
         )}
       </main>

@@ -35,6 +35,16 @@ public partial class AccessoryService
             SellerHidePhone = accessory.User?.HidePhone ?? false,
             AverageRating = (double)accessory.AverageRating,
             RatingCount = accessory.RatingCount,
+            Images = accessory.Images?.Select(i => new AccessoryImageDto
+            {
+                Id = i.Id,
+                AccessoryId = i.AccessoryId,
+                ImageUrl = i.ImageUrl,
+                AltText = i.AltText,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary,
+                UploadedAt = i.UploadedAt
+            }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<AccessoryImageDto>(),
             IsHidden = accessory.IsHidden,
             HiddenAt = accessory.HiddenAt
         };

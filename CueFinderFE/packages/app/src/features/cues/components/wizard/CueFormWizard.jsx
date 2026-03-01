@@ -12,6 +12,7 @@ import * as cueCaseService from '../../../../api/cueCaseService';
 import * as billiardTableService from '../../../../api/billiardTableService';
 import * as accessoryService from '../../../../api/accessoryService';
 import { getErrorMessage } from '../../../../utils/errorUtils';
+import RaffleCalculatorModal from '../../../../components/RaffleCalculatorModal';
 
 /**
  * CueFormWizard - Multi-step form wizard for creating/editing listings
@@ -82,6 +83,9 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [uploadProgress, setUploadProgress] = useState(null);
+  const [raffleItem, setRaffleItem] = useState(null);
+  const [isRaffle, setIsRaffle] = useState(false);
+  const [showRaffleModal, setShowRaffleModal] = useState(false);
 
   // Load existing data when editing
   useEffect(() => {
@@ -264,6 +268,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
       }
 
       let savedItem;
+      let uploadedImageUrl = null;
 
       // Save based on product type
       if (productType === 'cue') {
@@ -290,7 +295,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
 
         if (images.length > 0 && savedItem && savedItem.id) {
           setUploadProgress(0);
-          await cueService.uploadCueImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await cueService.uploadCueImages(savedItem.id, images, setUploadProgress);
+          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'case') {
         const caseData = {
@@ -319,7 +325,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
 
         if (images.length > 0 && savedItem && savedItem.id) {
           setUploadProgress(0);
-          await cueCaseService.uploadCueCaseImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await cueCaseService.uploadCueCaseImages(savedItem.id, images, setUploadProgress);
+          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'table') {
         const tableData = {
@@ -347,7 +354,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
 
         if (images.length > 0 && savedItem && savedItem.id) {
           setUploadProgress(0);
-          await billiardTableService.uploadTableImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await billiardTableService.uploadTableImages(savedItem.id, images, setUploadProgress);
+          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'accessory') {
         const accessoryData = {
@@ -371,12 +379,24 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
 
         if (images.length > 0 && savedItem && savedItem.id) {
           setUploadProgress(0);
-          await accessoryService.uploadAccessoryImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await accessoryService.uploadAccessoryImages(savedItem.id, images, setUploadProgress);
+          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       }
 
-      // Success - call onSave callback
-      onSave();
+      // Success
+      if (!isEditing && isRaffle) {
+        setRaffleItem({
+          title: formData.title,
+          brand: formData.brand,
+          price: parseFloat(formData.price),
+          description: formData.description,
+          imageUrl: uploadedImageUrl,
+        });
+        setShowRaffleModal(true);
+      } else {
+        onSave();
+      }
     } catch (error) {
       console.error('Error saving listing:', error);
       setError(getErrorMessage(error, 'Failed to save listing. Please try again.'));
@@ -436,11 +456,21 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
 
   const isLastStep = currentStep === steps.length - 1;
 
+  if (showRaffleModal && raffleItem) {
+    return (
+      <RaffleCalculatorModal
+        item={raffleItem}
+        itemImageUrl={raffleItem.imageUrl || null}
+        onClose={onSave}
+      />
+    );
+  }
+
   return (
     <>
       {/* Overlay */}
-      <div 
-        className="fixed inset-0 bg-black/60 z-[999]" 
+      <div
+        className="fixed inset-0 bg-black/60 z-[999]"
         onClick={onClose}
         aria-hidden="true"
       />
@@ -535,6 +565,32 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                 )}
               </Button>
             </div>
+
+            {/* Raffle Toggle — shown for new listings after product type is chosen */}
+            {!isEditing && currentStep > 0 && (
+              <button
+                type="button"
+                onClick={() => setIsRaffle(r => !r)}
+                className={`w-full mt-3 flex items-center gap-3 px-4 py-3 rounded-xl border-2 transition-all text-left ${
+                  isRaffle
+                    ? 'border-primary bg-primary/10 text-foreground'
+                    : 'border-border bg-muted/30 text-muted-foreground hover:border-primary/50 hover:bg-muted/50'
+                }`}
+              >
+                {/* Toggle pill */}
+                <span className={`relative inline-flex h-5 w-9 shrink-0 rounded-full border-2 border-transparent transition-colors ${
+                  isRaffle ? 'bg-primary' : 'bg-muted-foreground/30'
+                }`}>
+                  <span className={`inline-block h-4 w-4 rounded-full bg-white shadow transition-transform ${
+                    isRaffle ? 'translate-x-4' : 'translate-x-0'
+                  }`} />
+                </span>
+                <span className="text-sm font-medium">🎰 Also create a raffle for this listing</span>
+                {isRaffle && (
+                  <span className="ml-auto text-xs font-semibold text-primary">ON</span>
+                )}
+              </button>
+            )}
 
             {/* Progress Text */}
             <div className="mt-2 text-center">

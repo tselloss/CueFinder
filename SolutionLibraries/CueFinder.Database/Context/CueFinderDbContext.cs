@@ -40,6 +40,8 @@ namespace CueFinder.Database.Context
         public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
         public DbSet<ModerationQueue> ModerationQueues { get; set; } = null!;
         public DbSet<UserReport> UserReports { get; set; } = null!;
+        public DbSet<Raffle> Raffles { get; set; } = null!;
+        public DbSet<RaffleEntry> RaffleEntries { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -824,6 +826,99 @@ namespace CueFinder.Database.Context
                 entity.HasIndex(e => new { e.UserId, e.BilliardTableId })
                     .IsUnique()
                     .HasDatabaseName("IX_SavedBilliardTable_Unique_User_Table");
+            });
+
+            // Raffle entity configuration
+            modelBuilder.Entity<Raffle>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Organizer)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrganizerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Winner)
+                    .WithMany()
+                    .HasForeignKey(e => e.WinnerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasMany(e => e.Entries)
+                    .WithOne(r => r.Raffle)
+                    .HasForeignKey(r => r.RaffleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.ItemImageUrl)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.PricePerSpot)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.PaymentDetails)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("open");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.OrganizerId)
+                    .HasDatabaseName("IX_Raffle_OrganizerId");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_Raffle_Status");
+
+                entity.HasIndex(e => e.EndsAt)
+                    .HasDatabaseName("IX_Raffle_EndsAt");
+            });
+
+            // RaffleEntry entity configuration
+            modelBuilder.Entity<RaffleEntry>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Raffle)
+                    .WithMany(r => r.Entries)
+                    .HasForeignKey(e => e.RaffleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("pending");
+
+                entity.Property(e => e.PaymentMethod)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.PaymentReference)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                // Each spot number must be unique within a raffle
+                entity.HasIndex(e => new { e.RaffleId, e.SpotNumber })
+                    .IsUnique()
+                    .HasDatabaseName("IX_RaffleEntry_Raffle_Spot");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_RaffleEntry_UserId");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_RaffleEntry_Status");
             });
         }
     }

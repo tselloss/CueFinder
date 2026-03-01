@@ -17,6 +17,9 @@ import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import OldListingsModal from './components/OldListingsModal.jsx';
+import RaffleList from './components/RaffleList.jsx';
+import RaffleDetail from './components/RaffleDetail.jsx';
+import RaffleCreateForm from './components/RaffleCreateForm.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -89,6 +92,8 @@ function AppInner() {
 
   // Check if we're on the home page (listings page)
   const isHomePage = location.pathname === '/';
+  // Show the sidebar on home + raffles + forum pages
+  const showSidebar = isHomePage || location.pathname.startsWith('/raffles') || location.pathname.startsWith('/forum');
   
   // Handle view mode based on screen size
   useEffect(() => {
@@ -397,15 +402,15 @@ function AppInner() {
       <div className="flex-1 bg-background flex flex-col relative pt-[60px]">
         <div className="flex flex-row flex-1 relative">
           {/* Mobile Sidebar Overlay */}
-          {isHomePage && mobileMenuOpen && (
+          {showSidebar && mobileMenuOpen && (
             <div 
               className="sidebar-overlay absolute inset-0 bg-black/50 z-40"
               onClick={() => setMobileMenuOpen(false)}
             />
           )}
 
-          {/* Desktop Sidebar - Only on home page */}
-          {isHomePage && (
+          {/* Desktop Sidebar - Home, Raffles, Forum */}
+          {showSidebar && (
             <DesktopSidebar
               category={category}
               setCategory={setCategory}
@@ -507,13 +512,20 @@ function AppInner() {
               <Route path="/forum" element={
                 user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
+
+              {/* Raffles — public browse + detail, create requires auth */}
+              <Route path="/raffles" element={<RaffleList onBack={handleBack} />} />
+              <Route path="/raffles/create" element={
+                user ? <RaffleCreateForm onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/raffles/:id" element={<RaffleDetail onBack={handleBack} />} />
             </Routes>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Button - Only on home page */}
-      {isHomePage && (
+      {/* Mobile Menu Button */}
+      {showSidebar && (
         <button
           className="mobile-menu-button fixed bottom-20 right-4 md:hidden p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg"
           data-testid="mobile-menu-toggle"
