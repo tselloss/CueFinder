@@ -6,7 +6,6 @@ import * as billiardTableService from '../api/billiardTableService';
 import * as accessoryService from '../api/accessoryService';
 import CueFormModal from './CueFormModal.jsx';
 import ListingPromptModal from './ListingPromptModal.jsx';
-import useListingPrompt from './useListingPrompt';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
