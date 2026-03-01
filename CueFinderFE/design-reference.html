@@ -1,0 +1,1070 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>CueFinder — Design Reference</title>
+<style>
+/* ─── DESIGN TOKENS ──────────────────────────────────────────── */
+:root {
+  --bg:          #050e1e;
+  --surface-1:   #0b1628;
+  --surface-2:   #111f35;
+  --surface-3:   #182a42;
+  --surface-4:   #21344f;
+  --fg:          #f0f4fa;
+  --fg-muted:    #a0b0c8;
+  --fg-subtle:   #6a82a0;
+  --primary:     #1e9eff;
+  --primary-d:   #1890f4;
+  --primary-bg:  rgba(30,158,255,0.10);
+  --primary-bd:  rgba(30,158,255,0.22);
+  --accent:      #17caf4;
+  --success:     #22c55e;
+  --warning:     #f59e0b;
+  --danger:      #ef4444;
+  --border:      #1a2e45;
+  --border-s:    #1d4d80;
+  --radius-sm:   6px;
+  --radius:      10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --shadow-sm:   0 1px 3px rgba(0,0,0,.5), 0 1px 2px rgba(0,0,0,.4);
+  --shadow-md:   0 4px 12px rgba(0,0,0,.5), 0 2px 4px rgba(0,0,0,.4);
+  --shadow-lg:   0 8px 28px rgba(0,0,0,.6), 0 4px 8px rgba(0,0,0,.4);
+  --glow-sm:     0 0 14px rgba(30,158,255,.22);
+  --glow-md:     0 0 28px rgba(30,158,255,.30);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  background: #020810;
+  color: var(--fg);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+/* ─── PAGE NAV ───────────────────────────────────────────────── */
+.doc-nav {
+  position: sticky;
+  top: 0;
+  z-index: 999;
+  background: rgba(5,14,30,.92);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 12px 28px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+.doc-nav-logo {
+  font-size: 15px;
+  font-weight: 800;
+  color: var(--fg);
+  letter-spacing: -.03em;
+  margin-right: 16px;
+}
+.doc-nav-logo span { color: var(--primary); }
+.doc-nav a {
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  color: var(--fg-muted);
+  font-size: .75rem;
+  font-weight: 600;
+  text-decoration: none;
+  transition: all .15s;
+}
+.doc-nav a:hover { background: var(--surface-3); color: var(--fg); }
+
+/* ─── SECTION CONTAINER ──────────────────────────────────────── */
+.section {
+  padding: 56px 28px;
+  border-bottom: 1px solid var(--border);
+  max-width: 1280px;
+  margin: 0 auto;
+}
+.section-title {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--fg);
+  letter-spacing: -.025em;
+  margin-bottom: 6px;
+}
+.section-subtitle {
+  font-size: .875rem;
+  color: var(--fg-muted);
+  margin-bottom: 32px;
+}
+
+/* ─── TOKENS GRID ────────────────────────────────────────────── */
+.token-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 10px; }
+.token-swatch {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 1px solid var(--border);
+}
+.token-color { height: 56px; }
+.token-info { padding: 10px 12px; background: var(--surface-1); }
+.token-name { font-size: .7rem; font-weight: 700; color: var(--fg-muted); text-transform: uppercase; letter-spacing: .06em; }
+.token-val  { font-size: .8rem; font-weight: 600; color: var(--fg); margin-top: 2px; }
+
+/* ─── SPACING SCALE ──────────────────────────────────────────── */
+.spacing-row { display: flex; align-items: center; gap: 12px; margin-bottom: 8px; }
+.spacing-bar { background: var(--primary); border-radius: 3px; height: 20px; }
+.spacing-label { font-size: .75rem; color: var(--fg-muted); min-width: 90px; }
+
+/* ─── TYPOGRAPHY ─────────────────────────────────────────────── */
+.type-row { padding: 14px 0; border-bottom: 1px solid var(--border); display: flex; align-items: baseline; gap: 20px; }
+.type-meta { min-width: 140px; font-size: .75rem; color: var(--fg-subtle); font-family: monospace; }
+
+/* ─── BUTTONS ────────────────────────────────────────────────── */
+.btn-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; }
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  padding: 9px 20px; border-radius: var(--radius);
+  font-size: .875rem; font-weight: 600; cursor: pointer;
+  border: none; transition: all .15s; white-space: nowrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--primary), #1890f4);
+  color: #050e1e;
+  box-shadow: 0 2px 8px rgba(30,158,255,.35);
+}
+.btn-outline {
+  background: transparent;
+  color: var(--fg-muted);
+  border: 1.5px solid var(--border);
+}
+.btn-outline:hover { background: var(--surface-3); color: var(--fg); }
+.btn-ghost  { background: transparent; color: var(--fg-muted); border: 1px solid transparent; }
+.btn-ghost:hover  { background: var(--surface-3); color: var(--fg); }
+.btn-danger { background: rgba(239,68,68,.12); color: #f87171; border: 1.5px solid rgba(239,68,68,.3); }
+.btn-success{ background: rgba(34,197,94,.12);  color: #4ade80; border: 1.5px solid rgba(34,197,94,.3); }
+.btn-sm  { padding: 6px 14px; font-size: .8rem; }
+.btn-lg  { padding: 13px 28px; font-size: 1rem; }
+.btn-icon {
+  width: 36px; height: 36px; padding: 0;
+  background: var(--surface-2); border: 1px solid var(--border); color: var(--fg-muted);
+  border-radius: var(--radius); display: inline-flex; align-items: center; justify-content: center;
+}
+
+/* ─── BADGES ─────────────────────────────────────────────────── */
+.badge {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border-radius: 100px;
+  font-size: .65rem; font-weight: 700; letter-spacing: .05em; text-transform: uppercase;
+}
+.badge-blue    { background: rgba(30,158,255,.14); color: #60b6ff; border: 1px solid rgba(30,158,255,.25); }
+.badge-green   { background: rgba(34,197,94,.14);  color: #4ade80; border: 1px solid rgba(34,197,94,.25); }
+.badge-red     { background: rgba(239,68,68,.14);  color: #f87171; border: 1px solid rgba(239,68,68,.25); }
+.badge-amber   { background: rgba(245,158,11,.14); color: #fbbf24; border: 1px solid rgba(245,158,11,.25); }
+.badge-purple  { background: rgba(168,85,247,.14); color: #c084fc; border: 1px solid rgba(168,85,247,.25); }
+.badge-muted   { background: var(--surface-3); color: var(--fg-muted); border: 1px solid var(--border); }
+
+/* ─── INPUTS ─────────────────────────────────────────────────── */
+.input-demo { width: 320px; max-width: 100%; }
+.cf-input {
+  width: 100%; background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: var(--radius); color: var(--fg); font-size: .875rem;
+  padding: 10px 14px; outline: none; transition: all .15s;
+  font-family: inherit;
+}
+.cf-input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(30,158,255,.12), var(--glow-sm); }
+.cf-input::placeholder { color: var(--fg-subtle); }
+.form-label { display: block; font-size: .8rem; font-weight: 600; color: var(--fg); margin-bottom: 6px; }
+.input-group { margin-bottom: 14px; }
+
+/* ─── CARDS ──────────────────────────────────────────────────── */
+.card-demo-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 16px; }
+.cf-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
+  overflow: hidden; transition: all .25s;
+}
+.cf-card:hover {
+  border-color: var(--border-s); box-shadow: var(--shadow-lg), var(--glow-sm);
+  transform: translateY(-3px);
+}
+.card-img { width: 100%; height: 140px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--fg-subtle); font-size: 2rem; }
+.card-body { padding: 14px 16px 16px; }
+.card-title { font-size: .9375rem; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+.card-meta  { font-size: .75rem; color: var(--fg-subtle); margin-bottom: 10px; }
+.card-price { font-size: 1.125rem; font-weight: 700; color: var(--primary); }
+.card-footer { display: flex; justify-content: space-between; align-items: center; padding: 10px 16px; border-top: 1px solid var(--border); background: var(--surface-2); font-size: .75rem; color: var(--fg-subtle); }
+
+/* ─── PAGE MOCKUPS ───────────────────────────────────────────── */
+.mockup-frame {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  overflow: hidden;
+  box-shadow: var(--shadow-lg);
+}
+.mock-header {
+  height: 58px;
+  display: flex;
+  align-items: center;
+  padding: 0 20px;
+  gap: 12px;
+  background: rgba(5,14,30,.9);
+  border-bottom: 1px solid var(--border);
+  backdrop-filter: blur(12px);
+}
+.mock-logo { font-size: 15px; font-weight: 800; color: var(--fg); letter-spacing: -.03em; }
+.mock-logo span { color: var(--primary); }
+.mock-search {
+  flex: 1; max-width: 320px;
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: 100px; padding: 7px 14px;
+  font-size: .8rem; color: var(--fg-subtle);
+  display: flex; align-items: center; gap: 8px;
+}
+.mock-spacer { flex: 1; }
+.mock-avatar {
+  width: 32px; height: 32px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--primary), var(--accent));
+  display: flex; align-items: center; justify-content: center;
+  font-size: .75rem; font-weight: 700; color: white;
+}
+.mock-body { display: flex; min-height: 480px; }
+.mock-sidebar {
+  width: 220px; min-width: 220px;
+  background: var(--surface-1);
+  border-right: 1px solid var(--border);
+  padding: 16px 12px;
+}
+.mock-sidebar-item {
+  padding: 8px 12px;
+  border-radius: var(--radius);
+  color: var(--fg-muted);
+  font-size: .8rem;
+  font-weight: 500;
+  margin-bottom: 3px;
+  cursor: pointer;
+}
+.mock-sidebar-item.active { background: var(--primary-bg); color: var(--primary); border: 1px solid var(--primary-bd); }
+.mock-main { flex: 1; padding: 20px; }
+.mock-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.mock-card {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); overflow: hidden;
+}
+.mock-card-img { height: 90px; background: var(--surface-2); display: flex; align-items: center; justify-content: center; color: var(--fg-subtle); font-size: 1.5rem; }
+.mock-card-body { padding: 10px; }
+.mock-card-title { font-size: .75rem; font-weight: 600; color: var(--fg); margin-bottom: 4px; }
+.mock-card-price { font-size: .875rem; font-weight: 700; color: var(--primary); }
+
+/* hero */
+.mock-hero {
+  padding: 40px 28px 32px;
+  background: radial-gradient(ellipse 120% 80% at 50% 0%, rgba(30,158,255,.1) 0%, transparent 65%),
+              linear-gradient(180deg, var(--surface-1) 0%, var(--bg) 100%);
+  border-bottom: 1px solid var(--border);
+  text-align: center;
+}
+.mock-hero-title { font-size: 1.75rem; font-weight: 900; color: var(--fg); letter-spacing: -.03em; margin-bottom: 8px; }
+.mock-hero-title span { color: var(--primary); }
+.mock-hero-sub { font-size: .875rem; color: var(--fg-muted); margin-bottom: 20px; }
+.mock-hero-search {
+  display: flex; max-width: 520px; margin: 0 auto;
+  background: var(--surface-2); border: 1.5px solid var(--border);
+  border-radius: 100px; overflow: hidden;
+}
+.mock-hero-search input {
+  flex: 1; background: transparent; border: none; padding: 12px 20px;
+  color: var(--fg); font-size: .875rem; outline: none;
+}
+.mock-hero-search button {
+  background: var(--primary); border: none; padding: 12px 22px;
+  color: #050e1e; font-weight: 700; font-size: .875rem; cursor: pointer;
+}
+
+/* detail */
+.mock-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; padding: 20px; }
+.mock-detail-img { background: var(--surface-2); border: 1px solid var(--border); border-radius: var(--radius-lg); height: 280px; display: flex; align-items: center; justify-content: center; color: var(--fg-subtle); font-size: 3rem; }
+.mock-detail-info { display: flex; flex-direction: column; gap: 14px; }
+.mock-spec-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mock-spec {
+  background: var(--surface-2); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: 10px 12px;
+}
+.mock-spec-label { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; color: var(--fg-subtle); }
+.mock-spec-val   { font-size: .875rem; font-weight: 600; color: var(--fg); }
+
+/* auth */
+.mock-auth {
+  min-height: 400px;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(30,158,255,.07) 0%, transparent 70%),
+              var(--bg);
+  display: flex; align-items: center; justify-content: center; padding: 40px 24px;
+}
+.mock-auth-card {
+  background: var(--surface-1); border: 1px solid var(--border-s);
+  border-radius: var(--radius-xl); box-shadow: var(--shadow-lg), var(--glow-sm);
+  padding: 36px; width: 100%; max-width: 380px;
+}
+.mock-auth-title { font-size: 1.375rem; font-weight: 800; color: var(--fg); letter-spacing: -.02em; margin-bottom: 4px; }
+.mock-auth-sub   { font-size: .8rem; color: var(--fg-muted); margin-bottom: 24px; }
+
+/* forum */
+.mock-forum-cats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; padding: 20px; }
+.mock-forum-cat {
+  background: var(--surface-1); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 16px;
+  transition: all .25s;
+}
+.mock-forum-cat:hover { border-color: var(--border-s); box-shadow: var(--shadow-md), var(--glow-sm); transform: translateY(-2px); }
+.mock-forum-icon { width: 36px; height: 36px; border-radius: var(--radius); background: var(--primary-bg); border: 1px solid var(--primary-bd); display: flex; align-items: center; justify-content: center; color: var(--primary); font-size: 1rem; margin-bottom: 10px; }
+.mock-forum-name { font-size: .875rem; font-weight: 700; color: var(--fg); margin-bottom: 4px; }
+.mock-forum-desc { font-size: .75rem; color: var(--fg-muted); }
+
+/* admin */
+.mock-admin { padding: 20px; }
+.mock-stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 20px; }
+.mock-stat { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px; }
+.mock-stat-val { font-size: 1.75rem; font-weight: 800; color: var(--fg); letter-spacing: -.03em; }
+.mock-stat-label { font-size: .75rem; color: var(--fg-muted); font-weight: 500; }
+.mock-table { width: 100%; border-collapse: collapse; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow: hidden; }
+.mock-table th { background: var(--surface-2); color: var(--fg-subtle); font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; padding: 10px 14px; text-align: left; border-bottom: 1px solid var(--border); }
+.mock-table td { padding: 11px 14px; border-bottom: 1px solid var(--border); color: var(--fg); font-size: .8125rem; }
+.mock-table tr:last-child td { border-bottom: none; }
+.mock-table tbody tr:hover { background: var(--surface-2); }
+
+/* inbox */
+.mock-inbox { display: flex; height: 460px; }
+.mock-inbox-list { width: 300px; border-right: 1px solid var(--border); overflow-y: auto; }
+.mock-inbox-thread { padding: 14px 16px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .15s; }
+.mock-inbox-thread:hover { background: var(--surface-2); }
+.mock-inbox-thread.active { background: var(--primary-bg); border-left: 3px solid var(--primary); }
+.mock-inbox-sender { font-size: .8rem; font-weight: 600; color: var(--fg); margin-bottom: 3px; }
+.mock-inbox-preview { font-size: .75rem; color: var(--fg-muted); overflow: hidden; white-space: nowrap; text-overflow: ellipsis; }
+.mock-inbox-chat { flex: 1; display: flex; flex-direction: column; padding: 16px; gap: 10px; overflow-y: auto; }
+.chat-bubble { max-width: 65%; padding: 10px 14px; border-radius: var(--radius-lg); font-size: .8125rem; line-height: 1.5; }
+.chat-bubble.received { background: var(--surface-2); border: 1px solid var(--border); color: var(--fg); align-self: flex-start; border-bottom-left-radius: 4px; }
+.chat-bubble.sent { background: linear-gradient(135deg, var(--primary), #1890f4); color: #050e1e; align-self: flex-end; border-bottom-right-radius: 4px; font-weight: 500; }
+
+/* profile */
+.mock-profile-header { display: flex; align-items: center; gap: 16px; padding: 24px; background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-xl); margin: 20px; }
+.mock-avatar-lg { width: 64px; height: 64px; border-radius: 50%; background: linear-gradient(135deg, var(--primary), var(--accent)); display: flex; align-items: center; justify-content: center; font-size: 1.5rem; font-weight: 700; color: white; box-shadow: var(--glow-sm); }
+
+/* wizard */
+.mock-wizard { padding: 24px; }
+.mock-steps { display: flex; align-items: center; gap: 0; margin-bottom: 28px; }
+.mock-step { display: flex; align-items: center; flex: 1; }
+.mock-step-circle { width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: .8rem; font-weight: 700; flex-shrink: 0; }
+.mock-step-circle.done   { background: var(--success); color: white; }
+.mock-step-circle.active { background: var(--primary); color: #050e1e; box-shadow: var(--glow-sm); }
+.mock-step-circle.pend   { background: var(--surface-2); border: 2px solid var(--border); color: var(--fg-subtle); }
+.mock-step-line  { flex: 1; height: 2px; background: var(--border); margin: 0 8px; }
+.mock-step-line.done { background: var(--success); }
+.mock-wizard-body { background: var(--surface-1); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 24px; }
+
+/* toast */
+.mock-toast {
+  display: flex; align-items: flex-start; gap: 10px;
+  padding: 14px 16px; border-radius: var(--radius-lg);
+  background: var(--surface-2); border: 1px solid var(--border-s);
+  box-shadow: var(--shadow-lg), var(--glow-sm);
+  width: 320px; position: relative; overflow: hidden;
+}
+.mock-toast-success { border-color: rgba(34,197,94,.4); }
+.mock-toast-error   { border-color: rgba(239,68,68,.4); }
+.mock-toast-info    { border-color: rgba(30,158,255,.4); }
+.mock-toast-bar { position: absolute; bottom: 0; left: 0; height: 2px; }
+.mock-toast-bar-success { background: var(--success); width: 60%; }
+.mock-toast-bar-error   { background: var(--danger);  width: 30%; }
+.mock-toast-bar-info    { background: var(--primary); width: 75%; }
+.mock-toast-icon { font-size: 1rem; margin-top: 1px; }
+.mock-toast-msg { font-size: .8125rem; color: var(--fg); }
+
+/* misc */
+.grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
+.label-sm { font-size: .65rem; font-weight: 700; text-transform: uppercase; letter-spacing: .07em; color: var(--fg-subtle); margin-bottom: 10px; }
+.mt-12  { margin-top: 12px; }
+.mt-20  { margin-top: 20px; }
+.mt-28  { margin-top: 28px; }
+.mb-8   { margin-bottom: 8px; }
+.gap-10 { gap: 10px; }
+.flex   { display: flex; }
+.flex-col { flex-direction: column; }
+.items-center { align-items: center; }
+.flex-wrap { flex-wrap: wrap; }
+
+hr.section-rule { border: none; border-top: 1px solid var(--border); margin: 0; }
+</style>
+</head>
+<body>
+
+<!-- ── NAV ───────────────────────────────────────────────────── -->
+<nav class="doc-nav">
+  <div class="doc-nav-logo">Cue<span>Finder</span> <span style="color:var(--fg-subtle);font-weight:500;font-size:.75rem;margin-left:4px">Design Reference</span></div>
+  <a href="#tokens">Tokens</a>
+  <a href="#typography">Typography</a>
+  <a href="#buttons">Buttons</a>
+  <a href="#badges">Badges</a>
+  <a href="#inputs">Inputs</a>
+  <a href="#cards">Cards</a>
+  <a href="#toasts">Toasts</a>
+  <a href="#p-home">Home</a>
+  <a href="#p-detail">Detail</a>
+  <a href="#p-auth">Auth</a>
+  <a href="#p-forum">Forum</a>
+  <a href="#p-admin">Admin</a>
+  <a href="#p-inbox">Inbox</a>
+  <a href="#p-profile">Profile</a>
+  <a href="#p-wizard">Add Listing</a>
+</nav>
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 1 — DESIGN TOKENS                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="tokens">
+  <div class="section-title">Design Tokens</div>
+  <div class="section-subtitle">Core HSL color values and surface layers</div>
+
+  <div class="label-sm">Backgrounds & Surfaces</div>
+  <div class="token-grid mb-8">
+    <div class="token-swatch"><div class="token-color" style="background:#050e1e"></div><div class="token-info"><div class="token-name">background</div><div class="token-val">#050e1e</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#0b1628"></div><div class="token-info"><div class="token-name">surface-1</div><div class="token-val">#0b1628</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#111f35"></div><div class="token-info"><div class="token-name">surface-2</div><div class="token-val">#111f35</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#182a42"></div><div class="token-info"><div class="token-name">surface-3</div><div class="token-val">#182a42</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#21344f"></div><div class="token-info"><div class="token-name">surface-4</div><div class="token-val">#21344f</div></div></div>
+  </div>
+
+  <div class="label-sm mt-20">Brand Colors</div>
+  <div class="token-grid mb-8">
+    <div class="token-swatch"><div class="token-color" style="background:#1e9eff"></div><div class="token-info"><div class="token-name">primary</div><div class="token-val">#1e9eff</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#1890f4"></div><div class="token-info"><div class="token-name">primary-hover</div><div class="token-val">#1890f4</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#1d4d80"></div><div class="token-info"><div class="token-name">primary-muted</div><div class="token-val">#1d4d80</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#17caf4"></div><div class="token-info"><div class="token-name">accent / cyan</div><div class="token-val">#17caf4</div></div></div>
+  </div>
+
+  <div class="label-sm mt-20">Semantic Colors</div>
+  <div class="token-grid mb-8">
+    <div class="token-swatch"><div class="token-color" style="background:#22c55e"></div><div class="token-info"><div class="token-name">success</div><div class="token-val">#22c55e</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#f59e0b"></div><div class="token-info"><div class="token-name">warning</div><div class="token-val">#f59e0b</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#ef4444"></div><div class="token-info"><div class="token-name">destructive</div><div class="token-val">#ef4444</div></div></div>
+  </div>
+
+  <div class="label-sm mt-20">Text</div>
+  <div class="token-grid mb-8">
+    <div class="token-swatch"><div class="token-color" style="background:#f0f4fa"></div><div class="token-info"><div class="token-name">foreground</div><div class="token-val">#f0f4fa</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#a0b0c8"></div><div class="token-info"><div class="token-name">fg-muted</div><div class="token-val">#a0b0c8</div></div></div>
+    <div class="token-swatch"><div class="token-color" style="background:#6a82a0"></div><div class="token-info"><div class="token-name">fg-subtle</div><div class="token-val">#6a82a0</div></div></div>
+  </div>
+
+  <div class="label-sm mt-20">Radius Scale</div>
+  <div class="flex flex-wrap gap-10 mt-12">
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:4px;margin-bottom:6px"></div><div class="label-sm">xs 4px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:6px;margin-bottom:6px"></div><div class="label-sm">sm 6px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:10px;margin-bottom:6px"></div><div class="label-sm">md 10px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:14px;margin-bottom:6px"></div><div class="label-sm">lg 14px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:20px;margin-bottom:6px"></div><div class="label-sm">xl 20px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:28px;margin-bottom:6px"></div><div class="label-sm">2xl 28px</div></div>
+    <div style="text-align:center"><div style="width:48px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:50%;margin-bottom:6px"></div><div class="label-sm">full</div></div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 2 — TYPOGRAPHY                                     -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="typography">
+  <div class="section-title">Typography</div>
+  <div class="section-subtitle">Font: Inter (system fallback). All sizes use rem.</div>
+
+  <div class="type-row"><div class="type-meta">display / 3rem 900</div><div style="font-size:3rem;font-weight:900;letter-spacing:-.035em;color:var(--fg)">Find Your Perfect Cue</div></div>
+  <div class="type-row"><div class="type-meta">h1 / 2.25rem 800</div><div style="font-size:2.25rem;font-weight:800;letter-spacing:-.03em;color:var(--fg)">Cue Listings</div></div>
+  <div class="type-row"><div class="type-meta">h2 / 1.625rem 800</div><div style="font-size:1.625rem;font-weight:800;letter-spacing:-.025em;color:var(--fg)">Filter Results</div></div>
+  <div class="type-row"><div class="type-meta">h3 / 1.25rem 700</div><div style="font-size:1.25rem;font-weight:700;letter-spacing:-.02em;color:var(--fg)">Player Cues</div></div>
+  <div class="type-row"><div class="type-meta">h4 / 1rem 700</div><div style="font-size:1rem;font-weight:700;color:var(--fg)">Price Range</div></div>
+  <div class="type-row"><div class="type-meta">body / .9375rem 400</div><div style="font-size:.9375rem;color:var(--fg)">This is body text used for descriptions and general content throughout the application.</div></div>
+  <div class="type-row"><div class="type-meta">sm / .875rem 400</div><div style="font-size:.875rem;color:var(--fg-muted)">Secondary body text for metadata, captions, and supporting information.</div></div>
+  <div class="type-row"><div class="type-meta">xs / .75rem 600</div><div style="font-size:.75rem;font-weight:600;color:var(--fg-subtle)">Label text, timestamps, counters</div></div>
+  <div class="type-row"><div class="type-meta">caps / .65rem 700</div><div style="font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;color:var(--fg-subtle)">TABLE HEADER / SECTION LABEL</div></div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 3 — BUTTONS                                        -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="buttons">
+  <div class="section-title">Buttons</div>
+  <div class="section-subtitle">Variants, sizes, and states</div>
+
+  <div class="label-sm">Variants</div>
+  <div class="btn-row mt-12">
+    <button class="btn btn-primary">Primary Action</button>
+    <button class="btn btn-outline">Outline</button>
+    <button class="btn btn-ghost">Ghost</button>
+    <button class="btn btn-danger">Delete</button>
+    <button class="btn btn-success">Confirm</button>
+    <button class="btn btn-icon" title="Icon button">&#x2764;</button>
+  </div>
+
+  <div class="label-sm mt-28">Sizes</div>
+  <div class="btn-row mt-12">
+    <button class="btn btn-primary btn-sm">Small</button>
+    <button class="btn btn-primary">Default</button>
+    <button class="btn btn-primary btn-lg">Large</button>
+  </div>
+
+  <div class="label-sm mt-28">States</div>
+  <div class="btn-row mt-12">
+    <button class="btn btn-primary" disabled style="opacity:.5;cursor:not-allowed">Disabled</button>
+    <button class="btn btn-primary" style="transform:translateY(-1px);box-shadow:0 4px 16px rgba(30,158,255,.45)">Hover (simulated)</button>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 4 — BADGES                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="badges">
+  <div class="section-title">Badges & Status</div>
+  <div class="section-subtitle">Used for listing status, forum tags, and category labels</div>
+  <div class="btn-row mt-12">
+    <span class="badge badge-blue">Active</span>
+    <span class="badge badge-green">Available</span>
+    <span class="badge badge-red">Sold</span>
+    <span class="badge badge-amber">Pending</span>
+    <span class="badge badge-purple">Pinned</span>
+    <span class="badge badge-muted">Draft</span>
+    <span class="badge" style="background:rgba(23,202,244,.14);color:#67e8f9;border:1px solid rgba(23,202,244,.25)">New</span>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 5 — INPUTS                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="inputs">
+  <div class="section-title">Form Inputs</div>
+  <div class="section-subtitle">Text fields, select, and search — consistent styling across all forms</div>
+
+  <div class="grid-2">
+    <div>
+      <div class="input-group"><label class="form-label">Cue Title</label><input class="cf-input" placeholder="e.g. Predator 314-3 Shaft" /></div>
+      <div class="input-group"><label class="form-label">Price</label><input class="cf-input" type="number" placeholder="0.00" /></div>
+      <div class="input-group"><label class="form-label">Description</label><textarea class="cf-input" rows="3" style="resize:vertical" placeholder="Describe the item..."></textarea></div>
+      <div class="input-group">
+        <label class="form-label">Category</label>
+        <select class="cf-input">
+          <option>Player Cues</option>
+          <option>Break Cues</option>
+          <option>Jump Cues</option>
+          <option>Cue Cases</option>
+        </select>
+      </div>
+    </div>
+    <div>
+      <div class="label-sm mb-8">Search Bar</div>
+      <div style="display:flex;background:var(--surface-2);border:1.5px solid var(--border);border-radius:100px;overflow:hidden;margin-bottom:16px">
+        <input style="flex:1;background:transparent;border:none;padding:11px 18px;color:var(--fg);font-size:.875rem;outline:none;font-family:inherit" placeholder="Search cues, cases, accessories…" />
+        <button style="background:var(--primary);border:none;padding:11px 20px;color:#050e1e;font-weight:700;font-size:.875rem;cursor:pointer">Search</button>
+      </div>
+      <div class="label-sm mb-8">States</div>
+      <div class="input-group"><label class="form-label">Default</label><input class="cf-input" placeholder="Placeholder text" /></div>
+      <div class="input-group"><label class="form-label">Focus (simulated)</label><input class="cf-input" style="border-color:var(--primary);box-shadow:0 0 0 3px rgba(30,158,255,.12),0 0 14px rgba(30,158,255,.22)" value="Focused input" /></div>
+      <div class="input-group"><label class="form-label" style="color:var(--fg-subtle)">Disabled</label><input class="cf-input" disabled value="Disabled input" style="opacity:.45;cursor:not-allowed" /></div>
+      <div class="input-group"><label class="form-label" style="color:var(--danger)">Error</label><input class="cf-input" style="border-color:rgba(239,68,68,.5);box-shadow:0 0 0 3px rgba(239,68,68,.1)" value="Invalid value" /><div style="font-size:.75rem;color:var(--danger);margin-top:5px">This field is required</div></div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 6 — CARDS                                          -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="cards">
+  <div class="section-title">Listing Cards</div>
+  <div class="section-subtitle">Grid view and list view variants</div>
+  <div class="label-sm mb-8">Grid View</div>
+  <div class="card-demo-grid">
+    <div class="cf-card">
+      <div class="card-img">🎱</div>
+      <div class="card-body">
+        <div class="card-title">Predator BK3 Break Cue</div>
+        <div class="card-meta">Break Cue · Very Good condition</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="card-price">$280</div>
+          <span class="badge badge-green">Available</span>
+        </div>
+      </div>
+      <div class="card-footer"><span>📍 New York</span><span>2h ago</span></div>
+    </div>
+    <div class="cf-card">
+      <div class="card-img">🎱</div>
+      <div class="card-body">
+        <div class="card-title">Mezz EC7-WM Player Cue</div>
+        <div class="card-meta">Player Cue · Excellent condition</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="card-price">$650</div>
+          <span class="badge badge-blue">Active</span>
+        </div>
+      </div>
+      <div class="card-footer"><span>📍 Los Angeles</span><span>1d ago</span></div>
+    </div>
+    <div class="cf-card">
+      <div class="card-img">📦</div>
+      <div class="card-body">
+        <div class="card-title">Predator 8-Pocket Cue Case</div>
+        <div class="card-meta">Cue Case · Good condition</div>
+        <div style="display:flex;align-items:center;justify-content:space-between">
+          <div class="card-price">$120</div>
+          <span class="badge badge-amber">Pending</span>
+        </div>
+      </div>
+      <div class="card-footer"><span>📍 Chicago</span><span>3d ago</span></div>
+    </div>
+  </div>
+
+  <div class="label-sm mt-28 mb-8">List View</div>
+  <div style="display:flex;flex-direction:column;gap:10px">
+    <div style="display:flex;background:var(--surface-1);border:1px solid var(--border);border-radius:14px;overflow:hidden">
+      <div style="width:100px;min-width:100px;background:var(--surface-2);display:flex;align-items:center;justify-content:center;font-size:2rem">🎱</div>
+      <div style="flex:1;padding:14px 16px">
+        <div style="font-size:.9375rem;font-weight:600;color:var(--fg);margin-bottom:3px">Predator BK3 Break Cue</div>
+        <div style="font-size:.75rem;color:var(--fg-subtle);margin-bottom:8px">Break Cue · Very Good · New York · 2h ago</div>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div style="font-size:1.125rem;font-weight:700;color:var(--primary)">$280</div>
+          <span class="badge badge-green">Available</span>
+        </div>
+      </div>
+      <div style="padding:14px 16px;display:flex;align-items:center">
+        <button class="btn btn-outline btn-sm">View</button>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  SECTION 7 — TOASTS                                         -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="toasts">
+  <div class="section-title">Toast Notifications</div>
+  <div class="section-subtitle">Auto-dismiss with progress bar. Bottom-right placement.</div>
+  <div style="display:flex;flex-direction:column;gap:10px;max-width:340px">
+    <div class="mock-toast mock-toast-success">
+      <div class="mock-toast-icon" style="color:var(--success)">✓</div>
+      <div class="mock-toast-msg">Listing created successfully!</div>
+      <div class="mock-toast-bar mock-toast-bar-success"></div>
+    </div>
+    <div class="mock-toast mock-toast-error">
+      <div class="mock-toast-icon" style="color:var(--danger)">✕</div>
+      <div class="mock-toast-msg">Failed to save changes. Please try again.</div>
+      <div class="mock-toast-bar mock-toast-bar-error"></div>
+    </div>
+    <div class="mock-toast mock-toast-info">
+      <div class="mock-toast-icon" style="color:var(--primary)">ℹ</div>
+      <div class="mock-toast-msg">You have 3 new messages in your inbox.</div>
+      <div class="mock-toast-bar mock-toast-bar-info"></div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — HOME / LISTINGS                                     -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-home">
+  <div class="section-title">Page — Home / Listings</div>
+  <div class="section-subtitle">Main marketplace page with sidebar filters and cue grid</div>
+  <div class="mockup-frame">
+    <!-- header -->
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-search">🔍 <span style="color:var(--fg-subtle);font-size:.8rem">Search cues, cases…</span></div>
+      <div class="mock-spacer"></div>
+      <button class="btn btn-outline btn-sm" style="margin-right:8px">Sign In</button>
+      <button class="btn btn-primary btn-sm">Post Listing</button>
+    </div>
+    <!-- hero -->
+    <div class="mock-hero">
+      <div class="mock-hero-title">Find Your Perfect <span>Cue</span></div>
+      <div class="mock-hero-sub">Browse thousands of player cues, break cues, accessories, and more from trusted sellers.</div>
+      <div class="mock-hero-search">
+        <input placeholder="Search by brand, model, or keyword…" />
+        <button>Search</button>
+      </div>
+    </div>
+    <!-- body -->
+    <div class="mock-body">
+      <div class="mock-sidebar">
+        <div style="font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-subtle);padding:4px 12px 8px">Categories</div>
+        <div class="mock-sidebar-item active">🎱 Player Cues</div>
+        <div class="mock-sidebar-item">💥 Break Cues</div>
+        <div class="mock-sidebar-item">⬆ Jump Cues</div>
+        <div class="mock-sidebar-item">📦 Cue Cases</div>
+        <div class="mock-sidebar-item">🎯 Accessories</div>
+        <div class="mock-sidebar-item">🪵 Billiard Tables</div>
+        <div style="margin-top:16px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-subtle);padding:4px 12px 8px">Price</div>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:10px;padding:12px;margin:0 2px">
+          <input type="range" min="0" max="5000" value="1200" style="width:100%;accent-color:var(--primary)" />
+          <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--fg-subtle);margin-top:6px"><span>$0</span><span style="color:var(--primary);font-weight:600">$1,200</span><span>$5,000</span></div>
+        </div>
+        <div style="margin-top:16px;font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--fg-subtle);padding:4px 12px 8px">Condition</div>
+        <div class="mock-sidebar-item active">All Conditions</div>
+        <div class="mock-sidebar-item">Mint</div>
+        <div class="mock-sidebar-item">Excellent</div>
+        <div class="mock-sidebar-item">Very Good</div>
+        <div class="mock-sidebar-item">Good</div>
+      </div>
+      <div class="mock-main">
+        <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+          <div style="font-size:.8rem;color:var(--fg-muted)">Showing <strong style="color:var(--fg)">142</strong> results</div>
+          <div style="display:flex;gap:8px">
+            <select class="cf-input" style="width:auto;padding:6px 10px;font-size:.75rem">
+              <option>Newest First</option>
+              <option>Price: Low to High</option>
+              <option>Price: High to Low</option>
+            </select>
+            <button class="btn btn-icon" style="width:32px;height:32px">⊞</button>
+            <button class="btn btn-icon" style="width:32px;height:32px;background:var(--primary-bg);color:var(--primary);border-color:var(--primary-bd)">☰</button>
+          </div>
+        </div>
+        <div class="mock-grid">
+          <div class="mock-card"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Predator BK3</div><div class="mock-card-price">$280</div></div></div>
+          <div class="mock-card"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Mezz EC7-WM</div><div class="mock-card-price">$650</div></div></div>
+          <div class="mock-card"><div class="mock-card-img">📦</div><div class="mock-card-body"><div class="mock-card-title">Predator Case</div><div class="mock-card-price">$120</div></div></div>
+          <div class="mock-card"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Lucasi Custom</div><div class="mock-card-price">$340</div></div></div>
+          <div class="mock-card"><div class="mock-card-img">🎯</div><div class="mock-card-body"><div class="mock-card-title">Kamui Tip (set)</div><div class="mock-card-price">$45</div></div></div>
+          <div class="mock-card"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Schon STL15</div><div class="mock-card-price">$420</div></div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — DETAIL                                              -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-detail">
+  <div class="section-title">Page — Listing Detail</div>
+  <div class="section-subtitle">Full item page with images, specs, price, and contact</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar">J</div>
+    </div>
+    <div class="mock-detail-grid">
+      <div>
+        <div class="mock-detail-img">🎱</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <div style="width:60px;height:48px;background:var(--surface-2);border:1px solid var(--primary);border-radius:var(--radius-sm)"></div>
+          <div style="width:60px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+          <div style="width:60px;height:48px;background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-sm)"></div>
+        </div>
+      </div>
+      <div class="mock-detail-info">
+        <div>
+          <div style="font-size:1.5rem;font-weight:800;color:var(--fg);letter-spacing:-.025em;margin-bottom:6px">Predator BK3 Break Cue</div>
+          <div style="display:flex;gap:8px;align-items:center;margin-bottom:12px">
+            <span class="badge badge-green">Available</span>
+            <span class="badge badge-blue">Break Cue</span>
+            <span style="font-size:.75rem;color:var(--fg-subtle)">Very Good</span>
+          </div>
+          <div style="font-size:2rem;font-weight:800;color:var(--primary);letter-spacing:-.03em;margin-bottom:16px">$280</div>
+        </div>
+        <div class="mock-spec-grid">
+          <div class="mock-spec"><div class="mock-spec-label">Brand</div><div class="mock-spec-val">Predator</div></div>
+          <div class="mock-spec"><div class="mock-spec-label">Model</div><div class="mock-spec-val">BK3</div></div>
+          <div class="mock-spec"><div class="mock-spec-label">Weight</div><div class="mock-spec-val">19 oz</div></div>
+          <div class="mock-spec"><div class="mock-spec-label">Length</div><div class="mock-spec-val">58"</div></div>
+          <div class="mock-spec"><div class="mock-spec-label">Tip</div><div class="mock-spec-val">Triangle</div></div>
+          <div class="mock-spec"><div class="mock-spec-label">Wrap</div><div class="mock-spec-val">Irish Linen</div></div>
+        </div>
+        <div style="display:flex;gap:10px;margin-top:4px">
+          <button class="btn btn-primary" style="flex:1">Send Message</button>
+          <button class="btn btn-outline">Save</button>
+        </div>
+        <div style="background:var(--surface-2);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px;margin-top:4px">
+          <div style="font-size:.75rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle);margin-bottom:8px">Seller</div>
+          <div style="display:flex;align-items:center;gap:10px">
+            <div style="width:36px;height:36px;border-radius:50%;background:linear-gradient(135deg,var(--primary),var(--accent));display:flex;align-items:center;justify-content:center;font-weight:700;font-size:.8rem;color:white">JD</div>
+            <div><div style="font-size:.875rem;font-weight:600;color:var(--fg)">John D.</div><div style="font-size:.75rem;color:var(--fg-subtle)">Member since 2022 · 4.9★</div></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — AUTH                                                -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-auth">
+  <div class="section-title">Page — Sign In / Register</div>
+  <div class="section-subtitle">Auth card centered on a gradient background</div>
+  <div class="mockup-frame">
+    <div class="mock-auth">
+      <div class="mock-auth-card">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:1.5rem;font-weight:800;color:var(--fg);letter-spacing:-.03em;margin-bottom:2px">Cue<span style="color:var(--primary)">Finder</span></div>
+        </div>
+        <div class="mock-auth-title">Welcome back</div>
+        <div class="mock-auth-sub">Sign in to your account to continue</div>
+        <div class="input-group"><label class="form-label">Email</label><input class="cf-input" placeholder="you@example.com" /></div>
+        <div class="input-group"><label class="form-label">Password</label><input class="cf-input" type="password" placeholder="••••••••" /></div>
+        <div style="text-align:right;margin:-8px 0 16px"><a href="#" style="font-size:.8rem;color:var(--primary);text-decoration:none">Forgot password?</a></div>
+        <button class="btn btn-primary" style="width:100%">Sign In</button>
+        <div style="display:flex;align-items:center;gap:12px;margin:16px 0;color:var(--fg-subtle);font-size:.75rem"><div style="flex:1;border-top:1px solid var(--border)"></div>or<div style="flex:1;border-top:1px solid var(--border)"></div></div>
+        <button class="btn btn-outline" style="width:100%">Continue with Google</button>
+        <div style="text-align:center;font-size:.8rem;color:var(--fg-muted);margin-top:20px">Don't have an account? <a href="#" style="color:var(--primary);font-weight:600">Sign up</a></div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — FORUM                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-forum">
+  <div class="section-title">Page — Forum</div>
+  <div class="section-subtitle">Category grid and discussion threads</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar">J</div>
+    </div>
+    <div style="padding:24px 24px 16px;background:linear-gradient(180deg,rgba(30,158,255,.06) 0%,transparent 100%);border-bottom:1px solid var(--border)">
+      <div style="font-size:1.5rem;font-weight:800;color:var(--fg);letter-spacing:-.025em;margin-bottom:4px">💬 Community Forum</div>
+      <div style="font-size:.875rem;color:var(--fg-muted)">Discuss cues, techniques, and the game with fellow players</div>
+    </div>
+    <div class="mock-forum-cats">
+      <div class="mock-forum-cat">
+        <div class="mock-forum-icon">🎱</div>
+        <div class="mock-forum-name">Equipment Talk</div>
+        <div class="mock-forum-desc">Discuss cues, tips, and gear</div>
+        <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--fg-subtle);margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <span>124 threads</span><span>843 posts</span>
+        </div>
+      </div>
+      <div class="mock-forum-cat">
+        <div class="mock-forum-icon">📖</div>
+        <div class="mock-forum-name">Technique & Training</div>
+        <div class="mock-forum-desc">Tips, drills and improvement</div>
+        <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--fg-subtle);margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <span>87 threads</span><span>512 posts</span>
+        </div>
+      </div>
+      <div class="mock-forum-cat">
+        <div class="mock-forum-icon">🏆</div>
+        <div class="mock-forum-name">Tournaments</div>
+        <div class="mock-forum-desc">News, results, and schedules</div>
+        <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--fg-subtle);margin-top:12px;padding-top:10px;border-top:1px solid var(--border)">
+          <span>56 threads</span><span>291 posts</span>
+        </div>
+      </div>
+    </div>
+    <div style="padding:8px 24px 20px">
+      <div style="font-size:.9rem;font-weight:700;color:var(--fg);margin-bottom:10px">Recent Discussions</div>
+      <div style="display:flex;flex-direction:column;gap:8px">
+        <div style="background:var(--surface-1);border:1px solid var(--border);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1"><div style="font-size:.875rem;font-weight:600;color:var(--fg);margin-bottom:3px">Best break cue shaft for power?</div><div style="font-size:.75rem;color:var(--fg-subtle)">by player99 · 2h ago · 14 replies</div></div>
+          <span class="badge badge-amber">Hot</span>
+        </div>
+        <div style="background:var(--surface-1);border:1px solid var(--border);border-left:3px solid var(--primary);border-radius:var(--radius-lg);padding:14px 18px;display:flex;align-items:center;gap:12px">
+          <div style="flex:1"><div style="font-size:.875rem;font-weight:600;color:var(--fg);margin-bottom:3px">Tips for consistent stroke</div><div style="font-size:.75rem;color:var(--fg-subtle)">by cuepro · 1d ago · 28 replies</div></div>
+          <span class="badge badge-purple">Pinned</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — ADMIN                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-admin">
+  <div class="section-title">Page — Admin Dashboard</div>
+  <div class="section-subtitle">Stats overview and user / listing management tables</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span> <span style="font-size:.7rem;color:var(--fg-subtle);font-weight:500">Admin</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar" style="background:linear-gradient(135deg,var(--danger),#c0392b)">A</div>
+    </div>
+    <div class="mock-admin">
+      <div class="mock-stats">
+        <div class="mock-stat"><div class="mock-stat-val" style="color:var(--primary)">1,284</div><div class="mock-stat-label">Total Users</div></div>
+        <div class="mock-stat"><div class="mock-stat-val" style="color:var(--success)">347</div><div class="mock-stat-label">Active Listings</div></div>
+        <div class="mock-stat"><div class="mock-stat-val" style="color:var(--warning)">12</div><div class="mock-stat-label">Pending Review</div></div>
+        <div class="mock-stat"><div class="mock-stat-val" style="color:var(--danger)">3</div><div class="mock-stat-label">Reports</div></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-bottom:14px">
+        <button class="btn btn-primary btn-sm">Users</button>
+        <button class="btn btn-outline btn-sm">Listings</button>
+        <button class="btn btn-outline btn-sm">Reports</button>
+      </div>
+      <table class="mock-table">
+        <thead><tr><th>User</th><th>Email</th><th>Status</th><th>Joined</th><th>Actions</th></tr></thead>
+        <tbody>
+          <tr><td>John Doe</td><td>john@email.com</td><td><span class="badge badge-green">Active</span></td><td style="color:var(--fg-subtle)">Jan 2024</td><td><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-danger btn-sm">Ban</button></div></td></tr>
+          <tr><td>Maria S.</td><td>maria@email.com</td><td><span class="badge badge-amber">Pending</span></td><td style="color:var(--fg-subtle)">Feb 2024</td><td><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-danger btn-sm">Ban</button></div></td></tr>
+          <tr><td>Alex K.</td><td>alex@email.com</td><td><span class="badge badge-red">Banned</span></td><td style="color:var(--fg-subtle)">Mar 2024</td><td><div style="display:flex;gap:6px"><button class="btn btn-outline btn-sm">Edit</button><button class="btn btn-success btn-sm">Unban</button></div></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — INBOX                                               -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-inbox">
+  <div class="section-title">Page — Inbox / Messaging</div>
+  <div class="section-subtitle">Thread list on the left, chat view on the right</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar">J</div>
+    </div>
+    <div class="mock-inbox">
+      <div class="mock-inbox-list">
+        <div style="padding:12px 14px;border-bottom:1px solid var(--border);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--fg-subtle)">Messages</div>
+        <div class="mock-inbox-thread active">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="mock-inbox-sender">Maria S.</div>
+            <div style="font-size:.65rem;color:var(--fg-subtle)">2h ago</div>
+          </div>
+          <div class="mock-inbox-preview">Is the Predator BK3 still available?</div>
+        </div>
+        <div class="mock-inbox-thread">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="mock-inbox-sender">Alex K.</div>
+            <div style="font-size:.65rem;color:var(--fg-subtle)">1d ago</div>
+          </div>
+          <div class="mock-inbox-preview">Would you take $250 for the cue?</div>
+        </div>
+        <div class="mock-inbox-thread">
+          <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+            <div class="mock-inbox-sender">CuePro99</div>
+            <div style="font-size:.65rem;color:var(--fg-subtle)">3d ago</div>
+          </div>
+          <div class="mock-inbox-preview">Thanks for the fast shipping!</div>
+        </div>
+      </div>
+      <div class="mock-inbox-chat">
+        <div style="padding-bottom:10px;border-bottom:1px solid var(--border);margin-bottom:4px;font-size:.875rem;font-weight:600;color:var(--fg)">Maria S. <span style="font-size:.75rem;font-weight:400;color:var(--fg-subtle)">— Predator BK3</span></div>
+        <div class="chat-bubble received">Is the Predator BK3 still available? I'm very interested!</div>
+        <div class="chat-bubble sent">Yes, still available! Feel free to ask any questions.</div>
+        <div class="chat-bubble received">Would you consider $260 shipped?</div>
+        <div class="chat-bubble sent">I can do $270 shipped, that's my best offer.</div>
+        <div style="margin-top:auto;display:flex;gap:8px">
+          <input class="cf-input" placeholder="Type a message…" style="flex:1" />
+          <button class="btn btn-primary btn-sm">Send</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — PROFILE                                             -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-profile">
+  <div class="section-title">Page — User Profile</div>
+  <div class="section-subtitle">Account info, stats, and user's active listings</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar">J</div>
+    </div>
+    <div class="mock-profile-header">
+      <div class="mock-avatar-lg">JD</div>
+      <div>
+        <div style="font-size:1.25rem;font-weight:800;color:var(--fg);letter-spacing:-.02em">John Doe</div>
+        <div style="font-size:.8rem;color:var(--fg-muted);margin-top:2px">Member since January 2022 · New York</div>
+        <div style="display:flex;gap:8px;margin-top:8px">
+          <span class="badge badge-green">Verified</span>
+          <span class="badge badge-blue">Seller</span>
+        </div>
+      </div>
+      <div style="margin-left:auto;display:flex;gap:16px">
+        <div style="text-align:center"><div style="font-size:1.25rem;font-weight:800;color:var(--fg)">24</div><div style="font-size:.7rem;color:var(--fg-subtle)">Listings</div></div>
+        <div style="text-align:center"><div style="font-size:1.25rem;font-weight:800;color:var(--fg)">4.9</div><div style="font-size:.7rem;color:var(--fg-subtle)">Rating</div></div>
+        <div style="text-align:center"><div style="font-size:1.25rem;font-weight:800;color:var(--fg)">18</div><div style="font-size:.7rem;color:var(--fg-subtle)">Sales</div></div>
+      </div>
+      <button class="btn btn-outline btn-sm" style="margin-left:16px">Edit Profile</button>
+    </div>
+    <div style="padding:0 20px 24px">
+      <div style="display:flex;gap:8px;margin-bottom:16px">
+        <button class="btn btn-primary btn-sm">My Listings</button>
+        <button class="btn btn-outline btn-sm">Settings</button>
+        <button class="btn btn-outline btn-sm">Notifications</button>
+      </div>
+      <div class="mock-grid">
+        <div class="mock-card"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Predator BK3</div><div class="mock-card-price">$280</div></div></div>
+        <div class="mock-card"><div class="mock-card-img">📦</div><div class="mock-card-body"><div class="mock-card-title">8-Pocket Case</div><div class="mock-card-price">$120</div></div></div>
+        <div class="mock-card" style="opacity:.5"><div class="mock-card-img">🎱</div><div class="mock-card-body"><div class="mock-card-title">Lucasi Custom</div><div style="font-size:.8rem;color:var(--danger)">Sold</div></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+<hr class="section-rule">
+
+<!-- ════════════════════════════════════════════════════════════ -->
+<!--  PAGE — ADD LISTING WIZARD                                  -->
+<!-- ════════════════════════════════════════════════════════════ -->
+<div class="section" id="p-wizard">
+  <div class="section-title">Page — Add Listing (Form Wizard)</div>
+  <div class="section-subtitle">Multi-step form with step indicator</div>
+  <div class="mockup-frame">
+    <div class="mock-header">
+      <div class="mock-logo">Cue<span>Finder</span></div>
+      <div class="mock-spacer"></div>
+      <div class="mock-avatar">J</div>
+    </div>
+    <div class="mock-wizard">
+      <div style="font-size:1.25rem;font-weight:800;color:var(--fg);letter-spacing:-.025em;margin-bottom:20px">Create New Listing</div>
+      <div class="mock-steps">
+        <div class="mock-step"><div class="mock-step-circle done">✓</div><div class="mock-step-line done"></div></div>
+        <div class="mock-step"><div class="mock-step-circle done">✓</div><div class="mock-step-line"></div></div>
+        <div class="mock-step"><div class="mock-step-circle active">3</div><div class="mock-step-line"></div></div>
+        <div class="mock-step"><div class="mock-step-circle pend">4</div></div>
+      </div>
+      <div style="display:flex;justify-content:space-between;font-size:.7rem;color:var(--fg-subtle);margin-bottom:20px;padding:0 2px">
+        <span>Product Type</span><span>Basic Info</span><span style="color:var(--primary);font-weight:700">Specifications</span><span>Photos</span>
+      </div>
+      <div class="mock-wizard-body">
+        <div style="font-size:1rem;font-weight:700;color:var(--fg);margin-bottom:16px">Cue Specifications</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="input-group"><label class="form-label">Brand</label><input class="cf-input" placeholder="e.g. Predator" /></div>
+          <div class="input-group"><label class="form-label">Model</label><input class="cf-input" placeholder="e.g. BK3" /></div>
+          <div class="input-group"><label class="form-label">Weight (oz)</label><input class="cf-input" type="number" placeholder="19" /></div>
+          <div class="input-group"><label class="form-label">Length (inches)</label><input class="cf-input" type="number" placeholder="58" /></div>
+          <div class="input-group"><label class="form-label">Tip</label><select class="cf-input"><option>Triangle</option><option>Moori</option><option>Kamui</option></select></div>
+          <div class="input-group"><label class="form-label">Wrap</label><select class="cf-input"><option>Irish Linen</option><option>Leather</option><option>No Wrap</option></select></div>
+        </div>
+      </div>
+      <div style="display:flex;justify-content:space-between;margin-top:20px">
+        <button class="btn btn-outline">← Back</button>
+        <button class="btn btn-primary">Continue →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div style="background:var(--surface-1);border-top:1px solid var(--border);padding:24px;text-align:center;color:var(--fg-subtle);font-size:.8rem">
+  CueFinder Design Reference · Generated from design-system.css · All values from CSS custom properties
+</div>
+
+</body>
+</html>
