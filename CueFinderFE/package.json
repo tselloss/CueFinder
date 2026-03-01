@@ -17,10 +17,10 @@
     "clean": "pnpm -r --parallel run clean && pnpm clean"
   },
   "devDependencies": {
-    "pnpm": "^8.0.0"
+    "pnpm": "^10.0.0"
   },
   "engines": {
-    "pnpm": ">=8.0.0",
+    "pnpm": ">=10.0.0",
     "node": ">=18.0.0"
   }
 }
