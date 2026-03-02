@@ -18,6 +18,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CueFinder.Database\CueFinder.Database.csproj" />
     <ProjectReference Include="..\CueFinder.Extensions\CueFinder.Extensions\CueFinder.Extensions.csproj" />
+    <ProjectReference Include="..\CueFinder.Messages\CueFinder.Messages.csproj" />
   </ItemGroup>
 
 </Project>

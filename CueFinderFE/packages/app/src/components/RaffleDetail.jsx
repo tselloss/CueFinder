@@ -22,6 +22,26 @@ const PAYMENT_LABELS = {
   acceptDM:           'DM Seller',
 };
 
+// Options a buyer sees when claiming a spot
+const PAYMENT_OPTIONS = [
+  { flag: 'acceptPayPal',       value: 'paypal',        label: 'PayPal' },
+  { flag: 'acceptRevolut',      value: 'revolut',       label: 'Revolut' },
+  { flag: 'acceptBankTransfer', value: 'bankTransfer',  label: 'Bank Transfer / SEPA' },
+  { flag: 'acceptViva',         value: 'viva',          label: 'Viva Wallet' },
+  { flag: 'acceptIris',         value: 'iris',          label: 'IRIS Pay' },
+  { flag: 'acceptDM',           value: 'dm',            label: 'Arrange via DM' },
+];
+
+const METHOD_LABEL = Object.fromEntries(PAYMENT_OPTIONS.map(m => [m.value, m.label]));
+
+function formatTimeLeft(expiresAt) {
+  const ms = new Date(expiresAt) - new Date();
+  if (ms <= 0) return 'Expired';
+  const h = Math.floor(ms / 3600000);
+  const m = Math.floor((ms % 3600000) / 60000);
+  return h > 0 ? `${h}h ${m}m left` : `${m}m left`;
+}
+
 export default function RaffleDetail({ onBack }) {
   const { id } = useParams();
   const { user } = useAuth();
@@ -32,6 +52,7 @@ export default function RaffleDetail({ onBack }) {
   const [error, setError] = useState('');
 
   const [selectedSpot, setSelectedSpot] = useState(null);
+  const [selectedMethod, setSelectedMethod] = useState('');
   const [entering, setEntering] = useState(false);
   const [enterError, setEnterError] = useState('');
   const [enterSuccess, setEnterSuccess] = useState('');
@@ -69,14 +90,15 @@ export default function RaffleDetail({ onBack }) {
   const isDrawn     = raffle?.status === 'drawn';
 
   async function handleEnter() {
-    if (!selectedSpot) return;
+    if (!selectedSpot || !selectedMethod) return;
     setEnterError('');
     setEnterSuccess('');
     try {
       setEntering(true);
-      await raffleService.enterRaffle(raffle.id, selectedSpot);
-      setEnterSuccess(`✅ You claimed spot #${selectedSpot}! Send payment to confirm your entry.`);
+      await raffleService.enterRaffle(raffle.id, selectedSpot, selectedMethod);
+      setEnterSuccess(`✅ Spot #${selectedSpot} claimed! The seller has been notified. You have 36 hours to complete payment.`);
       setSelectedSpot(null);
+      setSelectedMethod('');
       await load();
     } catch (err) {
       setEnterError(err?.response?.data?.message || 'Failed to claim spot.');
@@ -93,19 +115,7 @@ export default function RaffleDetail({ onBack }) {
       setRaffle(updated);
       setShowWheel(true);
 
-      // Auto-message the winner
-      if (updated.winnerId) {
-        const paymentLine = updated.paymentDetails
-          ? `\n\nPayment details:\n${updated.paymentDetails}`
-          : '';
-        await messageService.sendMessage({
-          recipientId: updated.winnerId,
-          cueId: null,
-          subject: `🏆 You won the raffle: ${updated.title}`,
-          content: `Congratulations @${updated.winnerUsername}! 🎉\n\nYou won the raffle "${updated.title}" with spot #${updated.winnerSpotNumber}!\n\nPlease arrange payment with me so I can ship the item to you.${paymentLine}`,
-          messageType: 'message',
-        }).catch(() => {}); // don't block the draw if messaging fails
-      }
+      // Winner is notified server-side via system message
     } catch (err) {
       alert(err?.response?.data?.message || 'Failed to draw winner.');
     } finally {
@@ -388,32 +398,51 @@ export default function RaffleDetail({ onBack }) {
           {/* Entry panel */}
           {isOpen && user && !isOrganizer && (
             <div className="mt-4 p-4 bg-surface-2 border border-white/10 rounded-xl">
-              {selectedSpot ? (
-                <>
-                  <p className="text-white font-semibold mb-2">Claim Spot #{selectedSpot}</p>
-                  <p className="text-gray-400 text-sm mb-3">
-                    Cost: <span className="text-primary font-bold">€{raffle.pricePerSpot}</span>.
-                    After claiming, send payment to the organizer using one of the accepted methods.
-                  </p>
-                  {enterError && <p className="text-red-400 text-sm mb-2">{enterError}</p>}
-                  {enterSuccess && <p className="text-green-400 text-sm mb-2">{enterSuccess}</p>}
-                  <div className="flex gap-2">
-                    <button
-                      onClick={handleEnter}
-                      disabled={entering}
-                      className="flex-1 py-2 rounded-lg bg-primary hover:bg-primary/80 text-white font-semibold transition disabled:opacity-50"
-                    >
-                      {entering ? 'Claiming…' : `Claim Spot #${selectedSpot}`}
-                    </button>
-                    <button
-                      onClick={() => setSelectedSpot(null)}
-                      className="px-3 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white transition"
-                    >
-                      Cancel
-                    </button>
-                  </div>
-                </>
-              ) : (
+              {selectedSpot ? (() => {
+                const availableMethods = PAYMENT_OPTIONS.filter(m => raffle[m.flag]);
+                return (
+                  <>
+                    <p className="text-white font-semibold mb-1">Claim Spot #{selectedSpot}</p>
+                    <p className="text-gray-400 text-xs mb-3">
+                      Cost: <span className="text-primary font-semibold">€{raffle.pricePerSpot}</span> · 36h to complete payment
+                    </p>
+                    <p className="text-xs text-gray-300 mb-2 font-medium">How will you pay?</p>
+                    <div className="grid grid-cols-2 gap-1.5 mb-3">
+                      {availableMethods.map(m => (
+                        <button
+                          key={m.value}
+                          type="button"
+                          onClick={() => setSelectedMethod(m.value)}
+                          className={`text-xs px-2 py-2 rounded-lg border transition text-left ${
+                            selectedMethod === m.value
+                              ? 'border-primary bg-primary/20 text-white font-semibold'
+                              : 'border-white/10 bg-black/20 text-gray-400 hover:border-white/30'
+                          }`}
+                        >
+                          {m.label}
+                        </button>
+                      ))}
+                    </div>
+                    {enterError && <p className="text-red-400 text-xs mb-2">{enterError}</p>}
+                    {enterSuccess && <p className="text-green-400 text-xs mb-2">{enterSuccess}</p>}
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleEnter}
+                        disabled={entering || !selectedMethod}
+                        className="flex-1 py-2 rounded-lg bg-primary hover:bg-primary/80 text-white font-semibold text-sm transition disabled:opacity-50"
+                      >
+                        {entering ? 'Claiming…' : `Claim Spot #${selectedSpot}`}
+                      </button>
+                      <button
+                        onClick={() => { setSelectedSpot(null); setSelectedMethod(''); }}
+                        className="px-3 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white transition text-sm"
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </>
+                );
+              })() : (
                 <p className="text-gray-400 text-sm text-center">Click an available spot to enter</p>
               )}
             </div>
@@ -437,14 +466,22 @@ export default function RaffleDetail({ onBack }) {
               <p className="text-sm text-gray-400 mb-2">Your spots</p>
               <div className="space-y-2">
                 {myEntries.map(e => (
-                  <div key={e.id} className="flex items-center justify-between p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
-                    <span className="text-white font-semibold">Spot #{e.spotNumber}</span>
-                    <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
-                      e.status === 'paid' ? 'bg-green-500/20 text-green-400' :
-                      'bg-yellow-500/20 text-yellow-400'
-                    }`}>
-                      {e.status === 'paid' ? '✓ Paid' : 'Pending payment'}
-                    </span>
+                  <div key={e.id} className="p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
+                    <div className="flex items-center justify-between">
+                      <span className="text-white font-semibold">Spot #{e.spotNumber}</span>
+                      <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                        e.status === 'paid' ? 'bg-green-500/20 text-green-400' :
+                        'bg-yellow-500/20 text-yellow-400'
+                      }`}>
+                        {e.status === 'paid' ? '✓ Paid' : 'Pending payment'}
+                      </span>
+                    </div>
+                    {e.paymentMethod && (
+                      <p className="text-gray-500 text-xs mt-1">via {METHOD_LABEL[e.paymentMethod] || e.paymentMethod}</p>
+                    )}
+                    {e.status === 'pending' && e.pendingExpiresAt && (
+                      <p className="text-orange-400 text-xs mt-0.5">⏱ {formatTimeLeft(e.pendingExpiresAt)}</p>
+                    )}
                   </div>
                 ))}
               </div>
@@ -501,7 +538,17 @@ export default function RaffleDetail({ onBack }) {
                 {pendingEntries.map(e => (
                   <div key={e.id} className="p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-white">Spot #{e.spotNumber} — @{e.username}</span>
+                      <div>
+                        <span className="text-white">Spot #{e.spotNumber} — @{e.username}</span>
+                        {e.paymentMethod && (
+                          <span className="ml-2 text-xs text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
+                            {METHOD_LABEL[e.paymentMethod] || e.paymentMethod}
+                          </span>
+                        )}
+                        {e.pendingExpiresAt && (
+                          <span className="ml-1 text-xs text-orange-400">· {formatTimeLeft(e.pendingExpiresAt)}</span>
+                        )}
+                      </div>
                       <button
                         onClick={() => setVerifyEntryId(verifyEntryId === e.id ? null : e.id)}
                         className="text-xs text-primary hover:underline"

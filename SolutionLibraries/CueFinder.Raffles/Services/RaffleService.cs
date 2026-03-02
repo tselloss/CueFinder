@@ -1,4 +1,5 @@
 using CueFinder.Database.Context;
+using CueFinder.Messages.Services;
 using CueFinder.Raffles.Interfaces;
 using CueFinder.Raffles.Models;
 using Microsoft.Extensions.Logging;
@@ -15,11 +16,13 @@ namespace CueFinder.Raffles.Services;
 public partial class RaffleService : IRaffleService
 {
     private readonly CueFinderDbContext _context;
+    private readonly IMessageService _messages;
     private readonly ILogger<RaffleService> _logger;
 
-    public RaffleService(CueFinderDbContext context, ILogger<RaffleService> logger)
+    public RaffleService(CueFinderDbContext context, IMessageService messages, ILogger<RaffleService> logger)
     {
         _context = context;
+        _messages = messages;
         _logger = logger;
     }
 }

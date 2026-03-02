@@ -5,10 +5,18 @@ namespace CueFinder.Raffles.Services;
 
 public partial class RaffleService
 {
+    private static readonly TimeSpan PendingTtl = TimeSpan.FromHours(36);
+
     private RaffleResponseDto MapToDto(Raffle r)
     {
-        var claimed = r.Entries.Count;
-        var paid    = r.Entries.Count(e => e.Status == "paid");
+        var now = DateTime.UtcNow;
+        // Exclude pending entries whose 36-hour window has elapsed (lazy expiry)
+        var activeEntries = r.Entries
+            .Where(e => e.Status != "pending" || e.CreatedAt.Add(PendingTtl) >= now)
+            .ToList();
+
+        var claimed = activeEntries.Count;
+        var paid    = activeEntries.Count(e => e.Status == "paid");
 
         return new RaffleResponseDto
         {
@@ -47,7 +55,7 @@ public partial class RaffleService
             TotalPaid = paid,
             SpotsAvailable = r.TotalSpots - claimed,
 
-            Entries = r.Entries
+            Entries = activeEntries
                 .OrderBy(e => e.SpotNumber)
                 .Select(MapEntryToDto)
                 .ToList()
@@ -65,6 +73,7 @@ public partial class RaffleService
         PaymentMethod = e.PaymentMethod,
         PaymentReference = e.PaymentReference,
         CreatedAt = e.CreatedAt,
-        PaidAt = e.PaidAt
+        PaidAt = e.PaidAt,
+        PendingExpiresAt = e.Status == "pending" ? e.CreatedAt.Add(PendingTtl) : null
     };
 }

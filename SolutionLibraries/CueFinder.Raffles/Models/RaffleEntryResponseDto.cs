@@ -12,4 +12,7 @@ public class RaffleEntryResponseDto
     public string? PaymentReference { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime? PaidAt { get; set; }
+
+    /// <summary>Null once paid. Set to CreatedAt + 36 h while still pending.</summary>
+    public DateTime? PendingExpiresAt { get; set; }
 }

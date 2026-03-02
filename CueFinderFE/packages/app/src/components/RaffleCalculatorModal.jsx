@@ -7,12 +7,12 @@ function discountPct(n) { return Math.min((n - 1) * 5, 25); }
 function priceForNSpots(basePrice, n) { return n * basePrice * (1 - discountPct(n) / 100); }
 
 const PAYMENT_METHODS = [
-  { key: 'acceptPayPal',       label: 'PayPal' },
-  { key: 'acceptRevolut',      label: 'Revolut' },
-  { key: 'acceptBankTransfer', label: 'Bank Transfer / SEPA' },
-  { key: 'acceptViva',         label: 'Viva Wallet' },
-  { key: 'acceptIris',         label: 'IRIS Pay' },
-  { key: 'acceptDM',           label: 'Arrange via DM' },
+  { key: 'acceptPayPal',       label: 'PayPal',               detailKey: 'payPalDetail',       detailLabel: 'PayPal email',              placeholder: 'seller@email.com',          inputType: 'email' },
+  { key: 'acceptRevolut',      label: 'Revolut',              detailKey: 'revolutDetail',      detailLabel: 'Revolut @handle or mobile', placeholder: '@username or +30 69…',      inputType: 'text' },
+  { key: 'acceptBankTransfer', label: 'Bank Transfer / SEPA', detailKey: 'bankTransferDetail', detailLabel: 'IBAN',                      placeholder: 'GR12 0110 1250 0000 …',     inputType: 'text' },
+  { key: 'acceptViva',         label: 'Viva Wallet',          detailKey: 'vivaDetail',         detailLabel: 'Mobile or email',           placeholder: '+30 6900 000000',           inputType: 'text' },
+  { key: 'acceptIris',         label: 'IRIS Pay',             detailKey: 'irisDetail',         detailLabel: 'Mobile number',             placeholder: '+30 6900 000000',           inputType: 'tel' },
+  { key: 'acceptDM',           label: 'Arrange via DM',       detailKey: null,                 detailLabel: null,                        placeholder: null,                        inputType: null },
 ];
 
 function StepIndicator({ step }) {
@@ -209,7 +209,11 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
     acceptViva: false,
     acceptIris: false,
     acceptDM: true,
-    paymentDetails: '',
+    payPalDetail: '',
+    revolutDetail: '',
+    bankTransferDetail: '',
+    vivaDetail: '',
+    irisDetail: '',
   });
 
   const [loading, setLoading] = useState(false);
@@ -226,11 +230,16 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
     if (new Date(form.endsAt) <= new Date()) { setError('End date must be in the future.'); return; }
     try {
       setLoading(true);
+      const paymentDetails = PAYMENT_METHODS
+        .filter(m => m.detailKey && form[m.key] && form[m.detailKey].trim())
+        .map(m => `${m.label}: ${form[m.detailKey].trim()}`)
+        .join('\n');
       const created = await raffleService.createRaffle({
         ...form,
         totalSpots: Number(form.totalSpots),
         pricePerSpot: Number(form.pricePerSpot),
         endsAt: new Date(form.endsAt).toISOString(),
+        paymentDetails,
       });
       onClose();
       navigate(`/raffles/${created.id}`);
@@ -317,12 +326,25 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
           </div>
         </div>
 
-        <div>
-          <label className="block text-xs font-medium text-gray-300 mb-1.5">Payment Details <span className="text-gray-500 font-normal">(shown to entrants)</span></label>
-          <textarea maxLength={500} rows={2} value={form.paymentDetails} onChange={e => set('paymentDetails', e.target.value)}
-            placeholder="e.g. PayPal: seller@email.com | Revolut: @handle | IBAN: GR…"
-            className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition resize-none placeholder-gray-600" />
-        </div>
+        {PAYMENT_METHODS.some(m => m.detailKey && form[m.key]) && (
+          <div className="space-y-2">
+            <label className="block text-xs font-medium text-gray-300">
+              Payment Details <span className="text-gray-500 font-normal">(shown to entrants)</span>
+            </label>
+            {PAYMENT_METHODS.filter(m => m.detailKey && form[m.key]).map(({ detailKey, detailLabel, placeholder, inputType }) => (
+              <div key={detailKey} className="flex items-center gap-2">
+                <span className="text-xs text-gray-400 shrink-0 w-32 truncate">{detailLabel}</span>
+                <input
+                  type={inputType}
+                  value={form[detailKey]}
+                  onChange={e => set(detailKey, e.target.value)}
+                  placeholder={placeholder}
+                  className="flex-1 bg-black/30 border border-white/15 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition placeholder-gray-600"
+                />
+              </div>
+            ))}
+          </div>
+        )}
 
         {error && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
       </form>

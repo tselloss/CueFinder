@@ -54,8 +54,21 @@ function Avatar({ name, size = 'md' }) {
   );
 }
 
+function SystemAvatar({ size = 'md' }) {
+  return (
+    <div
+      className={`msng-avatar msng-avatar-${size}`}
+      style={{ background: 'linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%)', fontSize: size === 'sm' ? 10 : 14 }}
+      aria-label="CueFinder"
+    >
+      🎱
+    </div>
+  );
+}
+
 function ThreadItem({ message, active, onClick }) {
   const isOffer = ['offer', 'accepted', 'rejected', 'counter_offer'].includes(message.messageType);
+  const isSystem = message.isSystem;
   return (
     <button
       type="button"
@@ -66,15 +79,18 @@ function ThreadItem({ message, active, onClick }) {
       ].filter(Boolean).join(' ')}
       onClick={onClick}
     >
-      <Avatar name={message.senderName} size="md" />
+      {isSystem ? <SystemAvatar size="md" /> : <Avatar name={message.senderName} size="md" />}
       <div className="msng-thread-body">
         <div className="msng-thread-top">
-          <span className="msng-thread-name">{message.senderName}</span>
+          <span className="msng-thread-name" style={isSystem ? { color: '#a78bfa' } : undefined}>
+            {isSystem ? 'CueFinder' : message.senderName}
+          </span>
           <span className="msng-thread-time">{formatTime(message.createdAt)}</span>
         </div>
         <div className="msng-thread-sub">
           <span className="msng-thread-preview">
             {isOffer && <span style={{ marginRight: 4 }}>🔨</span>}
+            {isSystem && <span style={{ marginRight: 4 }}>🔔</span>}
             {message.subject ? `${message.subject}: ` : ''}{isOffer ? 'Offer message' : message.content}
           </span>
           {!message.isRead && <span className="msng-thread-dot" />}
@@ -404,6 +420,7 @@ export default function Inbox({ onBack }) {
   const offerData = selected ? parseOfferContent(selected.content) : null;
   const isOfferMsg = selected?.messageType === 'offer' && offerData?.type === 'offer';
   const isResponseMsg = ['accepted', 'rejected', 'counter_offer'].includes(selected?.messageType);
+  const isSystemMsg = selected?.isSystem === true;
 
   // Whether the current user already responded (has session replies)
   const alreadyResponded = sessionReplies.length > 0;
@@ -491,13 +508,20 @@ export default function Inbox({ onBack }) {
           <>
             {/* chat header */}
             <div className="msng-chat-header">
-              <Avatar name={selected.senderName} size="md" />
+              {isSystemMsg ? <SystemAvatar size="md" /> : <Avatar name={selected.senderName} size="md" />}
               <div className="msng-chat-header-info">
-                <span className="msng-chat-header-name">{selected.senderName}</span>
+                <span className="msng-chat-header-name" style={isSystemMsg ? { color: '#a78bfa' } : undefined}>
+                  {isSystemMsg ? 'CueFinder' : selected.senderName}
+                </span>
                 {selected.subject && (
-                  <span className="msng-chat-header-sub">Re: {selected.subject}</span>
+                  <span className="msng-chat-header-sub">{isSystemMsg ? selected.subject : `Re: ${selected.subject}`}</span>
                 )}
               </div>
+              {isSystemMsg && (
+                <span className="msng-listing-badge" style={{ background: 'rgba(99,102,241,0.15)', color: '#a78bfa', border: '1px solid rgba(99,102,241,0.3)' }}>
+                  🔔 Notification
+                </span>
+              )}
               {isOfferMsg && (
                 <span className="msng-listing-badge" style={{ background: 'rgba(245,158,11,0.15)', color: '#f59e0b', border: '1px solid rgba(245,158,11,0.3)' }}>
                   🔨 Bid Offer
@@ -506,7 +530,7 @@ export default function Inbox({ onBack }) {
               {isResponseMsg && (
                 <span className="msng-listing-badge">Offer Response</span>
               )}
-              {!isOfferMsg && !isResponseMsg && selected.cueId && (
+              {!isSystemMsg && !isOfferMsg && !isResponseMsg && selected.cueId && (
                 <span className="msng-listing-badge">About a listing</span>
               )}
               <div className="msng-chat-header-actions">
@@ -540,7 +564,17 @@ export default function Inbox({ onBack }) {
               </div>
 
               {/* Offer or regular message bubble */}
-              {isOfferMsg ? (
+              {isSystemMsg ? (
+                <div className="msng-bubble-row">
+                  <SystemAvatar size="sm" />
+                  <div className="msng-bubble-col">
+                    <div className="msng-bubble msng-bubble-recv" style={{ borderLeft: '3px solid #6366f1', background: 'rgba(99,102,241,0.08)' }}>
+                      <span className="msng-bubble-text" style={{ whiteSpace: 'pre-wrap' }}>{selected.content}</span>
+                    </div>
+                    <span className="msng-bubble-time">{formatBubbleTime(selected.createdAt)}</span>
+                  </div>
+                </div>
+              ) : isOfferMsg ? (
                 <OfferCard
                   data={offerData}
                   time={formatBubbleTime(selected.createdAt)}
@@ -580,8 +614,8 @@ export default function Inbox({ onBack }) {
               <div ref={chatEndRef} />
             </div>
 
-            {/* input bar — hide for offer messages that were already responded */}
-            {(!isOfferMsg || alreadyResponded) && !isResponseMsg && (
+            {/* input bar — hidden for system notifications and offer responses */}
+            {!isSystemMsg && (!isOfferMsg || alreadyResponded) && !isResponseMsg && (
               <div className="msng-input-bar">
                 <div className="msng-input-wrap">
                   <textarea

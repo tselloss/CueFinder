@@ -151,14 +151,17 @@ namespace CueFinder.Messages.Services
             if (originalMessage == null)
                 throw new InvalidOperationException("Original message not found.");
 
+            if (originalMessage.IsSystem || !originalMessage.SenderId.HasValue)
+                throw new InvalidOperationException("Cannot reply to system notifications.");
+
             // Verify the sender is part of the conversation (either sender or recipient of original)
             if (originalMessage.SenderId != senderId && originalMessage.RecipientId != senderId)
                 throw new UnauthorizedAccessException("You are not part of this conversation.");
 
             // Determine who receives the reply
-            int recipientId = originalMessage.SenderId == senderId 
-                ? originalMessage.RecipientId 
-                : originalMessage.SenderId;
+            int recipientId = originalMessage.SenderId == senderId
+                ? originalMessage.RecipientId
+                : originalMessage.SenderId.Value;
 
             // Create reply message
             var request = new SendMessageRequest
@@ -175,6 +178,32 @@ namespace CueFinder.Messages.Services
             _logger.LogInformation("User {SenderId} replying to message {MessageId}", senderId, messageId);
 
             return await SendMessageAsync(senderId, request, isReply: true);
+        }
+
+        public async Task SendSystemNotificationAsync(int recipientId, string subject, string content)
+        {
+            var recipient = await _context.Users.FindAsync(recipientId)
+                ?? throw new InvalidOperationException("Recipient not found.");
+
+            var message = new Message
+            {
+                SenderId = null,
+                IsSystem = true,
+                RecipientId = recipientId,
+                Subject = subject,
+                Content = content,
+                MessageType = "notification",
+                IsRead = false,
+                CreatedAt = DateTime.UtcNow,
+            };
+
+            _context.Messages.Add(message);
+            await _context.SaveChangesAsync();
+
+            var dto = MapToDto(message, null, recipient);
+            await _hubContext.Clients.Group($"user-{recipientId}").SendAsync("ReceiveMessage", dto);
+
+            _logger.LogInformation("System notification sent to user {RecipientId}: {Subject}", recipientId, subject);
         }
 
         public async Task<bool> DeleteMessageAsync(int messageId, int userId)
@@ -202,7 +231,8 @@ namespace CueFinder.Messages.Services
             {
                 Id = message.Id,
                 SenderId = message.SenderId,
-                SenderName = sender?.Name ?? string.Empty,
+                SenderName = message.IsSystem ? "CueFinder" : (sender?.Name ?? string.Empty),
+                IsSystem = message.IsSystem,
                 RecipientId = message.RecipientId,
                 RecipientName = recipient?.Name ?? string.Empty,
                 CueId = message.CueId,

@@ -66,10 +66,10 @@ export async function deleteRaffle(id) {
   });
 }
 
-export async function enterRaffle(raffleId, spotNumber) {
+export async function enterRaffle(raffleId, spotNumber, chosenPaymentMethod) {
   const res = await axios.post(
     `${API_BASE_URL}/raffles/${raffleId}/enter`,
-    { spotNumber },
+    { spotNumber, chosenPaymentMethod },
     { headers: getAuthHeaders() }
   );
   return res.data;

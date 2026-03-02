@@ -100,9 +100,15 @@ public partial class RaffleService
         if (dto.SpotNumber < 1 || dto.SpotNumber > raffle.TotalSpots)
             throw new InvalidOperationException($"Spot number must be between 1 and {raffle.TotalSpots}");
 
-        var spotTaken = raffle.Entries.Any(e => e.SpotNumber == dto.SpotNumber);
-        if (spotTaken)
-            throw new InvalidOperationException($"Spot #{dto.SpotNumber} is already taken");
+        var existingEntry = raffle.Entries.FirstOrDefault(e => e.SpotNumber == dto.SpotNumber);
+        if (existingEntry != null)
+        {
+            // Allow re-claim only if the previous pending entry has expired
+            if (existingEntry.Status == "pending" && existingEntry.CreatedAt.AddHours(36) < DateTime.UtcNow)
+                existingEntry.Status = "refunded"; // free the spot
+            else
+                throw new InvalidOperationException($"Spot #{dto.SpotNumber} is already taken");
+        }
 
         var entry = new RaffleEntry
         {
@@ -110,6 +116,7 @@ public partial class RaffleService
             UserId = userId,
             SpotNumber = dto.SpotNumber,
             Status = "pending",
+            PaymentMethod = dto.ChosenPaymentMethod,
             CreatedAt = DateTime.UtcNow
         };
 
@@ -119,6 +126,32 @@ public partial class RaffleService
         _logger.LogInformation("User {UserId} claimed spot #{Spot} in raffle {RaffleId}", userId, dto.SpotNumber, raffleId);
 
         await _context.Entry(entry).Reference(e => e.User).LoadAsync();
+
+        // Notify organizer
+        var methodLabel = dto.ChosenPaymentMethod switch
+        {
+            "paypal"       => "PayPal",
+            "revolut"      => "Revolut",
+            "bankTransfer" => "Bank Transfer / SEPA",
+            "viva"         => "Viva Wallet",
+            "iris"         => "IRIS Pay",
+            "dm"           => "DM",
+            _              => dto.ChosenPaymentMethod ?? "—"
+        };
+        var buyerName = entry.User?.Username ?? $"user#{userId}";
+        try
+        {
+            await _messages.SendSystemNotificationAsync(
+                raffle.OrganizerId,
+                $"Spot #{dto.SpotNumber} claimed — {raffle.Title}",
+                $"@{buyerName} has claimed spot #{dto.SpotNumber} in your raffle \"{raffle.Title}\" and intends to pay via {methodLabel}.\n\nPlease reply with your payment details so they can complete the transfer."
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to notify organizer {OrganizerId} of spot claim", raffle.OrganizerId);
+        }
+
         return MapEntryToDto(entry);
     }
 
@@ -144,6 +177,21 @@ public partial class RaffleService
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Entry {EntryId} in raffle {RaffleId} marked as paid", entryId, raffleId);
+
+        // Notify buyer that their payment was confirmed
+        try
+        {
+            await _messages.SendSystemNotificationAsync(
+                entry.UserId,
+                $"Payment confirmed — Spot #{entry.SpotNumber} in \"{raffle.Title}\"",
+                $"✅ Your payment for spot #{entry.SpotNumber} in the raffle \"{raffle.Title}\" has been confirmed by the organizer.\n\nYou're officially in! Good luck in the draw 🎰"
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to notify buyer {UserId} of payment confirmation", entry.UserId);
+        }
+
         return MapEntryToDto(entry);
     }
 
@@ -182,6 +230,23 @@ public partial class RaffleService
             raffleId, winnerEntry.UserId, winnerEntry.SpotNumber);
 
         await _context.Entry(raffle).Reference(r => r.Winner).LoadAsync();
+
+        // Notify winner
+        var winnerUsername = winnerEntry.User?.Username ?? $"user#{winnerEntry.UserId}";
+        var organizerUsername = raffle.Organizer?.Username ?? "the organizer";
+        try
+        {
+            await _messages.SendSystemNotificationAsync(
+                winnerEntry.UserId,
+                $"🏆 You won the raffle: {raffle.Title}",
+                $"Congratulations @{winnerUsername}! 🎉\n\nYou won the raffle \"{raffle.Title}\" with spot #{winnerEntry.SpotNumber}!\n\nPlease contact @{organizerUsername} via inbox to arrange shipment of your prize."
+            );
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Failed to notify winner {WinnerId}", winnerEntry.UserId);
+        }
+
         return MapToDto(raffle);
     }
 
