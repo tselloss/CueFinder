@@ -186,10 +186,28 @@ export default function RaffleDetail({ onBack }) {
 
       {/* Winner banner */}
       {isDrawn && raffle.winnerUsername && (
-        <div className="mb-5 p-4 rounded-xl bg-yellow-500/10 border border-yellow-500/40 text-center">
-          <p className="text-yellow-300 text-lg font-bold">🏆 Winner: @{raffle.winnerUsername}</p>
-          {raffle.winnerSpotNumber && (
-            <p className="text-yellow-400/70 text-sm">Spot #{raffle.winnerSpotNumber}</p>
+        <div className="mb-5 rounded-xl bg-yellow-500/10 border border-yellow-500/40 overflow-hidden">
+          {getImageUrl(raffle.winnerCardImageUrl) ? (
+            <img
+              src={getImageUrl(raffle.winnerCardImageUrl)}
+              alt="Winner card"
+              className="w-full max-h-64 object-contain bg-[#0f172a]"
+            />
+          ) : (
+            <div className="p-4 text-center">
+              <p className="text-yellow-300 text-lg font-bold">🏆 Winner: @{raffle.winnerUsername}</p>
+              {raffle.winnerSpotNumber && (
+                <p className="text-yellow-400/70 text-sm">Spot #{raffle.winnerSpotNumber}</p>
+              )}
+            </div>
+          )}
+          {getImageUrl(raffle.winnerCardImageUrl) && (
+            <div className="px-4 py-2 text-center border-t border-yellow-500/20">
+              <p className="text-yellow-300 font-bold">🏆 @{raffle.winnerUsername}</p>
+              {raffle.winnerSpotNumber && (
+                <p className="text-yellow-400/70 text-xs">Spot #{raffle.winnerSpotNumber}</p>
+              )}
+            </div>
           )}
         </div>
       )}
@@ -433,6 +451,48 @@ export default function RaffleDetail({ onBack }) {
             </div>
           )}
 
+          {/* Entrants list — visible to all */}
+          {raffle.entries?.length > 0 && (
+            <div className="mt-5">
+              <p className="text-sm font-semibold text-gray-400 mb-2">
+                Entrants ({raffle.entries.length})
+              </p>
+              <div className="bg-surface-2 border border-white/10 rounded-xl overflow-hidden">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wide">
+                      <th className="text-left px-3 py-2">Spot</th>
+                      <th className="text-left px-3 py-2">User</th>
+                      <th className="text-right px-3 py-2">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {raffle.entries.map(e => (
+                      <tr key={e.id} className="border-b border-white/5 last:border-0">
+                        <td className="px-3 py-2 text-white font-semibold">#{e.spotNumber}</td>
+                        <td className="px-3 py-2 text-gray-300">
+                          @{e.username}
+                          {raffle.winnerId && e.userId === raffle.winnerId && (
+                            <span className="ml-1 text-yellow-400">🏆</span>
+                          )}
+                        </td>
+                        <td className="px-3 py-2 text-right">
+                          <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
+                            e.status === 'paid'
+                              ? 'bg-green-500/20 text-green-400'
+                              : 'bg-yellow-500/20 text-yellow-400'
+                          }`}>
+                            {e.status === 'paid' ? '✓ Paid' : 'Pending'}
+                          </span>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
           {/* Organizer: verify pending entries */}
           {isOrganizer && pendingEntries.length > 0 && (
             <div className="mt-4">
@@ -485,6 +545,7 @@ export default function RaffleDetail({ onBack }) {
         <SpinWheel
           raffle={raffle}
           onClose={() => setShowWheel(false)}
+          onWinnerCardSaved={updated => setRaffle(updated)}
         />
       )}
     </div>

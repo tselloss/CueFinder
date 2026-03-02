@@ -38,6 +38,7 @@ public partial class RaffleService
             WinnerId = r.WinnerId,
             WinnerUsername = r.Winner?.Username,
             WinnerSpotNumber = r.WinnerSpotNumber,
+            WinnerCardImageUrl = r.WinnerCardImageUrl,
 
             CreatedAt = r.CreatedAt,
             DrawnAt = r.DrawnAt,

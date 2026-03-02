@@ -184,4 +184,18 @@ public partial class RaffleService
         await _context.Entry(raffle).Reference(r => r.Winner).LoadAsync();
         return MapToDto(raffle);
     }
+
+    public async Task<RaffleResponseDto?> SaveWinnerCardAsync(int raffleId, string imageUrl, int requestingUserId)
+    {
+        var raffle = await _context.Raffles.FindAsync(raffleId);
+        if (raffle == null) return null;
+
+        if (raffle.OrganizerId != requestingUserId)
+            throw new UnauthorizedAccessException("Only the organizer can save the winner card");
+
+        raffle.WinnerCardImageUrl = imageUrl;
+        await _context.SaveChangesAsync();
+
+        return await GetRaffleByIdAsync(raffleId);
+    }
 }

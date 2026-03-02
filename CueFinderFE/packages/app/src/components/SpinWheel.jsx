@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import * as raffleService from '../api/raffleService';
 
 /**
  * SpinWheel modal.
  * Shows an animated spinning slots / ticker effect, then reveals the winner.
  *
  * Props:
- *   raffle  – RaffleResponseDto (must be status "drawn" with winnerId set)
- *   onClose – callback to close the modal
+ *   raffle           – RaffleResponseDto (must be status "drawn" with winnerId set)
+ *   onClose          – callback to close the modal
+ *   onWinnerCardSaved – optional callback(updatedRaffle) after winner card is persisted
  */
-export default function SpinWheel({ raffle, onClose }) {
+export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
   const [phase, setPhase] = useState('ready'); // ready | spinning | revealing | done
   const [displayName, setDisplayName] = useState('???');
   const intervalRef = useRef(null);
@@ -101,65 +103,60 @@ export default function SpinWheel({ raffle, onClose }) {
   }
 
   // ── Winner card (canvas PNG) ────────────────────────────────────────────────
-  function downloadWinnerCard() {
+  function buildWinnerCanvas() {
     const W = 600, H = 360;
     const canvas = document.createElement('canvas');
     canvas.width = W;
     canvas.height = H;
     const ctx = canvas.getContext('2d');
 
-    // Background
     const bg = ctx.createLinearGradient(0, 0, W, H);
     bg.addColorStop(0, '#0f172a');
     bg.addColorStop(1, '#1e1b4b');
     ctx.fillStyle = bg;
     ctx.fillRect(0, 0, W, H);
 
-    // Gold border
     ctx.strokeStyle = '#eab308';
     ctx.lineWidth = 3;
     ctx.strokeRect(12, 12, W - 24, H - 24);
-
     ctx.textAlign = 'center';
 
-    // Trophy
     ctx.font = '56px serif';
     ctx.fillText('🏆', W / 2, 85);
 
-    // "RAFFLE WINNER" label
     ctx.font = 'bold 18px sans-serif';
     ctx.fillStyle = '#fbbf24';
     ctx.fillText('RAFFLE WINNER', W / 2, 122);
 
-    // Winner username
     const winnerName = `@${raffle.winnerUsername || raffle.winnerId}`;
     ctx.font = `bold ${winnerName.length > 20 ? 28 : 38}px monospace`;
     ctx.fillStyle = '#fde68a';
     ctx.fillText(winnerName, W / 2, 185);
 
-    // Spot number
     if (raffle.winnerSpotNumber) {
       ctx.font = '16px sans-serif';
       ctx.fillStyle = '#94a3b8';
       ctx.fillText(`Spot #${raffle.winnerSpotNumber}`, W / 2, 218);
     }
 
-    // Raffle title
     const title = raffle.title?.length > 55 ? raffle.title.slice(0, 54) + '…' : (raffle.title || '');
     ctx.font = '15px sans-serif';
     ctx.fillStyle = '#64748b';
     ctx.fillText(title, W / 2, 258);
 
-    // Date
     ctx.font = '13px sans-serif';
     ctx.fillStyle = '#475569';
     ctx.fillText(new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'long', year: 'numeric' }), W / 2, 290);
 
-    // Watermark
     ctx.font = '11px sans-serif';
     ctx.fillStyle = '#334155';
     ctx.fillText('billiardscuefinder.com', W / 2, 330);
 
+    return canvas;
+  }
+
+  function downloadWinnerCard() {
+    const canvas = buildWinnerCanvas();
     canvas.toBlob(blob => {
       const url = URL.createObjectURL(blob);
       const a = document.createElement('a');
@@ -171,6 +168,22 @@ export default function SpinWheel({ raffle, onClose }) {
       URL.revokeObjectURL(url);
     });
   }
+
+  // Auto-upload winner card when spin is done
+  useEffect(() => {
+    if (phase !== 'done') return;
+    const canvas = buildWinnerCanvas();
+    canvas.toBlob(async blob => {
+      if (!blob) return;
+      try {
+        const updated = await raffleService.saveWinnerCard(raffle.id, blob);
+        if (onWinnerCardSaved) onWinnerCardSaved(updated);
+      } catch {
+        // Silent — card download still works manually
+      }
+    }, 'image/png');
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phase]);
 
   // ── Render ──────────────────────────────────────────────────────────────────
   return (

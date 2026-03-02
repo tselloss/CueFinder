@@ -92,3 +92,22 @@ export async function drawWinner(raffleId) {
   );
   return res.data;
 }
+
+export async function saveWinnerCard(raffleId, canvasBlob) {
+  // Upload the PNG blob as a standalone image
+  const formData = new FormData();
+  formData.append('file', canvasBlob, `raffle-winner-${raffleId}.png`);
+  const uploadRes = await axios.post(`${API_BASE_URL}/images/upload-standalone`, formData, {
+    headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' },
+  });
+  const imageUrl = uploadRes.data?.imageUrl;
+  if (!imageUrl) throw new Error('Image upload failed');
+
+  // Save the URL on the raffle
+  const res = await axios.patch(
+    `${API_BASE_URL}/raffles/${raffleId}/winner-card`,
+    { imageUrl },
+    { headers: getAuthHeaders() }
+  );
+  return res.data;
+}

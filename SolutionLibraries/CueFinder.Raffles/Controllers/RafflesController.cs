@@ -205,6 +205,28 @@ public class RafflesController : BaseApiController
         }
     }
 
+    [HttpPatch("{id:int}/winner-card")]
+    [Authorize]
+    [ProducesResponseType(typeof(RaffleResponseDto), StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult<RaffleResponseDto>> SaveWinnerCard(int id, [FromBody] SaveWinnerCardDto dto)
+    {
+        try
+        {
+            var raffle = await _raffleService.SaveWinnerCardAsync(id, dto.ImageUrl, GetCurrentUserId());
+            return raffle == null ? NotFound(new { message = "Raffle not found" }) : Ok(raffle);
+        }
+        catch (UnauthorizedAccessException)
+        {
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error saving winner card for raffle {Id}", id);
+            return StatusCode(500, new { message = "Error saving winner card" });
+        }
+    }
+
     [HttpPost("{id:int}/draw")]
     [Authorize]
     [ProducesResponseType(typeof(RaffleResponseDto), StatusCodes.Status200OK)]

@@ -17,4 +17,5 @@ public interface IRaffleService
     Task<RaffleEntryResponseDto?> VerifyEntryAsync(int raffleId, int entryId, VerifyEntryDto dto, int requestingUserId);
 
     Task<RaffleResponseDto?> DrawWinnerAsync(int raffleId, int requestingUserId);
+    Task<RaffleResponseDto?> SaveWinnerCardAsync(int raffleId, string imageUrl, int requestingUserId);
 }

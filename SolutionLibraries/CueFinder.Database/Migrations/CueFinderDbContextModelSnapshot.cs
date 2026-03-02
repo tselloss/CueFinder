@@ -1438,6 +1438,10 @@ namespace CueFinder.Database.Migrations
                     b.Property<int?>("WinnerSpotNumber")
                         .HasColumnType("integer");
 
+                    b.Property<string>("WinnerCardImageUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)");
+
                     b.HasKey("Id");
 
                     b.HasIndex("EndsAt")

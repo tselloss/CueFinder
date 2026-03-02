@@ -43,6 +43,7 @@ namespace CueFinder.Database.Models
         public int? WinnerId { get; set; }
         public virtual User? Winner { get; set; }
         public int? WinnerSpotNumber { get; set; }
+        public string? WinnerCardImageUrl { get; set; }
 
         public DateTime CreatedAt { get; set; }
         public DateTime? DrawnAt { get; set; }
