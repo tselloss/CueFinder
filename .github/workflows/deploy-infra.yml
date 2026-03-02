@@ -170,18 +170,18 @@ jobs:
           
           # Create .env file with all secrets (properly quoted for special characters)
           echo "⚙️  Updating environment..."
-          cat > .env << 'ENVEOF'
-          DB_PASSWORD="\$DB_PASSWORD"
-          JWT_SECRET="\$JWT_SECRET"
-          FRONTEND_API_URL="\$FRONTEND_API_URL"
-          CORS_FRONTEND_ORIGIN="\$CORS_FRONTEND_ORIGIN"
-          SMTP_PASSWORD="\$SMTP_PASSWORD"
-          SMTP_SERVER="\$SMTP_SERVER"
-          SMTP_PORT="\$SMTP_PORT"
-          EMAIL_FROM="\$EMAIL_FROM"
-          GMAIL_CLIENT_ID="\$GMAIL_CLIENT_ID"
-          GMAIL_CLIENT_SECRET="\$GMAIL_CLIENT_SECRET"
-          GMAIL_PROJECT_ID="\$GMAIL_PROJECT_ID"
+          cat > .env << ENVEOF
+          DB_PASSWORD="$DB_PASSWORD"
+          JWT_SECRET="$JWT_SECRET"
+          FRONTEND_API_URL="$FRONTEND_API_URL"
+          CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
+          SMTP_PASSWORD="$SMTP_PASSWORD"
+          SMTP_SERVER="$SMTP_SERVER"
+          SMTP_PORT="$SMTP_PORT"
+          EMAIL_FROM="$EMAIL_FROM"
+          GMAIL_CLIENT_ID="$GMAIL_CLIENT_ID"
+          GMAIL_CLIENT_SECRET="$GMAIL_CLIENT_SECRET"
+          GMAIL_PROJECT_ID="$GMAIL_PROJECT_ID"
           ENVEOF
                     
                     echo "📋 Environment file created"
