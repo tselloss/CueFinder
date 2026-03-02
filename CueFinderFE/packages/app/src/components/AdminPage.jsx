@@ -2,8 +2,9 @@ import React, { useEffect, useMemo, useState } from 'react';
 import {
   ArrowLeft, Trash2, Flag, UserCheck, UserX, Edit, Shield, Users, Package,
   AlertTriangle, ChevronLeft, ChevronRight, Ban, Image as ImageIcon, TrendingUp,
-  ShoppingBag, CheckSquare, Activity,
+  ShoppingBag, CheckSquare, Activity, BadgeCheck,
 } from 'lucide-react';
+import VerifiedBadge from './VerifiedBadge';
 import * as adminUsers from '../api/adminUsersService';
 import * as cueService from '../api/cueService';
 import * as cueCaseService from '../api/cueCaseService';
@@ -199,6 +200,11 @@ export default function AdminPage({ onBack }) {
   /* ── actions ───────────────────────────────────────── */
   const toggleBan = async (u) => {
     const updated = await adminUsers.updateUser(u.id, { IsActive: u.isActive === false });
+    setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
+  };
+
+  const toggleVerify = async (u) => {
+    const updated = await adminUsers.updateUser(u.id, { IsVerified: !u.isVerified });
     setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
   };
 
@@ -568,6 +574,7 @@ export default function AdminPage({ onBack }) {
                           <div>
                             <div className="flex items-center gap-2">
                               <span className="font-medium">{u.name}</span>
+                              <VerifiedBadge isVerified={u.isVerified} />
                               {usersWithFlaggedContent.some(x => x.id === u.id) && (
                                 <Flag className="w-4 h-4 text-orange-500" title="Has flagged content" />
                               )}
@@ -589,6 +596,14 @@ export default function AdminPage({ onBack }) {
                         <TableCell>
                           <div className="flex justify-end gap-1">
                             <Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...u })}><Edit className="w-4 h-4" /></Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => toggleVerify(u)}
+                              title={u.isVerified ? 'Remove verification' : 'Verify seller'}
+                            >
+                              <BadgeCheck className={`w-4 h-4 ${u.isVerified ? 'text-amber-500' : 'text-muted-foreground'}`} />
+                            </Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleBan(u)}>
                               {u.isActive === false
                                 ? <UserCheck className="w-4 h-4 text-green-500" />

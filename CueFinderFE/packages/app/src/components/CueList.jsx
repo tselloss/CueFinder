@@ -94,6 +94,8 @@ export default function CueList({
     if (category && category !== 'all') {
       if (category === 'cues' && c.itemType !== 'cue') return false;
       if (category === 'cases' && c.itemType !== 'case') return false;
+      if (category === 'tables' && c.itemType !== 'table') return false;
+      if (category === 'accessories' && c.itemType !== 'accessory') return false;
     }
 
     // Condition filter

@@ -46,6 +46,11 @@ namespace CueFinder.Auth.Models
         public bool IsActive { get; set; } = true;
 
         /// <summary>
+        /// Whether the user has been verified by an admin
+        /// </summary>
+        public bool IsVerified { get; set; } = false;
+
+        /// <summary>
         /// User's location (city/general area)
         /// </summary>
         public string? Location { get; set; }

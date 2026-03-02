@@ -20,6 +20,7 @@ import OldListingsModal from './components/OldListingsModal.jsx';
 import RaffleList from './components/RaffleList.jsx';
 import RaffleDetail from './components/RaffleDetail.jsx';
 import RaffleCreateForm from './components/RaffleCreateForm.jsx';
+import SellerProfile from './components/SellerProfile.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -61,10 +62,10 @@ function AppInner() {
   const [showForumCategories, setShowForumCategories] = useState(false);
   const [oldListings, setOldListings] = useState([]);
   const [showOldListingsModal, setShowOldListingsModal] = useState(false);
-  // Price range slider [min,max] in USD
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  // Price range slider [min,max] in EUR
   const PRICE_MIN_LIMIT = 0;
   const PRICE_MAX_LIMIT = 10000;
+  const [priceRange, setPriceRange] = useState([PRICE_MIN_LIMIT, PRICE_MAX_LIMIT]);
   const PRICE_STEP = 1;
   const presetRanges = [
     { label: '< $200', value: [0, 200] },
@@ -126,8 +127,8 @@ function AppInner() {
       const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
         cueService.getCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
         cueCaseService.getCueCases().catch(err => { console.error('Error fetching cue cases:', err); return []; }),
-        billiardTableService.getTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
-        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
+        billiardTableService.getTables(1, 10000).catch(err => { console.error('Error fetching tables:', err); return []; }),
+        accessoryService.getAccessories(1, 10000).catch(err => { console.error('Error fetching accessories:', err); return []; })
       ]);
 
       const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
@@ -512,6 +513,9 @@ function AppInner() {
               <Route path="/forum" element={
                 user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
+
+              {/* Seller profiles — public */}
+              <Route path="/sellers/:id" element={<SellerProfile />} />
 
               {/* Raffles — public browse + detail, create requires auth */}
               <Route path="/raffles" element={<RaffleList onBack={handleBack} />} />

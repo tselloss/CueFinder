@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import {
   ArrowLeft,
   ChevronLeft,
@@ -10,15 +11,19 @@ import {
   ImageIcon,
   Send,
   Gavel,
-  TrendingDown
+  TrendingDown,
+  Star
 } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import * as messageService from '../api/messageService';
+import * as sellerService from '../api/sellerService';
 import { useAuth } from '../auth/AuthContext';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import VerifiedBadge from './VerifiedBadge';
+import ReviewModal from './ReviewModal';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
@@ -38,8 +43,8 @@ const ImagePlaceholder = () => (
   </div>
 );
 
-export default function ItemDetail({ 
-  item, 
+export default function ItemDetail({
+  item,
   itemType = 'cue',
   onBack,
   specifications = []
@@ -55,6 +60,21 @@ export default function ItemDetail({
   const [sendSuccess, setSendSuccess] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Review state
+  const [showReview, setShowReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [isEligibleToReview, setIsEligibleToReview] = useState(false);
+
+  useEffect(() => {
+    if (user && item?.sellerId && item?.id && (item.isSold || item.is_sold) && user.id !== item.sellerId) {
+      sellerService.checkMyReview(item.sellerId, itemType, item.id)
+        .then(data => {
+          setHasReviewed(data.hasReviewed);
+          setIsEligibleToReview(data.isEligible);
+        })
+        .catch(() => {});
+    }
+  }, [user, item, itemType]);
 
   // Bid state
   const [showBid, setShowBid] = useState(false);
@@ -321,7 +341,13 @@ export default function ItemDetail({
                   {(item.sellerName || item.seller_name) && (
                     <div className="flex items-center gap-3">
                       <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">{item.sellerName || item.seller_name}</span>
+                      <Link
+                        to={`/sellers/${item.sellerId}`}
+                        className="text-foreground hover:text-primary hover:underline font-medium flex items-center gap-1.5"
+                      >
+                        {item.sellerName || item.seller_name}
+                        <VerifiedBadge isVerified={item.sellerIsVerified} />
+                      </Link>
                     </div>
                   )}
                   {(item.sellerEmail || item.seller_email) && (
@@ -367,6 +393,17 @@ export default function ItemDetail({
                         >
                           <Gavel className="w-4 h-4" />
                           Place a Bid
+                        </Button>
+                      )}
+                      {user && user.id !== item.sellerId && (item.isSold || item.is_sold) && isEligibleToReview && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowReview(true)}
+                          disabled={hasReviewed}
+                          className="w-full gap-2"
+                        >
+                          <Star className="w-4 h-4" />
+                          {hasReviewed ? 'Review Submitted' : 'Leave a Review'}
                         </Button>
                       )}
                     </div>
@@ -597,6 +634,17 @@ export default function ItemDetail({
           </Card>
         </div>
       )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={showReview}
+        onClose={() => setShowReview(false)}
+        sellerId={item?.sellerId}
+        sellerName={item?.sellerName || item?.seller_name}
+        listingType={itemType}
+        listingId={item?.id}
+        onSubmitted={() => setHasReviewed(true)}
+      />
 
       {/* Login Prompt Modal */}
       {showLoginPrompt && (

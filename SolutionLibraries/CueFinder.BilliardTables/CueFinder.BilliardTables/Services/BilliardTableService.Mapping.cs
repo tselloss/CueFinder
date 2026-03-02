@@ -37,6 +37,7 @@ public partial class BilliardTableService
             SellerEmail = table.User?.Email ?? string.Empty,
             SellerPhone = table.User?.Phone,
             SellerHidePhone = table.User?.HidePhone ?? false,
+            SellerIsVerified = table.User?.IsVerified ?? false,
             AverageRating = (double)table.AverageRating,
             RatingCount = table.RatingCount,
             Images = table.Images?.Select(i => new BilliardTableImageDto

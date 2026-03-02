@@ -33,6 +33,7 @@ public partial class AccessoryService
             SellerEmail = accessory.User?.Email ?? string.Empty,
             SellerPhone = accessory.User?.Phone,
             SellerHidePhone = accessory.User?.HidePhone ?? false,
+            SellerIsVerified = accessory.User?.IsVerified ?? false,
             AverageRating = (double)accessory.AverageRating,
             RatingCount = accessory.RatingCount,
             Images = accessory.Images?.Select(i => new AccessoryImageDto

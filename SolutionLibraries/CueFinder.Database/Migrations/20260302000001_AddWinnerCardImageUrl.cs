@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CueFinder.Database.Migrations
 {
     /// <inheritdoc />
+    [Migration("20260302000001_AddWinnerCardImageUrl")]
     public partial class AddWinnerCardImageUrl : Migration
     {
         /// <inheritdoc />

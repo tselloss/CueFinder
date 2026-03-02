@@ -112,9 +112,10 @@ namespace CueFinder.Database.Context
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(e => e.Ratings)
-                    .WithOne(r => r.Cue)
+                    .WithOne()
                     .HasForeignKey(r => r.CueId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasMany(e => e.SavedByUsers)
                     .WithOne(s => s.Cue)
@@ -283,10 +284,8 @@ namespace CueFinder.Database.Context
             {
                 entity.HasKey(e => e.Id);
 
-                entity.HasOne(e => e.Cue)
-                    .WithMany(c => c.Ratings)
-                    .HasForeignKey(e => e.CueId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.ListingType)
+                    .HasMaxLength(20);
 
                 entity.HasOne(e => e.RatedByUser)
                     .WithMany(u => u.RatingsGiven)
@@ -310,9 +309,10 @@ namespace CueFinder.Database.Context
                 entity.Property(e => e.UpdatedAt)
                     .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
-                entity.HasIndex(e => new { e.CueId, e.RatedByUserId })
+                entity.HasIndex(e => new { e.RatedByUserId, e.ListingType, e.ListingId })
                     .IsUnique()
-                    .HasDatabaseName("IX_Rating_Unique_User_Cue");
+                    .HasFilter("\"ListingType\" IS NOT NULL AND \"ListingId\" IS NOT NULL")
+                    .HasDatabaseName("IX_Rating_Unique_Reviewer_Listing");
             });
 
             // Message entity configuration

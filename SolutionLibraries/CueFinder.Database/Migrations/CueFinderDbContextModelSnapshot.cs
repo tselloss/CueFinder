@@ -982,9 +982,6 @@ namespace CueFinder.Database.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<int?>("BilliardTableId")
-                        .HasColumnType("integer");
-
                     b.Property<string>("Category")
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
@@ -994,8 +991,15 @@ namespace CueFinder.Database.Migrations
                         .HasColumnType("timestamp without time zone")
                         .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
-                    b.Property<int>("CueId")
+                    b.Property<int?>("CueId")
                         .HasColumnType("integer");
+
+                    b.Property<int?>("ListingId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("ListingType")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.Property<int>("RatedByUserId")
                         .HasColumnType("integer");
@@ -1018,15 +1022,14 @@ namespace CueFinder.Database.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("BilliardTableId");
-
                     b.HasIndex("RatedByUserId");
 
                     b.HasIndex("SellerUserId");
 
-                    b.HasIndex("CueId", "RatedByUserId")
+                    b.HasIndex("RatedByUserId", "ListingType", "ListingId")
                         .IsUnique()
-                        .HasDatabaseName("IX_Rating_Unique_User_Cue");
+                        .HasFilter("\"ListingType\" IS NOT NULL AND \"ListingId\" IS NOT NULL")
+                        .HasDatabaseName("IX_Rating_Unique_Reviewer_Listing");
 
                     b.ToTable("Ratings");
                 });
@@ -1675,15 +1678,10 @@ namespace CueFinder.Database.Migrations
 
             modelBuilder.Entity("CueFinder.Database.Models.Rating", b =>
                 {
-                    b.HasOne("CueFinder.Database.Models.BilliardTable", null)
-                        .WithMany("Ratings")
-                        .HasForeignKey("BilliardTableId");
-
-                    b.HasOne("CueFinder.Database.Models.Cue", "Cue")
+                    b.HasOne("CueFinder.Database.Models.Cue", null)
                         .WithMany("Ratings")
                         .HasForeignKey("CueId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
+                        .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("CueFinder.Database.Models.User", "RatedByUser")
                         .WithMany("RatingsGiven")
@@ -1696,8 +1694,6 @@ namespace CueFinder.Database.Migrations
                         .HasForeignKey("SellerUserId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
-
-                    b.Navigation("Cue");
 
                     b.Navigation("RatedByUser");
 

@@ -393,15 +393,17 @@ function CueCard({ cue, onEdit, onDelete, onToggleSold, onReactivate, showHidden
         <div className="flex gap-2 pt-2">
           {!isHidden && (
             <>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={onEdit}
-                className="flex-1"
-              >
-                <Edit2 className="w-4 h-4 mr-1" />
-                Edit
-              </Button>
+              {(cue.category === 'cue' || cue.category === 'case') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={onEdit}
+                  className="flex-1"
+                >
+                  <Edit2 className="w-4 h-4 mr-1" />
+                  Edit
+                </Button>
+              )}
               <Button
                 variant="outline"
                 size="sm"
