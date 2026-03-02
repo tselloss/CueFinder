@@ -167,6 +167,18 @@ jobs:
                               cp deployment/deploy-backend-blue-green.sh ./deploy-backend-blue-green.sh
                               chmod +x ./deploy-backend-blue-green.sh
 
+          # Backup database before deployment
+          echo "💾 Backing up database before deployment..."
+          mkdir -p /home/cuefinder/backups
+          BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S)_backend.sql"
+          if docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE" 2>/dev/null; then
+            echo "   ✓ Backup saved: \$BACKUP_FILE"
+            ls -t /home/cuefinder/backups/cuefinder_backup_*.sql 2>/dev/null | tail -n +6 | xargs rm -f
+            echo "   ✓ Old backups pruned (keeping last 5)"
+          else
+            echo "   ⚠️  Backup skipped (postgres container not available)"
+          fi
+
           # Ensure upstream file exists so nginx can start/reload cleanly
           if [ ! -f .deployment/backend-upstream.conf ]; then
             cat > .deployment/backend-upstream.conf << 'UPSTREAMEOF'

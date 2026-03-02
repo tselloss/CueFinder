@@ -187,15 +187,21 @@ jobs:
                     echo "📋 Environment file created"
                     echo "✓ Environment configured"
           
+          # Backup database before any infrastructure changes
+          echo "💾 Backing up database before deployment..."
+          mkdir -p /home/cuefinder/backups
+          BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S)_infra.sql"
+          if docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE" 2>/dev/null; then
+            echo "   ✓ Backup saved: \$BACKUP_FILE"
+            ls -t /home/cuefinder/backups/cuefinder_backup_*.sql 2>/dev/null | tail -n +6 | xargs rm -f
+            echo "   ✓ Old backups pruned (keeping last 5)"
+          else
+            echo "   ⚠️  Backup skipped (postgres container not available)"
+          fi
+
           # Run database migrations (if needed)
           if [ "\$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
-            
-            # Create backup before migrations (assumes cuefinder-postgres-prod container exists)
-            mkdir -p /home/cuefinder/backups
-            BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S).sql"
-            docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE"
-            echo "   Backup created: \$BACKUP_FILE"
             
             # Run migrations
             if [ -d "init.sql" ]; then
