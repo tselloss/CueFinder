@@ -177,7 +177,10 @@ export default function ItemDetail({
     );
   }
 
-  const images = item.images && item.images.length > 0 ? item.images : [];
+  // Sort so the primary image always appears first in the carousel
+  const images = item.images && item.images.length > 0
+    ? [...item.images].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+    : [];
   const hasImages = images.length > 0;
   const currentImage = hasImages ? getImageUrl(images[imageIndex]) : '';
 

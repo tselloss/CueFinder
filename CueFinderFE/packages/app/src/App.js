@@ -17,6 +17,7 @@ import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import OldListingsModal from './components/OldListingsModal.jsx';
+import MobileBottomNav from './components/MobileBottomNav.jsx';
 import RaffleList from './components/RaffleList.jsx';
 import RaffleDetail from './components/RaffleDetail.jsx';
 import RaffleCreateForm from './components/RaffleCreateForm.jsx';
@@ -127,8 +128,8 @@ function AppInner() {
       const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
         cueService.getCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
         cueCaseService.getCueCases().catch(err => { console.error('Error fetching cue cases:', err); return []; }),
-        billiardTableService.getTables(1, 10000).catch(err => { console.error('Error fetching tables:', err); return []; }),
-        accessoryService.getAccessories(1, 10000).catch(err => { console.error('Error fetching accessories:', err); return []; })
+        billiardTableService.getTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
+        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
       ]);
 
       const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
@@ -401,7 +402,8 @@ function AppInner() {
 
       {/* Main Content Area with Sidebar */}
       <div className="flex-1 bg-background flex flex-col relative pt-[60px]">
-        <div className="flex flex-row flex-1 relative">
+        {/* pb-16 on mobile leaves room above the fixed bottom nav */}
+        <div className="flex flex-row flex-1 relative pb-16 md:pb-0">
           {/* Mobile Sidebar Overlay */}
           {showSidebar && mobileMenuOpen && (
             <div 
@@ -528,20 +530,16 @@ function AppInner() {
         </div>
       </div>
 
-      {/* Mobile Menu Button */}
-      {showSidebar && (
-        <button
-          className="mobile-menu-button fixed bottom-20 right-4 md:hidden p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg"
-          data-testid="mobile-menu-toggle"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      )}
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        currentPath={location.pathname}
+        onNavigate={(path) => navigate(path)}
+        unreadCount={unreadMessageCount}
+        user={user}
+        onToggleSidebar={() => setMobileMenuOpen(v => !v)}
+        showSidebar={showSidebar}
+        onAddListing={handleAdd}
+      />
 
       {/* App Footer - shown on all pages */}
       <AppFooter />

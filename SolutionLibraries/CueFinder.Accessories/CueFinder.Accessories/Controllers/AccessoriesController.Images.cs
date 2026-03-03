@@ -13,37 +13,41 @@ namespace CueFinder.Accessories.Controllers;
 public partial class AccessoriesController
 {
     /// <summary>
-    /// Upload a single image for an accessory (owner only)
+    /// Upload one or more images for an accessory (owner only)
+    /// POST /api/accessories/{id}/images
     /// </summary>
-    [HttpPost("{id}/images")] 
+    [HttpPost("{id}/images")]
     [Authorize]
-    [ProducesResponseType(typeof(AccessoryImageDto), StatusCodes.Status201Created)]
-    public async Task<ActionResult<AccessoryImageDto>> UploadAccessoryImage(
-        int id,
-        [FromForm] IFormFile file,
-        [FromForm] string? altText = null,
-        [FromForm] int displayOrder = 0,
-        [FromForm] bool isPrimary = false)
+    [ProducesResponseType(typeof(List<AccessoryImageDto>), StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    public async Task<ActionResult<List<AccessoryImageDto>>> UploadAccessoryImages(int id, [FromForm] List<IFormFile> images)
     {
         try
         {
+            if (images == null || images.Count == 0)
+                return BadRequest(new { message = "No files provided" });
+
             var userId = GetUserIdFromClaims();
             if (!userId.HasValue) return Unauthorized(new { message = "Invalid user" });
 
-            if (file == null || file.Length == 0) return BadRequest(new { message = "No file provided" });
-
-            var result = await _imageService.UploadAccessoryImageAsync(id, file, userId.Value, altText, displayOrder, isPrimary);
-            return CreatedAtAction(nameof(GetAccessoryImages), new { id }, result);
+            var result = await _imageService.UploadAccessoryImagesAsync(id, images, userId.Value);
+            return StatusCode(201, result);
         }
         catch (UnauthorizedAccessException ex)
         {
             _logger.LogWarning(ex, "Unauthorized image upload for accessory {AccessoryId}", id);
-            return StatusCode(StatusCodes.Status401Unauthorized, new { message = ex.Message });
+            return Forbid();
+        }
+        catch (InvalidOperationException ex)
+        {
+            return BadRequest(new { message = ex.Message });
         }
         catch (Exception ex)
         {
-            _logger.LogError(ex, "Error uploading image for accessory {AccessoryId}", id);
-            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Error uploading image" });
+            _logger.LogError(ex, "Error uploading images for accessory {AccessoryId}", id);
+            return StatusCode(StatusCodes.Status500InternalServerError, new { message = "Error uploading images" });
         }
     }
 

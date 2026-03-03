@@ -9,7 +9,7 @@ namespace CueFinder.BilliardTables.Services;
 /// BilliardTableService partial: Write operations (mutations)
 /// - CreateBilliardTableAsync: Create a new billiard table listing
 /// - UpdateBilliardTableAsync: Update an existing billiard table
-/// - DeleteBilliardTableAsync: Soft-delete a billiard table by marking as sold
+/// - DeleteBilliardTableAsync: Permanently delete a billiard table and its images
 /// </summary>
 public partial class BilliardTableService
 {
@@ -80,8 +80,12 @@ public partial class BilliardTableService
         if (dto.Condition != null) table.Condition = dto.Condition;
         if (dto.Location != null) table.Location = dto.Location;
         if (dto.IsSold.HasValue) table.IsSold = dto.IsSold.Value;
-        // Reactivation: if isHidden is being set to false, reset prompt timers
-        // Reactivation logic removed: IsHidden property not present in UpdateBilliardTableDto
+        if (dto.IsHidden.HasValue)
+        {
+            table.IsHidden = dto.IsHidden.Value;
+            table.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+        }
+        if (dto.LastUserResponseAt.HasValue) table.LastUserResponseAt = dto.LastUserResponseAt.Value;
 
         table.UpdatedAt = DateTime.UtcNow;
 
@@ -92,6 +96,21 @@ public partial class BilliardTableService
         return MapToBilliardTableResponseDto(table);
     }
 
+    public async Task<bool> MarkAsSoldAsync(int tableId, int userId)
+    {
+        var table = await _context.BilliardTables.FindAsync(tableId);
+        if (table == null) return false;
+        if (table.UserId != userId)
+            throw new UnauthorizedAccessException("You can only mark your own tables as sold");
+
+        table.IsSold = true;
+        table.SoldDate = DateTime.UtcNow;
+        table.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Billiard table {TableId} marked as sold by user {UserId}", tableId, userId);
+        return true;
+    }
+
     public async Task<bool> DeleteBilliardTableAsync(int tableId, int userId, bool isAdmin = false)
     {
         var table = await _context.BilliardTables.FindAsync(tableId);
@@ -100,11 +119,6 @@ public partial class BilliardTableService
             _logger.LogWarning("Billiard table {TableId} not found for deletion by user {UserId}", tableId, userId);
             return false;
         }
-        // Add deletion logic here if needed
-        return true;
-
-        if (table == null)
-            return false;
 
         // Check ownership or admin
         if (table.UserId != userId && !isAdmin)
@@ -113,46 +127,10 @@ public partial class BilliardTableService
         // Delete all associated images first
         await _imageService.DeleteBilliardTableImagesInternalAsync(tableId);
 
-        // Soft delete by marking as sold
-        table.IsSold = true;
-        var now = DateTime.UtcNow;
-        var listings = await _context.BilliardTables.ToListAsync();
-        foreach (var listing in listings)
-        {
-            if (listing.IsSold)
-                continue;
-
-            // If hidden for over 6 months, delete
-            if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
-            {
-                await _imageService.DeleteBilliardTableImagesInternalAsync(listing.Id);
-                _context.BilliardTables.Remove(listing);
-                continue;
-            }
-
-            if (!listing.IsHidden)
-            {
-                // First prompt: 2 months after creation
-                var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
-                // Re-prompt: 2 months after last prompt if user pressed 'active'
-                var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
-
-                if (firstPromptDue || rePromptDue)
-                {
-                    // TODO: Send prompt to user (notification/email/etc.)
-                    listing.LastPromptedAt = now;
-                }
-
-                // If last prompt was over 2 months ago and no user response since, hide
-                if (listing.LastPromptedAt.HasValue &&
-                    (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
-                    (now - listing.LastPromptedAt.Value).TotalDays >= 60)
-                {
-                    listing.IsHidden = true;
-                    listing.HiddenAt = now;
-                }
-            }
-        }
+        _context.BilliardTables.Remove(table);
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Billiard table {TableId} deleted by user {UserId}", tableId, userId);
+        return true;
     }
 }

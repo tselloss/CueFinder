@@ -9,7 +9,7 @@ namespace CueFinder.Cues.Services;
 /// CueService partial: Write operations (mutations)
 /// - CreateCueAsync: Create a new cue listing
 /// - UpdateCueAsync: Update an existing cue
-/// - DeleteCueAsync: Soft-delete a cue by marking as sold
+/// - DeleteCueAsync: Permanently delete a cue and its images
 /// </summary>
 public partial class CueService
 {
@@ -208,47 +208,40 @@ public partial class CueService
         if (dto.TipSize.HasValue) cue.TipSize = dto.TipSize;
         if (dto.Location != null) cue.Location = dto.Location;
         if (dto.IsSold.HasValue) cue.IsSold = dto.IsSold.Value;
-        // Reactivation logic removed: IsHidden not present in UpdateCueDto
-
-        var now = DateTime.UtcNow;
-        var listings = await _context.Cues.ToListAsync();
-        foreach (var listing in listings)
+        if (dto.IsHidden.HasValue)
         {
-            if (listing.IsSold)
-                continue;
-
-            // If hidden for over 6 months, delete
-            if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
-            {
-                await _imageService.DeleteCueImagesInternalAsync(listing.Id);
-                _context.Cues.Remove(listing);
-                continue;
-            }
-
-            if (!listing.IsHidden)
-            {
-                // First prompt: 2 months after creation
-                var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
-                // Re-prompt: 2 months after last prompt if user pressed 'active'
-                var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
-
-                if (firstPromptDue || rePromptDue)
-                {
-                    // TODO: Send prompt to user (notification/email/etc.)
-                    listing.LastPromptedAt = now;
-                }
-
-                // If last prompt was over 2 months ago and no user response since, hide
-                if (listing.LastPromptedAt.HasValue &&
-                    (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
-                    (now - listing.LastPromptedAt.Value).TotalDays >= 60)
-                {
-                    listing.IsHidden = true;
-                    listing.HiddenAt = now;
-                }
-            }
+            cue.IsHidden = dto.IsHidden.Value;
+            cue.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
         }
+        if (dto.LastUserResponseAt.HasValue) cue.LastUserResponseAt = dto.LastUserResponseAt.Value;
+
+        cue.UpdatedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Cue {CueId} updated by user {UserId}", cueId, userId);
+
         return MapToCueResponseDto(cue);
+    }
+
+    public async Task<bool> DeleteCueAsync(int cueId, int userId, bool isAdmin = false)
+    {
+        var cue = await _context.Cues
+            .Include(c => c.Images)
+            .FirstOrDefaultAsync(c => c.Id == cueId);
+
+        if (cue == null)
+            return false;
+
+        if (cue.UserId != userId && !isAdmin)
+            throw new UnauthorizedAccessException("You can only delete your own cues");
+
+        await _imageService.DeleteCueImagesInternalAsync(cueId);
+
+        _context.Cues.Remove(cue);
+        await _context.SaveChangesAsync();
+
+        _logger.LogInformation("Cue {CueId} deleted by user {UserId}", cueId, userId);
+
+        return true;
     }
 }

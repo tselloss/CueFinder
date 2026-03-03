@@ -9,7 +9,7 @@ namespace CueFinder.Accessories.Services;
 /// AccessoryService partial: Write operations (mutations)
 /// - CreateAccessoryAsync: Create a new accessory listing
 /// - UpdateAccessoryAsync: Update an existing accessory
-/// - DeleteAccessoryAsync: Soft-delete an accessory by marking as sold
+/// - DeleteAccessoryAsync: Permanently delete an accessory and its images
 /// </summary>
 public partial class AccessoryService
 {
@@ -118,14 +118,17 @@ public partial class AccessoryService
         if (dto.Color != null) accessory.Color = dto.Color;
         if (dto.Location != null) accessory.Location = dto.Location;
         if (dto.IsSold.HasValue) accessory.IsSold = dto.IsSold.Value;
-        // Reactivation: if isHidden is being set to false, reset prompt timers
-        if (dto.IsHidden.HasValue && dto.IsHidden.Value == false && accessory.IsHidden)
+        if (dto.IsHidden.HasValue)
         {
-            accessory.IsHidden = false;
-            accessory.HiddenAt = null;
-            accessory.LastPromptedAt = null;
-            accessory.LastUserResponseAt = null;
+            accessory.IsHidden = dto.IsHidden.Value;
+            accessory.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+            if (!dto.IsHidden.Value)
+            {
+                accessory.LastPromptedAt = null;
+                accessory.LastUserResponseAt = null;
+            }
         }
+        if (dto.LastUserResponseAt.HasValue) accessory.LastUserResponseAt = dto.LastUserResponseAt.Value;
         
         accessory.UpdatedAt = DateTime.UtcNow;
 
@@ -134,6 +137,21 @@ public partial class AccessoryService
         _logger.LogInformation("Accessory {AccessoryId} updated by user {UserId}", accessoryId, userId);
 
         return MapToAccessoryResponseDto(accessory);
+    }
+
+    public async Task<bool> MarkAsSoldAsync(int accessoryId, int userId)
+    {
+        var accessory = await _context.Accessories.FindAsync(accessoryId);
+        if (accessory == null) return false;
+        if (accessory.UserId != userId)
+            throw new UnauthorizedAccessException("You can only mark your own accessories as sold");
+
+        accessory.IsSold = true;
+        accessory.SoldDate = DateTime.UtcNow;
+        accessory.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Accessory {AccessoryId} marked as sold by user {UserId}", accessoryId, userId);
+        return true;
     }
 
     public async Task<bool> DeleteAccessoryAsync(int accessoryId, int userId, bool isAdmin = false)
@@ -150,9 +168,7 @@ public partial class AccessoryService
         // Delete all associated images first
         await _imageService.DeleteAccessoryImagesInternalAsync(accessoryId);
 
-        // Soft delete by marking as sold
-        accessory.IsSold = true;
-        accessory.SoldDate = DateTime.UtcNow;
+        _context.Accessories.Remove(accessory);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Accessory {AccessoryId} deleted by user {UserId}", accessoryId, userId);

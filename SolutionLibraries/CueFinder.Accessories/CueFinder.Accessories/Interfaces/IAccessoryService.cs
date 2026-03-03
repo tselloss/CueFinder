@@ -42,4 +42,20 @@ public interface IAccessoryService
     /// Search accessories by keyword
     /// </summary>
     Task<List<AccessoryResponseDto>> SearchAccessoriesAsync(string query);
+
+    /// <summary>
+    /// Get filtered accessories with type-specific params and pagination
+    /// </summary>
+    Task<List<AccessoryResponseDto>> GetFilteredAccessoriesAsync(string? accessoryType, string? material,
+        string? condition, decimal? minPrice, decimal? maxPrice, int page, int pageSize);
+
+    /// <summary>
+    /// Mark an accessory as sold (owner only)
+    /// </summary>
+    Task<bool> MarkAsSoldAsync(int accessoryId, int userId);
+
+    /// <summary>
+    /// Get count of active (unsold) accessories
+    /// </summary>
+    Task<int> GetActiveCountAsync();
 }

@@ -201,7 +201,7 @@ export async function deleteImage(imageId) {
 // Set primary image (requires auth + ownership)
 export async function setPrimaryImage(imageId) {
   try {
-    await axios.put(`${API_BASE_URL}/images/${imageId}/primary`, {}, {
+    await axios.put(`${API_BASE_URL}/images/${imageId}/set-primary`, {}, {
       headers: getAuthHeaders()
     });
     return { success: true };

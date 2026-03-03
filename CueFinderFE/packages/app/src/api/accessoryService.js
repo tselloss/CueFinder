@@ -55,7 +55,7 @@ export async function getMyAccessories() {
 export async function searchAccessories(query, page = 1, pageSize = 20) {
   try {
     const response = await axios.get(`${API_BASE_URL}/accessories/search`, {
-      params: { query, page, pageSize }
+      params: { q: query, page, pageSize }
     });
     return response.data;
   } catch (error) {

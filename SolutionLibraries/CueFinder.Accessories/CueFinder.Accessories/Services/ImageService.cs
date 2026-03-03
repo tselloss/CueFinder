@@ -82,6 +82,68 @@ public class ImageService : IImageService
         };
     }
 
+    public async Task<List<AccessoryImageDto>> UploadAccessoryImagesAsync(int accessoryId, List<IFormFile> files, int userId)
+    {
+        if (files == null || files.Count == 0)
+            throw new InvalidOperationException("No files provided");
+
+        // Validate ownership once before processing files
+        var accessory = await _context.Accessories.FirstOrDefaultAsync(a => a.Id == accessoryId);
+        if (accessory == null)
+            throw new InvalidOperationException("Accessory not found");
+        if (accessory.UserId != userId)
+            throw new UnauthorizedAccessException("You can only modify your own accessories");
+
+        var hasPrimary = await _context.AccessoryImages.AnyAsync(i => i.AccessoryId == accessoryId && i.IsPrimary);
+        var results = new List<AccessoryImageDto>();
+
+        var baseUploads = Path.Combine(_env.ContentRootPath, "uploads", "accessories", accessoryId.ToString());
+        Directory.CreateDirectory(baseUploads);
+
+        for (int i = 0; i < files.Count; i++)
+        {
+            var file = files[i];
+            if (file == null || file.Length == 0) continue;
+
+            var safeFileName = $"{DateTime.UtcNow:yyyyMMddHHmmssfff}-{Guid.NewGuid():N}-{Path.GetFileName(file.FileName)}";
+            var fullPath = Path.Combine(baseUploads, safeFileName);
+
+            using (var stream = new FileStream(fullPath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            var relativeUrl = $"/uploads/accessories/{accessoryId}/{safeFileName}";
+            var setAsPrimary = !hasPrimary && i == 0;
+
+            var image = new AccessoryImage
+            {
+                AccessoryId = accessoryId,
+                ImageUrl = relativeUrl,
+                IsPrimary = setAsPrimary,
+                DisplayOrder = i,
+                UploadedAt = DateTime.UtcNow
+            };
+
+            _context.AccessoryImages.Add(image);
+            await _context.SaveChangesAsync();
+
+            if (setAsPrimary) hasPrimary = true;
+
+            results.Add(new AccessoryImageDto
+            {
+                Id = image.Id,
+                AccessoryId = accessoryId,
+                ImageUrl = image.ImageUrl,
+                IsPrimary = image.IsPrimary,
+                DisplayOrder = image.DisplayOrder,
+                UploadedAt = image.UploadedAt
+            });
+        }
+
+        return results;
+    }
+
     public async Task<List<AccessoryImageDto>> GetAccessoryImagesAsync(int accessoryId)
     {
         var images = await _context.AccessoryImages

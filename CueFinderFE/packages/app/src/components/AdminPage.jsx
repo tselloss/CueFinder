@@ -55,13 +55,13 @@ const PIE_COLORS = ['#1e9eff', '#22c55e', '#f59e0b', '#a855f7'];
 function StatCard({ label, value, icon: Icon, colorClass = '', borderClass = '' }) {
   return (
     <Card className={borderClass}>
-      <CardContent className="pt-6">
+      <CardContent className="pt-4 pb-4 px-4">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm text-muted-foreground">{label}</p>
-            <p className={`text-2xl font-bold ${colorClass}`}>{value}</p>
+            <p className="text-xs text-muted-foreground">{label}</p>
+            <p className={`text-xl font-bold ${colorClass}`}>{value}</p>
           </div>
-          <Icon className={`w-8 h-8 ${colorClass || 'text-muted-foreground'}`} />
+          <Icon className={`w-7 h-7 ${colorClass || 'text-muted-foreground'}`} />
         </div>
       </CardContent>
     </Card>
@@ -98,7 +98,6 @@ export default function AdminPage({ onBack }) {
         setUsers(u || []);
         setCues(c || []);
         setCases(k || []);
-        // getTables/getAccessories may return paginated objects or arrays
         setTables(Array.isArray(t) ? t : (t?.items || t?.data || []));
         setAccessories(Array.isArray(a) ? a : (a?.items || a?.data || []));
 
@@ -222,18 +221,18 @@ export default function AdminPage({ onBack }) {
 
   const removeListing = async (item) => {
     if (!window.confirm(`Delete this ${item.itemType} listing permanently?`)) return;
-    if (item.itemType === 'cue')       { await cueService.deleteCue(item.id);             setCues(s => s.filter(c => c.id !== item.id)); }
-    else if (item.itemType === 'case') { await cueCaseService.deleteCueCase(item.id);      setCases(s => s.filter(c => c.id !== item.id)); }
-    else if (item.itemType === 'table') { await billiardTableService.deleteTable(item.id); setTables(s => s.filter(c => c.id !== item.id)); }
-    else                               { await accessoryService.deleteAccessory(item.id);  setAccessories(s => s.filter(c => c.id !== item.id)); }
+    if (item.itemType === 'cue')        { await cueService.deleteCue(item.id);             setCues(s => s.filter(c => c.id !== item.id)); }
+    else if (item.itemType === 'case')  { await cueCaseService.deleteCueCase(item.id);      setCases(s => s.filter(c => c.id !== item.id)); }
+    else if (item.itemType === 'table') { await billiardTableService.deleteTable(item.id);  setTables(s => s.filter(c => c.id !== item.id)); }
+    else                                { await accessoryService.deleteAccessory(item.id);  setAccessories(s => s.filter(c => c.id !== item.id)); }
   };
 
   const flagListing = async (item) => {
-    if (item.itemType === 'cue')  { const r = await cueService.updateCue(item.id, { flagged: true });           setCues(s => s.map(c => (c.id === r.id ? r : c))); }
-    else if (item.itemType === 'case') { const r = await cueCaseService.updateCueCase(item.id, { flagged: true }); setCases(s => s.map(c => (c.id === r.id ? r : c))); }
+    if (item.itemType === 'cue')       { const r = await cueService.updateCue(item.id, { flagged: true });           setCues(s => s.map(c => (c.id === r.id ? r : c))); }
+    else if (item.itemType === 'case') { const r = await cueCaseService.updateCueCase(item.id, { flagged: true });   setCases(s => s.map(c => (c.id === r.id ? r : c))); }
   };
 
-  /* ── listing row ───────────────────────────────────── */
+  /* ── listing table row (md+ screens) ──────────────── */
   const ListingRow = ({ item }) => (
     <TableRow key={item.uid}>
       <TableCell>
@@ -264,6 +263,141 @@ export default function AdminPage({ onBack }) {
     </TableRow>
   );
 
+  /* ── mobile card: listing ──────────────────────────── */
+  const MobileListingCard = ({ item }) => (
+    <div className="p-3 border-b border-border last:border-0">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Badge variant="outline" className="text-xs shrink-0">{item.itemType.toUpperCase()}</Badge>
+            <span className="font-medium text-sm truncate">{item.title}</span>
+          </div>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <span className="text-sm font-medium">€{item.price.toFixed(2)}</span>
+            {item.flagged && <Badge variant="warning" className="text-xs">Flagged</Badge>}
+            {item.isSold  && <Badge variant="secondary" className="text-xs">Sold</Badge>}
+          </div>
+        </div>
+        <div className="flex gap-0.5 shrink-0">
+          {!item.flagged && (
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => flagListing(item)}>
+              <Flag className="w-4 h-4 text-yellow-500" />
+            </Button>
+          )}
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => removeListing(item)}>
+            <Trash2 className="w-4 h-4 text-destructive" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── mobile card: user ─────────────────────────────── */
+  const MobileUserCard = ({ u }) => (
+    <div className="p-3 border-b border-border last:border-0">
+      <div className="flex items-start justify-between gap-2">
+        <div className="min-w-0 flex-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <span className="font-medium text-sm">{u.name}</span>
+            <VerifiedBadge isVerified={u.isVerified} />
+            {usersWithFlaggedContent.some(x => x.id === u.id) && (
+              <Flag className="w-3.5 h-3.5 text-orange-500" title="Has flagged content" />
+            )}
+          </div>
+          <div className="text-xs text-muted-foreground mt-0.5 truncate">{u.email}</div>
+          <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
+            <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
+              {u.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
+              {u.role}
+            </Badge>
+            {u.isActive === false
+              ? <Badge variant="destructive" className="text-xs">Inactive</Badge>
+              : <Badge variant="success" className="text-xs">Active</Badge>}
+          </div>
+        </div>
+        <div className="flex gap-0.5 shrink-0">
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => setEditingUser({ ...u })}>
+            <Edit className="w-4 h-4" />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toggleVerify(u)} title={u.isVerified ? 'Remove verification' : 'Verify seller'}>
+            <BadgeCheck className={`w-4 h-4 ${u.isVerified ? 'text-amber-500' : 'text-muted-foreground'}`} />
+          </Button>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => toggleBan(u)}>
+            {u.isActive === false
+              ? <UserCheck className="w-4 h-4 text-green-500" />
+              : <UserX className="w-4 h-4 text-orange-500" />}
+          </Button>
+          <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => deleteUser(u.id)}>
+            <Trash2 className="w-4 h-4 text-destructive" />
+          </Button>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── mobile card: blocked image ────────────────────── */
+  const MobileBlockedImageCard = ({ img }) => (
+    <div className="p-3 border-b border-border last:border-0 space-y-1.5">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="font-medium text-sm">{img.user_name || 'Unknown'}</div>
+          {img.user_email && <div className="text-xs text-muted-foreground">{img.user_email}</div>}
+          {img.user_is_banned && <Badge variant="destructive" className="text-xs mt-1">Banned</Badge>}
+        </div>
+        <div>
+          {img.status === 'pending'  && <Badge variant="warning" className="text-xs">Pending</Badge>}
+          {img.status === 'rejected' && <Badge variant="destructive" className="text-xs">Rejected</Badge>}
+          {img.status === 'approved' && <Badge variant="success" className="text-xs">Approved</Badge>}
+        </div>
+      </div>
+      <div className="flex items-center gap-2 flex-wrap">
+        <Badge variant="outline" className="text-xs">{img.flag_reason || 'Unknown'}</Badge>
+        {img.is_ai_flagged && <span className="text-xs text-muted-foreground">AI: {(img.ai_confidence * 100).toFixed(0)}%</span>}
+        <span className="text-xs text-muted-foreground">{new Date(img.flagged_at).toLocaleDateString()}</span>
+      </div>
+      {(img.cue_id || img.cue_case_id) && (
+        <div className="text-xs text-muted-foreground">
+          {img.cue_id ? `Cue #${img.cue_id}` : `Case #${img.cue_case_id}`}
+        </div>
+      )}
+    </div>
+  );
+
+  /* ── mobile card: banned user ──────────────────────── */
+  const MobileBannedUserCard = ({ u }) => (
+    <div className="p-3 border-b border-border last:border-0">
+      <div className="flex items-start justify-between gap-2">
+        <div>
+          <div className="font-medium text-sm">{u.username}</div>
+          {u.display_name && <div className="text-xs text-muted-foreground">{u.display_name}</div>}
+          <div className="text-xs text-muted-foreground">{u.email}</div>
+          <div className="text-xs text-muted-foreground mt-0.5">Joined {new Date(u.created_at).toLocaleDateString()}</div>
+        </div>
+        <div className="flex gap-3 shrink-0">
+          <div className="text-center">
+            <Badge variant="outline" className="text-xs">{u.flagged_images_count || 0}</Badge>
+            <div className="text-xs text-muted-foreground mt-0.5">flagged</div>
+          </div>
+          <div className="text-center">
+            <Badge variant="destructive" className="text-xs">{u.rejected_images_count || 0}</Badge>
+            <div className="text-xs text-muted-foreground mt-0.5">rejected</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+
+  /* ── pagination controls ───────────────────────────── */
+  const Pagination = ({ page, total, onChange }) => total <= 1 ? null : (
+    <div className="flex items-center justify-between mt-4">
+      <span className="text-sm text-muted-foreground">Page {page} of {total}</span>
+      <div className="flex gap-2">
+        <Button variant="outline" size="sm" onClick={() => onChange(p => Math.max(1, p - 1))} disabled={page === 1}><ChevronLeft className="w-4 h-4" /></Button>
+        <Button variant="outline" size="sm" onClick={() => onChange(p => Math.min(total, p + 1))} disabled={page === total}><ChevronRight className="w-4 h-4" /></Button>
+      </div>
+    </div>
+  );
+
   const typeFilter = (type) => filteredListings.filter(l => l.itemType === type);
 
   /* ── render ────────────────────────────────────────── */
@@ -271,36 +405,36 @@ export default function AdminPage({ onBack }) {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="border-b border-border bg-card sticky top-0 z-10">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center gap-4">
-            <Button variant="ghost" onClick={onBack} className="gap-2">
+        <div className="container mx-auto px-3 md:px-4 py-3 md:py-4">
+          <div className="flex items-center gap-3">
+            <Button variant="ghost" size="sm" onClick={onBack} className="gap-1.5 shrink-0">
               <ArrowLeft className="w-4 h-4" />
-              Back
+              <span className="hidden sm:inline">Back</span>
             </Button>
             <div className="flex items-center gap-2">
-              <Shield className="w-6 h-6 text-primary" />
-              <h1 className="text-2xl font-bold mt-2">Admin Dashboard</h1>
+              <Shield className="w-5 h-5 text-primary shrink-0" />
+              <h1 className="text-lg md:text-2xl font-bold">Admin Dashboard</h1>
             </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 py-6 space-y-6">
+      <div className="container mx-auto px-3 md:px-4 py-4 md:py-6 space-y-4 md:space-y-6">
 
         {/* ── Row 1: Core stats ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Total Users"      value={users.length}          icon={Users}       />
-          <StatCard label="Total Listings"   value={listings.length}       icon={Package}     />
-          <StatCard label="Active Listings"  value={activeListings.length} icon={Activity}    colorClass="text-green-500"   borderClass="border-green-500/30" />
-          <StatCard label="Sold Listings"    value={soldListings.length}   icon={CheckSquare} colorClass="text-blue-500"    borderClass="border-blue-500/30" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Total Users"     value={users.length}          icon={Users}       />
+          <StatCard label="Total Listings"  value={listings.length}       icon={Package}     />
+          <StatCard label="Active"          value={activeListings.length} icon={Activity}    colorClass="text-green-500"   borderClass="border-green-500/30" />
+          <StatCard label="Sold"            value={soldListings.length}   icon={CheckSquare} colorClass="text-blue-500"    borderClass="border-blue-500/30" />
         </div>
 
         {/* ── Row 2: Moderation stats ── */}
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <StatCard label="Flagged Content"  value={flaggedListings.length}    icon={AlertTriangle} colorClass="text-orange-500" borderClass="border-orange-500/30" />
-          <StatCard label="Pending Review"   value={moderationStats.pending}   icon={ImageIcon}     colorClass="text-yellow-500" borderClass="border-yellow-500/30" />
-          <StatCard label="Banned Users"     value={bannedUsers.length}        icon={UserX}         colorClass="text-red-500"    borderClass="border-red-500/30" />
-          <StatCard label="Blocked Images"   value={moderationStats.total}     icon={Ban}           colorClass="text-purple-500" borderClass="border-purple-500/30" />
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          <StatCard label="Flagged"         value={flaggedListings.length}    icon={AlertTriangle} colorClass="text-orange-500" borderClass="border-orange-500/30" />
+          <StatCard label="Pending Review"  value={moderationStats.pending}   icon={ImageIcon}     colorClass="text-yellow-500" borderClass="border-yellow-500/30" />
+          <StatCard label="Banned Users"    value={bannedUsers.length}        icon={UserX}         colorClass="text-red-500"    borderClass="border-red-500/30" />
+          <StatCard label="Blocked Images"  value={moderationStats.total}     icon={Ban}           colorClass="text-purple-500" borderClass="border-purple-500/30" />
         </div>
 
         {/* ── Flagged alert ── */}
@@ -317,21 +451,20 @@ export default function AdminPage({ onBack }) {
         )}
 
         {/* ── Charts row ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Line chart: Listings over time */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 md:gap-6">
           <Card className="lg:col-span-2">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <TrendingUp className="w-5 h-5 text-primary" />
                 Listings — Last 6 Months
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={listingsByMonth} margin={{ top: 4, right: 16, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="month" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                  <XAxis dataKey="month" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
                   <Tooltip
                     contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8 }}
                     labelStyle={{ color: 'var(--foreground)' }}
@@ -342,21 +475,20 @@ export default function AdminPage({ onBack }) {
             </CardContent>
           </Card>
 
-          {/* Pie chart: By type */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <ShoppingBag className="w-5 h-5 text-primary" />
                 By Type
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={200}>
+              <ResponsiveContainer width="100%" height={180}>
                 <PieChart>
                   <Pie
                     data={listingsByType}
                     cx="50%" cy="50%"
-                    innerRadius={52} outerRadius={80}
+                    innerRadius={48} outerRadius={72}
                     paddingAngle={3}
                     dataKey="value"
                     label={({ name, value }) => value > 0 ? `${name} ${value}` : ''}
@@ -371,9 +503,9 @@ export default function AdminPage({ onBack }) {
                   />
                 </PieChart>
               </ResponsiveContainer>
-              <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 justify-center">
+              <div className="flex flex-wrap gap-x-3 gap-y-1 mt-2 justify-center">
                 {listingsByType.map((d, i) => (
-                  <div key={d.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                  <div key={d.name} className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ background: PIE_COLORS[i] }} />
                     {d.name}
                   </div>
@@ -383,21 +515,21 @@ export default function AdminPage({ onBack }) {
           </Card>
         </div>
 
-        {/* ── Bar chart: By type (detailed) + Recent Activity ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* ── Bar chart + Recent Activity ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <Package className="w-5 h-5" />
                 Listings by Category
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={160}>
+              <ResponsiveContainer width="100%" height={150}>
                 <BarChart data={listingsByType} margin={{ top: 4, right: 8, left: -20, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.06)" />
-                  <XAxis dataKey="name" tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
-                  <YAxis allowDecimals={false} tick={{ fontSize: 12, fill: 'var(--muted-foreground)' }} />
+                  <XAxis dataKey="name" tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
+                  <YAxis allowDecimals={false} tick={{ fontSize: 11, fill: 'var(--muted-foreground)' }} />
                   <Tooltip contentStyle={{ background: 'var(--card)', border: '1px solid var(--border)', borderRadius: 8 }} />
                   <Bar dataKey="value" name="Count" radius={[4, 4, 0, 0]}>
                     {listingsByType.map((_, i) => (
@@ -409,20 +541,19 @@ export default function AdminPage({ onBack }) {
             </CardContent>
           </Card>
 
-          {/* Recent activity */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <Activity className="w-5 h-5" />
                 Recent Listings
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="space-y-2">
+              <div className="space-y-0">
                 {recentListings.length === 0 ? (
                   <p className="text-sm text-muted-foreground">No listings yet.</p>
                 ) : recentListings.map(item => (
-                  <div key={item.uid} className="flex items-center justify-between py-1.5 border-b border-border last:border-0">
+                  <div key={item.uid} className="flex items-center justify-between py-2 border-b border-border last:border-0">
                     <div className="flex items-center gap-2 min-w-0">
                       <Badge variant="outline" className="text-xs shrink-0">{item.itemType.toUpperCase()}</Badge>
                       <span className="text-sm font-medium truncate">{item.title}</span>
@@ -430,7 +561,7 @@ export default function AdminPage({ onBack }) {
                     <div className="flex items-center gap-2 ml-2 shrink-0">
                       <span className="text-sm text-muted-foreground">€{item.price.toFixed(2)}</span>
                       {item.createdAt && (
-                        <span className="text-xs text-muted-foreground">
+                        <span className="text-xs text-muted-foreground hidden sm:inline">
                           {new Date(item.createdAt).toLocaleDateString(undefined, { month: 'short', day: 'numeric' })}
                         </span>
                       )}
@@ -445,8 +576,8 @@ export default function AdminPage({ onBack }) {
         {/* ── Image moderation overview ── */}
         {(flaggedImages.length > 0 || bannedUsers.length > 0) && (
           <Card className="border-purple-500/50">
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2">
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
                 <Shield className="w-5 h-5 text-purple-500" />
                 Image Moderation Overview
               </CardTitle>
@@ -454,12 +585,13 @@ export default function AdminPage({ onBack }) {
             <CardContent>
               <Tabs defaultValue="blocked" className="w-full">
                 <TabsList className="grid w-full grid-cols-2">
-                  <TabsTrigger value="blocked">Blocked Images ({flaggedImages.length})</TabsTrigger>
-                  <TabsTrigger value="banned">Banned Users ({bannedUsers.length})</TabsTrigger>
+                  <TabsTrigger value="blocked">Blocked ({flaggedImages.length})</TabsTrigger>
+                  <TabsTrigger value="banned">Banned ({bannedUsers.length})</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="blocked" className="mt-4">
-                  <div className="rounded-md border">
+                  {/* Desktop table */}
+                  <div className="hidden md:block rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -505,10 +637,21 @@ export default function AdminPage({ onBack }) {
                       <div className="p-4 text-center text-sm text-muted-foreground border-t">Showing 10 of {flaggedImages.length}</div>
                     )}
                   </div>
+                  {/* Mobile cards */}
+                  <div className="md:hidden rounded-md border divide-y-0">
+                    {flaggedImages.length === 0
+                      ? <p className="p-4 text-sm text-muted-foreground">No blocked images</p>
+                      : flaggedImages.slice(0, 10).map(img => <MobileBlockedImageCard key={img.id} img={img} />)
+                    }
+                    {flaggedImages.length > 10 && (
+                      <div className="p-3 text-center text-sm text-muted-foreground border-t">Showing 10 of {flaggedImages.length}</div>
+                    )}
+                  </div>
                 </TabsContent>
 
                 <TabsContent value="banned" className="mt-4">
-                  <div className="rounded-md border">
+                  {/* Desktop table */}
+                  <div className="hidden md:block rounded-md border">
                     <Table>
                       <TableHeader>
                         <TableRow>
@@ -537,6 +680,13 @@ export default function AdminPage({ onBack }) {
                       </TableBody>
                     </Table>
                   </div>
+                  {/* Mobile cards */}
+                  <div className="md:hidden rounded-md border">
+                    {bannedUsers.length === 0
+                      ? <p className="p-4 text-sm text-muted-foreground">No banned users</p>
+                      : bannedUsers.slice(0, 10).map(u => <MobileBannedUserCard key={u.id} u={u} />)
+                    }
+                  </div>
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -544,18 +694,24 @@ export default function AdminPage({ onBack }) {
         )}
 
         {/* ── Users + Listings management ── */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+
           {/* Users */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Users className="w-5 h-5" />Users Management</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Users className="w-5 h-5" />
+                Users Management
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
                 <Input placeholder="Search by name or email" value={userQuery} onChange={e => setUserQuery(e.target.value)} className="flex-1" />
-                <Badge variant="secondary">{filteredUsers.length} / {users.length}</Badge>
+                <Badge variant="secondary" className="shrink-0">{filteredUsers.length}/{users.length}</Badge>
               </div>
-              <div className="rounded-md border">
+
+              {/* Desktop table */}
+              <div className="hidden sm:block rounded-md border">
                 <Table>
                   <TableHeader>
                     <TableRow>
@@ -572,7 +728,7 @@ export default function AdminPage({ onBack }) {
                       <TableRow key={u.id}>
                         <TableCell>
                           <div>
-                            <div className="flex items-center gap-2">
+                            <div className="flex items-center gap-1.5">
                               <span className="font-medium">{u.name}</span>
                               <VerifiedBadge isVerified={u.isVerified} />
                               {usersWithFlaggedContent.some(x => x.id === u.id) && (
@@ -596,12 +752,7 @@ export default function AdminPage({ onBack }) {
                         <TableCell>
                           <div className="flex justify-end gap-1">
                             <Button variant="ghost" size="sm" onClick={() => setEditingUser({ ...u })}><Edit className="w-4 h-4" /></Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => toggleVerify(u)}
-                              title={u.isVerified ? 'Remove verification' : 'Verify seller'}
-                            >
+                            <Button variant="ghost" size="sm" onClick={() => toggleVerify(u)} title={u.isVerified ? 'Remove verification' : 'Verify seller'}>
                               <BadgeCheck className={`w-4 h-4 ${u.isVerified ? 'text-amber-500' : 'text-muted-foreground'}`} />
                             </Button>
                             <Button variant="ghost" size="sm" onClick={() => toggleBan(u)}>
@@ -617,43 +768,51 @@ export default function AdminPage({ onBack }) {
                   </TableBody>
                 </Table>
               </div>
-              {totalUserPages > 1 && (
-                <div className="flex items-center justify-between mt-4">
-                  <span className="text-sm text-muted-foreground">Page {userPage} of {totalUserPages}</span>
-                  <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setUserPage(p => Math.max(1, p - 1))} disabled={userPage === 1}><ChevronLeft className="w-4 h-4" /></Button>
-                    <Button variant="outline" size="sm" onClick={() => setUserPage(p => Math.min(totalUserPages, p + 1))} disabled={userPage === totalUserPages}><ChevronRight className="w-4 h-4" /></Button>
-                  </div>
-                </div>
-              )}
+
+              {/* Mobile cards */}
+              <div className="sm:hidden rounded-md border">
+                {paginatedUsers.length === 0
+                  ? <p className="p-4 text-sm text-muted-foreground">No users found</p>
+                  : paginatedUsers.map(u => <MobileUserCard key={u.id} u={u} />)
+                }
+              </div>
+
+              <Pagination page={userPage} total={totalUserPages} onChange={setUserPage} />
             </CardContent>
           </Card>
 
           {/* Listings */}
           <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center gap-2"><Package className="w-5 h-5" />Listings Management</CardTitle>
+            <CardHeader className="pb-2">
+              <CardTitle className="flex items-center gap-2 text-base md:text-lg">
+                <Package className="w-5 h-5" />
+                Listings Management
+              </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               <div className="flex items-center gap-2">
                 <Input placeholder="Search by title or price" value={query} onChange={e => setQuery(e.target.value)} className="flex-1" />
-                <Badge variant="secondary">{filteredListings.length} / {listings.length}</Badge>
+                <Badge variant="secondary" className="shrink-0">{filteredListings.length}/{listings.length}</Badge>
               </div>
 
               <Tabs defaultValue="all" className="w-full">
-                <TabsList className="grid w-full grid-cols-5">
-                  <TabsTrigger value="all">All</TabsTrigger>
-                  <TabsTrigger value="cue">Cues</TabsTrigger>
-                  <TabsTrigger value="case">Cases</TabsTrigger>
-                  <TabsTrigger value="table">Tables</TabsTrigger>
-                  <TabsTrigger value="accessory">Acc.</TabsTrigger>
-                </TabsList>
+                {/* Scrollable tabs on mobile */}
+                <div className="overflow-x-auto -mx-1 px-1">
+                  <TabsList className="flex w-max min-w-full">
+                    <TabsTrigger value="all"       className="flex-1 text-xs px-2">All</TabsTrigger>
+                    <TabsTrigger value="cue"       className="flex-1 text-xs px-2">Cues</TabsTrigger>
+                    <TabsTrigger value="case"      className="flex-1 text-xs px-2">Cases</TabsTrigger>
+                    <TabsTrigger value="table"     className="flex-1 text-xs px-2">Tables</TabsTrigger>
+                    <TabsTrigger value="accessory" className="flex-1 text-xs px-2">Acc.</TabsTrigger>
+                  </TabsList>
+                </div>
 
                 {['all', 'cue', 'case', 'table', 'accessory'].map(tab => {
                   const items = tab === 'all' ? paginatedListings : typeFilter(tab);
                   return (
-                    <TabsContent key={tab} value={tab} className="mt-4">
-                      <div className="rounded-md border">
+                    <TabsContent key={tab} value={tab} className="mt-3">
+                      {/* Desktop table */}
+                      <div className="hidden sm:block rounded-md border">
                         <Table>
                           <TableHeader>
                             <TableRow>
@@ -670,14 +829,17 @@ export default function AdminPage({ onBack }) {
                           </TableBody>
                         </Table>
                       </div>
-                      {tab === 'all' && totalListingPages > 1 && (
-                        <div className="flex items-center justify-between mt-4">
-                          <span className="text-sm text-muted-foreground">Page {listingPage} of {totalListingPages}</span>
-                          <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setListingPage(p => Math.max(1, p - 1))} disabled={listingPage === 1}><ChevronLeft className="w-4 h-4" /></Button>
-                            <Button variant="outline" size="sm" onClick={() => setListingPage(p => Math.min(totalListingPages, p + 1))} disabled={listingPage === totalListingPages}><ChevronRight className="w-4 h-4" /></Button>
-                          </div>
-                        </div>
+
+                      {/* Mobile cards */}
+                      <div className="sm:hidden rounded-md border">
+                        {items.length === 0
+                          ? <p className="p-4 text-sm text-muted-foreground">No listings found</p>
+                          : items.map(item => <MobileListingCard key={item.uid} item={item} />)
+                        }
+                      </div>
+
+                      {tab === 'all' && (
+                        <Pagination page={listingPage} total={totalListingPages} onChange={setListingPage} />
                       )}
                     </TabsContent>
                   );
@@ -691,7 +853,7 @@ export default function AdminPage({ onBack }) {
       {/* Edit User Dialog */}
       {editingUser && (
         <Dialog open={true} onOpenChange={() => setEditingUser(null)}>
-          <DialogContent>
+          <DialogContent className="max-w-sm mx-auto">
             <DialogHeader><DialogTitle>Edit User</DialogTitle></DialogHeader>
             <div className="space-y-4 py-4">
               <div>
@@ -713,9 +875,9 @@ export default function AdminPage({ onBack }) {
                 </Select>
               </div>
             </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setEditingUser(null)}>Cancel</Button>
-              <Button onClick={saveUser}>Save Changes</Button>
+            <DialogFooter className="flex-col sm:flex-row gap-2">
+              <Button variant="outline" onClick={() => setEditingUser(null)} className="w-full sm:w-auto">Cancel</Button>
+              <Button onClick={saveUser} className="w-full sm:w-auto">Save Changes</Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>

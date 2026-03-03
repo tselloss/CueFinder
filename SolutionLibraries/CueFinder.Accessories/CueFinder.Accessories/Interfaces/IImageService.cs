@@ -14,6 +14,11 @@ public interface IImageService
     Task<AccessoryImageDto> UploadAccessoryImageAsync(int accessoryId, IFormFile file, int userId, string? altText = null, int displayOrder = 0, bool isPrimary = false);
 
     /// <summary>
+    /// Upload multiple images for an accessory (owner only)
+    /// </summary>
+    Task<List<AccessoryImageDto>> UploadAccessoryImagesAsync(int accessoryId, List<IFormFile> files, int userId);
+
+    /// <summary>
     /// Get all images for an accessory (public)
     /// </summary>
     Task<List<AccessoryImageDto>> GetAccessoryImagesAsync(int accessoryId);
