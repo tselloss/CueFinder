@@ -187,8 +187,8 @@ BEGIN
 
   -- Discussion Subscriptions/Views
   IF NOT EXISTS (SELECT 1 FROM "DiscussionSubscriptions") THEN
-    INSERT INTO "DiscussionSubscriptions" ("Id", "DiscussionId", "UserId", "NotifyOnNewPost", "NotifyOnMention", "SubscribedAt")
-    VALUES (uuid_generate_v4(), discussion_id, forum_user_id, true, true, (now() AT TIME ZONE 'UTC'));
+    INSERT INTO "DiscussionSubscriptions" ("Id", "DiscussionId", "UserId", "SubscribedAt")
+    VALUES (uuid_generate_v4(), discussion_id, forum_user_id, (now() AT TIME ZONE 'UTC'));
   END IF;
 
   IF NOT EXISTS (SELECT 1 FROM "DiscussionViews") THEN
