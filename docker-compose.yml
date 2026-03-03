@@ -101,8 +101,6 @@ services:
       - JwtSettings__Audience=CueFinderUsers
       - JwtSettings__ExpirationMinutes=60
       - Moderation__NudeNetUrl=http://opennsfw:8000
-    ports:
-      - "5001:5001"
     depends_on:
       postgres:
         condition: service_healthy
