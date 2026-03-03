@@ -21,7 +21,7 @@ public interface IBilliardTableService
     /// <summary>
     /// Get all billiard tables created by a specific user
     /// </summary>
-    Task<List<BilliardTableResponseDto>> GetUserBilliardTablesAsync(int userId);
+    Task<List<BilliardTableResponseDto>> GetUserBilliardTablesAsync(int userId, bool? hidden = null);
     
     /// <summary>
     /// Create a new billiard table listing
@@ -42,4 +42,20 @@ public interface IBilliardTableService
     /// Search billiard tables by keyword
     /// </summary>
     Task<List<BilliardTableResponseDto>> SearchBilliardTablesAsync(string query);
+
+    /// <summary>
+    /// Get filtered billiard tables with type-specific params and pagination
+    /// </summary>
+    Task<List<BilliardTableResponseDto>> GetFilteredBilliardTablesAsync(string? tableSize, string? tableType,
+        string? condition, decimal? minPrice, decimal? maxPrice, int page, int pageSize);
+
+    /// <summary>
+    /// Mark a billiard table as sold (owner only)
+    /// </summary>
+    Task<bool> MarkAsSoldAsync(int tableId, int userId);
+
+    /// <summary>
+    /// Get count of active (unsold) billiard tables
+    /// </summary>
+    Task<int> GetActiveCountAsync();
 }

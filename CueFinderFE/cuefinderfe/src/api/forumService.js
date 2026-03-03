@@ -69,3 +69,18 @@ export const getUserDiscussions = (userId) =>
 
 export const getUserPosts = (userId) =>
   get(`${BASE_URL}/user/${userId}/posts`);
+
+// Billiard Clubs
+export const getClubRecords = () => get(`${BASE_URL}/clubs`);
+
+export const createClubRecord = (data) => post(`${BASE_URL}/clubs`, data);
+
+export const updateClubRecord = (id, data) => put(`${BASE_URL}/clubs/${id}`, data);
+
+export const deleteClubRecord = (id) => delete_(`${BASE_URL}/clubs/${id}`);
+
+export const requestClubCoOwner = (id, emailOrUsername) =>
+  post(`${BASE_URL}/clubs/${id}/coowners`, { emailOrUsername });
+
+export const approveClubCoOwner = (id, coOwnerId) =>
+  post(`${BASE_URL}/clubs/${id}/coowners/${coOwnerId}/approve`);

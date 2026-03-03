@@ -137,7 +137,12 @@ public partial class CueCaseService
         if (dto.Color != null)
             cueCase.Color = dto.Color;
 
-        // Reactivation logic removed: UpdateCueCaseDto does not contain IsHidden
+        if (dto.IsHidden.HasValue)
+        {
+            cueCase.IsHidden = dto.IsHidden.Value;
+            cueCase.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+        }
+        if (dto.LastUserResponseAt.HasValue) cueCase.LastUserResponseAt = dto.LastUserResponseAt.Value;
 
         if (dto.CaseMaterial != null)
             cueCase.CaseMaterial = dto.CaseMaterial;

@@ -17,6 +17,11 @@ import DesktopSidebar from './components/DesktopSidebar';
 import AppHeader from './components/AppHeader.jsx';
 import AppFooter from './components/AppFooter.jsx';
 import OldListingsModal from './components/OldListingsModal.jsx';
+import MobileBottomNav from './components/MobileBottomNav.jsx';
+import RaffleList from './components/RaffleList.jsx';
+import RaffleDetail from './components/RaffleDetail.jsx';
+import RaffleCreateForm from './components/RaffleCreateForm.jsx';
+import SellerProfile from './components/SellerProfile.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
@@ -58,10 +63,10 @@ function AppInner() {
   const [showForumCategories, setShowForumCategories] = useState(false);
   const [oldListings, setOldListings] = useState([]);
   const [showOldListingsModal, setShowOldListingsModal] = useState(false);
-  // Price range slider [min,max] in USD
-  const [priceRange, setPriceRange] = useState([0, 5000]);
+  // Price range slider [min,max] in EUR
   const PRICE_MIN_LIMIT = 0;
   const PRICE_MAX_LIMIT = 10000;
+  const [priceRange, setPriceRange] = useState([PRICE_MIN_LIMIT, PRICE_MAX_LIMIT]);
   const PRICE_STEP = 1;
   const presetRanges = [
     { label: '< $200', value: [0, 200] },
@@ -89,6 +94,8 @@ function AppInner() {
 
   // Check if we're on the home page (listings page)
   const isHomePage = location.pathname === '/';
+  // Show the sidebar on home + raffles + forum pages
+  const showSidebar = isHomePage || location.pathname.startsWith('/raffles') || location.pathname.startsWith('/forum');
   
   // Handle view mode based on screen size
   useEffect(() => {
@@ -395,17 +402,18 @@ function AppInner() {
 
       {/* Main Content Area with Sidebar */}
       <div className="flex-1 bg-background flex flex-col relative pt-[60px]">
-        <div className="flex flex-row flex-1 relative">
+        {/* pb-16 on mobile leaves room above the fixed bottom nav */}
+        <div className="flex flex-row flex-1 relative pb-16 md:pb-0">
           {/* Mobile Sidebar Overlay */}
-          {isHomePage && mobileMenuOpen && (
+          {showSidebar && mobileMenuOpen && (
             <div 
               className="sidebar-overlay absolute inset-0 bg-black/50 z-40"
               onClick={() => setMobileMenuOpen(false)}
             />
           )}
 
-          {/* Desktop Sidebar - Only on home page */}
-          {isHomePage && (
+          {/* Desktop Sidebar - Home, Raffles, Forum */}
+          {showSidebar && (
             <DesktopSidebar
               category={category}
               setCategory={setCategory}
@@ -507,25 +515,31 @@ function AppInner() {
               <Route path="/forum" element={
                 user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
+
+              {/* Seller profiles — public */}
+              <Route path="/sellers/:id" element={<SellerProfile />} />
+
+              {/* Raffles — public browse + detail, create requires auth */}
+              <Route path="/raffles" element={<RaffleList onBack={handleBack} />} />
+              <Route path="/raffles/create" element={
+                user ? <RaffleCreateForm onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/raffles/:id" element={<RaffleDetail onBack={handleBack} />} />
             </Routes>
           </div>
         </div>
       </div>
 
-      {/* Mobile Menu Button - Only on home page */}
-      {isHomePage && (
-        <button
-          className="mobile-menu-button fixed bottom-20 right-4 md:hidden p-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg"
-          data-testid="mobile-menu-toggle"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-            <line x1="3" y1="6" x2="21" y2="6"></line>
-            <line x1="3" y1="12" x2="21" y2="12"></line>
-            <line x1="3" y1="18" x2="21" y2="18"></line>
-          </svg>
-        </button>
-      )}
+      {/* Mobile Bottom Navigation */}
+      <MobileBottomNav
+        currentPath={location.pathname}
+        onNavigate={(path) => navigate(path)}
+        unreadCount={unreadMessageCount}
+        user={user}
+        onToggleSidebar={() => setMobileMenuOpen(v => !v)}
+        showSidebar={showSidebar}
+        onAddListing={handleAdd}
+      />
 
       {/* App Footer - shown on all pages */}
       <AppFooter />

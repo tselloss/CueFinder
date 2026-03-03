@@ -6,8 +6,9 @@ namespace CueFinder.Messages.Models
     public class MessageResponseDto
     {
         public int Id { get; set; }
-        public int SenderId { get; set; }
+        public int? SenderId { get; set; }
         public string SenderName { get; set; } = string.Empty;
+        public bool IsSystem { get; set; } = false;
         public int RecipientId { get; set; }
         public string RecipientName { get; set; } = string.Empty;
         public int? CueId { get; set; }

@@ -166,7 +166,7 @@ fi
 print_step "Graceful shutdown of $ACTIVE_SLOT slot (${DRAIN_TIMEOUT}s grace period)..."
 
 # Create shutdown signal for graceful shutdown
-docker exec -d cuefinder-backend-$ACTIVE_SLOT /bin/sh -c 'touch /tmp/shutdown-signal' 2>/dev/null || true
+docker exec -d cuefinder-backend-$ACTIVE_SLOT-prod /bin/sh -c 'touch /tmp/shutdown-signal' 2>/dev/null || true
 
 # Wait for graceful shutdown
 sleep $DRAIN_TIMEOUT

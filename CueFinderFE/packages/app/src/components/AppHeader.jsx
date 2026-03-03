@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
@@ -18,9 +18,8 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
   ];
 
   const handleMobileToggle = () => {
-    if (!mobileNavOpen) {
-      setDropdownOpen(false);
-    }
+    setDropdownOpen(false);
+    setLangDropdownOpen(false);
     setMobileNavOpen(v => !v);
   };
 
@@ -72,7 +71,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
 
         <div className="flex items-center gap-2">
           {/* Language Switcher */}
-          <DropdownMenu open={langDropdownOpen} onOpenChange={handleLanguageDropdownChange}>
+          <DropdownMenu open={langDropdownOpen} onOpenChange={handleLanguageDropdownChange} modal={false}>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" size="sm" className="gap-1 flex-shrink-0 hover:bg-primary/10 transition-colors">
                 <Globe className="h-4 w-4" />
@@ -144,7 +143,7 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                   )}
                 </Button>
 
-                <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange} modal={true}>
+                <DropdownMenu open={dropdownOpen} onOpenChange={handleDropdownChange} modal={false}>
                   <DropdownMenuTrigger asChild>
                     <Button variant="outline" size="sm" className="flex-shrink-0 hover:bg-primary/10 transition-colors">
                       <UserIcon className="h-4 w-4" />

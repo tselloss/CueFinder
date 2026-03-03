@@ -32,14 +32,5 @@ public partial class CueService : ICueService
         _emailService = emailService;
     }
 
-    public Task<bool> DeleteCueAsync(int cueId, int userId, bool isAdmin = false)
-    {
-        throw new NotImplementedException();
-    }
-
-    public Task<List<CueResponseDto>> GetUserCuesAsync(int userId)
-    {
-        throw new NotImplementedException();
-    }
 }
 

@@ -170,32 +170,38 @@ jobs:
           
           # Create .env file with all secrets (properly quoted for special characters)
           echo "⚙️  Updating environment..."
-          cat > .env << 'ENVEOF'
-          DB_PASSWORD="\$DB_PASSWORD"
-          JWT_SECRET="\$JWT_SECRET"
-          FRONTEND_API_URL="\$FRONTEND_API_URL"
-          CORS_FRONTEND_ORIGIN="\$CORS_FRONTEND_ORIGIN"
-          SMTP_PASSWORD="\$SMTP_PASSWORD"
-          SMTP_SERVER="\$SMTP_SERVER"
-          SMTP_PORT="\$SMTP_PORT"
-          EMAIL_FROM="\$EMAIL_FROM"
-          GMAIL_CLIENT_ID="\$GMAIL_CLIENT_ID"
-          GMAIL_CLIENT_SECRET="\$GMAIL_CLIENT_SECRET"
-          GMAIL_PROJECT_ID="\$GMAIL_PROJECT_ID"
+          cat > .env << ENVEOF
+          DB_PASSWORD="$DB_PASSWORD"
+          JWT_SECRET="$JWT_SECRET"
+          FRONTEND_API_URL="$FRONTEND_API_URL"
+          CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
+          SMTP_PASSWORD="$SMTP_PASSWORD"
+          SMTP_SERVER="$SMTP_SERVER"
+          SMTP_PORT="$SMTP_PORT"
+          EMAIL_FROM="$EMAIL_FROM"
+          GMAIL_CLIENT_ID="$GMAIL_CLIENT_ID"
+          GMAIL_CLIENT_SECRET="$GMAIL_CLIENT_SECRET"
+          GMAIL_PROJECT_ID="$GMAIL_PROJECT_ID"
           ENVEOF
                     
                     echo "📋 Environment file created"
                     echo "✓ Environment configured"
           
+          # Backup database before any infrastructure changes
+          echo "💾 Backing up database before deployment..."
+          mkdir -p /home/cuefinder/backups
+          BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S)_infra.sql"
+          if docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE" 2>/dev/null; then
+            echo "   ✓ Backup saved: \$BACKUP_FILE"
+            ls -t /home/cuefinder/backups/cuefinder_backup_*.sql 2>/dev/null | tail -n +6 | xargs rm -f
+            echo "   ✓ Old backups pruned (keeping last 5)"
+          else
+            echo "   ⚠️  Backup skipped (postgres container not available)"
+          fi
+
           # Run database migrations (if needed)
           if [ "\$SKIP_MIGRATIONS" != "true" ]; then
             echo "🗄️  Running database migrations..."
-            
-            # Create backup before migrations (assumes cuefinder-postgres-prod container exists)
-            mkdir -p /home/cuefinder/backups
-            BACKUP_FILE="/home/cuefinder/backups/cuefinder_backup_\$(date +%Y%m%d_%H%M%S).sql"
-            docker exec cuefinder-postgres-prod pg_dump -U postgres -d cuefinder > "\$BACKUP_FILE"
-            echo "   Backup created: \$BACKUP_FILE"
             
             # Run migrations
             if [ -d "init.sql" ]; then

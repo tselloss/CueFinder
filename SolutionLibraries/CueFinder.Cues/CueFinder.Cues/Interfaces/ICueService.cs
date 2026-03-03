@@ -21,7 +21,7 @@ public interface ICueService
     /// <summary>
     /// Get all cues created by a specific user
     /// </summary>
-    Task<List<CueResponseDto>> GetUserCuesAsync(int userId);
+    Task<List<CueResponseDto>> GetUserCuesAsync(int userId, bool? hidden = null);
     
     /// <summary>
     /// Create a new cue listing

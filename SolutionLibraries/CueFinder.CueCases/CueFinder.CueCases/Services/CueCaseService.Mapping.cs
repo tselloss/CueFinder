@@ -38,6 +38,7 @@ public partial class CueCaseService
             SellerEmail = cueCase.User?.Email,
             SellerPhone = cueCase.User?.Phone,
             SellerHidePhone = cueCase.User?.HidePhone ?? false,
+            SellerIsVerified = cueCase.User?.IsVerified ?? false,
             ViewCount = cueCase.ViewCount,
             AverageRating = cueCase.AverageRating,
             RatingCount = cueCase.RatingCount,

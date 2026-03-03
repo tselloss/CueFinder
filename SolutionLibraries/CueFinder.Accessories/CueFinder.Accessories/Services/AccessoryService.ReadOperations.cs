@@ -105,4 +105,38 @@ public partial class AccessoryService
 
         return accessories.Select(MapToAccessoryResponseDto).ToList();
     }
+
+    public async Task<List<AccessoryResponseDto>> GetFilteredAccessoriesAsync(
+        string? accessoryType, string? material, string? condition,
+        decimal? minPrice, decimal? maxPrice, int page, int pageSize)
+    {
+        var query = _context.Accessories
+            .Include(a => a.Images)
+            .Include(a => a.User)
+            .Where(a => !a.IsSold);
+
+        if (!string.IsNullOrEmpty(accessoryType))
+            query = query.Where(a => a.AccessoryType == accessoryType);
+        if (!string.IsNullOrEmpty(material))
+            query = query.Where(a => a.Material == material);
+        if (!string.IsNullOrEmpty(condition))
+            query = query.Where(a => a.Condition == condition);
+        if (minPrice.HasValue)
+            query = query.Where(a => a.Price >= minPrice.Value);
+        if (maxPrice.HasValue)
+            query = query.Where(a => a.Price <= maxPrice.Value);
+
+        var accessories = await query
+            .OrderByDescending(a => a.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return accessories.Select(MapToAccessoryResponseDto).ToList();
+    }
+
+    public async Task<int> GetActiveCountAsync()
+    {
+        return await _context.Accessories.CountAsync(a => !a.IsSold);
+    }
 }

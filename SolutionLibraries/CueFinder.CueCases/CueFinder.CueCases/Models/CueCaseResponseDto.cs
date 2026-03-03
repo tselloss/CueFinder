@@ -32,6 +32,7 @@ public class CueCaseResponseDto
     public string? SellerEmail { get; set; }
     public string? SellerPhone { get; set; }
     public bool SellerHidePhone { get; set; }
+    public bool SellerIsVerified { get; set; }
     public int ViewCount { get; set; }
     public decimal AverageRating { get; set; }
     public int RatingCount { get; set; }

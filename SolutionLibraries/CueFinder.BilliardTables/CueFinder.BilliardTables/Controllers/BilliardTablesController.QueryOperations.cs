@@ -89,18 +89,66 @@ public partial class BilliardTablesController
     [Authorize]
     [ProducesResponseType(typeof(List<BilliardTableResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<BilliardTableResponseDto>>> GetMyTables()
+    public async Task<ActionResult<List<BilliardTableResponseDto>>> GetMyTables([FromQuery] bool? hidden = null)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var tables = await _tableService.GetUserBilliardTablesAsync(userId);
+            var tables = await _tableService.GetUserBilliardTablesAsync(userId, hidden);
             return Ok(tables);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving current user's billiard tables");
             return StatusCode(500, new { message = "Error retrieving your billiard tables", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get count of active (unsold) billiard tables
+    /// </summary>
+    [HttpGet("count/active")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<ActionResult<int>> GetActiveCount()
+    {
+        try
+        {
+            var count = await _tableService.GetActiveCountAsync();
+            return Ok(count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting active billiard tables count");
+            return StatusCode(500, new { message = "Error getting count", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get filtered billiard tables with type-specific params
+    /// </summary>
+    [HttpGet("filter")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<BilliardTableResponseDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<BilliardTableResponseDto>>> GetFilteredTables(
+        [FromQuery] string? tableSize = null,
+        [FromQuery] string? tableType = null,
+        [FromQuery] string? condition = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var tables = await _tableService.GetFilteredBilliardTablesAsync(
+                tableSize, tableType, condition, minPrice, maxPrice, page, pageSize);
+            return Ok(tables);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error filtering billiard tables");
+            return StatusCode(500, new { message = "Error filtering billiard tables", error = ex.Message });
         }
     }
 
