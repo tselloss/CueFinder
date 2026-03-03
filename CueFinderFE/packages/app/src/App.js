@@ -509,22 +509,28 @@ function AppInner() {
               } />
               
               <Route path="/coming-soon" element={
-                <ComingSoon category={category} onBack={handleBack} />
+                user ? <ComingSoon category={category} onBack={handleBack} /> : <Navigate to="/login" />
               } />
               
               <Route path="/forum" element={
                 user ? <Forum onBack={handleBack} /> : <Navigate to="/login" />
               } />
 
-              {/* Seller profiles — public */}
-              <Route path="/sellers/:id" element={<SellerProfile />} />
+              {/* Seller profiles — registered users only */}
+              <Route path="/sellers/:id" element={
+                user ? <SellerProfile /> : <Navigate to="/login" />
+              } />
 
-              {/* Raffles — public browse + detail, create requires auth */}
-              <Route path="/raffles" element={<RaffleList onBack={handleBack} />} />
+              {/* Raffles — all require auth */}
+              <Route path="/raffles" element={
+                user ? <RaffleList onBack={handleBack} /> : <Navigate to="/login" />
+              } />
               <Route path="/raffles/create" element={
                 user ? <RaffleCreateForm onBack={handleBack} /> : <Navigate to="/login" />
               } />
-              <Route path="/raffles/:id" element={<RaffleDetail onBack={handleBack} />} />
+              <Route path="/raffles/:id" element={
+                user ? <RaffleDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
             </Routes>
           </div>
         </div>

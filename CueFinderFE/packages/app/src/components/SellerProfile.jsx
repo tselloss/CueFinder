@@ -7,7 +7,6 @@ import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import VerifiedBadge from './VerifiedBadge';
 import * as sellerService from '../api/sellerService';
-import { useAuth } from '../auth/AuthContext';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 
 const getImageUrl = (url) => {
@@ -122,7 +121,6 @@ function ReviewCard({ review }) {
 
 export default function SellerProfile() {
   const { id } = useParams();
-  const { user } = useAuth();
   const navigate = useNavigate();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
