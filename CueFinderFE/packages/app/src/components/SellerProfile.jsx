@@ -2,11 +2,10 @@ import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, Star, MapPin, Calendar, Package, ShoppingBag } from 'lucide-react';
 import { Button } from './ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
+import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from './ui/tabs';
 import VerifiedBadge from './VerifiedBadge';
-import ReviewModal from './ReviewModal';
 import * as sellerService from '../api/sellerService';
 import { useAuth } from '../auth/AuthContext';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
@@ -154,7 +153,6 @@ export default function SellerProfile() {
   }
 
   const memberYear = new Date(profile.memberSince).getFullYear();
-  const isOwnProfile = user && user.id === profile.id;
 
   return (
     <div className="min-h-screen bg-background">

@@ -184,7 +184,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
 // ─────────────────────────────────────────────────────────────────────────────
 function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
   const navigate = useNavigate();
-  const { itemValue, spots, basePrice } = calcData;
+  const { spots, basePrice } = calcData;
 
   const defaultEndsAt = (() => {
     const d = new Date();
