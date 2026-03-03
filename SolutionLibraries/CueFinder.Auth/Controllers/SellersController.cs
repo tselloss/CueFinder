@@ -90,7 +90,7 @@ namespace CueFinder.Auth.Controllers
         // ── GET /api/sellers/{id} ────────────────────────────────────────────────
 
         [HttpGet("{id:int}")]
-        [AllowAnonymous]
+        [Authorize]
         [ProducesResponseType(typeof(SellerProfileDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProfile(int id)
@@ -354,12 +354,13 @@ namespace CueFinder.Auth.Controllers
             if (!listingSold)
                 return BadRequest(new { message = "Listing not found or not yet sold." });
 
-            // Verify reviewer is the actual buyer (has an accepted offer message for this listing)
+            // Verify reviewer is the actual buyer (has any accepted offer message from this seller)
+            // Message.CueId only exists for cue listings; other listing types store context in Content JSON,
+            // so we check for any accepted message from this seller to this buyer.
             bool isVerifiedBuyer = await _db.Messages.AnyAsync(m =>
                 m.MessageType == "accepted" &&
-                m.SenderId == id &&           // seller sent the acceptance
-                m.RecipientId == reviewerId && // buyer received it
-                m.CueId == req.ListingId);    // for this specific listing
+                m.SenderId == id &&            // seller sent the acceptance
+                m.RecipientId == reviewerId);  // to this buyer
 
             if (!isVerifiedBuyer)
                 return BadRequest(new { message = "Only the buyer of this listing can leave a review." });
@@ -426,8 +427,7 @@ namespace CueFinder.Auth.Controllers
             bool isEligible = await _db.Messages.AnyAsync(m =>
                 m.MessageType == "accepted" &&
                 m.SenderId == id &&
-                m.RecipientId == reviewerId &&
-                m.CueId == listingId);
+                m.RecipientId == reviewerId);
 
             return Ok(new { hasReviewed, isEligible });
         }

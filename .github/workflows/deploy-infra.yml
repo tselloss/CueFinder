@@ -153,40 +153,49 @@ jobs:
           GMAIL_PROJECT_ID: ${{ secrets.GMAIL_PROJECT_ID }}
         shell: bash
         run: |
+          # ── Generate .env locally via Python (handles special chars safely) ────────
+          # Avoids nested-heredoc terminator issues and docker-compose .env parser
+          # failures caused by unquoted <, >, #, " in secret values.
+          python3 - <<'PYEOF'
+          import os
+          rows = [
+            ("DB_PASSWORD",          os.environ["DB_PASSWORD"]),
+            ("JWT_SECRET",           os.environ["JWT_SECRET"]),
+            ("FRONTEND_API_URL",     os.environ.get("FRONTEND_API_URL", "")),
+            ("CORS_FRONTEND_ORIGIN", os.environ.get("CORS_FRONTEND_ORIGIN", "")),
+            ("SMTP_PASSWORD",        os.environ.get("SMTP_PASSWORD", "")),
+            ("SMTP_SERVER",          os.environ.get("SMTP_SERVER", "smtp.gmail.com")),
+            ("SMTP_PORT",            os.environ.get("SMTP_PORT", "587")),
+            ("EMAIL_FROM",           os.environ.get("EMAIL_FROM", "")),
+            ("GMAIL_CLIENT_ID",      os.environ.get("GMAIL_CLIENT_ID", "")),
+            ("GMAIL_CLIENT_SECRET",  os.environ.get("GMAIL_CLIENT_SECRET", "")),
+            ("GMAIL_PROJECT_ID",     os.environ.get("GMAIL_PROJECT_ID", "")),
+          ]
+          with open(".env.deploy", "w") as f:
+            for key, val in rows:
+              # Single-quote the value: docker-compose treats content literally,
+              # so <, >, #, " etc. are all safe inside single quotes.
+              safe = val.replace("'", "'\"'\"'")
+              f.write(f"{key}='{safe}'\n")
+          PYEOF
+
           cat > deploy-infra.sh << DEPLOY_SCRIPT
           #!/bin/bash
           set -e
-          
+
           echo "🚀 Starting infrastructure deployment..."
-          
+
           cd /home/cuefinder/app
-          
+
           # Pull latest code
           echo "📦 Pulling latest changes..."
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
-          git clean -fdx -e uploads/ -e .deployment/ -e ssl/
-          
-          # Create .env file with all secrets (properly quoted for special characters)
-          echo "⚙️  Updating environment..."
-          cat > .env << ENVEOF
-          DB_PASSWORD="$DB_PASSWORD"
-          JWT_SECRET="$JWT_SECRET"
-          FRONTEND_API_URL="$FRONTEND_API_URL"
-          CORS_FRONTEND_ORIGIN="$CORS_FRONTEND_ORIGIN"
-          SMTP_PASSWORD="$SMTP_PASSWORD"
-          SMTP_SERVER="$SMTP_SERVER"
-          SMTP_PORT="$SMTP_PORT"
-          EMAIL_FROM="$EMAIL_FROM"
-          GMAIL_CLIENT_ID="$GMAIL_CLIENT_ID"
-          GMAIL_CLIENT_SECRET="$GMAIL_CLIENT_SECRET"
-          GMAIL_PROJECT_ID="$GMAIL_PROJECT_ID"
-          ENVEOF
-                    
-                    echo "📋 Environment file created"
-                    echo "✓ Environment configured"
-          
+          git clean -fdx -e uploads/ -e .deployment/ -e ssl/ -e .env
+
+          echo "✓ Environment configured"
+
           # Backup database before any infrastructure changes
           echo "💾 Backing up database before deployment..."
           mkdir -p /home/cuefinder/backups
@@ -246,13 +255,17 @@ jobs:
           DEPLOY_SCRIPT
 
           chmod +x deploy-infra.sh
-          
+
+          # Upload .env first (generated locally, free of special-char issues)
+          scp -o StrictHostKeyChecking=no .env.deploy \
+            "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/.env"
+
           scp -o StrictHostKeyChecking=no deploy-infra.sh \
             "$SERVER_USER@$SERVER_IP:/home/$SERVER_USER/app/"
-          
+
           ssh -o StrictHostKeyChecking=no \
             "$SERVER_USER@$SERVER_IP" \
-            'bash /home/cuefinder/app/deploy-infra.sh'
+            "SKIP_MIGRATIONS=$SKIP_MIGRATIONS bash /home/cuefinder/app/deploy-infra.sh"
 
       - name: Verify deployment
         env:

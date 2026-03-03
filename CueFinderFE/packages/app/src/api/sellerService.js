@@ -9,7 +9,9 @@ const getAuthHeaders = () => {
 };
 
 export async function getSellerProfile(id) {
-  const res = await axios.get(`${API_BASE_URL}/sellers/${id}`);
+  const res = await axios.get(`${API_BASE_URL}/sellers/${id}`, {
+    headers: getAuthHeaders(),
+  });
   return res.data;
 }
 
