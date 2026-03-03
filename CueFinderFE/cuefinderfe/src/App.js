@@ -13,6 +13,7 @@ import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox';
 import ComingSoon from './components/ComingSoon';
 import Forum from './components/Forum';
+import BilliardClubsPage from './features/forum/components/BilliardClubsPage';
 import ForgotPassword from './features/auth/components/ForgotPassword';
 import ResetPassword from './features/auth/components/ResetPassword';
 import DesktopSidebar from './components/DesktopSidebar';
@@ -442,10 +443,13 @@ function AppInner() {
       });
     };
 
+    const filterForumCategories = (items = []) =>
+      items.filter((cat) => (cat?.name || '').trim().toLowerCase() !== 'billiard clubs');
+
     const loadForumCategories = async () => {
       try {
         const categories = await forumService.getCategories();
-        setForumCategories(dedupeCategories(categories));
+        setForumCategories(dedupeCategories(filterForumCategories(categories)));
       } catch (error) {
         console.error('Failed to load forum categories:', error);
       }
@@ -478,7 +482,7 @@ function AppInner() {
       />
 
       {/* Main Content Area with Sidebar */}
-      <div className="flex-1 bg-background flex flex-col relative pt-[60px]">
+      <div className="flex-1 bg-background flex flex-col relative pt-[76px] sm:pt-[72px] md:pt-[64px]">
         <div className="flex flex-row flex-1 relative">
           {/* Mobile Sidebar Overlay */}
           {isHomePage && mobileMenuOpen && (
@@ -598,6 +602,9 @@ function AppInner() {
               
               <Route path="/forum" element={
                 <Forum onBack={handleBack} />
+              } />
+              <Route path="/clubs" element={
+                <BilliardClubsPage />
               } />
             </Routes>
           </div>

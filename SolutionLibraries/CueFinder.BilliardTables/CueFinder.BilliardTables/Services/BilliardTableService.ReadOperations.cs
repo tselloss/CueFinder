@@ -67,12 +67,22 @@ public partial class BilliardTableService
         return MapToBilliardTableResponseDto(table);
     }
 
-    public async Task<List<BilliardTableResponseDto>> GetUserBilliardTablesAsync(int userId)
+    public async Task<List<BilliardTableResponseDto>> GetUserBilliardTablesAsync(int userId, bool? hidden = null)
     {
-        var tables = await _context.BilliardTables
+        var query = _context.BilliardTables
             .Include(t => t.Images)
             .Include(t => t.User)
-            .Where(t => t.UserId == userId && !t.IsSold)
+            .Where(t => t.UserId == userId && !t.IsSold);
+
+        if (hidden.HasValue)
+        {
+            if (hidden.Value)
+                query = query.Where(t => t.IsHidden);
+            else
+                query = query.Where(t => !t.IsHidden);
+        }
+
+        var tables = await query
             .OrderByDescending(t => t.CreatedAt)
             .ToListAsync();
 
@@ -97,5 +107,39 @@ public partial class BilliardTableService
             .ToListAsync();
 
         return tables.Select(MapToBilliardTableResponseDto).ToList();
+    }
+
+    public async Task<List<BilliardTableResponseDto>> GetFilteredBilliardTablesAsync(
+        string? tableSize, string? tableType, string? condition,
+        decimal? minPrice, decimal? maxPrice, int page, int pageSize)
+    {
+        var query = _context.BilliardTables
+            .Include(t => t.Images)
+            .Include(t => t.User)
+            .Where(t => !t.IsSold);
+
+        if (!string.IsNullOrEmpty(tableSize))
+            query = query.Where(t => t.TableSize == tableSize);
+        if (!string.IsNullOrEmpty(tableType))
+            query = query.Where(t => t.TableType == tableType);
+        if (!string.IsNullOrEmpty(condition))
+            query = query.Where(t => t.Condition == condition);
+        if (minPrice.HasValue)
+            query = query.Where(t => t.Price >= minPrice.Value);
+        if (maxPrice.HasValue)
+            query = query.Where(t => t.Price <= maxPrice.Value);
+
+        var tables = await query
+            .OrderByDescending(t => t.CreatedAt)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync();
+
+        return tables.Select(MapToBilliardTableResponseDto).ToList();
+    }
+
+    public async Task<int> GetActiveCountAsync()
+    {
+        return await _context.BilliardTables.CountAsync(t => !t.IsSold);
     }
 }

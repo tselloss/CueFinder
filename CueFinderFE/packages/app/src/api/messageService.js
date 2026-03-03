@@ -57,3 +57,37 @@ export async function deleteMessage(messageId) {
   const response = await axios.delete(API_ENDPOINTS.MESSAGES.DELETE(messageId), { headers });
   return response.status === 204;
 }
+
+export async function sendOffer({ recipientId, itemId, bidAmount, originalPrice, itemTitle, personalNote = '' }) {
+  const content = JSON.stringify({
+    type: 'offer',
+    amount: bidAmount,
+    originalPrice,
+    itemTitle,
+    note: personalNote,
+  });
+  return sendMessage({
+    recipientId,
+    cueId: itemId,
+    subject: `Offer for "${itemTitle}"`,
+    content,
+    messageType: 'offer',
+  });
+}
+
+export async function respondToOffer({ recipientId, cueId, action, counterAmount = null, message = '' }) {
+  const typeMap = { accepted: 'accepted', rejected: 'rejected', counter: 'counter_offer' };
+  const subjectMap = {
+    accepted: 'Offer Accepted',
+    rejected: 'Offer Declined',
+    counter: `Counter Offer: €${counterAmount?.toFixed(2)}`,
+  };
+  const content = JSON.stringify({ type: action, counterAmount, message });
+  return sendMessage({
+    recipientId,
+    cueId,
+    subject: subjectMap[action] || 'Offer Response',
+    content,
+    messageType: typeMap[action] || 'message',
+  });
+}

@@ -157,7 +157,7 @@ namespace CueFinder.Database.Models
         public virtual ICollection<CueImage>? Images { get; set; }
 
         /// <summary>
-        /// Ratings for this cue
+        /// Seller reviews received on this cue (via Ratings table)
         /// </summary>
         public virtual ICollection<Rating>? Ratings { get; set; }
 

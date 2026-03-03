@@ -144,31 +144,35 @@ export default function ImagesStep({
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {existingImages.map((img, index) => (
-                  <div key={img.id || index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-border bg-muted">
+                  <div key={img.id || index} className="relative">
+                    <div className={`aspect-square rounded-lg overflow-hidden border-2 bg-muted ${
+                      img.isPrimary ? 'border-primary' : 'border-border'
+                    }`}>
                       <img
                         src={getImageUrl(img)}
                         alt={`Preview ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
-                    {/* Overlay Actions */}
-                    <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 rounded-lg">
-                      <button
-                        type="button"
-                        onClick={() => onSetPrimaryImage(img.id)}
-                        className="p-2 bg-primary text-primary-foreground rounded-full hover:bg-primary/90 transition-colors"
-                        title={isGreek ? 'Ορισμός ως κύρια' : 'Set as primary'}
-                      >
-                        <Star className="w-4 h-4" />
-                      </button>
+                    {/* Always-visible action buttons (works on mobile and desktop) */}
+                    <div className="absolute top-1.5 right-1.5 flex gap-1">
+                      {!img.isPrimary && (
+                        <button
+                          type="button"
+                          onClick={() => onSetPrimaryImage(img.id)}
+                          className="p-1.5 bg-black/60 text-white rounded-full hover:bg-primary transition-colors"
+                          title={isGreek ? 'Ορισμός ως κύρια' : 'Set as primary'}
+                        >
+                          <Star className="w-3 h-3" />
+                        </button>
+                      )}
                       <button
                         type="button"
                         onClick={() => onImageDelete(img.id, true)}
-                        className="p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors"
+                        className="p-1.5 bg-black/60 text-white rounded-full hover:bg-destructive transition-colors"
                         title={isGreek ? 'Διαγραφή' : 'Delete'}
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </button>
                     </div>
                     {img.isPrimary && (
@@ -191,21 +195,24 @@ export default function ImagesStep({
               </p>
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                 {imagePreviews.map((preview, index) => (
-                  <div key={index} className="relative group">
-                    <div className="aspect-square rounded-lg overflow-hidden border-2 border-primary bg-muted">
+                  <div key={index} className="relative">
+                    <div className={`aspect-square rounded-lg overflow-hidden border-2 bg-muted ${
+                      index === 0 && !existingImages?.length ? 'border-primary' : 'border-border'
+                    }`}>
                       <img
                         src={preview}
                         alt={`New ${index + 1}`}
                         className="w-full h-full object-cover"
                       />
                     </div>
+                    {/* Always-visible delete button */}
                     <button
                       type="button"
                       onClick={() => onImageDelete(index, false)}
-                      className="absolute top-2 right-2 p-2 bg-destructive text-destructive-foreground rounded-full hover:bg-destructive/90 transition-colors opacity-0 group-hover:opacity-100"
+                      className="absolute top-1.5 right-1.5 p-1.5 bg-black/60 text-white rounded-full hover:bg-destructive transition-colors"
                       title={isGreek ? 'Αφαίρεση' : 'Remove'}
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </button>
                     {index === 0 && !existingImages?.length && (
                       <div className="absolute bottom-2 left-2 px-2 py-1 bg-primary text-primary-foreground text-xs font-semibold rounded-full">

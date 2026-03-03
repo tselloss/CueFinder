@@ -33,10 +33,6 @@ body, #root {
     display: none !important;
   }
 
-  .mobile-menu-button {
-    display: none !important;
-  }
-
   .mobile-filters-toolbar {
     display: none !important;
   }
@@ -84,36 +80,6 @@ body, #root {
     z-index: 1000;
     animation: fadeIn 0.25s ease-out;
     backdrop-filter: blur(3px);
-  }
-
-  /* FAB menu button */
-  .mobile-menu-button {
-    display: flex !important;
-    align-items: center;
-    justify-content: center;
-    position: fixed;
-    bottom: 24px;
-    right: 20px;
-    width: 52px;
-    height: 52px;
-    border-radius: 50%;
-    background: linear-gradient(135deg, hsl(var(--primary)), hsl(213 94% 48%));
-    box-shadow: 0 4px 16px rgba(30, 158, 255, 0.5), 0 0 0 0 rgba(30, 158, 255, 0.6);
-    z-index: 900;
-    border: 2px solid rgba(255, 255, 255, 0.15);
-    cursor: pointer;
-    transition: all 0.25s ease;
-    animation: menuButtonPulse 2.5s ease-in-out infinite;
-  }
-
-  .mobile-menu-button:hover {
-    transform: scale(1.12);
-    box-shadow: 0 8px 24px rgba(30, 158, 255, 0.7), 0 0 0 6px rgba(30, 158, 255, 0.15);
-    animation: none;
-  }
-
-  .mobile-menu-button:active {
-    transform: scale(0.96);
   }
 
   /* Show close button in sidebar on mobile */
@@ -357,16 +323,37 @@ body, #root {
 /* ── Touch Targets ────────────────────────────────────────── */
 
 @media (max-width: 768px) {
-  button,
-  a,
+  /* Apply 44px min-height only to form controls and primary action buttons,
+     NOT to icon-only ghost buttons (they use explicit w/h sizing) */
   input,
-  select {
+  select,
+  textarea {
     min-height: 44px !important;
   }
 
   * {
     -webkit-text-size-adjust: 100%;
     text-size-adjust: 100%;
+  }
+}
+
+/* ── Mobile Bottom Nav ────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  /* Ensure the footer is not clipped by the fixed bottom nav */
+  footer,
+  .app-footer {
+    margin-bottom: calc(56px + env(safe-area-inset-bottom, 0px)) !important;
+  }
+
+  /* Sidebar overlay sits above content but below bottom nav */
+  .sidebar-overlay {
+    z-index: 1000 !important;
+  }
+
+  /* Opened sidebar drawer must be above the overlay and bottom nav */
+  .sidebar-mobile-open {
+    z-index: 1100 !important;
   }
 }
 
@@ -389,15 +376,6 @@ body, #root {
 @keyframes fadeIn {
   from { opacity: 0; }
   to   { opacity: 1; }
-}
-
-@keyframes menuButtonPulse {
-  0%, 100% {
-    box-shadow: 0 4px 16px rgba(30, 158, 255, 0.5), 0 0 0 0 rgba(30, 158, 255, 0.6);
-  }
-  50% {
-    box-shadow: 0 4px 16px rgba(30, 158, 255, 0.5), 0 0 0 10px rgba(30, 158, 255, 0);
-  }
 }
 
 /* ── Grommet overrides ────────────────────────────────────── */

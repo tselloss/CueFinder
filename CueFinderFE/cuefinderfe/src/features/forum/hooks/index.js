@@ -49,7 +49,10 @@ export function useForumState(initialCategory) {
     try {
       setLoading(true);
       const data = await forumService.getCategories();
-      setCategories(dedupeCategories(data || []));
+      const filtered = (data || []).filter(
+        (cat) => (cat?.name || '').trim().toLowerCase() !== 'billiard clubs'
+      );
+      setCategories(dedupeCategories(filtered));
     } catch (error) {
       console.error('Forum: failed to load categories', error);
       setCategories([]);

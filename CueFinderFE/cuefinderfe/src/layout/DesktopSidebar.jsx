@@ -273,6 +273,29 @@ export default function DesktopSidebar({
           </span>
         </div>
         <button
+          onClick={() => {
+            navigate('/clubs');
+            setMobileMenuOpen(false);
+          }}
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
+          style={{
+            background: 'rgba(30, 41, 59, 0.6)',
+            color: '#cbd5e1',
+            border: '1px solid rgba(51, 65, 85, 0.4)',
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+            e.currentTarget.style.transform = 'translateX(2px)';
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+            e.currentTarget.style.transform = 'translateX(0)';
+          }}
+        >
+          <span className="text-xl leading-none">🏟️</span>
+          <span className="text-sm font-medium">Billiard Clubs</span>
+        </button>
+        <button
           data-testid="sidebar-forum"
           onClick={(e) => {
             e.stopPropagation();

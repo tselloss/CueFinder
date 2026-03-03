@@ -54,11 +54,11 @@ export function HeroSearch({
   };
 
   return (
-    <div className="w-full max-w-5xl mx-auto px-4 py-8">
+    <div className="w-full max-w-5xl mx-auto px-3 sm:px-4 py-3 sm:py-8">
       {/* Hero Title */}
-      <div className="text-center mb-8">
-        <div className="flex flex-col md:flex-row items-center justify-center gap-4 mb-4">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
+      <div className="text-center mb-3 sm:mb-8">
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-4 mb-2 sm:mb-4">
+          <h1 className="text-2xl sm:text-4xl md:text-5xl lg:text-6xl font-bold bg-gradient-to-r from-blue-400 to-blue-600 bg-clip-text text-transparent">
             {t('hero.title')}
           </h1>
           {user && onAddListing && (
@@ -71,14 +71,14 @@ export function HeroSearch({
             </Button>
           )}
         </div>
-        <p className="text-base md:text-lg text-muted-foreground">
+        <p className="text-sm sm:text-base md:text-lg text-muted-foreground">
           {t('hero.subtitle')}
         </p>
       </div>
 
       {/* Search & Filters Card */}
       <Card className="border-2 border-primary/20 shadow-xl bg-card/50 backdrop-blur-sm">
-        <CardContent className="p-4 md:p-6 space-y-4">
+        <CardContent className="p-3 sm:p-4 md:p-6 space-y-3 sm:space-y-4">
           {/* Search Bar */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />

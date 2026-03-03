@@ -34,6 +34,7 @@ public partial class CueService
             SellerEmail = cue.User?.Email ?? string.Empty,
             SellerPhone = cue.User?.Phone ?? string.Empty,
             SellerHidePhone = cue.User?.HidePhone ?? false,
+            SellerIsVerified = cue.User?.IsVerified ?? false,
             Images = cue.Images?.Select(i => new CueImageDto
             {
                 Id = i.Id,

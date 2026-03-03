@@ -88,6 +88,34 @@ public class ImagesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Upload a standalone image not tied to a cue (e.g. for a raffle).
+    /// Returns the public URL of the saved image.
+    /// </summary>
+    [HttpPost("upload-standalone")]
+    [ProducesResponseType(typeof(ImageUploadResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadStandalone([FromForm] IFormFile file)
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file provided" });
+
+            var response = await _imageService.UploadStandaloneAsync(file);
+            if (!response.Success)
+                return BadRequest(new { message = response.ErrorMessage });
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading standalone image");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "An error occurred while uploading the image" });
+        }
+    }
+
     [HttpPost("upload-multiple")]
     [ProducesResponseType(typeof(List<ImageUploadResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -278,12 +306,8 @@ public class ImagesController : ControllerBase
     /// </summary>
     private int? GetUserIdFromClaims()
     {
-        if (User?.FindFirst("sub")?.Value is string userIdStr &&
-            int.TryParse(userIdStr, out int userId))
-        {
-            return userId;
-        }
-        return null;
+        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        return int.TryParse(userIdStr, out int userId) ? userId : null;
     }
 }
 

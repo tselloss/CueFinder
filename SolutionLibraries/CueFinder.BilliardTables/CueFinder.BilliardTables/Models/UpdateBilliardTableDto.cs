@@ -20,4 +20,7 @@ public class UpdateBilliardTableDto
     public string? Condition { get; set; }
     public string? Location { get; set; }
     public bool? IsSold { get; set; }
+    public bool? IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
+    public DateTime? LastUserResponseAt { get; set; }
 }
