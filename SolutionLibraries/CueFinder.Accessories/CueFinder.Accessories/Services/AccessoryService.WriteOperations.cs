@@ -89,7 +89,12 @@ public partial class AccessoryService
 
         _logger.LogInformation("Accessory {AccessoryId} created by user {UserId}", accessory.Id, userId);
 
-        return MapToAccessoryResponseDto(accessory);
+        var created = await _context.Accessories
+            .Include(a => a.Images)
+            .Include(a => a.User)
+            .FirstAsync(a => a.Id == accessory.Id);
+
+        return MapToAccessoryResponseDto(created);
     }
 
     public async Task<AccessoryResponseDto?> UpdateAccessoryAsync(int accessoryId, UpdateAccessoryDto dto, int userId)

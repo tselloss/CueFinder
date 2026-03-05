@@ -53,7 +53,7 @@ public partial class CueCaseService
         var cueCase = await _context.CueCases
             .Include(c => c.Images)
             .Include(c => c.User)
-            .FirstOrDefaultAsync(c => c.Id == cueCaseId && !c.IsSold);
+            .FirstOrDefaultAsync(c => c.Id == cueCaseId);
 
         if (cueCase == null)
             return null;
@@ -70,7 +70,7 @@ public partial class CueCaseService
         var query = _context.CueCases
             .Include(c => c.Images)
             .Include(c => c.User)
-            .Where(c => c.UserId == userId && !c.IsSold);
+            .Where(c => c.UserId == userId);
 
         if (hidden.HasValue)
         {

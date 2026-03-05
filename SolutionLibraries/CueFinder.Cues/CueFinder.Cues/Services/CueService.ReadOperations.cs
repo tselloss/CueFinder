@@ -52,14 +52,12 @@ public partial class CueService
 
     public async Task<CueResponseDto?> GetCueByIdAsync(int cueId)
     {
-        // Query cues excluding soft-deleted ones (IsSold = true)
         var cue = await _context.Cues
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
             .AsSplitQuery()
             .Where(c => c.Id == cueId)
-            .Where(c => !c.IsSold)
             .FirstOrDefaultAsync();
 
         if (cue == null)
@@ -79,7 +77,7 @@ public partial class CueService
             .Include(c => c.Ratings)
             .Include(c => c.User)
             .AsSplitQuery()
-            .Where(c => c.UserId == userId && !c.IsSold);
+            .Where(c => c.UserId == userId);
 
         if (hidden.HasValue)
         {

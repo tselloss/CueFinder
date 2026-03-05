@@ -54,7 +54,6 @@ public partial class AccessoryService
             .Include(a => a.Images)
             .Include(a => a.User)
             .Where(a => a.Id == accessoryId)
-            .Where(a => !a.IsSold)
             .FirstOrDefaultAsync();
 
         if (accessory == null)
@@ -72,7 +71,7 @@ public partial class AccessoryService
         var query = _context.Accessories
             .Include(a => a.Images)
             .Include(a => a.User)
-            .Where(a => a.UserId == userId && !a.IsSold);
+            .Where(a => a.UserId == userId);
 
         if (hidden.HasValue)
         {

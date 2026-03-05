@@ -59,7 +59,14 @@ public partial class CueService
             // Don't throw - email failure shouldn't prevent cue creation
         }
 
-        return MapToCueResponseDto(cue);
+        var created = await _context.Cues
+            .Include(c => c.Images)
+            .Include(c => c.Ratings)
+            .Include(c => c.User)
+            .AsSplitQuery()
+            .FirstAsync(c => c.Id == cue.Id);
+
+        return MapToCueResponseDto(created);
     }
 
     /// <summary>

@@ -92,7 +92,12 @@ public partial class CueCaseService
 
         _logger.LogInformation("Created new cue case listing {CueCaseId} by user {UserId}", cueCase.Id, userId);
 
-        return MapToCueCaseResponseDto(cueCase);
+        var created = await _context.CueCases
+            .Include(c => c.Images)
+            .Include(c => c.User)
+            .FirstAsync(c => c.Id == cueCase.Id);
+
+        return MapToCueCaseResponseDto(created);
     }
 
     public async Task<CueCaseResponseDto?> UpdateCueCaseAsync(int cueCaseId, UpdateCueCaseDto dto, int userId)

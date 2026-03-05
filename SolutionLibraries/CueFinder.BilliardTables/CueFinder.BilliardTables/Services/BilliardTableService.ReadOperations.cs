@@ -71,7 +71,7 @@ public partial class BilliardTableService
         var query = _context.BilliardTables
             .Include(t => t.Images)
             .Include(t => t.User)
-            .Where(t => t.UserId == userId && !t.IsSold);
+            .Where(t => t.UserId == userId);
 
         if (hidden.HasValue)
         {
