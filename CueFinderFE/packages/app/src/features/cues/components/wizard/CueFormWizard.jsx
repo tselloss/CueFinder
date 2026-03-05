@@ -293,9 +293,10 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await cueService.createCue(cueData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const cueUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && cueUploadId) {
           setUploadProgress(0);
-          const uploadResult = await cueService.uploadCueImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await cueService.uploadCueImages(cueUploadId, images, setUploadProgress);
           uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'case') {
@@ -323,9 +324,10 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await cueCaseService.createCueCase(caseData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const caseUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && caseUploadId) {
           setUploadProgress(0);
-          const uploadResult = await cueCaseService.uploadCueCaseImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await cueCaseService.uploadCueCaseImages(caseUploadId, images, setUploadProgress);
           uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'table') {
@@ -352,9 +354,10 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await billiardTableService.createTable(tableData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const tableUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && tableUploadId) {
           setUploadProgress(0);
-          const uploadResult = await billiardTableService.uploadTableImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await billiardTableService.uploadTableImages(tableUploadId, images, setUploadProgress);
           uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       } else if (productType === 'accessory') {
@@ -377,9 +380,10 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await accessoryService.createAccessory(accessoryData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const accessoryUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && accessoryUploadId) {
           setUploadProgress(0);
-          const uploadResult = await accessoryService.uploadAccessoryImages(savedItem.id, images, setUploadProgress);
+          const uploadResult = await accessoryService.uploadAccessoryImages(accessoryUploadId, images, setUploadProgress);
           uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
         }
       }

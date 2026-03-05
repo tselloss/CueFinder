@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Upload, Trash2, Star, Image as ImageIcon } from 'lucide-react';
 import { Card, CardContent } from '../../../../components/ui/card';
@@ -27,6 +27,7 @@ export default function ImagesStep({
 }) {
   const { i18n } = useTranslation();
   const isGreek = i18n.language?.startsWith('el');
+  const fileInputRef = useRef(null);
 
   const handleDescriptionChange = (e) => {
     onChange({ ...formData, description: e.target.value });
@@ -34,6 +35,12 @@ export default function ImagesStep({
 
   const handleImageInputChange = (e) => {
     onImageSelect(e);
+    // Reset so the same file can be re-selected after removal
+    if (fileInputRef.current) fileInputRef.current.value = '';
+  };
+
+  const handleUploadAreaClick = () => {
+    fileInputRef.current?.click();
   };
 
   const getImageUrl = (img) => {
@@ -98,15 +105,22 @@ export default function ImagesStep({
           </div>
 
           {/* Upload Button */}
-          <label className="block">
+          <div>
             <input
+              ref={fileInputRef}
               type="file"
               accept="image/*"
               multiple
               onChange={handleImageInputChange}
               className="hidden"
             />
-            <div className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all text-center">
+            <div
+              role="button"
+              tabIndex={0}
+              onClick={handleUploadAreaClick}
+              onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && handleUploadAreaClick()}
+              className="border-2 border-dashed border-border rounded-lg p-6 sm:p-8 cursor-pointer hover:border-primary hover:bg-primary/5 transition-all text-center"
+            >
               <Upload className="w-8 h-8 sm:w-10 sm:h-10 mx-auto mb-2 text-muted-foreground" />
               <p className="text-sm font-medium text-foreground mb-1">
                 {isGreek ? 'Κάντε κλικ για μεταφόρτωση ή σύρετε και αποθέστε' : 'Click to upload photos or drag and drop'}
@@ -118,7 +132,7 @@ export default function ImagesStep({
                 PNG, JPG, GIF {isGreek ? 'έως 10MB' : 'up to 10MB'} {isGreek ? 'το καθένα' : 'each'}
               </p>
             </div>
-          </label>
+          </div>
 
           {/* Upload Progress */}
           {uploadProgress !== null && uploadProgress < 100 && (
