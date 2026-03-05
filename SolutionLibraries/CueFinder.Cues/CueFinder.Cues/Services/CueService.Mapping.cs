@@ -30,7 +30,7 @@ public partial class CueService
             CreatedAt = cue.CreatedAt,
             UpdatedAt = cue.UpdatedAt,
             SellerId = cue.UserId,
-            SellerName = cue.User?.Name ?? string.Empty,
+            SellerName = !string.IsNullOrEmpty(cue.User?.Name) ? cue.User!.Name : (cue.User?.Username ?? string.Empty),
             SellerEmail = cue.User?.Email ?? string.Empty,
             SellerPhone = cue.User?.Phone ?? string.Empty,
             SellerHidePhone = cue.User?.HidePhone ?? false,

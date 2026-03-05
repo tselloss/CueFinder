@@ -29,7 +29,7 @@ public partial class AccessoryService
             CreatedAt = accessory.CreatedAt,
             UpdatedAt = accessory.UpdatedAt,
             SellerId = accessory.UserId,
-            SellerName = accessory.User?.Name ?? string.Empty,
+            SellerName = !string.IsNullOrEmpty(accessory.User?.Name) ? accessory.User!.Name : (accessory.User?.Username ?? string.Empty),
             SellerEmail = accessory.User?.Email ?? string.Empty,
             SellerPhone = accessory.User?.Phone,
             SellerHidePhone = accessory.User?.HidePhone ?? false,

@@ -301,50 +301,6 @@ export default function ItemDetail({
               </p>
             </div>
 
-            {/* Specifications */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-xl">
-                  {itemType === 'case' ? 'Case Specifications' : 'Specifications'}
-                </CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="space-y-3">
-                  {specifications.map((spec, idx) => spec.value && (
-                    <div 
-                      key={idx}
-                      className="flex justify-between items-center pb-3 border-b border-border last:border-0 last:pb-0"
-                    >
-                      <span className="font-semibold text-foreground">{spec.label}</span>
-                      {spec.highlight ? (
-                        <span className={`px-3 py-1 rounded-md text-sm font-medium ${
-                          spec.value === 'New' 
-                            ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
-                            : 'bg-primary/10 text-primary border border-primary/20'
-                        }`}>
-                          {spec.value}
-                        </span>
-                      ) : (
-                        <span className="text-muted-foreground">{spec.value}</span>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              </CardContent>
-            </Card>
-
-            {/* Description */}
-            {item.description && (
-              <Card>
-                <CardHeader>
-                  <CardTitle className="text-xl">Description</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
-                </CardContent>
-              </Card>
-            )}
-
             {/* Seller Info */}
             <Card>
               <CardHeader>
@@ -383,6 +339,18 @@ export default function ItemDetail({
                       ) : (
                         <span className="text-foreground">{item.sellerPhone || item.seller_phone}</span>
                       )}
+                    </div>
+                  )}
+                  {item.sellerId && !(item.sellerName || item.seller_name) && (
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <Link
+                        to={`/sellers/${item.sellerId}`}
+                        className="text-foreground hover:text-primary hover:underline font-medium flex items-center gap-1.5"
+                      >
+                        View Profile
+                        <VerifiedBadge isVerified={item.sellerIsVerified} />
+                      </Link>
                     </div>
                   )}
                   {item.sellerId && (
@@ -428,6 +396,50 @@ export default function ItemDetail({
                 </div>
               </CardContent>
             </Card>
+
+            {/* Specifications */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="text-xl">
+                  {itemType === 'case' ? 'Case Specifications' : 'Specifications'}
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {specifications.map((spec, idx) => spec.value && (
+                    <div 
+                      key={idx}
+                      className="flex justify-between items-center pb-3 border-b border-border last:border-0 last:pb-0"
+                    >
+                      <span className="font-semibold text-foreground">{spec.label}</span>
+                      {spec.highlight ? (
+                        <span className={`px-3 py-1 rounded-md text-sm font-medium ${
+                          spec.value === 'New' 
+                            ? 'bg-green-500/10 text-green-500 border border-green-500/20' 
+                            : 'bg-primary/10 text-primary border border-primary/20'
+                        }`}>
+                          {spec.value}
+                        </span>
+                      ) : (
+                        <span className="text-muted-foreground">{spec.value}</span>
+                      )}
+                    </div>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Description */}
+            {item.description && (
+              <Card>
+                <CardHeader>
+                  <CardTitle className="text-xl">Description</CardTitle>
+                </CardHeader>
+                <CardContent>
+                  <p className="text-muted-foreground leading-relaxed">{item.description}</p>
+                </CardContent>
+              </Card>
+            )}
           </div>
         </div>
       </div>

@@ -33,7 +33,7 @@ public partial class BilliardTableService
             CreatedAt = table.CreatedAt,
             UpdatedAt = table.UpdatedAt,
             SellerId = table.UserId,
-            SellerName = table.User?.Name ?? string.Empty,
+            SellerName = !string.IsNullOrEmpty(table.User?.Name) ? table.User!.Name : (table.User?.Username ?? string.Empty),
             SellerEmail = table.User?.Email ?? string.Empty,
             SellerPhone = table.User?.Phone,
             SellerHidePhone = table.User?.HidePhone ?? false,
