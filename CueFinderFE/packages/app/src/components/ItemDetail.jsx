@@ -221,13 +221,13 @@ export default function ItemDetail({
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pb-8 max-w-7xl">
+      <div className="container mx-auto px-4 pb-24 md:pb-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Image Section */}
-          <div className="order-1">
+          <div className="order-1 lg:sticky lg:top-4 lg:self-start">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                <div className="relative aspect-[4/3] bg-card">
+                <div className={`relative ${itemType === 'table' ? 'aspect-video' : 'aspect-[4/3]'} bg-card`}>
                   {hasImages ? (
                     <>
                       <img
