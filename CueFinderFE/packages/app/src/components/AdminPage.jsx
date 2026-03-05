@@ -161,7 +161,9 @@ export default function AdminPage({ onBack }) {
 
   const filteredUsers = useMemo(() => {
     const q = userQuery.trim().toLowerCase();
-    return users.filter(u => !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q));
+    return users
+      .filter(u => !q || (u.name || '').toLowerCase().includes(q) || (u.email || '').toLowerCase().includes(q))
+      .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
   }, [users, userQuery]);
 
   /* ── chart data ────────────────────────────────────── */
@@ -318,6 +320,7 @@ export default function AdminPage({ onBack }) {
             )}
           </div>
           <div className="text-xs text-muted-foreground mt-0.5 truncate">{u.email}</div>
+          {u.createdAt && <div className="text-xs text-muted-foreground mt-0.5">Joined {new Date(u.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' })}</div>}
           <div className="flex items-center gap-1.5 mt-1.5 flex-wrap">
             <Badge variant={u.role === 'admin' ? 'default' : 'secondary'} className="text-xs">
               {u.role === 'admin' && <Shield className="w-3 h-3 mr-1" />}
@@ -741,6 +744,7 @@ export default function AdminPage({ onBack }) {
                       <TableHead>User</TableHead>
                       <TableHead>Role</TableHead>
                       <TableHead>Status</TableHead>
+                      <TableHead>Joined</TableHead>
                       <TableHead className="text-right">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
@@ -771,6 +775,9 @@ export default function AdminPage({ onBack }) {
                           {u.isActive === false
                             ? <Badge variant="destructive">INACTIVE</Badge>
                             : <Badge variant="success">ACTIVE</Badge>}
+                        </TableCell>
+                        <TableCell className="text-sm text-muted-foreground whitespace-nowrap">
+                          {u.createdAt ? new Date(u.createdAt).toLocaleDateString(undefined, { year: 'numeric', month: 'short', day: 'numeric' }) : '—'}
                         </TableCell>
                         <TableCell>
                           <div className="flex justify-end gap-1">
