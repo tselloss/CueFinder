@@ -40,7 +40,7 @@ public partial class BilliardTablesController
     /// <summary>
     /// Get a specific billiard table by ID
     /// </summary>
-    [HttpGet("{id}")]
+    [HttpGet("{id:int}")]
     [AllowAnonymous]
     [ProducesResponseType(typeof(BilliardTableResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

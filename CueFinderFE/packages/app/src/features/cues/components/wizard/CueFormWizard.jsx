@@ -348,7 +348,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         const tableData = {
           title: formData.title,
           brand: formData.brand,
-          price: parseFloat(formData.price),
+          price: parseFloat(formData.price) || 0,
           condition: formData.condition,
           description: formData.description,
           location: formData.location || null,

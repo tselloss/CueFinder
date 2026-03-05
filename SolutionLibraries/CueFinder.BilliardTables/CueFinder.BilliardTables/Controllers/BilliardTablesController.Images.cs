@@ -15,7 +15,7 @@ public partial class BilliardTablesController
     /// Upload images for a billiard table (owner only)
     /// POST /api/billiardtables/{id}/images
     /// </summary>
-    [HttpPost("{id}/images")]
+    [HttpPost("{id:int}/images")]
     [Authorize]
     [ProducesResponseType(typeof(List<BilliardTableImageDto>), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -79,7 +79,7 @@ public partial class BilliardTablesController
     /// Set primary image for a billiard table (owner only)
     /// PUT /api/billiardtables/{id}/set-primary-image
     /// </summary>
-    [HttpPut("{id}/set-primary-image")]
+    [HttpPut("{id:int}/set-primary-image")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

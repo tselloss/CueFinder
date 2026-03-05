@@ -42,7 +42,7 @@ public partial class BilliardTablesController
     /// <summary>
     /// Update an existing billiard table (owner only)
     /// </summary>
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize]
     [ProducesResponseType(typeof(BilliardTableResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -79,7 +79,7 @@ public partial class BilliardTablesController
     /// <summary>
     /// Mark a billiard table as sold (owner only)
     /// </summary>
-    [HttpPut("{id}/mark-sold")]
+    [HttpPut("{id:int}/mark-sold")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -110,7 +110,7 @@ public partial class BilliardTablesController
     /// <summary>
     /// Delete a billiard table (owner only)
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
