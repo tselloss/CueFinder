@@ -6,6 +6,7 @@ using CueFinder.BilliardTables.Extensions;
 using CueFinder.Raffles.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
+using CueFinder.Auth.Controllers;
 using CueFinder.BilliardTables.Controllers;
 using CueFinder.Cues.Controllers;
 using CueFinder.CueCases.Controllers;
@@ -32,6 +33,7 @@ builder.Services
     .AddControllers()
     .AddApplicationPart(typeof(ModerationController).Assembly)
     .AddApplicationPart(typeof(CueFinder.Raffles.Controllers.RafflesController).Assembly)
+    .AddApplicationPart(typeof(SellersController).Assembly)
     .AddApplicationPart(typeof(BilliardTablesController).Assembly)
     .AddApplicationPart(typeof(CuesController).Assembly)
     .AddApplicationPart(typeof(CueCasesController).Assembly)

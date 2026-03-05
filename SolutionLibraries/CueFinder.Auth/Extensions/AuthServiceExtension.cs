@@ -17,6 +17,8 @@ namespace CueFinder.Auth.Extensions
         {
             // Register controllers
             services.TryAddScoped<AuthController>();
+            services.TryAddScoped<SellersController>();
+            services.TryAddScoped<UsersController>();
 
             // Register DatabaseAuthService instead of mock AuthService
             services.AddScoped<IAuthService, DatabaseAuthService>();
