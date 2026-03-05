@@ -41,7 +41,7 @@ export async function uploadRaffleImage(file) {
   const formData = new FormData();
   formData.append('file', file);
   const res = await axios.post(`${API_BASE_URL}/images/upload-standalone`, formData, {
-    headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' },
+    headers: getAuthHeaders(),
   });
   return res.data; // { success, imageUrl, ... }
 }
@@ -98,7 +98,7 @@ export async function saveWinnerCard(raffleId, canvasBlob) {
   const formData = new FormData();
   formData.append('file', canvasBlob, `raffle-winner-${raffleId}.png`);
   const uploadRes = await axios.post(`${API_BASE_URL}/images/upload-standalone`, formData, {
-    headers: { ...getAuthHeaders(), 'Content-Type': 'multipart/form-data' },
+    headers: getAuthHeaders(),
   });
   const imageUrl = uploadRes.data?.imageUrl;
   if (!imageUrl) throw new Error('Image upload failed');

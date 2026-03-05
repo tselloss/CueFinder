@@ -160,10 +160,7 @@ export async function uploadAccessoryImages(accessoryId, files, onProgressCallba
       `${API_BASE_URL}/accessories/${accessoryId}/images`,
       formData,
       {
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        },
+        headers: getAuthHeaders(),
         onUploadProgress: (progressEvent) => {
           if (onProgressCallback) {
             const percentCompleted = Math.round(

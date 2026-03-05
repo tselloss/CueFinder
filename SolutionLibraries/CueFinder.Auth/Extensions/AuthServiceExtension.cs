@@ -51,6 +51,10 @@ namespace CueFinder.Auth.Extensions
             })
             .AddJwtBearer(options =>
             {
+                // .NET 8 uses JsonWebTokenHandler which defaults MapInboundClaims to false.
+                // Ensure JWT short claims ("sub", "nameid") are mapped back to ClaimTypes.
+                options.MapInboundClaims = true;
+
                 options.TokenValidationParameters = new TokenValidationParameters
                 {
                     ValidateIssuerSigningKey = true,

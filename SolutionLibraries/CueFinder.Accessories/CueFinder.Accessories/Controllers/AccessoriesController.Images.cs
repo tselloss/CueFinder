@@ -123,9 +123,15 @@ public partial class AccessoriesController
         return Ok(new { message = "All images deleted" });
     }
 
+    /// <summary>
+    /// Extract user ID from JWT claims, checking multiple possible claim types
+    /// for compatibility with .NET 8 JsonWebTokenHandler claim mapping.
+    /// </summary>
     private int? GetUserIdFromClaims()
     {
-        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User?.FindFirst("sub")?.Value
+            ?? User?.FindFirst("nameid")?.Value;
         return int.TryParse(userIdStr, out int userId) ? userId : null;
     }
 }

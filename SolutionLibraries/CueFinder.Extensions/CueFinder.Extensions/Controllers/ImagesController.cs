@@ -304,9 +304,15 @@ public class ImagesController : ControllerBase
     /// <summary>
     /// Helper method to extract user ID from JWT claims.
     /// </summary>
+    /// <summary>
+    /// Extract user ID from JWT claims, checking multiple possible claim types
+    /// for compatibility with .NET 8 JsonWebTokenHandler claim mapping.
+    /// </summary>
     private int? GetUserIdFromClaims()
     {
-        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
+            ?? User?.FindFirst("sub")?.Value
+            ?? User?.FindFirst("nameid")?.Value;
         return int.TryParse(userIdStr, out int userId) ? userId : null;
     }
 }
