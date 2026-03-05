@@ -47,7 +47,13 @@ public partial class BilliardTableService
 
         _logger.LogInformation("Billiard table {TableId} created by user {UserId}", table.Id, userId);
 
-        return MapToBilliardTableResponseDto(table);
+        // Reload with User navigation property so the response includes complete seller info
+        var created = await _context.BilliardTables
+            .Include(t => t.Images)
+            .Include(t => t.User)
+            .FirstAsync(t => t.Id == table.Id);
+
+        return MapToBilliardTableResponseDto(created);
     }
 
     public async Task<BilliardTableResponseDto?> UpdateBilliardTableAsync(int tableId, UpdateBilliardTableDto dto, int userId)

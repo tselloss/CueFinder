@@ -54,7 +54,6 @@ public partial class BilliardTableService
             .Include(t => t.Images)
             .Include(t => t.User)
             .Where(t => t.Id == tableId)
-            .Where(t => !t.IsSold)
             .FirstOrDefaultAsync();
 
         if (table == null)
