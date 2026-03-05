@@ -296,8 +296,15 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         const cueUploadId = isEditing ? cue.id : savedItem?.id;
         if (images.length > 0 && cueUploadId) {
           setUploadProgress(0);
-          const uploadResult = await cueService.uploadCueImages(cueUploadId, images, setUploadProgress);
-          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          try {
+            const uploadResult = await cueService.uploadCueImages(cueUploadId, images, setUploadProgress);
+            uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          } catch (uploadErr) {
+            console.error('Cue image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'case') {
         const caseData = {
@@ -327,8 +334,15 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         const caseUploadId = isEditing ? cue.id : savedItem?.id;
         if (images.length > 0 && caseUploadId) {
           setUploadProgress(0);
-          const uploadResult = await cueCaseService.uploadCueCaseImages(caseUploadId, images, setUploadProgress);
-          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          try {
+            const uploadResult = await cueCaseService.uploadCueCaseImages(caseUploadId, images, setUploadProgress);
+            uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          } catch (uploadErr) {
+            console.error('Case image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'table') {
         const tableData = {
@@ -357,8 +371,15 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         const tableUploadId = isEditing ? cue.id : savedItem?.id;
         if (images.length > 0 && tableUploadId) {
           setUploadProgress(0);
-          const uploadResult = await billiardTableService.uploadTableImages(tableUploadId, images, setUploadProgress);
-          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          try {
+            const uploadResult = await billiardTableService.uploadTableImages(tableUploadId, images, setUploadProgress);
+            uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          } catch (uploadErr) {
+            console.error('Table image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'accessory') {
         const accessoryData = {
@@ -383,8 +404,15 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         const accessoryUploadId = isEditing ? cue.id : savedItem?.id;
         if (images.length > 0 && accessoryUploadId) {
           setUploadProgress(0);
-          const uploadResult = await accessoryService.uploadAccessoryImages(accessoryUploadId, images, setUploadProgress);
-          uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          try {
+            const uploadResult = await accessoryService.uploadAccessoryImages(accessoryUploadId, images, setUploadProgress);
+            uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          } catch (uploadErr) {
+            console.error('Accessory image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       }
 

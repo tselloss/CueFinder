@@ -180,16 +180,22 @@ public class ImageService : IImageService
 
             if (moderationResult.IsUnsafe)
             {
-                _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}",
-                    filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
-
-                // Do NOT create a CueImage; retain file for admin review
-                return new ImageUploadResponse
+                // Fail-open for infrastructure errors (NudeNet down/timeout) — only block actual NSFW content
+                var isInfraError = moderationResult.FlagReason is "scan_error" or "service_error";
+                if (!isInfraError)
                 {
-                    Success = false,
-                    ErrorMessage = $"Image rejected: {moderationResult.FlagReason}. Confidence: {moderationResult.ConfidenceScore:P0}",
-                    UploadedAt = DateTime.UtcNow
-                };
+                    _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}",
+                        filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
+
+                    // Do NOT create a CueImage; retain file for admin review
+                    return new ImageUploadResponse
+                    {
+                        Success = false,
+                        ErrorMessage = $"Image rejected: {moderationResult.FlagReason}. Confidence: {moderationResult.ConfidenceScore:P0}",
+                        UploadedAt = DateTime.UtcNow
+                    };
+                }
+                _logger.LogWarning("Moderation service unavailable for cue {CueId} (reason: {Reason}), allowing upload", request.CueId, moderationResult.FlagReason);
             }
 
             _logger.LogInformation("Image passed NSFW check: {FilePath}", filePath);
