@@ -5,7 +5,10 @@ cuefinderfe/node_modules
 packages/*/node_modules
 packages/*/.next
 packages/*/dist
-packages/*/build
+# NOTE: packages/*/build is intentionally NOT excluded here.
+# Dockerfile.prebuilt requires the pre-built React output (packages/app/build)
+# to already exist on the host. The full Dockerfile does its own build inside
+# the container so it never needs files from this directory.
 .env
 .env.local
 .env.development
