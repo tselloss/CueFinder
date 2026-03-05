@@ -137,7 +137,14 @@ function AppInner() {
       const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
       const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
 
-      const allListings = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
+      const combined = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
+
+      // Fisher-Yates shuffle so the home page shows a different order on every refresh
+      for (let i = combined.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [combined[i], combined[j]] = [combined[j], combined[i]];
+      }
+      const allListings = combined;
 
       console.log('Loaded listings:', {
         cues: cuesWithCategory.length,

@@ -128,10 +128,8 @@ export default function CueList({
     filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
   } else if (sortBy === 'price_desc') {
     filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-  } else {
-    // newest first (default)
-    filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
   }
+  // default ('newest'): keep the shuffled order from App.js refreshListings
 
   return (
     <div className="w-full relative z-10">
