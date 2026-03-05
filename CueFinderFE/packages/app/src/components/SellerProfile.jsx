@@ -141,7 +141,7 @@ export default function SellerProfile() {
         }
         setLoading(false);
       });
-  }, [id]);
+  }, [id, navigate]);
 
   if (loading) {
     return (
