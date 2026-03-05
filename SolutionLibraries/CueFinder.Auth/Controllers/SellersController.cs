@@ -90,7 +90,7 @@ namespace CueFinder.Auth.Controllers
         // ── GET /api/sellers/{id} ────────────────────────────────────────────────
 
         [HttpGet("{id:int}")]
-        [AllowAnonymous]
+        [Authorize]
         [ProducesResponseType(typeof(SellerProfileDto), StatusCodes.Status200OK)]
         [ProducesResponseType(StatusCodes.Status404NotFound)]
         public async Task<IActionResult> GetProfile(int id)

@@ -130,7 +130,17 @@ export default function SellerProfile() {
     setLoading(true);
     sellerService.getSellerProfile(id)
       .then(data => { setProfile(data); setLoading(false); })
-      .catch(() => { setError('Seller not found.'); setLoading(false); });
+      .catch(err => {
+        const status = err.response?.status;
+        if (status === 401 || status === 403) {
+          navigate('/login');
+        } else if (status === 404) {
+          setError('Seller not found.');
+        } else {
+          setError('Failed to load profile. Please try again.');
+        }
+        setLoading(false);
+      });
   }, [id]);
 
   if (loading) {
