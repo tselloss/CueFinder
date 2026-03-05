@@ -179,9 +179,7 @@ services:
     restart: always
     build:
       context: ./CueFinderFE
-      dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_URL=${FRONTEND_API_URL}
+      dockerfile: Dockerfile.prebuilt
     ports: []
     depends_on:
       postgres:

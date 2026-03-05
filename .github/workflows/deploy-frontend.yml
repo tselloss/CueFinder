@@ -140,6 +140,16 @@ jobs:
           
           # Build frontend (pre-check before Docker build)
           echo "🔨 Building frontend..."
+
+          # Load REACT_APP_API_URL from .env.production (same source docker-compose uses)
+          if [ -f "/home/cuefinder/app/.env.production" ]; then
+            set -o allexport
+            source /home/cuefinder/app/.env.production
+            set +o allexport
+          fi
+          export REACT_APP_API_URL="${FRONTEND_API_URL:-https://billiardscuefinder.com/api}"
+          echo "✅ REACT_APP_API_URL=$REACT_APP_API_URL"
+
           cd CueFinderFE
           npm install -g pnpm@10
           pnpm install --frozen-lockfile
