@@ -15,6 +15,16 @@ export default function BilliardTableDetail({ onBack }) {
         setLoading(true);
         setError(null);
         const data = await billiardTableService.getTableById(id);
+        // Normalize: if API returns raw entity (userId/user) instead of DTO (sellerId/sellerName),
+        // map the fields so ItemDetail always gets the expected shape.
+        if (data && !data.sellerId && (data.userId || data.user)) {
+          data.sellerId = data.userId || data.user?.id;
+          data.sellerName = data.user?.name || data.user?.username || '';
+          data.sellerEmail = data.user?.email || '';
+          data.sellerPhone = data.user?.phone || null;
+          data.sellerHidePhone = data.user?.hidePhone ?? false;
+          data.sellerIsVerified = data.user?.isVerified ?? false;
+        }
         setTable(data);
       } catch (err) {
         console.error('Error loading table:', err);

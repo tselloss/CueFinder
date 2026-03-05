@@ -33,8 +33,8 @@ namespace CueFinder.Database.Extensions
             services.AddScoped<IUserRepository, UserRepository>();
 
             // Register services
-            services.AddScoped<ICueService, CueService>();
-            services.AddScoped<IBilliardTableService, BilliardTableService>();
+            // NOTE: IBilliardTableService and ICueService are registered in their own library extensions
+            // (AddBilliardTablesServices, AddCueServices) — not here, to avoid DI conflicts.
             services.AddScoped<IUserService, UserService>();
 
             return services;

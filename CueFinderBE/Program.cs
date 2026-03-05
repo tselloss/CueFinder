@@ -6,6 +6,10 @@ using CueFinder.BilliardTables.Extensions;
 using CueFinder.Raffles.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
+using CueFinder.BilliardTables.Controllers;
+using CueFinder.Cues.Controllers;
+using CueFinder.CueCases.Controllers;
+using CueFinder.Accessories.Controllers;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Controllers;
 using CueFinder.Extensions.Email;
@@ -23,11 +27,15 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container and load controllers from shared libraries (e.g., moderation)
+// Add services to the container and load controllers from shared libraries
 builder.Services
     .AddControllers()
     .AddApplicationPart(typeof(ModerationController).Assembly)
     .AddApplicationPart(typeof(CueFinder.Raffles.Controllers.RafflesController).Assembly)
+    .AddApplicationPart(typeof(BilliardTablesController).Assembly)
+    .AddApplicationPart(typeof(CuesController).Assembly)
+    .AddApplicationPart(typeof(CueCasesController).Assembly)
+    .AddApplicationPart(typeof(AccessoriesController).Assembly)
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
