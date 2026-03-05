@@ -147,7 +147,7 @@ export default function MyCues() {
       } else {
         await cueService.deleteCue(item.id);
       }
-      setMyListings(myListings.filter(c => c.id !== item.id));
+      setMyListings(myListings.filter(c => !(c.id === item.id && c.category === item.category)));
       showMessage('success', text.deleteSuccess(itemType));
     } catch (error) {
       console.error('Delete error:', error);
@@ -175,7 +175,7 @@ export default function MyCues() {
           isSold: !item.isSold
         });
       }
-      setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
+      setMyListings(myListings.map(c => (c.id === item.id && c.category === item.category) ? { ...updated, category: item.category } : c));
       showMessage('success', text.soldMessage(!item.isSold));
     } catch (error) {
       console.error('Toggle sold error:', error);
@@ -250,7 +250,7 @@ export default function MyCues() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {myListings.map(item => (
             <CueCard
-              key={item.id}
+              key={`${item.category}-${item.id}`}
               cue={item}
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item)}

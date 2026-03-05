@@ -83,6 +83,7 @@ export default function AdminPage({ onBack }) {
   const [flaggedImages, setFlaggedImages] = useState([]);
   const [bannedUsers, setBannedUsers] = useState([]);
   const [moderationStats, setModerationStats] = useState({ total: 0, pending: 0, rejected: 0, approved: 0 });
+  const [actionError, setActionError] = useState(null);
   const itemsPerPage = 5;
 
   useEffect(() => {
@@ -198,13 +199,25 @@ export default function AdminPage({ onBack }) {
 
   /* ── actions ───────────────────────────────────────── */
   const toggleBan = async (u) => {
-    const updated = await adminUsers.updateUser(u.id, { IsActive: u.isActive === false });
-    setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
+    try {
+      const updated = await adminUsers.updateUser(u.id, { IsActive: u.isActive === false });
+      setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
+    } catch (err) {
+      console.error('Error toggling user ban:', err);
+      setActionError(err.message || 'Failed to update user status. Check the console for details.');
+      setTimeout(() => setActionError(null), 6000);
+    }
   };
 
   const toggleVerify = async (u) => {
-    const updated = await adminUsers.updateUser(u.id, { IsVerified: !u.isVerified });
-    setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
+    try {
+      const updated = await adminUsers.updateUser(u.id, { IsVerified: !u.isVerified });
+      setUsers(s => s.map(x => (x.id === updated.id ? updated : x)));
+    } catch (err) {
+      console.error('Error toggling user verification:', err);
+      setActionError(err.message || 'Failed to update user verification. Check the console for details.');
+      setTimeout(() => setActionError(null), 6000);
+    }
   };
 
   const saveUser = async () => {
@@ -446,6 +459,16 @@ export default function AdminPage({ onBack }) {
               {usersWithFlaggedContent.length > 0 && (
                 <span> <strong>{usersWithFlaggedContent.length} user(s)</strong> have uploaded flagged content.</span>
               )}
+            </AlertDescription>
+          </Alert>
+        )}
+
+        {/* ── Action error alert ── */}
+        {actionError && (
+          <Alert className="border-red-500/50 bg-red-50 dark:bg-red-950">
+            <AlertTriangle className="h-4 w-4 text-red-500" />
+            <AlertDescription className="text-red-700 dark:text-red-300">
+              <strong>Action failed:</strong> {actionError}
             </AlertDescription>
           </Alert>
         )}

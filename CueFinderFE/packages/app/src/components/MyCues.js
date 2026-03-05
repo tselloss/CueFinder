@@ -38,12 +38,20 @@ export default function MyCues() {
     setLoading(true);
     try {
       console.log('Fetching my listings from API...');
-      const [cues, cases, tables, accessories] = await Promise.all([
+      const results = await Promise.allSettled([
         cueService.getMyCues(),
         cueCaseService.getMyCueCases(),
         billiardTableService.getMyTables(),
         accessoryService.getMyAccessories()
       ]);
+
+      const [cuesResult, casesResult, tablesResult, accessoriesResult] = results;
+
+      const cues = cuesResult.status === 'fulfilled' ? cuesResult.value : [];
+      const cases = casesResult.status === 'fulfilled' ? casesResult.value : [];
+      const tables = tablesResult.status === 'fulfilled' ? tablesResult.value : [];
+      const accessories = accessoriesResult.status === 'fulfilled' ? accessoriesResult.value : [];
+
       const cuesWithCategory = (cues || []).map(c => ({ ...c, category: 'cue' }));
       const casesWithCategory = (cases || []).map(cs => ({ ...cs, category: 'case' }));
       const tablesWithCategory = (tables || []).map(t => ({ ...t, category: 'table' }));
@@ -56,6 +64,14 @@ export default function MyCues() {
         accessories: accessoriesWithCategory.length,
         total: combined.length 
       });
+
+      const failedCalls = results.filter(r => r.status === 'rejected').length;
+      if (failedCalls === results.length) {
+        showMessage('error', '❌ Unable to load your listings. Please refresh the page or try again later.');
+      } else if (failedCalls > 0) {
+        showMessage('error', '⚠️ Some listing types could not be loaded right now.');
+      }
+
       setMyListings(combined);
     } catch (error) {
       console.error('Error loading my cues:', error);
@@ -106,7 +122,7 @@ export default function MyCues() {
       } else {
         await cueService.deleteCue(item.id);
       }
-      setMyListings(myListings.filter(c => c.id !== item.id));
+      setMyListings(myListings.filter(c => !(c.id === item.id && c.category === item.category)));
       showMessage('success', `✅ Your ${itemType} listing has been deleted successfully`);
     } catch (error) {
       console.error('Delete error:', error);
@@ -134,7 +150,7 @@ export default function MyCues() {
           isSold: !item.isSold
         });
       }
-      setMyListings(myListings.map(c => c.id === item.id ? { ...updated, category: item.category } : c));
+      setMyListings(myListings.map(c => (c.id === item.id && c.category === item.category) ? { ...updated, category: item.category } : c));
       showMessage('success', `✅ Listing marked as ${!item.isSold ? 'sold' : 'available'}`);
     } catch (error) {
       console.error('Toggle sold error:', error);
@@ -300,7 +316,7 @@ export default function MyCues() {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {visibleListings.map(item => (
             <CueCard
-              key={item.id}
+              key={`${item.category}-${item.id}`}
               cue={item}
               onEdit={() => handleEdit(item)}
               onDelete={() => handleDelete(item)}

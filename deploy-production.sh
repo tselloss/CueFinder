@@ -131,6 +131,22 @@ for i in {1..30}; do
 done
 
 # ============================================================
+# APPLY SCHEMA SAFETY UPDATES
+# ============================================================
+echo -e "\n${YELLOW}[Post-deploy] Running schema safety updates...${NC}"
+
+if [ -f "schema-update-prod.sql" ]; then
+    docker cp schema-update-prod.sql cuefinder-postgres-prod:/tmp/schema-update-prod.sql
+    if docker exec cuefinder-postgres-prod psql -U postgres -d cuefinder -f /tmp/schema-update-prod.sql; then
+        echo -e "${GREEN}✓ Schema safety updates applied${NC}"
+    else
+        echo -e "${YELLOW}⚠️  Schema update had warnings (non-fatal, deployment continues)${NC}"
+    fi
+else
+    echo -e "${YELLOW}⊘ schema-update-prod.sql not found, skipping${NC}"
+fi
+
+# ============================================================
 # VERIFY DEPLOYMENT
 # ============================================================
 echo -e "\n${BLUE}Verifying deployment...${NC}"

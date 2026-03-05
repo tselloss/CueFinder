@@ -13,6 +13,17 @@
 -- 1. ADD MISSING COLUMNS (IF NOT EXISTS)
 -- ============================================================
 
+-- Users: IsVerified column (admin-verified seller badge)
+DO $$ 
+BEGIN
+  IF NOT EXISTS (SELECT 1 FROM information_schema.columns WHERE table_name='Users' AND column_name='IsVerified') THEN
+    ALTER TABLE "Users" ADD COLUMN "IsVerified" BOOLEAN NOT NULL DEFAULT FALSE;
+    RAISE NOTICE 'Added Users.IsVerified column';
+  ELSE
+    RAISE NOTICE 'Users.IsVerified column already exists';
+  END IF;
+END $$;
+
 -- Users: Password Reset Token columns
 DO $$ 
 BEGIN
@@ -178,7 +189,7 @@ END $$;
 DO $$
 DECLARE
   required_cols TEXT[] := ARRAY[
-    'Id', 'Username', 'Email', 'PasswordHash', 'Role', 'CreatedAt', 'IsActive'
+    'Id', 'Username', 'Email', 'PasswordHash', 'Role', 'CreatedAt', 'IsActive', 'IsVerified'
   ];
   missing_cols TEXT[] := ARRAY[]::TEXT[];
   col_name TEXT;
