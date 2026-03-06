@@ -238,8 +238,11 @@ jobs:
           
           # Update infrastructure services
           echo "🔄 Updating infrastructure services..."
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build opennsfw
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml build moderator
+          # Disable BuildKit + compose CLI build so builds are more stable
+          DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build opennsfw
+          DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
+            docker compose -f docker-compose.yml -f docker-compose.prod.yml build moderator
           docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d opennsfw moderator
           
           # Wait for services to be healthy
