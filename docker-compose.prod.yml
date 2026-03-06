@@ -151,6 +151,7 @@ services:
       - JwtSettings__Audience=cuefinder.com
       - JwtSettings__ExpirationMinutes=1440
       - Moderation__NudeNetUrl=http://cuefinder-opennsfw-prod:8000
+      - Moderation__Disabled=true
     ports: []
     depends_on:
       postgres:
