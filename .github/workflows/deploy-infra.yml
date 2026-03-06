@@ -237,12 +237,13 @@ jobs:
           fi
           
           # Update infrastructure services
-          echo "🔄 Updating infrastructure services..."
-          # Disable BuildKit + compose CLI build so builds are more stable
-          DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build opennsfw
-          DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
-            docker compose -f docker-compose.yml -f docker-compose.prod.yml build moderator
+          echo "🔄 Updating infrastructure services (build temporarily disabled)..."
+          # NOTE: Temporarily skip rebuilding opennsfw/moderator to avoid runc errors on the server.
+          # When Docker on the host is fixed, restore the build lines below:
+          # DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
+          #   docker compose -f docker-compose.yml -f docker-compose.prod.yml build opennsfw
+          # DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
+          #   docker compose -f docker-compose.yml -f docker-compose.prod.yml build moderator
           docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d opennsfw moderator
           
           # Wait for services to be healthy
