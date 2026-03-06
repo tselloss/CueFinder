@@ -237,25 +237,21 @@ jobs:
           fi
           
           # Update infrastructure services
-          echo "🔄 Updating infrastructure services (build temporarily disabled)..."
-          # NOTE: Temporarily skip rebuilding opennsfw/moderator to avoid runc errors on the server.
-          # When Docker on the host is fixed, restore the build lines below:
-          # DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
-          #   docker compose -f docker-compose.yml -f docker-compose.prod.yml build opennsfw
-          # DOCKER_BUILDKIT=0 COMPOSE_DOCKER_CLI_BUILD=0 \
-          #   docker compose -f docker-compose.yml -f docker-compose.prod.yml build moderator
-          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d opennsfw moderator
+          echo "🔄 Updating infrastructure services (moderator temporarily disabled)..."
+          # NOTE: Moderator container cannot start due to a host Docker/runc issue.
+          # For now, only manage the opennsfw service so the pipeline can succeed.
+          docker compose -f docker-compose.yml -f docker-compose.prod.yml up -d opennsfw
           
-          # Wait for services to be healthy
-          echo "⏳ Waiting for services to become healthy..."
+          # Wait for opennsfw to be healthy
+          echo "⏳ Waiting for opennsfw service to become healthy..."
           for i in {1..30}; do
-            if docker compose ps | grep -q "opennsfw.*Up" && docker compose ps | grep -q "moderator.*Up"; then
+            if docker compose ps | grep -q "opennsfw.*Up"; then
               break
             fi
             sleep 2
           done
           
-          echo "✅ Infrastructure deployment completed"
+          echo "✅ Infrastructure deployment completed (moderator skipped due to host Docker issue)"
           DEPLOY_SCRIPT
 
           chmod +x deploy-infra.sh
