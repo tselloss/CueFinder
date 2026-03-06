@@ -45,6 +45,11 @@ namespace CueFinder.Cues.IntegrationTests
             public Task<bool> DeleteCueIfFlaggedAsync(int cueId, int userId) => Task.FromResult(false);
             public Task<bool> HasFlaggedCueCaseImagesAsync(int cueCaseId) => Task.FromResult(false);
             public Task<bool> DeleteCueCaseIfFlaggedAsync(int cueCaseId, int userId) => Task.FromResult(false);
+
+            public Task<ImageUploadResponse> UploadStandaloneAsync(IFormFile file)
+            {
+                throw new NotImplementedException();
+            }
         }
 
         #region Create Tests
