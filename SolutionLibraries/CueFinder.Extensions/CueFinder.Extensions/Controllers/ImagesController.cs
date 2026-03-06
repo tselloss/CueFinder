@@ -129,7 +129,8 @@ public class ImagesController : ControllerBase
             var userId = GetUserIdFromClaims();
             if (userId == 0)
             {
-                return Unauthorized(new { message = "Invalid user" });
+                _logger.LogError("Error UploadMultipleImages {userId}", userId);
+                return Unauthorized(new { message = $"Invalid user : {userId}" });
             }
 
             if (files == null || files.Count == 0)
