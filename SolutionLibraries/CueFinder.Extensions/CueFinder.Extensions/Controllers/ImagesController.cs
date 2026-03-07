@@ -127,9 +127,13 @@ public class ImagesController : ControllerBase
     {
         try
         {
+            var claimsSnapshot = User?.Claims?.Select(c => $"{c.Type}={c.Value}").ToList() ?? new List<string>();
+            _logger.LogInformation("UploadMultipleImages claims: {Claims}", string.Join("|", claimsSnapshot));
+
             var userId = GetUserIdFromClaims();
             if (userId == 0)
             {
+                _logger.LogWarning("UploadMultipleImages invalid user. Claims seen: {Claims}", string.Join("|", claimsSnapshot));
                 _logger.LogError("Error UploadMultipleImages {userId}", userId);
                 return Unauthorized(new { message = $"Invalid user : {userId}" });
             }
