@@ -48,7 +48,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "New User",
                 Email = "newuser@example.com",
-                Phone = "555-1111"
+                Phone = "555-1111",
+                AcceptedTerms = true
             };
 
             // Act
@@ -73,7 +74,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 1",
                 Email = "user1@example.com",
-                Phone = "555-2222"
+                Phone = "555-2222",
+                AcceptedTerms = true
             };
             var request2 = new RegisterRequest
             {
@@ -81,7 +83,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 2",
                 Email = "user2@example.com",
-                Phone = "555-3333"
+                Phone = "555-3333",
+                AcceptedTerms = true
             };
 
             // Act
@@ -103,7 +106,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 1",
                 Email = "duplicate@example.com",
-                Phone = "555-4444"
+                Phone = "555-4444",
+                AcceptedTerms = true
             };
             var request2 = new RegisterRequest
             {
@@ -111,7 +115,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 2",
                 Email = "duplicate@example.com",
-                Phone = "555-5555"
+                Phone = "555-5555",
+                AcceptedTerms = true
             };
 
             // Act
@@ -133,7 +138,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Test",
                 Email = "test@example.com",
-                Phone = "555-6666"
+                Phone = "555-6666",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -152,7 +158,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "",
                 Name = "Test",
                 Email = "test@example.com",
-                Phone = "555-7777"
+                Phone = "555-7777",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -171,7 +178,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "short",
                 Name = "Test",
                 Email = "test@example.com",
-                Phone = "555-8888"
+                Phone = "555-8888",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -190,7 +198,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "",
                 Email = "test@example.com",
-                Phone = "555-9999"
+                Phone = "555-9999",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -213,7 +222,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Login User",
                 Email = "login@example.com",
-                Phone = "555-0001"
+                Phone = "555-0001",
+                AcceptedTerms = true
             };
             await authService.RegisterAsync(registerRequest);
 
@@ -237,7 +247,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Email Login",
                 Email = "emaillogin@example.com",
-                Phone = "555-0002"
+                Phone = "555-0002",
+                AcceptedTerms = true
             };
             await authService.RegisterAsync(registerRequest);
 
@@ -292,7 +303,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Inactive User",
                 Email = "inactive@example.com",
-                Phone = "555-0004"
+                Phone = "555-0004",
+                AcceptedTerms = true
             };
             var response = await authService.RegisterAsync(registerRequest);
 
@@ -321,7 +333,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Profile User",
                 Email = "profile@example.com",
-                Phone = "555-0005"
+                Phone = "555-0005",
+                AcceptedTerms = true
             };
             var registerResponse = await authService.RegisterAsync(registerRequest);
 
@@ -359,7 +372,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Old Name",
                 Email = "old@example.com",
-                Phone = "555-0006"
+                Phone = "555-0006",
+                AcceptedTerms = true
             };
             var registerResponse = await authService.RegisterAsync(registerRequest);
 
@@ -422,7 +436,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 1",
                 Email = "existing@example.com",
-                Phone = "555-0007"
+                Phone = "555-0007",
+                AcceptedTerms = true
             };
             await authService.RegisterAsync(request1);
 
@@ -433,7 +448,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "User 2",
                 Email = "user2@example.com",
-                Phone = "555-0008"
+                Phone = "555-0008",
+                AcceptedTerms = true
             };
             var response2 = await authService.RegisterAsync(request2);
 
@@ -507,7 +523,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Full Flow User",
                 Email = "fullflow@example.com",
-                Phone = "555-0010"
+                Phone = "555-0010",
+                AcceptedTerms = true
             };
 
             // Act & Assert - Register

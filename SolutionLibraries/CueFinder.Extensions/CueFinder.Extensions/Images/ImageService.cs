@@ -238,6 +238,7 @@ public class ImageService : IImageService
                 Success = true,
                 ImageId = cueImage.Id,
                 ImageUrl = cueImage.ImageUrl,
+                IsPrimary = cueImage.IsPrimary,
                 FileSize = request.File.Length,
                 MimeType = contentType,
                 UploadedAt = cueImage.UploadedAt

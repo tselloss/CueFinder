@@ -116,7 +116,7 @@ namespace CueFinder.Cues.Tests.Services
         }
 
         [Fact]
-        public async Task DeleteCueAsync_WithOwner_SoftDeletes()
+        public async Task DeleteCueAsync_WithOwner_DeletesPermanently()
         {
             var user = new User { Username = "u1", PasswordHash = "h", Role = "user", IsActive = true };
             _context.Users.Add(user);
@@ -126,7 +126,8 @@ namespace CueFinder.Cues.Tests.Services
 
             var ok = await _service.DeleteCueAsync(cue.Id, user.Id);
             ok.Should().BeTrue();
-            (await _context.Cues.FindAsync(cue.Id))!.IsSold.Should().BeTrue();
+            var deletedCue = await _context.Cues.FindAsync(cue.Id);
+            deletedCue.Should().BeNull();
         }
 
         [Fact]

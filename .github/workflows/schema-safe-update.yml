@@ -1,0 +1,110 @@
+name: Schema Safe Update
+
+on:
+  workflow_dispatch:
+
+jobs:
+  schema-update:
+    name: Schema verification and safe apply
+    runs-on: ubuntu-latest
+    environment: staging
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install psql client
+        run: sudo apt-get update && sudo apt-get install -y postgresql-client
+
+      - name: Ensure scripts are executable
+        run: chmod +x scripts/ci_verify_and_fail.sh || true
+
+      - name: Full DB dump (logical)
+        env:
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+        run: |
+          pg_dump -Fc -h ${{ secrets.PGHOST }} -p ${{ secrets.PGPORT }} -U ${{ secrets.PGUSER }} -d ${{ secrets.PGDATABASE }} -f cuefinder_backup_$(date +%F).dump
+
+      - name: Upload DB dump artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: db-dump
+          path: cuefinder_backup_*.dump
+
+      - name: Run verification wrapper (fails if issues found)
+        env:
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+        run: |
+          ./scripts/ci_verify_and_fail.sh > verification.out 2>&1 || true
+
+      - name: Upload verification log
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-log
+          path: verification.out
+
+      - name: Create in-DB orphan backups
+        env:
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+        run: |
+          psql -v ON_ERROR_STOP=1 -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f scripts/20260304_create_orphan_backups.sql
+
+      - name: Apply safe defaults & NOT VALID FKs
+        env:
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+        run: |
+          psql -v ON_ERROR_STOP=1 -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f scripts/20260304_add_defaults_and_fks.sql
+
+      - name: Run cleanup & attempt validation
+        env:
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+        run: |
+          psql -v ON_ERROR_STOP=1 -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f scripts/20260304_cleanup_and_validate.sql || true
+
+      - name: Upload verification status
+        uses: actions/upload-artifact@v4
+        with:
+          name: verification-status
+          path: verification_status.txt
+
+  validate-constraints:
+    name: Validate constraints (manual approval required)
+    runs-on: ubuntu-latest
+    needs: schema-update
+    environment: production
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Download verification status
+        uses: actions/download-artifact@v4
+        with:
+          name: verification-status
+
+      - name: Check status and validate
+        env:
+          PGPASSWORD: ${{ secrets.PGPASSWORD }}
+          PGHOST: ${{ secrets.PGHOST }}
+          PGPORT: ${{ secrets.PGPORT }}
+          PGUSER: ${{ secrets.PGUSER }}
+          PGDATABASE: ${{ secrets.PGDATABASE }}
+        run: |
+          if [ ! -f verification_status.txt ]; then echo "verification_status.txt missing"; exit 1; fi
+          status=$(cat verification_status.txt | tr -d '\r' | tr -d '\n')
+          echo "Verification status: $status"
+          if [ "$status" != "OK" ]; then echo "Pre-checks did not pass; aborting validation."; exit 1; fi
+          echo "Validation approved: running constraint validation script"
+          psql -v ON_ERROR_STOP=1 -h $PGHOST -p $PGPORT -U $PGUSER -d $PGDATABASE -f scripts/20260304_validate_constraints.sql

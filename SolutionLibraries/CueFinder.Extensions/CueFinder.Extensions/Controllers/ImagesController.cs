@@ -1,5 +1,6 @@
 using CueFinder.Database.Models;
 using CueFinder.Extensions.Images;
+using CueFinder.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -303,22 +304,12 @@ public class ImagesController : ControllerBase
     }
 
     /// <summary>
-    /// Extracts the user ID from JWT claims, checking multiple possible claim types.
+    /// Extracts the user ID from JWT claims using the proper extension method.
     /// Returns 0 if no valid user ID is found.
     /// </summary>
     private int GetUserIdFromClaims()
     {
-        var userIdStr = User?.FindFirst(System.Security.Claims.ClaimTypes.NameIdentifier)?.Value
-            ?? User?.FindFirst("sub")?.Value
-            ?? User?.FindFirst("nameid")?.Value;
-
-        if (!int.TryParse(userIdStr, out int userId))
-        {
-            // Optionally log the issue
-            userId = 0; // Default fallback
-        }
-
-        return userId;
+        return User?.GetUserId() ?? 0;
     }
 }
 

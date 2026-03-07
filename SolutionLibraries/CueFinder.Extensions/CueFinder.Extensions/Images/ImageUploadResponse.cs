@@ -36,6 +36,11 @@ public class ImageUploadResponse
     public string? ErrorMessage { get; set; }
 
     /// <summary>
+    /// Whether this is the primary image.
+    /// </summary>
+    public bool IsPrimary { get; set; }
+
+    /// <summary>
     /// Timestamp of the upload.
     /// </summary>
     public DateTime UploadedAt { get; set; }
