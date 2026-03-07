@@ -13,9 +13,10 @@ namespace CueFinder.Extensions
         /// </summary>
         public static int? GetUserId(this ClaimsPrincipal user)
         {
-            var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value ??
-                              user?.FindFirst("sub")?.Value ??
-                              user?.FindFirst("userId")?.Value;
+            var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
+                              ?? user?.FindFirst("sub")?.Value
+                              ?? user?.FindFirst("nameid")?.Value
+                              ?? user?.FindFirst("userId")?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim))
             {
