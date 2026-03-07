@@ -16,7 +16,9 @@ namespace CueFinder.Extensions
             var userIdClaim = user?.FindFirst(ClaimTypes.NameIdentifier)?.Value
                               ?? user?.FindFirst("sub")?.Value
                               ?? user?.FindFirst("nameid")?.Value
-                              ?? user?.FindFirst("userId")?.Value;
+                              ?? user?.FindFirst("userId")?.Value
+                              ?? user?.FindFirst("user_id")?.Value
+                              ?? user?.FindFirst("uid")?.Value;
 
             if (string.IsNullOrEmpty(userIdClaim))
             {
@@ -26,6 +28,16 @@ namespace CueFinder.Extensions
             if (int.TryParse(userIdClaim, out var userId))
             {
                 return userId;
+            }
+
+            var candidates = new[] { "userid", "user_id", "uid" };
+            foreach (var c in candidates)
+            {
+                var v = user?.FindFirst(c)?.Value;
+                if (!string.IsNullOrEmpty(v) && int.TryParse(v, out var id))
+                {
+                    return id;
+                }
             }
 
             return null;
