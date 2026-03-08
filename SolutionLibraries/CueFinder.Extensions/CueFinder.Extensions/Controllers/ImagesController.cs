@@ -1,6 +1,5 @@
 using CueFinder.Database.Models;
 using CueFinder.Extensions.Images;
-using CueFinder.Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -308,12 +307,16 @@ public class ImagesController : ControllerBase
     }
 
     /// <summary>
-    /// Extracts the user ID from JWT claims using the proper extension method.
+    /// Extracts the user ID from JWT claims.
+    /// Checks multiple claim types for .NET 8 JsonWebTokenHandler compatibility.
     /// Returns 0 if no valid user ID is found.
     /// </summary>
     private int GetUserIdFromClaims()
     {
-        return User?.GetUserId() ?? 0;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("nameid")?.Value;
+        return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 }
 
