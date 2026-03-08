@@ -125,6 +125,7 @@ jobs:
           git fetch --prune origin
           git checkout release
           git reset --hard origin/release
+          rm -rf CueFinderFE/cuefinderfe/node_modules CueFinderFE/node_modules
           git clean -fdx -e uploads/ -e .deployment/ -e ssl/
           
           # Install Node.js if not present
