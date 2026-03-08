@@ -191,7 +191,6 @@ export default function SellerProfile() {
                     </Badge>
                   )}
                 </div>
-                <p className="text-sm text-muted-foreground">@{profile.username}</p>
                 <div className="flex flex-wrap items-center gap-3 mt-2">
                   {(profile.city || profile.country) && (
                     <div className="flex items-center gap-1 text-sm text-muted-foreground">
