@@ -228,10 +228,10 @@ function AppInner() {
       if (lastCheck) return;
 
       const [userCues, userCases, userTables, userAccessories] = await Promise.all([
-        cueService.getCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
-        cueCaseService.getCueCases().catch(err => { console.error('Error fetching cases:', err); return []; }),
-        billiardTableService.getTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
-        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
+        cueService.getMyCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
+        cueCaseService.getMyCueCases().catch(err => { console.error('Error fetching cases:', err); return []; }),
+        billiardTableService.getMyTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
+        accessoryService.getMyAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
       ]);
 
       const allUserListings = [
@@ -250,8 +250,8 @@ function AppInner() {
           listing.owner_id === user.id || listing.sellerId === user.id ||
           String(listing.userId) === String(user.id) || String(listing.user_id) === String(user.id) ||
           String(listing.owner_id) === String(user.id) || String(listing.sellerId) === String(user.id);
-        const createdDate = new Date(listing.createdAt || listing.created_at);
-        const isOld = createdDate < thirtyDaysAgo;
+        const lastActivityDate = new Date(listing.updatedAt || listing.updated_at || listing.createdAt || listing.created_at);
+        const isOld = lastActivityDate < thirtyDaysAgo;
         const notSold = !listing.sold && !listing.isSold && listing.status !== 'sold';
         return isOwner && isOld && notSold;
       });
@@ -277,15 +277,16 @@ function AppInner() {
     const listing = oldListings.find(l => (l.uid || l.id) === listingId);
     if (!listing) return;
     try {
-      const updatedListing = { ...listing, createdAt: new Date().toISOString() };
+      // Send a no-op update — the server always sets updatedAt = now on any update
+      const renewPayload = { title: listing.title };
       if (listing.itemType === 'cue') {
-        await cueService.updateCue(listingId, updatedListing);
+        await cueService.updateCue(listingId, renewPayload);
       } else if (listing.itemType === 'case') {
-        await cueCaseService.updateCueCase(listingId, updatedListing);
+        await cueCaseService.updateCueCase(listingId, renewPayload);
       } else if (listing.itemType === 'table') {
-        await billiardTableService.updateTable(listingId, updatedListing);
+        await billiardTableService.updateTable(listingId, renewPayload);
       } else if (listing.itemType === 'accessory') {
-        await accessoryService.updateAccessory(listingId, updatedListing);
+        await accessoryService.updateAccessory(listingId, renewPayload);
       }
       setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
       if (oldListings.length === 1) setShowOldListingsModal(false);
