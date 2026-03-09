@@ -1,5 +1,6 @@
 using CueFinder.Cues.Interfaces;
 using CueFinder.Cues.Models;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -40,6 +41,7 @@ public partial class CuesController
     /// Create a new cue listing
     /// </summary>
     [HttpPost]
+    [Authorize]
     [ProducesResponseType(typeof(CueResponseDto), StatusCodes.Status201Created)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -66,6 +68,7 @@ public partial class CuesController
     /// Update an existing cue (owner only)
     /// </summary>
     [HttpPut("{id}")]
+    [Authorize]
     [ProducesResponseType(typeof(CueResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
@@ -102,6 +105,7 @@ public partial class CuesController
     /// Delete a cue (owner only)
     /// </summary>
     [HttpDelete("{id}")]
+    [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     [ProducesResponseType(StatusCodes.Status403Forbidden)]

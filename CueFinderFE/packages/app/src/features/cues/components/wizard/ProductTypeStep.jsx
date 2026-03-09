@@ -1,52 +1,44 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../../../components/ui/card';
 
-/**
- * ProductTypeStep - Step 1: Select product type
- * Large, touch-friendly cards for mobile
- * Visual selection with icons and descriptions
- * Multilanguage support for English and Greek
- */
 export default function ProductTypeStep({ productType, onProductTypeChange }) {
-  const { i18n } = useTranslation();
-  const isGreek = i18n.language?.startsWith('el');
+  const { t } = useTranslation();
 
   const productTypes = [
     {
       value: 'cue',
       icon: '🎱',
-      title: isGreek ? 'Στέκα Μπιλιάρδου' : 'Billiard Cue',
-      description: isGreek ? 'Στέκες Πουλ & Σνούκερ' : 'Pool & Snooker Cues',
-      details: isGreek ? 'Στέκες Παιχνιδιού, Σπασίματος ή Άλματος' : 'Playing, Break, or Jump Cues'
+      title: t('product.cue.title'),
+      description: t('product.cue.description'),
+      details: t('product.cue.details')
     },
     {
       value: 'case',
       icon: '💼',
-      title: isGreek ? 'Θήκη Στέκας' : 'Cue Case',
-      description: isGreek ? 'Θήκες Προστασίας' : 'Protective Cases',
-      details: isGreek ? 'Διάφορες χωρητικότητες & στυλ' : 'Various capacities & styles'
+      title: t('product.case.title'),
+      description: t('product.case.description'),
+      details: t('product.case.details')
     },
     {
       value: 'table',
       icon: '🎳',
-      title: isGreek ? 'Τραπέζι Μπιλιάρδου' : 'Billiard Table',
-      description: isGreek ? 'Τραπέζια Πουλ & Σνούκερ' : 'Pool & Snooker Tables',
-      details: isGreek ? 'Ολόκληρα τραπέζια προς πώληση' : 'Complete tables for sale'
+      title: t('product.table.title'),
+      description: t('product.table.description'),
+      details: t('product.table.details')
     },
     {
       value: 'accessory',
       icon: '🎯',
-      title: isGreek ? 'Αξεσουάρ' : 'Accessories',
-      description: isGreek ? 'Κιμωλία, Μύτες & Περισσότερα' : 'Chalk, Tips & More',
-      details: isGreek ? 'Βασικά αξεσουάρ μπιλιάρδου' : 'Essential billiard gear'
+      title: t('product.accessory.title'),
+      description: t('product.accessory.description'),
+      details: t('product.accessory.details')
     },
     {
       value: 'set',
       icon: '🎁',
-      title: isGreek ? 'Σετ Στεκών & Θήκης' : 'Cue Set',
-      description: isGreek ? 'Συνδυασμός Στεκών & Θήκης' : 'Cues & Case Bundle',
-      details: isGreek ? 'Στέκα Παιχνιδιού, Σπασίματος, Άλματος & Θήκη (οποιοσδήποτε συνδυασμός)' : 'Playing, Break, Jump Cue + Case (any combo)'
+      title: t('product.set.title'),
+      description: t('product.set.description'),
+      details: t('product.set.details')
     }
   ];
 
@@ -54,10 +46,10 @@ export default function ProductTypeStep({ productType, onProductTypeChange }) {
     <div className="space-y-3 sm:space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-          {isGreek ? 'Τι πωλείτε;' : 'What are you listing?'}
+          {t('wizard.whatAreListing')}
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          {isGreek ? 'Επιλέξτε τον τύπο του αντικειμένου που θέλετε να πουλήσετε' : 'Select the type of item you want to sell'}
+          {t('wizard.selectItemType')}
         </p>
       </div>
 

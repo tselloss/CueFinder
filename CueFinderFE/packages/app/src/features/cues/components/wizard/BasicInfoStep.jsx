@@ -1,19 +1,11 @@
-import React from 'react';
 import { useTranslation } from 'react-i18next';
 import { Card, CardContent } from '../../../../components/ui/card';
 import { Label } from '../../../../components/ui/label';
 import { Input } from '../../../../components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../../../components/ui/select';
 
-/**
- * BasicInfoStep - Step 2: Basic listing information
- * Title, brand, price, condition, and optional location
- * Mobile-optimized with larger touch targets
- * Multilanguage support for English and Greek
- */
 export default function BasicInfoStep({ formData, onChange, productType }) {
-  const { i18n } = useTranslation();
-  const isGreek = i18n.language?.startsWith('el');
+  const { t } = useTranslation();
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -24,38 +16,28 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
     onChange({ ...formData, [field]: value });
   };
 
-  const getProductLabel = () => {
-    if (isGreek) {
-      switch (productType) {
-        case 'cue': return 'στέκα';
-        case 'case': return 'θήκη';
-        case 'table': return 'τραπέζι';
-        case 'accessory': return 'αξεσουάρ';
-        default: return 'αντικείμενο';
-      }
-    } else {
-      switch (productType) {
-        case 'cue': return 'cue';
-        case 'case': return 'case';
-        case 'table': return 'table';
-        case 'accessory': return 'accessory';
-        default: return 'item';
-      }
-    }
-  };
+  const titlePlaceholderKey = productType === 'cue' ? 'wizard.field.title.placeholder.cue'
+    : productType === 'case' ? 'wizard.field.title.placeholder.case'
+    : productType === 'table' ? 'wizard.field.title.placeholder.table'
+    : 'wizard.field.title.placeholder.other';
 
-  const conditionOptions = isGreek 
-    ? { 'New': 'Καινούργιο', 'Excellent': 'Άριστη', 'Good': 'Καλή', 'Fair': 'Μέτρια', 'Poor': 'Χαμηλή' }
-    : { 'New': 'New', 'Excellent': 'Excellent', 'Good': 'Good', 'Fair': 'Fair', 'Poor': 'Poor' };
+  const brandPlaceholderKey = productType === 'cue' ? 'wizard.field.brand.placeholder.cue'
+    : productType === 'case' ? 'wizard.field.brand.placeholder.case'
+    : productType === 'table' ? 'wizard.field.brand.placeholder.table'
+    : 'wizard.field.brand.placeholder.other';
+
+  const subtitleKey = `wizard.basicInfo.subtitle.${productType || 'item'}`;
+
+  const conditionKeys = ['New', 'Excellent', 'Good', 'Fair', 'Poor'];
 
   return (
     <div className="space-y-4">
       <div className="text-center mb-4">
         <h3 className="text-lg sm:text-xl font-bold text-foreground mb-1">
-          {isGreek ? 'Βασικές Πληροφορίες' : 'Basic Information'}
+          {t('wizard.basicInfo')}
         </h3>
         <p className="text-xs sm:text-sm text-muted-foreground">
-          {isGreek ? `Πείτε μας για το ${getProductLabel()} σας` : `Tell us about your ${getProductLabel()}`}
+          {t(subtitleKey, t('wizard.basicInfo.subtitle.item'))}
         </p>
       </div>
 
@@ -64,43 +46,33 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           {/* Title */}
           <div>
             <Label htmlFor="title" className="text-sm font-semibold mb-2 flex items-center gap-1">
-              {isGreek ? 'Τίτλος' : 'Title'} <span className="text-destructive">*</span>
+              {t('wizard.field.title')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="title"
               name="title"
               value={formData.title}
               onChange={handleInputChange}
-              placeholder={
-                productType === 'cue' ? (isGreek ? 'π.χ., Predator REVO 12.9mm' : 'e.g., Predator REVO 12.9mm') :
-                productType === 'case' ? (isGreek ? 'π.χ., Θήκη 2x4' : 'e.g., 2x4 Hard Case') :
-                productType === 'table' ? (isGreek ? 'π.χ., 8ft Brunswick Gold Crown' : 'e.g., 8ft Brunswick Gold Crown') :
-                (isGreek ? 'π.χ., Kamui Black Soft Tip' : 'e.g., Kamui Black Soft Tip')
-              }
+              placeholder={t(titlePlaceholderKey)}
               required
               className="h-11 text-base"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              {isGreek ? 'Επιλέξτε περιγραφικό τίτλο που θα ψάχνουν οι αγοραστές' : 'Choose a descriptive title that buyers will search for'}
+              {t('wizard.field.title.hint')}
             </p>
           </div>
 
           {/* Brand */}
           <div>
             <Label htmlFor="brand" className="text-sm font-semibold mb-2 flex items-center gap-1">
-              {isGreek ? 'Μάρκα' : 'Brand'} <span className="text-destructive">*</span>
+              {t('wizard.field.brand')} <span className="text-destructive">*</span>
             </Label>
             <Input
               id="brand"
               name="brand"
               value={formData.brand}
               onChange={handleInputChange}
-              placeholder={
-                productType === 'cue' ? (isGreek ? 'π.χ., Predator, Cuetec, McDermott' : 'e.g., Predator, Cuetec, McDermott') :
-                productType === 'case' ? (isGreek ? 'π.χ., Instroke, Predator, J&J' : 'e.g., Instroke, Predator, J&J') :
-                productType === 'table' ? (isGreek ? 'π.χ., Brunswick, Diamond, Olhausen' : 'e.g., Brunswick, Diamond, Olhausen') :
-                (isGreek ? 'π.χ., Kamui, Tiger, Moori' : 'e.g., Kamui, Tiger, Moori')
-              }
+              placeholder={t(brandPlaceholderKey)}
               required
               className="h-11 text-base"
             />
@@ -110,7 +82,7 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label htmlFor="price" className="text-sm font-semibold mb-2 flex items-center gap-1">
-                {isGreek ? 'Τιμή (€)' : 'Price (€)'} <span className="text-destructive">*</span>
+                {t('wizard.field.price')} <span className="text-destructive">*</span>
               </Label>
               <Input
                 id="price"
@@ -127,56 +99,56 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
             </div>
             <div>
               <Label htmlFor="condition" className="text-sm font-semibold mb-2 flex items-center gap-1">
-                {isGreek ? 'Κατάσταση' : 'Condition'} <span className="text-destructive">*</span>
+                {t('wizard.field.condition')} <span className="text-destructive">*</span>
               </Label>
               <Select value={formData.condition} onValueChange={(value) => handleSelectChange('condition', value)}>
                 <SelectTrigger id="condition" className="h-11 text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  {Object.entries(conditionOptions).map(([key, label]) => (
-                    <SelectItem key={key} value={key}>{label}</SelectItem>
+                  {conditionKeys.map((key) => (
+                    <SelectItem key={key} value={key}>{t(`wizard.condition.${key}`)}</SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
-          {/* Cue Type - Only for cues */}
+          {/* Cue Type */}
           {productType === 'cue' && (
             <div>
               <Label htmlFor="cueType" className="text-sm font-semibold mb-2">
-                {isGreek ? 'Τύπος Στέκας' : 'Cue Type'}
+                {t('wizard.field.cueType')}
               </Label>
               <Select value={formData.cueType} onValueChange={(value) => handleSelectChange('cueType', value)}>
                 <SelectTrigger id="cueType" className="h-11 text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="playing">Playing Cue</SelectItem>
-                  <SelectItem value="break">Break Cue</SelectItem>
-                  <SelectItem value="jump">Jump Cue</SelectItem>
+                  <SelectItem value="playing">{t('wizard.cueType.playing')}</SelectItem>
+                  <SelectItem value="break">{t('wizard.cueType.break')}</SelectItem>
+                  <SelectItem value="jump">{t('wizard.cueType.jump')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
           )}
 
-          {/* Accessory Type - Only for accessories */}
+          {/* Accessory Type */}
           {productType === 'accessory' && (
             <div>
               <Label htmlFor="accessoryType" className="text-sm font-semibold mb-2">
-                Accessory Type
+                {t('wizard.field.accessoryType')}
               </Label>
               <Select value={formData.accessoryType} onValueChange={(value) => handleSelectChange('accessoryType', value)}>
                 <SelectTrigger id="accessoryType" className="h-11 text-base">
                   <SelectValue />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="chalk">Chalk</SelectItem>
-                  <SelectItem value="tip">Tips</SelectItem>
-                  <SelectItem value="glove">Glove</SelectItem>
-                  <SelectItem value="towel">Towel</SelectItem>
-                  <SelectItem value="other">Other</SelectItem>
+                  <SelectItem value="chalk">{t('wizard.accessoryType.chalk')}</SelectItem>
+                  <SelectItem value="tip">{t('wizard.accessoryType.tip')}</SelectItem>
+                  <SelectItem value="glove">{t('wizard.accessoryType.glove')}</SelectItem>
+                  <SelectItem value="towel">{t('wizard.accessoryType.towel')}</SelectItem>
+                  <SelectItem value="other">{t('wizard.accessoryType.other')}</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -185,18 +157,18 @@ export default function BasicInfoStep({ formData, onChange, productType }) {
           {/* Location */}
           <div>
             <Label htmlFor="location" className="text-sm font-semibold mb-2">
-              Location (Optional)
+              {t('wizard.field.location')}
             </Label>
             <Input
               id="location"
               name="location"
               value={formData.location}
               onChange={handleInputChange}
-              placeholder="e.g., Athens, Greece"
+              placeholder={t('wizard.field.location.placeholder')}
               className="h-11 text-base"
             />
             <p className="text-xs text-muted-foreground mt-1">
-              Help buyers find local listings
+              {t('wizard.field.location.hint')}
             </p>
           </div>
         </CardContent>

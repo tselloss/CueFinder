@@ -1,6 +1,7 @@
 using CueFinder.CueSets.Models;
 using CueFinder.Database.Models;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CueFinder.CueSets.Services;
 

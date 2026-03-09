@@ -26,9 +26,8 @@ import RaffleCalculatorModal from '../../../../components/RaffleCalculatorModal'
  * Mobile-optimized with responsive design and touch-friendly controls
  */
 export default function CueFormWizard({ cue, onClose, onSave }) {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const isEditing = !!cue;
-  const isGreek = i18n.language?.startsWith('el');
   
   // Determine initial product type
   const getInitialProductType = () => {
@@ -638,7 +637,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                 : productType === 'accessory'
                 ? t('listing.shareDetailsAccessory')
                 : productType === 'set'
-                ? (isGreek ? 'Περιγράψτε το σετ σας' : 'Describe your cue set')
+                ? t('listing.shareDetailsSet')
                 : t('listing.followSteps')}
             </p>
           </div>
@@ -671,7 +670,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                 className="h-11 px-4 sm:px-6"
               >
                 <ChevronLeft className="w-4 h-4 mr-1" />
-                {isGreek ? 'Πίσω' : 'Back'}
+                {t('nav.back')}
               </Button>
 
               {/* Next/Submit Button */}
