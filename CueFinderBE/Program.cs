@@ -1,6 +1,7 @@
 using CueFinder.Auth.Extensions;
 using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
+using CueFinder.CueSets.Extensions;
 using CueFinder.Accessories.Extensions;
 using CueFinder.BilliardTables.Extensions;
 using CueFinder.Raffles.Extensions;
@@ -10,6 +11,7 @@ using CueFinder.Auth.Controllers;
 using CueFinder.BilliardTables.Controllers;
 using CueFinder.Cues.Controllers;
 using CueFinder.CueCases.Controllers;
+using CueFinder.CueSets.Controllers;
 using CueFinder.Accessories.Controllers;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Controllers;
@@ -37,6 +39,7 @@ builder.Services
     .AddApplicationPart(typeof(BilliardTablesController).Assembly)
     .AddApplicationPart(typeof(CuesController).Assembly)
     .AddApplicationPart(typeof(CueCasesController).Assembly)
+    .AddApplicationPart(typeof(CueSetsController).Assembly)
     .AddApplicationPart(typeof(AccessoriesController).Assembly)
     .AddJsonOptions(options =>
     {
@@ -60,6 +63,7 @@ builder.Services.AddCueCasesServices();
 builder.Services.AddBilliardTablesServices();
 builder.Services.AddAccessoriesServices();
 builder.Services.AddRaffleServices();
+builder.Services.AddCueSetServices();
 builder.Services.AddMessageServices();
 builder.Services.AddForumServices(connectionString);
 

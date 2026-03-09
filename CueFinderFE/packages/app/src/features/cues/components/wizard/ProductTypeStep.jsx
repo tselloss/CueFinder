@@ -40,6 +40,13 @@ export default function ProductTypeStep({ productType, onProductTypeChange }) {
       title: isGreek ? 'Αξεσουάρ' : 'Accessories',
       description: isGreek ? 'Κιμωλία, Μύτες & Περισσότερα' : 'Chalk, Tips & More',
       details: isGreek ? 'Βασικά αξεσουάρ μπιλιάρδου' : 'Essential billiard gear'
+    },
+    {
+      value: 'set',
+      icon: '🎁',
+      title: isGreek ? 'Σετ Στεκών & Θήκης' : 'Cue Set',
+      description: isGreek ? 'Συνδυασμός Στεκών & Θήκης' : 'Cues & Case Bundle',
+      details: isGreek ? 'Στέκα Παιχνιδιού, Σπασίματος, Άλματος & Θήκη (οποιοσδήποτε συνδυασμός)' : 'Playing, Break, Jump Cue + Case (any combo)'
     }
   ];
 

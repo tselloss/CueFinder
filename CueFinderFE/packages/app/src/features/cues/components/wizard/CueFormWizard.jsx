@@ -11,6 +11,7 @@ import * as cueService from '../../../../api/cueService';
 import * as cueCaseService from '../../../../api/cueCaseService';
 import * as billiardTableService from '../../../../api/billiardTableService';
 import * as accessoryService from '../../../../api/accessoryService';
+import * as cueSetService from '../../../../api/cueSetService';
 import { getErrorMessage } from '../../../../utils/errorUtils';
 import RaffleCalculatorModal from '../../../../components/RaffleCalculatorModal';
 
@@ -32,9 +33,10 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
   // Determine initial product type
   const getInitialProductType = () => {
     if (cue) {
-      return cue.category === 'case' ? 'case' 
-           : cue.category === 'table' ? 'table' 
-           : cue.category === 'accessory' ? 'accessory' 
+      return cue.category === 'case' ? 'case'
+           : cue.category === 'table' ? 'table'
+           : cue.category === 'accessory' ? 'accessory'
+           : cue.category === 'set' ? 'set'
            : 'cue';
     }
     return '';
@@ -74,7 +76,28 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
     manufactureYear: '',
     accessoryType: 'chalk',
     material: '',
-    size: ''
+    size: '',
+    // Set fields
+    includesPlayingCue: false,
+    includesBreakCue: false,
+    includesJumpCue: false,
+    includesCase: false,
+    playingCueWeight: '',
+    playingCueLength: '',
+    playingCueTipSize: '',
+    playingCueShaftMaterial: '',
+    playingCueButtMaterial: '',
+    breakCueWeight: '',
+    breakCueLength: '',
+    breakCueTipSize: '',
+    breakCueShaftMaterial: '',
+    breakCueButtMaterial: '',
+    jumpCueWeight: '',
+    jumpCueLength: '',
+    jumpCueTipSize: '',
+    jumpCueShaftMaterial: '',
+    jumpCueButtMaterial: '',
+    caseColor: ''
   });
   
   const [images, setImages] = useState([]);
@@ -122,7 +145,28 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         manufactureYear: cue.manufactureYear || '',
         accessoryType: cue.accessoryType || 'chalk',
         material: cue.material || '',
-        size: cue.size || ''
+        size: cue.size || '',
+        // Set fields
+        includesPlayingCue: cue.includesPlayingCue || false,
+        includesBreakCue: cue.includesBreakCue || false,
+        includesJumpCue: cue.includesJumpCue || false,
+        includesCase: cue.includesCase || false,
+        playingCueWeight: cue.playingCueWeight || '',
+        playingCueLength: cue.playingCueLength || '',
+        playingCueTipSize: cue.playingCueTipSize || '',
+        playingCueShaftMaterial: cue.playingCueShaftMaterial || '',
+        playingCueButtMaterial: cue.playingCueButtMaterial || '',
+        breakCueWeight: cue.breakCueWeight || '',
+        breakCueLength: cue.breakCueLength || '',
+        breakCueTipSize: cue.breakCueTipSize || '',
+        breakCueShaftMaterial: cue.breakCueShaftMaterial || '',
+        breakCueButtMaterial: cue.breakCueButtMaterial || '',
+        jumpCueWeight: cue.jumpCueWeight || '',
+        jumpCueLength: cue.jumpCueLength || '',
+        jumpCueTipSize: cue.jumpCueTipSize || '',
+        jumpCueShaftMaterial: cue.jumpCueShaftMaterial || '',
+        jumpCueButtMaterial: cue.jumpCueButtMaterial || '',
+        caseColor: cue.caseColor || ''
       });
       
       if (cue.images && cue.images.length > 0) {
@@ -172,6 +216,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           await billiardTableService.removeImage(identifier);
         } else if (productType === 'accessory') {
           await accessoryService.removeImage(cue.id, identifier);
+        } else if (productType === 'set') {
+          await cueSetService.deleteCueSetImage(cue.id, identifier);
         }
         setExistingImages(prev => prev.filter(img => img.id !== identifier));
       } catch (err) {
@@ -198,6 +244,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
         await billiardTableService.setPrimaryImage(cue.id, imageId);
       } else if (productType === 'accessory') {
         await accessoryService.setPrimaryImage(cue.id, imageId);
+      } else if (productType === 'set') {
+        await cueSetService.setPrimaryCueSetImage(cue.id, imageId);
       }
       
       // Update existing images to reflect new primary
@@ -414,6 +462,60 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
             return;
           }
         }
+      } else if (productType === 'set') {
+        const setData = {
+          title: formData.title,
+          brand: formData.brand,
+          price: parseFloat(formData.price),
+          condition: formData.condition,
+          description: formData.description,
+          location: formData.location || null,
+          includesPlayingCue: !!formData.includesPlayingCue,
+          includesBreakCue: !!formData.includesBreakCue,
+          includesJumpCue: !!formData.includesJumpCue,
+          includesCase: !!formData.includesCase,
+          playingCueWeight: formData.playingCueWeight ? parseFloat(formData.playingCueWeight) : null,
+          playingCueLength: formData.playingCueLength ? parseFloat(formData.playingCueLength) : null,
+          playingCueTipSize: formData.playingCueTipSize ? parseFloat(formData.playingCueTipSize) : null,
+          playingCueShaftMaterial: formData.playingCueShaftMaterial || null,
+          playingCueButtMaterial: formData.playingCueButtMaterial || null,
+          breakCueWeight: formData.breakCueWeight ? parseFloat(formData.breakCueWeight) : null,
+          breakCueLength: formData.breakCueLength ? parseFloat(formData.breakCueLength) : null,
+          breakCueTipSize: formData.breakCueTipSize ? parseFloat(formData.breakCueTipSize) : null,
+          breakCueShaftMaterial: formData.breakCueShaftMaterial || null,
+          breakCueButtMaterial: formData.breakCueButtMaterial || null,
+          jumpCueWeight: formData.jumpCueWeight ? parseFloat(formData.jumpCueWeight) : null,
+          jumpCueLength: formData.jumpCueLength ? parseFloat(formData.jumpCueLength) : null,
+          jumpCueTipSize: formData.jumpCueTipSize ? parseFloat(formData.jumpCueTipSize) : null,
+          jumpCueShaftMaterial: formData.jumpCueShaftMaterial || null,
+          jumpCueButtMaterial: formData.jumpCueButtMaterial || null,
+          caseCapacity: formData.caseCapacity || null,
+          caseOpening: formData.caseOpening || null,
+          caseType: formData.caseType || null,
+          caseColor: formData.caseColor || null,
+          caseMaterial: formData.caseMaterial || null,
+          features: formData.features || null
+        };
+
+        if (isEditing) {
+          savedItem = await cueSetService.updateCueSet(cue.id, setData);
+        } else {
+          savedItem = await cueSetService.createCueSet(setData);
+        }
+
+        const setUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && setUploadId) {
+          setUploadProgress(0);
+          try {
+            const uploadResult = await cueSetService.uploadCueSetImages(setUploadId, images, setUploadProgress);
+            uploadedImageUrl = uploadResult?.[0]?.imageUrl || null;
+          } catch (uploadErr) {
+            console.error('Set image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
+        }
       }
 
       // Success
@@ -535,6 +637,8 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
                 ? t('listing.shareDetailsTable')
                 : productType === 'accessory'
                 ? t('listing.shareDetailsAccessory')
+                : productType === 'set'
+                ? (isGreek ? 'Περιγράψτε το σετ σας' : 'Describe your cue set')
                 : t('listing.followSteps')}
             </p>
           </div>

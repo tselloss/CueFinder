@@ -31,6 +31,7 @@
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Accessories\CueFinder.Accessories\CueFinder.Accessories.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.BilliardTables\CueFinder.BilliardTables\CueFinder.BilliardTables.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Raffles\CueFinder.Raffles.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.CueSets\CueFinder.CueSets\CueFinder.CueSets.csproj" />
   </ItemGroup>
 
 </Project>

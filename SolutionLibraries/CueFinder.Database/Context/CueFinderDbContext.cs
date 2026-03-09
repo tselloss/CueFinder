@@ -42,6 +42,8 @@ namespace CueFinder.Database.Context
         public DbSet<UserReport> UserReports { get; set; } = null!;
         public DbSet<Raffle> Raffles { get; set; } = null!;
         public DbSet<RaffleEntry> RaffleEntries { get; set; } = null!;
+        public DbSet<CueSet> CueSets { get; set; } = null!;
+        public DbSet<CueSetImage> CueSetImages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -919,6 +921,68 @@ namespace CueFinder.Database.Context
 
                 entity.HasIndex(e => e.Status)
                     .HasDatabaseName("IX_RaffleEntry_Status");
+            });
+
+            // CueSet entity configuration
+            modelBuilder.Entity<CueSet>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Brand).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(5000);
+                entity.Property(e => e.Price).HasColumnType("numeric(10,2)");
+                entity.Property(e => e.Condition).HasMaxLength(50).HasDefaultValue("good");
+                entity.Property(e => e.Location).HasMaxLength(200);
+                entity.Property(e => e.ModerationStatus).HasMaxLength(50).HasDefaultValue("approved");
+                entity.Property(e => e.FlagReason).HasMaxLength(500);
+                entity.Property(e => e.ModerationNotes).HasMaxLength(1000);
+                entity.Property(e => e.Features).HasMaxLength(1000);
+
+                entity.Property(e => e.PlayingCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.PlayingCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.BreakCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.BreakCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.JumpCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.JumpCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.CaseCapacity).HasMaxLength(20);
+                entity.Property(e => e.CaseOpening).HasMaxLength(50);
+                entity.Property(e => e.CaseType).HasMaxLength(50);
+                entity.Property(e => e.CaseColor).HasMaxLength(100);
+                entity.Property(e => e.CaseMaterial).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.Images)
+                    .WithOne(i => i.CueSet)
+                    .HasForeignKey(i => i.CueSetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserId).HasDatabaseName("IX_CueSet_UserId");
+                entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_CueSet_CreatedAt");
+                entity.HasIndex(e => e.IsSold).HasDatabaseName("IX_CueSet_IsSold");
+            });
+
+            // CueSetImage entity configuration
+            modelBuilder.Entity<CueSetImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.CueSetId).HasDatabaseName("IX_CueSetImage_CueSetId");
             });
         }
     }

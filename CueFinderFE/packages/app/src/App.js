@@ -6,6 +6,7 @@ import CueFormModal from './components/CueFormModal.jsx';
 import CueCaseDetail from './components/CueCaseDetail';
 import BilliardTableDetail from './components/BilliardTableDetail.jsx';
 import AccessoryDetail from './components/AccessoryDetail.jsx';
+import CueSetDetail from './components/CueSetDetail.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import LoginPage from './components/LoginPage.jsx';
 import UserProfile from './components/UserProfile.jsx';
@@ -27,6 +28,7 @@ import * as cueService from './api/cueService';
 import * as cueCaseService from './api/cueCaseService';
 import * as billiardTableService from './api/billiardTableService';
 import * as accessoryService from './api/accessoryService';
+import * as cueSetService from './api/cueSetService';
 import * as messageService from './api/messageService';
 import * as forumService from './api/forumService';
 
@@ -125,19 +127,21 @@ function AppInner() {
 
   const refreshListings = useCallback(async () => {
     try {
-      const [cuesData, casesData, tablesData, accessoriesData] = await Promise.all([
+      const [cuesData, casesData, tablesData, accessoriesData, setsData] = await Promise.all([
         cueService.getCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
         cueCaseService.getCueCases().catch(err => { console.error('Error fetching cue cases:', err); return []; }),
         billiardTableService.getTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
-        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
+        accessoryService.getAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; }),
+        cueSetService.getCueSets().catch(err => { console.error('Error fetching cue sets:', err); return []; })
       ]);
 
       const cuesWithCategory = cuesData.map(cue => ({ ...cue, itemType: 'cue' }));
       const casesWithCategory = casesData.map(cueCase => ({ ...cueCase, itemType: 'case' }));
       const tablesWithCategory = tablesData.map(table => ({ ...table, itemType: 'table' }));
       const accessoriesWithCategory = accessoriesData.map(accessory => ({ ...accessory, itemType: 'accessory' }));
+      const setsWithCategory = setsData.map(set => ({ ...set, itemType: 'set' }));
 
-      const combined = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory];
+      const combined = [...cuesWithCategory, ...casesWithCategory, ...tablesWithCategory, ...accessoriesWithCategory, ...setsWithCategory];
 
       // Fisher-Yates shuffle so the home page shows a different order on every refresh
       for (let i = combined.length - 1; i > 0; i--) {
@@ -178,6 +182,8 @@ function AppInner() {
       navigate(`/table/${item.id}`);
     } else if (item.itemType === 'accessory') {
       navigate(`/accessory/${item.id}`);
+    } else if (item.itemType === 'set') {
+      navigate(`/set/${item.id}`);
     } else {
       navigate(`/cue/${item.id}`);
     }
@@ -227,18 +233,20 @@ function AppInner() {
       const lastCheck = sessionStorage.getItem('oldListingsChecked');
       if (lastCheck) return;
 
-      const [userCues, userCases, userTables, userAccessories] = await Promise.all([
+      const [userCues, userCases, userTables, userAccessories, userSets] = await Promise.all([
         cueService.getMyCues().catch(err => { console.error('Error fetching cues:', err); return []; }),
         cueCaseService.getMyCueCases().catch(err => { console.error('Error fetching cases:', err); return []; }),
         billiardTableService.getMyTables().catch(err => { console.error('Error fetching tables:', err); return []; }),
-        accessoryService.getMyAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; })
+        accessoryService.getMyAccessories().catch(err => { console.error('Error fetching accessories:', err); return []; }),
+        cueSetService.getMyCueSets().catch(err => { console.error('Error fetching sets:', err); return []; })
       ]);
 
       const allUserListings = [
         ...userCues.map(c => ({ ...c, itemType: 'cue' })),
         ...userCases.map(c => ({ ...c, itemType: 'case' })),
         ...userTables.map(t => ({ ...t, itemType: 'table' })),
-        ...userAccessories.map(a => ({ ...a, itemType: 'accessory' }))
+        ...userAccessories.map(a => ({ ...a, itemType: 'accessory' })),
+        ...userSets.map(s => ({ ...s, itemType: 'set' }))
       ];
 
       const thirtyDaysAgo = new Date();
@@ -287,6 +295,8 @@ function AppInner() {
         await billiardTableService.updateTable(listingId, renewPayload);
       } else if (listing.itemType === 'accessory') {
         await accessoryService.updateAccessory(listingId, renewPayload);
+      } else if (listing.itemType === 'set') {
+        await cueSetService.updateCueSet(listingId, renewPayload);
       }
       setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
       if (oldListings.length === 1) setShowOldListingsModal(false);
@@ -309,6 +319,8 @@ function AppInner() {
         await billiardTableService.updateTable(listingId, { ...listing, sold: true, status: 'sold' });
       } else if (listing.itemType === 'accessory') {
         await accessoryService.updateAccessory(listingId, { ...listing, sold: true, status: 'sold' });
+      } else if (listing.itemType === 'set') {
+        await cueSetService.updateCueSet(listingId, { ...listing, sold: true, status: 'sold' });
       }
       setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
       if (oldListings.length === 1) setShowOldListingsModal(false);
@@ -331,6 +343,8 @@ function AppInner() {
         await billiardTableService.deleteTable(listingId);
       } else if (listing.itemType === 'accessory') {
         await accessoryService.deleteAccessory(listingId);
+      } else if (listing.itemType === 'set') {
+        await cueSetService.deleteCueSet(listingId);
       }
       setOldListings(prev => prev.filter(l => (l.uid || l.id) !== listingId));
       if (oldListings.length === 1) setShowOldListingsModal(false);
@@ -502,6 +516,9 @@ function AppInner() {
               } />
               <Route path="/accessory/:id" element={
                 user ? <AccessoryDetail onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/set/:id" element={
+                user ? <CueSetDetail onBack={handleBack} /> : <Navigate to="/login" />
               } />
 
               <Route path="/profile" element={
