@@ -206,7 +206,7 @@ export default function RaffleDetail({ onBack }) {
             />
           ) : (
             <div className="p-4 text-center">
-              <p className="text-yellow-300 text-lg font-bold">🏆 Winner: @{raffle.winnerUsername}</p>
+              <p className="text-yellow-300 text-lg font-bold">🏆 Winner: {raffle.winnerName || raffle.winnerUsername}</p>
               {raffle.winnerSpotNumber && (
                 <p className="text-yellow-400/70 text-sm">Spot #{raffle.winnerSpotNumber}</p>
               )}
@@ -214,7 +214,7 @@ export default function RaffleDetail({ onBack }) {
           )}
           {getImageUrl(raffle.winnerCardImageUrl) && (
             <div className="px-4 py-2 text-center border-t border-yellow-500/20">
-              <p className="text-yellow-300 font-bold">🏆 @{raffle.winnerUsername}</p>
+              <p className="text-yellow-300 font-bold">🏆 {raffle.winnerName || raffle.winnerUsername}</p>
               {raffle.winnerSpotNumber && (
                 <p className="text-yellow-400/70 text-xs">Spot #{raffle.winnerSpotNumber}</p>
               )}
@@ -272,7 +272,7 @@ export default function RaffleDetail({ onBack }) {
                 </div>
               ) : (
                 <form onSubmit={handleSendMsg} className="space-y-2">
-                  <label className="block text-xs text-gray-400">Message to @{raffle.organizerUsername}</label>
+                  <label className="block text-xs text-gray-400">Message to {raffle.organizerName || raffle.organizerUsername}</label>
                   <textarea
                     rows={3}
                     maxLength={1000}
@@ -527,7 +527,7 @@ export default function RaffleDetail({ onBack }) {
                       <tr key={e.id} className="border-b border-white/5 last:border-0">
                         <td className="px-3 py-2 text-white font-semibold">#{e.spotNumber}</td>
                         <td className="px-3 py-2 text-gray-300">
-                          @{e.username}
+                          {e.name || e.username}
                           {raffle.winnerId && e.userId === raffle.winnerId && (
                             <span className="ml-1 text-yellow-400">🏆</span>
                           )}
@@ -558,7 +558,7 @@ export default function RaffleDetail({ onBack }) {
                   <div key={e.id} className="p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
                     <div className="flex items-center justify-between mb-1">
                       <div>
-                        <span className="text-white">Spot #{e.spotNumber} — @{e.username}</span>
+                        <span className="text-white">Spot #{e.spotNumber} — {e.name || e.username}</span>
                         {e.paymentMethod && (
                           <span className="ml-2 text-xs text-primary bg-primary/10 border border-primary/20 rounded-full px-2 py-0.5">
                             {METHOD_LABEL[e.paymentMethod] || e.paymentMethod}

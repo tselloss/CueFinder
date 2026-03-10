@@ -46,6 +46,7 @@ public partial class RaffleService
 
             WinnerId = r.WinnerId,
             WinnerUsername = r.Winner?.Username,
+            WinnerName = r.Winner?.Name,
             WinnerSpotNumber = r.WinnerSpotNumber,
             WinnerCardImageUrl = r.WinnerCardImageUrl,
 
@@ -69,6 +70,7 @@ public partial class RaffleService
         RaffleId = e.RaffleId,
         UserId = e.UserId,
         Username = e.User?.Username ?? string.Empty,
+        Name = e.User?.Name ?? string.Empty,
         SpotNumber = e.SpotNumber,
         Status = e.Status,
         PaymentMethod = e.PaymentMethod,

@@ -72,14 +72,15 @@ export default function SpotGrid({ raffle, currentUserId, onSelectSpot, selected
 
           // Build tooltip
           let tooltip = `Spot #${n} — ${stateLabel[state]}`;
-          if (entry?.username) tooltip += ` · @${entry.username}`;
+          if (entry?.name || entry?.username) tooltip += ` · ${entry.name || entry.username}`;
 
           // Name to display inside cell
           let displayName = null;
-          if (hasUser && entry.username && maxNameLen > 0) {
-            displayName = entry.username.length > maxNameLen
-              ? entry.username.slice(0, maxNameLen) + '…'
-              : entry.username;
+          const entryLabel = entry?.name || entry?.username || '';
+          if (hasUser && entryLabel && maxNameLen > 0) {
+            displayName = entryLabel.length > maxNameLen
+              ? entryLabel.slice(0, maxNameLen) + '…'
+              : entryLabel;
           }
 
           return (

@@ -30,6 +30,7 @@ public class RaffleResponseDto
     // Winner
     public int? WinnerId { get; set; }
     public string? WinnerUsername { get; set; }
+    public string? WinnerName { get; set; }
     public int? WinnerSpotNumber { get; set; }
     public string? WinnerCardImageUrl { get; set; }
 

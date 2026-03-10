@@ -56,7 +56,7 @@ function RaffleCard({ raffle, onClick }) {
 
       <div className="p-4">
         <h3 className="text-white font-semibold text-sm mb-1 truncate">{raffle.title}</h3>
-        <p className="text-gray-500 text-xs mb-3">by @{raffle.organizerUsername}</p>
+        <p className="text-gray-500 text-xs mb-3">by {raffle.organizerName || raffle.organizerUsername}</p>
 
         {/* Progress bar */}
         <div className="mb-1">
@@ -78,7 +78,7 @@ function RaffleCard({ raffle, onClick }) {
         </div>
 
         {raffle.status === 'drawn' && raffle.winnerUsername && (
-          <p className="mt-2 text-yellow-400 text-xs font-medium">🏆 @{raffle.winnerUsername}</p>
+          <p className="mt-2 text-yellow-400 text-xs font-medium">🏆 {raffle.winnerName || raffle.winnerUsername}</p>
         )}
       </div>
     </div>

@@ -6,6 +6,7 @@ public class RaffleEntryResponseDto
     public int RaffleId { get; set; }
     public int UserId { get; set; }
     public string Username { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
     public int SpotNumber { get; set; }
     public string Status { get; set; } = "pending";
     public string? PaymentMethod { get; set; }
