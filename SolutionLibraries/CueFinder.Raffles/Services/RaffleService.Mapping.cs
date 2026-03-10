@@ -24,6 +24,7 @@ public partial class RaffleService
             OrganizerId = r.OrganizerId,
             OrganizerName = r.Organizer?.Name ?? string.Empty,
             OrganizerUsername = r.Organizer?.Username ?? string.Empty,
+            OrganizerIsVerified = r.Organizer?.IsVerified ?? false,
 
             Title = r.Title,
             Description = r.Description,

@@ -9,7 +9,7 @@ using System.Security.Claims;
 namespace CueFinder.CueSets.Controllers;
 
 [ApiController]
-[Route("api/cuesets/{cueSetId}/[controller]")]
+[Route("api/cuesets/{cueSetId}/images")]
 public class CueSetImagesController : ControllerBase
 {
     private readonly IImageService _imageService;

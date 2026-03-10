@@ -1,11 +1,12 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import * as raffleService from '../api/raffleService';
 import * as messageService from '../api/messageService';
 import { useAuth } from '../auth/AuthContext';
 import { SITE_BASE_URL } from '../config/apiConfig';
 import SpotGrid from './SpotGrid';
 import SpinWheel from './SpinWheel';
+import VerifiedBadge from './VerifiedBadge';
 
 function getImageUrl(url) {
   if (!url) return null;
@@ -239,7 +240,13 @@ export default function RaffleDetail({ onBack }) {
 
           <h1 className="text-xl font-bold text-white mb-1">{raffle.title}</h1>
           <div className="flex items-center justify-between mb-3">
-            <p className="text-gray-400 text-sm">by @{raffle.organizerUsername}</p>
+            <Link
+              to={`/sellers/${raffle.organizerId}`}
+              className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition"
+            >
+              <span>by @{raffle.organizerUsername}</span>
+              <VerifiedBadge isVerified={raffle.organizerIsVerified} />
+            </Link>
             {user && !isOrganizer && (
               <button
                 onClick={() => { setShowMsgBox(v => !v); setMsgSent(false); setMsgError(''); }}

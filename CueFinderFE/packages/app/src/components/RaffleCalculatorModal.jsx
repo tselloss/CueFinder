@@ -314,37 +314,30 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
 
         <div>
           <label className="block text-xs font-medium text-gray-300 mb-2">Accepted Payment Methods *</label>
-          <div className="grid grid-cols-2 gap-2">
-            {PAYMENT_METHODS.map(({ key, label }) => (
-              <label key={key} className={`flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2 border transition ${
-                form[key] ? 'border-primary/50 bg-primary/10 text-white' : 'border-white/10 bg-black/20 text-gray-400'
-              }`}>
-                <input type="checkbox" checked={form[key]} onChange={e => set(key, e.target.checked)} className="accent-primary" />
-                <span className="text-xs">{label}</span>
-              </label>
-            ))}
-          </div>
-        </div>
-
-        {PAYMENT_METHODS.some(m => m.detailKey && form[m.key]) && (
           <div className="space-y-2">
-            <label className="block text-xs font-medium text-gray-300">
-              Payment Details <span className="text-gray-500 font-normal">(shown to entrants)</span>
-            </label>
-            {PAYMENT_METHODS.filter(m => m.detailKey && form[m.key]).map(({ detailKey, detailLabel, placeholder, inputType }) => (
-              <div key={detailKey} className="flex items-center gap-2">
-                <span className="text-xs text-gray-400 shrink-0 w-32 truncate">{detailLabel}</span>
-                <input
-                  type={inputType}
-                  value={form[detailKey]}
-                  onChange={e => set(detailKey, e.target.value)}
-                  placeholder={placeholder}
-                  className="flex-1 bg-black/30 border border-white/15 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition placeholder-gray-600"
-                />
+            {PAYMENT_METHODS.map(({ key, label, detailKey, detailLabel, placeholder, inputType }) => (
+              <div key={key}>
+                <label className={`flex items-center gap-2 cursor-pointer rounded-lg px-3 py-2.5 border transition ${
+                  form[key] ? 'border-primary/50 bg-primary/10 text-white' : 'border-white/10 bg-black/20 text-gray-400'
+                }`}>
+                  <input type="checkbox" checked={form[key]} onChange={e => set(key, e.target.checked)} className="accent-primary" />
+                  <span className="text-sm">{label}</span>
+                </label>
+                {form[key] && detailKey && (
+                  <div className="mt-1 ml-2 pl-3 border-l border-primary/30">
+                    <input
+                      type={inputType}
+                      value={form[detailKey]}
+                      onChange={e => set(detailKey, e.target.value)}
+                      placeholder={`${detailLabel} — ${placeholder}`}
+                      className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2 text-white text-xs focus:outline-none focus:border-primary transition placeholder-gray-600"
+                    />
+                  </div>
+                )}
               </div>
             ))}
           </div>
-        )}
+        </div>
 
         {error && <p className="text-red-400 text-sm bg-red-500/10 border border-red-500/20 rounded-lg px-3 py-2">{error}</p>}
       </form>

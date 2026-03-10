@@ -6,6 +6,7 @@ public class RaffleResponseDto
     public int OrganizerId { get; set; }
     public string OrganizerName { get; set; } = string.Empty;
     public string OrganizerUsername { get; set; } = string.Empty;
+    public bool OrganizerIsVerified { get; set; }
 
     public string Title { get; set; } = string.Empty;
     public string? Description { get; set; }
