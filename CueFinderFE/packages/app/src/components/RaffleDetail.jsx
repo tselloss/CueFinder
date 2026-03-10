@@ -244,7 +244,7 @@ export default function RaffleDetail({ onBack }) {
               to={`/sellers/${raffle.organizerId}`}
               className="flex items-center gap-1.5 text-sm text-gray-400 hover:text-white transition"
             >
-              <span>by @{raffle.organizerUsername}</span>
+              <span>by {raffle.organizerName || `@${raffle.organizerUsername}`}</span>
               <VerifiedBadge isVerified={raffle.organizerIsVerified} />
             </Link>
             {user && !isOrganizer && (
