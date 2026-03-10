@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Star, MapPin, Calendar, Package, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Star, MapPin, Calendar, Package, ShoppingBag, Mail } from 'lucide-react';
+import { useAuth } from '../auth/AuthContext';
+import * as messageService from '../api/messageService';
 import { Button } from './ui/button';
 import { Card, CardContent } from './ui/card';
 import { Badge } from './ui/badge';
@@ -122,9 +124,38 @@ function ReviewCard({ review }) {
 export default function SellerProfile() {
   const { id } = useParams();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+
+  const [showMsgBox, setShowMsgBox] = useState(false);
+  const [msgText, setMsgText] = useState('');
+  const [msgSending, setMsgSending] = useState(false);
+  const [msgSent, setMsgSent] = useState(false);
+  const [msgError, setMsgError] = useState('');
+
+  async function handleSendMsg(e) {
+    e.preventDefault();
+    if (!msgText.trim()) return;
+    setMsgError('');
+    try {
+      setMsgSending(true);
+      await messageService.sendMessage({
+        recipientId: parseInt(id),
+        cueId: null,
+        subject: `Message from ${user?.username || 'a user'}`,
+        content: msgText.trim(),
+        messageType: 'message',
+      });
+      setMsgSent(true);
+      setMsgText('');
+    } catch (err) {
+      setMsgError(err?.response?.data?.message || 'Failed to send message.');
+    } finally {
+      setMsgSending(false);
+    }
+  }
 
   useEffect(() => {
     setLoading(true);
@@ -203,9 +234,56 @@ export default function SellerProfile() {
                     <span>Member since {memberYear}</span>
                   </div>
                 </div>
-                <div className="mt-2">
+                <div className="flex items-center justify-between flex-wrap gap-3 mt-2">
                   <StarDisplay value={profile.averageRating} count={profile.reviewCount} />
+                  {user && user.id !== parseInt(id) && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      className="gap-1.5"
+                      onClick={() => { setShowMsgBox(v => !v); setMsgSent(false); setMsgError(''); }}
+                    >
+                      <Mail className="w-3.5 h-3.5" />
+                      Message Seller
+                    </Button>
+                  )}
                 </div>
+                {user && user.id !== parseInt(id) && showMsgBox && (
+                  <div className="mt-3 p-3 bg-muted/50 border border-border rounded-xl">
+                    {msgSent ? (
+                      <div className="flex items-center justify-between">
+                        <p className="text-green-500 text-sm font-medium">Message sent!</p>
+                        <button
+                          onClick={() => { setMsgSent(false); setShowMsgBox(false); }}
+                          className="text-muted-foreground text-xs hover:text-foreground transition"
+                        >
+                          Close
+                        </button>
+                      </div>
+                    ) : (
+                      <form onSubmit={handleSendMsg} className="space-y-2">
+                        <label className="block text-xs text-muted-foreground">Message to {profile.name}</label>
+                        <textarea
+                          rows={3}
+                          maxLength={1000}
+                          value={msgText}
+                          onChange={e => setMsgText(e.target.value)}
+                          placeholder="Ask about listings, shipping, or anything else…"
+                          className="w-full bg-background border border-border rounded-lg px-3 py-2 text-foreground text-sm focus:outline-none focus:border-primary transition resize-none placeholder-muted-foreground"
+                        />
+                        {msgError && <p className="text-destructive text-xs">{msgError}</p>}
+                        <div className="flex gap-2">
+                          <Button type="submit" size="sm" disabled={msgSending || !msgText.trim()} className="flex-1">
+                            {msgSending ? 'Sending…' : 'Send'}
+                          </Button>
+                          <Button type="button" variant="outline" size="sm" onClick={() => setShowMsgBox(false)}>
+                            Cancel
+                          </Button>
+                        </div>
+                      </form>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
           </CardContent>

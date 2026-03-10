@@ -430,6 +430,18 @@ export default function RaffleDetail({ onBack }) {
                         </button>
                       ))}
                     </div>
+                    {selectedMethod === 'dm' && (
+                      <div className="mb-3 p-2.5 bg-primary/10 border border-primary/30 rounded-lg flex items-center justify-between gap-2">
+                        <p className="text-xs text-gray-300">Arrange payment directly with the seller.</p>
+                        <button
+                          type="button"
+                          onClick={() => { setShowMsgBox(true); setMsgSent(false); setMsgError(''); }}
+                          className="text-xs px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary/80 text-white font-semibold transition shrink-0"
+                        >
+                          ✉ Message Seller
+                        </button>
+                      </div>
+                    )}
                     {enterError && <p className="text-red-400 text-xs mb-2">{enterError}</p>}
                     {enterSuccess && <p className="text-green-400 text-xs mb-2">{enterSuccess}</p>}
                     <div className="flex gap-2">
