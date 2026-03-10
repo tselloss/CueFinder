@@ -1,4 +1,5 @@
 import React from 'react';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Visual grid of raffle spots.
@@ -10,6 +11,7 @@ import React from 'react';
  *   blue   = yours (pending or paid)
  */
 export default function SpotGrid({ raffle, currentUserId, onSelectSpot, selectedSpot }) {
+  const { t } = useTranslation();
   const { totalSpots, entries = [] } = raffle;
 
   const entryBySpot = {};
@@ -36,10 +38,10 @@ export default function SpotGrid({ raffle, currentUserId, onSelectSpot, selected
   };
 
   const stateLabel = {
-    available: 'Available — click to claim',
-    mine:      'Your spot',
-    paid:      'Paid',
-    pending:   'Claimed (unpaid)',
+    available: t('raffle.spotGrid.tooltipAvailable'),
+    mine:      t('raffle.spotGrid.tooltipMine'),
+    paid:      t('raffle.spotGrid.tooltipPaid'),
+    pending:   t('raffle.spotGrid.tooltipPending'),
   };
 
   return (
@@ -47,10 +49,10 @@ export default function SpotGrid({ raffle, currentUserId, onSelectSpot, selected
       {/* Legend */}
       <div className="flex flex-wrap gap-3 mb-3 text-xs">
         {[
-          { state: 'available', label: 'Available' },
-          { state: 'pending',   label: 'Claimed' },
-          { state: 'paid',      label: 'Paid' },
-          { state: 'mine',      label: 'Yours' },
+          { state: 'available', label: t('raffle.spotGrid.available') },
+          { state: 'pending',   label: t('raffle.spotGrid.pending') },
+          { state: 'paid',      label: t('raffle.spotGrid.paid') },
+          { state: 'mine',      label: t('raffle.spotGrid.mine') },
         ].map(({ state, label }) => (
           <span key={state} className="flex items-center gap-1">
             <span className={`inline-block w-3 h-3 rounded border ${stateStyle[state].split(' ')[0]} ${stateStyle[state].split(' ')[1]}`} />

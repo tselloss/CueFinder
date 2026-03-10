@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as raffleService from '../api/raffleService';
 import * as messageService from '../api/messageService';
 import { useAuth } from '../auth/AuthContext';
@@ -46,6 +47,7 @@ function formatTimeLeft(expiresAt) {
 export default function RaffleDetail({ onBack }) {
   const { id } = useParams();
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
 
   const [raffle, setRaffle] = useState(null);
@@ -97,7 +99,7 @@ export default function RaffleDetail({ onBack }) {
     try {
       setEntering(true);
       await raffleService.enterRaffle(raffle.id, selectedSpot, selectedMethod);
-      setEnterSuccess(`✅ Spot #${selectedSpot} claimed! The seller has been notified. You have 36 hours to complete payment.`);
+      setEnterSuccess(t('raffle.claim.success', { n: selectedSpot }));
       setSelectedSpot(null);
       setSelectedMethod('');
       await load();
@@ -109,7 +111,7 @@ export default function RaffleDetail({ onBack }) {
   }
 
   async function handleDraw() {
-    if (!window.confirm('Draw the winner now? This cannot be undone.')) return;
+    if (!window.confirm(t('raffle.detail.drawConfirm'))) return;
     try {
       setDrawing(true);
       const updated = await raffleService.drawWinner(raffle.id);
@@ -165,7 +167,7 @@ export default function RaffleDetail({ onBack }) {
     }
   }
 
-  if (loading) return <div className="p-8 text-center text-gray-500">Loading…</div>;
+  if (loading) return <div className="p-8 text-center text-gray-500">{t('common.loading')}</div>;
   if (error)   return <div className="p-8 text-center text-red-400">{error}</div>;
   if (!raffle) return null;
 
@@ -192,7 +194,7 @@ export default function RaffleDetail({ onBack }) {
         onClick={onBack || (() => navigate('/raffles'))}
         className="text-gray-400 hover:text-white transition text-sm mb-4 block"
       >
-        ← All Raffles
+        {t('raffle.allRaffles')}
       </button>
 
       {/* Winner banner */}
@@ -206,17 +208,17 @@ export default function RaffleDetail({ onBack }) {
             />
           ) : (
             <div className="p-4 text-center">
-              <p className="text-yellow-300 text-lg font-bold">🏆 Winner: {raffle.winnerName || raffle.winnerUsername}</p>
+              <p className="text-yellow-300 text-lg font-bold">{t('raffle.detail.winnerLabel')} {raffle.winnerName || raffle.winnerUsername}</p>
               {raffle.winnerSpotNumber && (
-                <p className="text-yellow-400/70 text-sm">Spot #{raffle.winnerSpotNumber}</p>
+                <p className="text-yellow-400/70 text-sm">{t('raffle.detail.spotNumber', { n: raffle.winnerSpotNumber })}</p>
               )}
             </div>
           )}
           {getImageUrl(raffle.winnerCardImageUrl) && (
             <div className="px-4 py-2 text-center border-t border-yellow-500/20">
-              <p className="text-yellow-300 font-bold">🏆 {raffle.winnerName || raffle.winnerUsername}</p>
+              <p className="text-yellow-300 font-bold">{t('raffle.detail.winnerLabel')} {raffle.winnerName || raffle.winnerUsername}</p>
               {raffle.winnerSpotNumber && (
-                <p className="text-yellow-400/70 text-xs">Spot #{raffle.winnerSpotNumber}</p>
+                <p className="text-yellow-400/70 text-xs">{t('raffle.detail.spotNumber', { n: raffle.winnerSpotNumber })}</p>
               )}
             </div>
           )}
@@ -252,7 +254,7 @@ export default function RaffleDetail({ onBack }) {
                 onClick={() => { setShowMsgBox(v => !v); setMsgSent(false); setMsgError(''); }}
                 className="text-xs px-3 py-1.5 rounded-lg border border-primary/40 text-primary hover:bg-primary/10 transition"
               >
-                ✉ Message Seller
+                {t('raffle.detail.messageSeller')}
               </button>
             )}
           </div>
@@ -262,23 +264,23 @@ export default function RaffleDetail({ onBack }) {
             <div className="mb-4 p-3 bg-surface-2 border border-white/10 rounded-xl">
               {msgSent ? (
                 <div className="flex items-center justify-between">
-                  <p className="text-green-400 text-sm">Message sent!</p>
+                  <p className="text-green-400 text-sm">{t('raffle.detail.msgSent')}</p>
                   <button
                     onClick={() => { setMsgSent(false); setShowMsgBox(false); }}
                     className="text-gray-500 text-xs hover:text-white transition"
                   >
-                    Close
+                    {t('common.close')}
                   </button>
                 </div>
               ) : (
                 <form onSubmit={handleSendMsg} className="space-y-2">
-                  <label className="block text-xs text-gray-400">Message to {raffle.organizerName || raffle.organizerUsername}</label>
+                  <label className="block text-xs text-gray-400">{t('inbox.sendMessage')} — {raffle.organizerName || raffle.organizerUsername}</label>
                   <textarea
                     rows={3}
                     maxLength={1000}
                     value={msgText}
                     onChange={e => setMsgText(e.target.value)}
-                    placeholder="Ask about the item, shipping, payment…"
+                    placeholder={t('raffle.detail.messagePlaceholder')}
                     className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2 text-white text-sm focus:outline-none focus:border-primary transition resize-none placeholder-gray-600"
                   />
                   {msgError && <p className="text-red-400 text-xs">{msgError}</p>}
@@ -288,14 +290,14 @@ export default function RaffleDetail({ onBack }) {
                       disabled={msgSending || !msgText.trim()}
                       className="flex-1 py-2 rounded-lg bg-primary hover:bg-primary/80 text-white text-sm font-semibold transition disabled:opacity-50"
                     >
-                      {msgSending ? 'Sending…' : 'Send'}
+                      {msgSending ? t('common.sending') : t('common.send')}
                     </button>
                     <button
                       type="button"
                       onClick={() => setShowMsgBox(false)}
                       className="px-3 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white transition text-sm"
                     >
-                      Cancel
+                      {t('common.cancel')}
                     </button>
                   </div>
                 </form>
@@ -310,23 +312,23 @@ export default function RaffleDetail({ onBack }) {
           {/* Stats */}
           <div className="bg-surface-2 border border-white/10 rounded-xl p-4 space-y-2 text-sm">
             <div className="flex justify-between">
-              <span className="text-gray-400">Price per spot</span>
+              <span className="text-gray-400">{t('raffle.detail.pricePerSpot')}</span>
               <span className="text-primary font-bold">€{raffle.pricePerSpot}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Total spots</span>
+              <span className="text-gray-400">{t('raffle.detail.totalSpots')}</span>
               <span className="text-white">{raffle.totalSpots}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Claimed</span>
+              <span className="text-gray-400">{t('raffle.detail.claimed')}</span>
               <span className="text-white">{raffle.totalClaimed}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Paid</span>
+              <span className="text-gray-400">{t('raffle.detail.paid')}</span>
               <span className="text-green-400">{raffle.totalPaid}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Available</span>
+              <span className="text-gray-400">{t('raffle.detail.available')}</span>
               <span className="text-teal-400">{raffle.spotsAvailable}</span>
             </div>
             <div className="h-2 rounded-full bg-white/10 mt-1">
@@ -336,11 +338,11 @@ export default function RaffleDetail({ onBack }) {
               />
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Ends</span>
+              <span className="text-gray-400">{t('raffle.detail.ends')}</span>
               <span className="text-white">{new Date(raffle.endsAt).toLocaleDateString('el-GR')}</span>
             </div>
             <div className="flex justify-between">
-              <span className="text-gray-400">Status</span>
+              <span className="text-gray-400">{t('raffle.detail.status')}</span>
               <span className={`font-semibold ${
                 isOpen ? 'text-green-400' :
                 isDrawn ? 'text-yellow-400' : 'text-gray-400'
@@ -353,7 +355,7 @@ export default function RaffleDetail({ onBack }) {
           {/* Payment methods */}
           {acceptedMethods.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm text-gray-400 mb-2">Accepted payments</p>
+              <p className="text-sm text-gray-400 mb-2">{t('raffle.detail.acceptedPayments')}</p>
               <div className="flex flex-wrap gap-2">
                 {acceptedMethods.map(m => (
                   <span key={m} className="text-xs px-2 py-1 bg-primary/10 border border-primary/30 text-primary rounded-full">
@@ -368,7 +370,7 @@ export default function RaffleDetail({ onBack }) {
                     onClick={() => copyText(raffle.paymentDetails)}
                     className="text-primary text-xs shrink-0 hover:underline"
                   >
-                    Copy
+                    {t('raffle.detail.copy')}
                   </button>
                 </div>
               )}
@@ -382,18 +384,18 @@ export default function RaffleDetail({ onBack }) {
               disabled={drawing}
               className="mt-4 w-full py-3 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-bold transition disabled:opacity-50"
             >
-              {drawing ? 'Drawing…' : '🎰 Draw Winner Now'}
+              {drawing ? t('raffle.detail.drawing') : t('raffle.detail.drawNow')}
             </button>
           )}
 
           {isOrganizer && isOpen && raffle.totalPaid === 0 && (
-            <p className="mt-3 text-gray-500 text-sm text-center">Verify at least one payment before drawing.</p>
+            <p className="mt-3 text-gray-500 text-sm text-center">{t('raffle.detail.verifyFirst')}</p>
           )}
         </div>
 
         {/* Right — spot grid + entry */}
         <div>
-          <h2 className="text-white font-semibold mb-3">Spot Grid</h2>
+          <h2 className="text-white font-semibold mb-3">{t('raffle.detail.spotGrid')}</h2>
 
           <SpotGrid
             raffle={raffle}
@@ -409,11 +411,11 @@ export default function RaffleDetail({ onBack }) {
                 const availableMethods = PAYMENT_OPTIONS.filter(m => raffle[m.flag]);
                 return (
                   <>
-                    <p className="text-white font-semibold mb-1">Claim Spot #{selectedSpot}</p>
+                    <p className="text-white font-semibold mb-1">{t('raffle.detail.claimSpot', { n: selectedSpot })}</p>
                     <p className="text-gray-400 text-xs mb-3">
-                      Cost: <span className="text-primary font-semibold">€{raffle.pricePerSpot}</span> · 36h to complete payment
+                      {t('raffle.detail.cost')} <span className="text-primary font-semibold">€{raffle.pricePerSpot}</span> · {t('raffle.detail.timeLimit')}
                     </p>
-                    <p className="text-xs text-gray-300 mb-2 font-medium">How will you pay?</p>
+                    <p className="text-xs text-gray-300 mb-2 font-medium">{t('raffle.detail.howToPay')}</p>
                     <div className="grid grid-cols-2 gap-1.5 mb-3">
                       {availableMethods.map(m => (
                         <button
@@ -432,13 +434,13 @@ export default function RaffleDetail({ onBack }) {
                     </div>
                     {selectedMethod === 'dm' && (
                       <div className="mb-3 p-2.5 bg-primary/10 border border-primary/30 rounded-lg flex items-center justify-between gap-2">
-                        <p className="text-xs text-gray-300">Arrange payment directly with the seller.</p>
+                        <p className="text-xs text-gray-300">{t('raffle.detail.dmNote')}</p>
                         <button
                           type="button"
                           onClick={() => { setShowMsgBox(true); setMsgSent(false); setMsgError(''); }}
                           className="text-xs px-2.5 py-1.5 rounded-lg bg-primary hover:bg-primary/80 text-white font-semibold transition shrink-0"
                         >
-                          ✉ Message Seller
+                          {t('raffle.detail.messageSeller')}
                         </button>
                       </div>
                     )}
@@ -450,31 +452,31 @@ export default function RaffleDetail({ onBack }) {
                         disabled={entering || !selectedMethod}
                         className="flex-1 py-2 rounded-lg bg-primary hover:bg-primary/80 text-white font-semibold text-sm transition disabled:opacity-50"
                       >
-                        {entering ? 'Claiming…' : `Claim Spot #${selectedSpot}`}
+                        {entering ? t('raffle.detail.claiming') : t('raffle.detail.claimSpot', { n: selectedSpot })}
                       </button>
                       <button
                         onClick={() => { setSelectedSpot(null); setSelectedMethod(''); }}
                         className="px-3 py-2 rounded-lg border border-white/10 text-gray-400 hover:text-white transition text-sm"
                       >
-                        Cancel
+                        {t('common.cancel')}
                       </button>
                     </div>
                   </>
                 );
               })() : (
-                <p className="text-gray-400 text-sm text-center">Click an available spot to enter</p>
+                <p className="text-gray-400 text-sm text-center">{t('raffle.detail.clickToEnter')}</p>
               )}
             </div>
           )}
 
           {!user && isOpen && (
             <div className="mt-4 p-4 bg-surface-2 border border-white/10 rounded-xl text-center">
-              <p className="text-gray-400 text-sm mb-2">Login to enter this raffle</p>
+              <p className="text-gray-400 text-sm mb-2">{t('raffle.detail.loginToEnter')}</p>
               <button
                 onClick={() => navigate('/login')}
                 className="px-4 py-2 bg-primary hover:bg-primary/80 text-white rounded-lg text-sm font-semibold transition"
               >
-                Login
+                {t('common.login')}
               </button>
             </div>
           )}
@@ -482,21 +484,21 @@ export default function RaffleDetail({ onBack }) {
           {/* My entries (non-organizer) */}
           {myEntries.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm text-gray-400 mb-2">Your spots</p>
+              <p className="text-sm text-gray-400 mb-2">{t('raffle.detail.yourSpots')}</p>
               <div className="space-y-2">
                 {myEntries.map(e => (
                   <div key={e.id} className="p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
                     <div className="flex items-center justify-between">
-                      <span className="text-white font-semibold">Spot #{e.spotNumber}</span>
+                      <span className="text-white font-semibold">{t('raffle.detail.spotNumber', { n: e.spotNumber })}</span>
                       <span className={`px-2 py-0.5 rounded-full text-xs font-medium ${
                         e.status === 'paid' ? 'bg-green-500/20 text-green-400' :
                         'bg-yellow-500/20 text-yellow-400'
                       }`}>
-                        {e.status === 'paid' ? '✓ Paid' : 'Pending payment'}
+                        {e.status === 'paid' ? t('raffle.detail.statusPaid') : t('raffle.detail.statusPendingPayment')}
                       </span>
                     </div>
                     {e.paymentMethod && (
-                      <p className="text-gray-500 text-xs mt-1">via {METHOD_LABEL[e.paymentMethod] || e.paymentMethod}</p>
+                      <p className="text-gray-500 text-xs mt-1">{t('raffle.detail.via')} {METHOD_LABEL[e.paymentMethod] || e.paymentMethod}</p>
                     )}
                     {e.status === 'pending' && e.pendingExpiresAt && (
                       <p className="text-orange-400 text-xs mt-0.5">⏱ {formatTimeLeft(e.pendingExpiresAt)}</p>
@@ -511,15 +513,15 @@ export default function RaffleDetail({ onBack }) {
           {raffle.entries?.length > 0 && (
             <div className="mt-5">
               <p className="text-sm font-semibold text-gray-400 mb-2">
-                Entrants ({raffle.entries.length})
+                {t('raffle.detail.entrants', { count: raffle.entries.length })}
               </p>
               <div className="bg-surface-2 border border-white/10 rounded-xl overflow-hidden">
                 <table className="w-full text-sm">
                   <thead>
                     <tr className="border-b border-white/10 text-xs text-gray-500 uppercase tracking-wide">
-                      <th className="text-left px-3 py-2">Spot</th>
-                      <th className="text-left px-3 py-2">User</th>
-                      <th className="text-right px-3 py-2">Status</th>
+                      <th className="text-left px-3 py-2">{t('raffle.detail.colSpot')}</th>
+                      <th className="text-left px-3 py-2">{t('raffle.detail.colUser')}</th>
+                      <th className="text-right px-3 py-2">{t('raffle.detail.colStatus')}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -538,7 +540,7 @@ export default function RaffleDetail({ onBack }) {
                               ? 'bg-green-500/20 text-green-400'
                               : 'bg-yellow-500/20 text-yellow-400'
                           }`}>
-                            {e.status === 'paid' ? '✓ Paid' : 'Pending'}
+                            {e.status === 'paid' ? t('raffle.detail.statusPaid') : t('raffle.detail.statusPending')}
                           </span>
                         </td>
                       </tr>
@@ -552,7 +554,7 @@ export default function RaffleDetail({ onBack }) {
           {/* Organizer: verify pending entries */}
           {isOrganizer && pendingEntries.length > 0 && (
             <div className="mt-4">
-              <p className="text-sm text-gray-400 mb-2">Pending entries — verify payment</p>
+              <p className="text-sm text-gray-400 mb-2">{t('raffle.detail.pendingEntries')}</p>
               <div className="space-y-2">
                 {pendingEntries.map(e => (
                   <div key={e.id} className="p-3 bg-surface-2 border border-white/10 rounded-lg text-sm">
@@ -572,19 +574,19 @@ export default function RaffleDetail({ onBack }) {
                         onClick={() => setVerifyEntryId(verifyEntryId === e.id ? null : e.id)}
                         className="text-xs text-primary hover:underline"
                       >
-                        {verifyEntryId === e.id ? 'Cancel' : 'Mark Paid'}
+                        {verifyEntryId === e.id ? t('common.cancel') : t('raffle.detail.markPaid')}
                       </button>
                     </div>
                     {verifyEntryId === e.id && (
                       <div className="mt-2 space-y-2">
                         <input
-                          placeholder="Payment method (optional)"
+                          placeholder={t('raffle.detail.paymentMethodPlaceholder')}
                           value={verifyPayment}
                           onChange={ev => setVerifyPayment(ev.target.value)}
                           className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-white text-xs"
                         />
                         <input
-                          placeholder="Payment reference (optional)"
+                          placeholder={t('raffle.detail.paymentRefPlaceholder')}
                           value={verifyRef}
                           onChange={ev => setVerifyRef(ev.target.value)}
                           className="w-full bg-black/30 border border-white/10 rounded px-2 py-1 text-white text-xs"
@@ -594,7 +596,7 @@ export default function RaffleDetail({ onBack }) {
                           disabled={verifying}
                           className="w-full py-1.5 rounded bg-green-600 hover:bg-green-500 text-white text-xs font-semibold transition disabled:opacity-50"
                         >
-                          {verifying ? 'Saving…' : 'Confirm Payment'}
+                          {verifying ? t('common.saving') : t('raffle.detail.confirmPayment')}
                         </button>
                       </div>
                     )}

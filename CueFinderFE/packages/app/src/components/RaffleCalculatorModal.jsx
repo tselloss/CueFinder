@@ -1,5 +1,6 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as raffleService from '../api/raffleService';
 
 // ── Discount formula ──────────────────────────────────────────────────────────
@@ -16,6 +17,7 @@ const PAYMENT_METHODS = [
 ];
 
 function StepIndicator({ step }) {
+  const { t } = useTranslation();
   return (
     <div className="flex items-center gap-2">
       {[1, 2].map(n => (
@@ -26,7 +28,7 @@ function StepIndicator({ step }) {
           {n < 2 && <div className={`h-px w-6 transition-colors ${step > 1 ? 'bg-primary/40' : 'bg-white/10'}`} />}
         </React.Fragment>
       ))}
-      <span className="text-gray-500 text-xs ml-1">Step {step} of 2</span>
+      <span className="text-gray-500 text-xs ml-1">{t('raffle.calculator.stepOf', { n: step, total: 2 })}</span>
     </div>
   );
 }
@@ -35,6 +37,7 @@ function StepIndicator({ step }) {
 // Step 1 — Calculator
 // ─────────────────────────────────────────────────────────────────────────────
 function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
+  const { t } = useTranslation();
   const [itemValue, setItemValue] = useState(item?.price ?? 100);
   const [spots, setSpots] = useState(20);
 
@@ -55,7 +58,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
       {/* Header */}
       <div className="flex items-start justify-between p-5 border-b border-white/10">
         <div className="space-y-2">
-          <h2 className="text-lg font-bold text-white">🎰 Raffle Calculator</h2>
+          <h2 className="text-lg font-bold text-white">{t('raffle.calculator.title')}</h2>
           <StepIndicator step={1} />
         </div>
         <button onClick={onClose} className="text-gray-400 hover:text-white transition text-xl leading-none mt-0.5">✕</button>
@@ -70,7 +73,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
             <div className="w-14 h-14 bg-black/30 rounded-lg flex items-center justify-center shrink-0 text-2xl opacity-40">🎱</div>
           )}
           <div className="min-w-0">
-            <p className="text-white font-semibold text-sm truncate">{item?.title || 'Your item'}</p>
+            <p className="text-white font-semibold text-sm truncate">{item?.title || t('raffle.calculator.yourItem')}</p>
             <p className="text-gray-400 text-xs">{item?.brand || ''}</p>
           </div>
         </div>
@@ -78,7 +81,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
         {/* Inputs */}
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1.5">Item Value (€)</label>
+            <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.calculator.itemValue')}</label>
             <input
               type="number" min={1} step={0.01} value={itemValue}
               onChange={e => setItemValue(Math.max(1, parseFloat(e.target.value) || 1))}
@@ -86,7 +89,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
             />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1.5">Number of Spots</label>
+            <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.calculator.numberOfSpots')}</label>
             <input
               type="number" min={2} max={500} value={spots}
               onChange={e => setSpots(Math.max(2, Math.min(500, parseInt(e.target.value) || 2)))}
@@ -109,29 +112,29 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
 
         {/* Key number callout */}
         <div className="bg-primary/15 border border-primary/30 rounded-2xl p-4 text-center">
-          <p className="text-gray-400 text-xs mb-1 uppercase tracking-wide">Base price per spot</p>
+          <p className="text-gray-400 text-xs mb-1 uppercase tracking-wide">{t('raffle.calculator.basePricePerSpot')}</p>
           <p className="text-4xl font-extrabold text-white">€{basePrice.toFixed(2)}</p>
-          <p className="text-gray-400 text-xs mt-1">{spots} spots · total pot €{itemValue.toFixed(2)}</p>
+          <p className="text-gray-400 text-xs mt-1">{t('raffle.calculator.spotsPot', { spots, pot: itemValue.toFixed(2) })}</p>
         </div>
 
         {/* Multi-spot discount table */}
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <p className="text-white font-semibold text-sm">Multi-Spot Discount Table</p>
-            <span className="text-xs bg-green-500/15 text-green-400 border border-green-500/25 rounded-full px-2 py-0.5">auto-applied</span>
+            <p className="text-white font-semibold text-sm">{t('raffle.calculator.discountTable')}</p>
+            <span className="text-xs bg-green-500/15 text-green-400 border border-green-500/25 rounded-full px-2 py-0.5">{t('raffle.calculator.autoApplied')}</span>
           </div>
           <p className="text-gray-500 text-xs mb-3">
-            Buyers who claim multiple spots get a tiered discount — rewarding commitment and filling your raffle faster.
+            {t('raffle.calculator.discountNote')}
           </p>
           <div className="rounded-xl overflow-hidden border border-white/10">
             <table className="w-full text-xs">
               <thead>
                 <tr className="bg-white/5 text-gray-400">
-                  <th className="text-left px-3 py-2">Spots</th>
-                  <th className="text-right px-3 py-2">Discount</th>
-                  <th className="text-right px-3 py-2">Per spot</th>
-                  <th className="text-right px-3 py-2">Total</th>
-                  <th className="text-right px-3 py-2">Save</th>
+                  <th className="text-left px-3 py-2">{t('raffle.calculator.col.spots')}</th>
+                  <th className="text-right px-3 py-2">{t('raffle.calculator.col.discount')}</th>
+                  <th className="text-right px-3 py-2">{t('raffle.calculator.col.perSpot')}</th>
+                  <th className="text-right px-3 py-2">{t('raffle.calculator.col.total')}</th>
+                  <th className="text-right px-3 py-2">{t('raffle.calculator.col.save')}</th>
                 </tr>
               </thead>
               <tbody>
@@ -141,8 +144,8 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
                     <tr key={n} className={`border-t border-white/5 ${isBest ? 'bg-green-500/8' : ''}`}>
                       <td className={`px-3 py-2 font-semibold ${isBest ? 'text-green-300' : 'text-gray-200'}`}>
                         {n === 6 ? '6+' : n}
-                        {n === 1 && <span className="text-gray-500 font-normal ml-1 text-xs">(base)</span>}
-                        {isBest && <span className="ml-1.5 text-xs bg-green-500/20 text-green-400 rounded px-1 py-0.5">best deal</span>}
+                        {n === 1 && <span className="text-gray-500 font-normal ml-1 text-xs">{t('raffle.calculator.base')}</span>}
+                        {isBest && <span className="ml-1.5 text-xs bg-green-500/20 text-green-400 rounded px-1 py-0.5">{t('raffle.calculator.bestDeal')}</span>}
                       </td>
                       <td className="text-right px-3 py-2">
                         {pctOff > 0
@@ -161,7 +164,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
             </table>
           </div>
           <p className="text-gray-600 text-xs mt-2">
-            * Multi-spot discounts are handled off-platform. The system tracks one entry per spot.
+            {t('raffle.calculator.multiSpotNote')}
           </p>
         </div>
       </div>
@@ -172,7 +175,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
           onClick={() => onNext({ itemValue, spots, basePrice })}
           className="w-full py-3 rounded-xl bg-primary hover:bg-primary/80 text-white font-bold transition text-base"
         >
-          Continue to Raffle Setup →
+          {t('raffle.calculator.continue')}
         </button>
       </div>
     </div>
@@ -183,6 +186,7 @@ function CalculatorStep({ item, itemImageUrl, onNext, onClose }) {
 // Step 2 — Setup Form
 // ─────────────────────────────────────────────────────────────────────────────
 function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const { spots, basePrice } = calcData;
 
@@ -226,8 +230,8 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
   async function handleSubmit(e) {
     e.preventDefault();
     setError('');
-    if (!PAYMENT_METHODS.some(m => form[m.key])) { setError('Select at least one payment method.'); return; }
-    if (new Date(form.endsAt) <= new Date()) { setError('End date must be in the future.'); return; }
+    if (!PAYMENT_METHODS.some(m => form[m.key])) { setError(t('raffle.setup.errorNoPayment')); return; }
+    if (new Date(form.endsAt) <= new Date()) { setError(t('raffle.setup.errorFutureDate')); return; }
     try {
       setLoading(true);
       const paymentDetails = PAYMENT_METHODS
@@ -244,7 +248,7 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
       onClose();
       navigate(`/raffles/${created.id}`);
     } catch (err) {
-      setError(err?.response?.data?.message || 'Failed to create raffle.');
+      setError(err?.response?.data?.message || t('raffle.setup.errorCreate'));
     } finally {
       setLoading(false);
     }
@@ -256,8 +260,8 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
       <div className="flex items-start justify-between p-5 border-b border-white/10">
         <div className="space-y-2">
           <div className="flex items-center gap-3">
-            <button onClick={onBack} className="text-gray-400 hover:text-white transition text-sm">← Back</button>
-            <h2 className="text-lg font-bold text-white">🎰 Raffle Setup</h2>
+            <button onClick={onBack} className="text-gray-400 hover:text-white transition text-sm">← {t('nav.back')}</button>
+            <h2 className="text-lg font-bold text-white">{t('raffle.setup.title')}</h2>
           </div>
           <StepIndicator step={2} />
         </div>
@@ -268,9 +272,9 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
         {/* Summary from calculator */}
         <div className="grid grid-cols-3 gap-2 text-center">
           {[
-            { label: 'Spots', value: form.totalSpots },
-            { label: 'Price / spot', value: `€${Number(form.pricePerSpot).toFixed(2)}` },
-            { label: 'Total pot', value: `€${totalPot}` },
+            { label: t('raffle.setup.spotsLabel'), value: form.totalSpots },
+            { label: t('raffle.setup.pricePerSpot'), value: `€${Number(form.pricePerSpot).toFixed(2)}` },
+            { label: t('raffle.setup.totalPot'), value: `€${totalPot}` },
           ].map(({ label, value }) => (
             <div key={label} className="bg-primary/15 border border-primary/25 rounded-xl p-3">
               <p className="text-primary font-bold text-base">{value}</p>
@@ -280,26 +284,26 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-300 mb-1.5">Title *</label>
+          <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.setup.titleLabel')}</label>
           <input required maxLength={200} value={form.title} onChange={e => set('title', e.target.value)}
             className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition" />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-300 mb-1.5">Description</label>
+          <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.setup.descriptionLabel')}</label>
           <textarea maxLength={2000} rows={2} value={form.description} onChange={e => set('description', e.target.value)}
             className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition resize-none" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1.5">Spots</label>
+            <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.setup.spotsLabel')}</label>
             <input type="number" min={2} max={500} required value={form.totalSpots}
               onChange={e => set('totalSpots', e.target.value)}
               className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-gray-300 mb-1.5">Price / spot (€)</label>
+            <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.setup.pricePerSpotLabel')}</label>
             <input type="number" min={0.01} step={0.01} required value={form.pricePerSpot}
               onChange={e => set('pricePerSpot', e.target.value)}
               className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition" />
@@ -307,13 +311,13 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-300 mb-1.5">Raffle Ends At *</label>
+          <label className="block text-xs font-medium text-gray-300 mb-1.5">{t('raffle.setup.endsAtLabel')}</label>
           <input type="datetime-local" required value={form.endsAt} onChange={e => set('endsAt', e.target.value)}
             className="w-full bg-black/30 border border-white/15 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition" />
         </div>
 
         <div>
-          <label className="block text-xs font-medium text-gray-300 mb-2">Accepted Payment Methods *</label>
+          <label className="block text-xs font-medium text-gray-300 mb-2">{t('raffle.setup.paymentMethodsLabel')}</label>
           <div className="space-y-2">
             {PAYMENT_METHODS.map(({ key, label, detailKey, detailLabel, placeholder, inputType }) => (
               <div key={key}>
@@ -348,7 +352,7 @@ function SetupStep({ item, itemImageUrl, calcData, onBack, onClose }) {
           disabled={loading}
           className="w-full py-3 rounded-xl bg-primary hover:bg-primary/80 text-white font-bold transition text-base disabled:opacity-50"
         >
-          {loading ? 'Creating Raffle…' : '🎰 Create Raffle'}
+          {loading ? t('raffle.setup.creating') : t('raffle.setup.create')}
         </button>
       </div>
     </div>

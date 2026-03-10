@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import * as raffleService from '../api/raffleService';
 
 /**
@@ -11,6 +12,7 @@ import * as raffleService from '../api/raffleService';
  *   onWinnerCardSaved – optional callback(updatedRaffle) after winner card is persisted
  */
 export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
+  const { t } = useTranslation();
   const [phase, setPhase] = useState('ready'); // ready | spinning | revealing | done
   const [displayName, setDisplayName] = useState('???');
   const intervalRef = useRef(null);
@@ -191,26 +193,26 @@ export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
       <div className="bg-surface-2 border border-white/10 rounded-2xl w-full max-w-sm text-center p-8 shadow-2xl">
         <div className="text-4xl mb-4">🎰</div>
         <h2 className="text-xl font-bold text-white mb-6">
-          {phase === 'ready' ? 'Ready to Draw?' : 'Drawing Winner…'}
+          {phase === 'ready' ? t('raffle.spin.readyTitle') : t('raffle.spin.drawingTitle')}
         </h2>
 
         {/* Pre-spin — choose recording option */}
         {phase === 'ready' && (
           <div className="space-y-3">
             <p className="text-gray-400 text-sm mb-4">
-              Start the draw. Optionally record your screen to share the moment.
+              {t('raffle.spin.readyNote')}
             </p>
             <button
               onClick={startRecordingAndSpin}
               className="w-full py-3 rounded-xl bg-red-600 hover:bg-red-500 text-white font-bold transition flex items-center justify-center gap-2"
             >
-              <span>🎬</span> Record Screen & Spin
+              {t('raffle.spin.recordAndSpin')}
             </button>
             <button
               onClick={startSpin}
               className="w-full py-2.5 rounded-xl bg-primary hover:bg-primary/80 text-white font-semibold transition text-sm"
             >
-              ▶️ Spin Without Recording
+              {t('raffle.spin.spinOnly')}
             </button>
           </div>
         )}
@@ -229,14 +231,14 @@ export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
                 {displayName}
               </p>
               {phase === 'done' && raffle.winnerSpotNumber && (
-                <p className="text-sm text-gray-400 mt-1">Spot #{raffle.winnerSpotNumber}</p>
+                <p className="text-sm text-gray-400 mt-1">{t('raffle.detail.spotNumber', { n: raffle.winnerSpotNumber })}</p>
               )}
             </div>
 
             {/* Spinning indicator + recording badge */}
             {phase !== 'done' && (
               <div className="flex items-center justify-center gap-3 mb-2">
-                <p className="text-gray-500 text-sm animate-pulse">Spinning…</p>
+                <p className="text-gray-500 text-sm animate-pulse">{t('raffle.spin.spinning')}</p>
                 {recording && (
                   <span className="flex items-center gap-1 text-xs text-red-400 animate-pulse">
                     <span className="w-2 h-2 rounded-full bg-red-500 inline-block" />
@@ -249,13 +251,13 @@ export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
             {/* Winner actions */}
             {phase === 'done' && (
               <>
-                <p className="text-green-400 font-semibold mb-4">🏆 Congratulations!</p>
+                <p className="text-green-400 font-semibold mb-4">{t('raffle.spin.congratulations')}</p>
                 <div className="flex flex-col gap-2 mb-3">
                   <button
                     onClick={downloadWinnerCard}
                     className="w-full py-2 rounded-lg bg-yellow-500 hover:bg-yellow-400 text-black font-semibold transition text-sm"
                   >
-                    📸 Save Winner Card
+                    {t('raffle.spin.saveCard')}
                   </button>
                   {recordingUrl && (
                     <a
@@ -263,7 +265,7 @@ export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
                       download={`raffle-spin-${raffle.id}.webm`}
                       className="w-full py-2 rounded-lg bg-green-700 hover:bg-green-600 text-white font-semibold transition text-sm text-center block"
                     >
-                      ⬇️ Download Recording
+                      {t('raffle.spin.downloadRecording')}
                     </a>
                   )}
                 </div>
@@ -271,7 +273,7 @@ export default function SpinWheel({ raffle, onClose, onWinnerCardSaved }) {
                   onClick={onClose}
                   className="w-full py-2 rounded-lg border border-white/20 text-gray-400 hover:text-white hover:border-white/40 transition text-sm"
                 >
-                  Close
+                  {t('common.close')}
                 </button>
               </>
             )}

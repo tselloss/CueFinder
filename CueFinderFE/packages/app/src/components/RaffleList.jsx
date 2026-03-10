@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import * as raffleService from '../api/raffleService';
 import { useAuth } from '../auth/AuthContext';
 import { SITE_BASE_URL } from '../config/apiConfig';
@@ -11,6 +12,7 @@ function getImageUrl(url) {
 }
 
 function RaffleCard({ raffle, onClick }) {
+  const { t } = useTranslation();
   const pct = raffle.totalSpots > 0
     ? Math.round((raffle.totalClaimed / raffle.totalSpots) * 100)
     : 0;
@@ -21,12 +23,12 @@ function RaffleCard({ raffle, onClick }) {
   const diffDays = Math.ceil(diffMs / 86400000);
 
   function timeLabel() {
-    if (raffle.status === 'drawn')    return '🏆 Drawn';
-    if (raffle.status === 'cancelled') return '❌ Cancelled';
-    if (diffMs <= 0) return 'Ended';
-    if (diffDays === 0) return 'Ends today';
-    if (diffDays === 1) return 'Ends tomorrow';
-    return `Ends in ${diffDays} days`;
+    if (raffle.status === 'drawn')     return t('raffle.card.drawn');
+    if (raffle.status === 'cancelled') return t('raffle.card.cancelled');
+    if (diffMs <= 0)    return t('raffle.card.ended');
+    if (diffDays === 0) return t('raffle.card.endsToday');
+    if (diffDays === 1) return t('raffle.card.endsTomorrow');
+    return t('raffle.card.endsInDays', { days: diffDays });
   }
 
   return (
@@ -61,8 +63,8 @@ function RaffleCard({ raffle, onClick }) {
         {/* Progress bar */}
         <div className="mb-1">
           <div className="flex justify-between text-xs text-gray-400 mb-1">
-            <span>{raffle.totalClaimed}/{raffle.totalSpots} spots</span>
-            <span>{raffle.spotsAvailable} left</span>
+            <span>{raffle.totalClaimed}/{raffle.totalSpots} {t('raffle.card.spots')}</span>
+            <span>{raffle.spotsAvailable} {t('raffle.card.left')}</span>
           </div>
           <div className="h-1.5 rounded-full bg-white/10">
             <div
@@ -73,7 +75,7 @@ function RaffleCard({ raffle, onClick }) {
         </div>
 
         <div className="flex justify-between items-center mt-3">
-          <span className="text-primary font-bold text-sm">€{raffle.pricePerSpot}/spot</span>
+          <span className="text-primary font-bold text-sm">€{raffle.pricePerSpot}{t('raffle.card.perSpot')}</span>
           <span className="text-gray-500 text-xs">{timeLabel()}</span>
         </div>
 
@@ -87,6 +89,7 @@ function RaffleCard({ raffle, onClick }) {
 
 export default function RaffleList({ onBack }) {
   const { user } = useAuth();
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [raffles, setRaffles] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -112,15 +115,15 @@ export default function RaffleList({ onBack }) {
       {/* Header */}
       <div className="flex items-center justify-between mb-6 flex-wrap gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-white">🎰 Raffles</h1>
-          <p className="text-gray-400 text-sm mt-0.5">Win billiards gear through community raffles</p>
+          <h1 className="text-2xl font-bold text-white">{t('raffle.pageTitle')}</h1>
+          <p className="text-gray-400 text-sm mt-0.5">{t('raffle.pageSubtitle')}</p>
         </div>
         {user && (
           <button
             onClick={() => navigate('/raffles/create')}
             className="px-4 py-2 bg-primary hover:bg-primary/80 text-white rounded-lg font-semibold text-sm transition"
           >
-            + Create Raffle
+            {t('raffle.createRaffle')}
           </button>
         )}
       </div>
@@ -136,23 +139,23 @@ export default function RaffleList({ onBack }) {
                 ? 'bg-primary text-white'
                 : 'bg-surface-2 text-gray-400 hover:text-white border border-white/10'}`}
           >
-            {f === 'all' ? 'All' : f === 'open' ? 'Active' : 'Drawn'}
+            {f === 'all' ? t('raffle.filter.all') : f === 'open' ? t('raffle.filter.active') : t('raffle.filter.drawn')}
           </button>
         ))}
       </div>
 
       {loading ? (
-        <div className="text-center py-20 text-gray-500">Loading raffles…</div>
+        <div className="text-center py-20 text-gray-500">{t('raffle.loading')}</div>
       ) : raffles.length === 0 ? (
         <div className="text-center py-20">
           <p className="text-4xl mb-3">🎰</p>
-          <p className="text-gray-400">No raffles yet.</p>
+          <p className="text-gray-400">{t('raffle.noRaffles')}</p>
           {user && (
             <button
               onClick={() => navigate('/raffles/create')}
               className="mt-4 px-4 py-2 bg-primary hover:bg-primary/80 text-white rounded-lg font-semibold text-sm transition"
             >
-              Create the first one
+              {t('raffle.createFirst')}
             </button>
           )}
         </div>
