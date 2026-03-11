@@ -89,18 +89,66 @@ public partial class AccessoriesController
     [Authorize]
     [ProducesResponseType(typeof(List<AccessoryResponseDto>), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
-    public async Task<ActionResult<List<AccessoryResponseDto>>> GetMyAccessories()
+    public async Task<ActionResult<List<AccessoryResponseDto>>> GetMyAccessories([FromQuery] bool? hidden = null)
     {
         try
         {
             var userId = GetCurrentUserId();
-            var accessories = await _accessoryService.GetUserAccessoriesAsync(userId);
+            var accessories = await _accessoryService.GetUserAccessoriesAsync(userId, hidden);
             return Ok(accessories);
         }
         catch (Exception ex)
         {
             _logger.LogError(ex, "Error retrieving current user's accessories");
             return StatusCode(500, new { message = "Error retrieving your accessories", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get count of active (unsold) accessories
+    /// </summary>
+    [HttpGet("count/active")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(int), StatusCodes.Status200OK)]
+    public async Task<ActionResult<int>> GetActiveCount()
+    {
+        try
+        {
+            var count = await _accessoryService.GetActiveCountAsync();
+            return Ok(count);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error getting active accessories count");
+            return StatusCode(500, new { message = "Error getting count", error = ex.Message });
+        }
+    }
+
+    /// <summary>
+    /// Get filtered accessories with type-specific params
+    /// </summary>
+    [HttpGet("filter")]
+    [AllowAnonymous]
+    [ProducesResponseType(typeof(List<AccessoryResponseDto>), StatusCodes.Status200OK)]
+    public async Task<ActionResult<List<AccessoryResponseDto>>> GetFilteredAccessories(
+        [FromQuery] string? accessoryType = null,
+        [FromQuery] string? material = null,
+        [FromQuery] string? condition = null,
+        [FromQuery] decimal? minPrice = null,
+        [FromQuery] decimal? maxPrice = null,
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20)
+    {
+        try
+        {
+            var accessories = await _accessoryService.GetFilteredAccessoriesAsync(
+                accessoryType, material, condition, minPrice, maxPrice, page, pageSize);
+            return Ok(accessories);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error filtering accessories");
+            return StatusCode(500, new { message = "Error filtering accessories", error = ex.Message });
         }
     }
 

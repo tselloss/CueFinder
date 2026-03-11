@@ -65,6 +65,8 @@ services:
       - ConnectionStrings__DefaultConnection=Host=cuefinder-postgres;Port=5432;Database=cuefinder;Username=postgres;Password=admin;SslMode=Disable;
       - BASE_URL=http://localhost:5000
       - FRONTEND_URL=http://localhost:3000
+      - Moderation__Disabled=false
+      - ModerationServiceUrl=http://moderator:5001
       - Sms__Provider=Mock
       - Sms__ApiUrl=
       - Sms__ApiKey=

@@ -7,7 +7,7 @@ namespace CueFinder.Core.Extensions;
 /// </summary>
 public static class ClaimsPrincipalExtensions
 {
-    private const string UserIdClaimType = "sub";
+    private static readonly string[] UserIdClaimTypes = new[] { ClaimTypes.NameIdentifier, "sub", "nameid", "userId" };
 
     /// <summary>
     /// Gets the user ID from JWT claims.
@@ -15,10 +15,13 @@ public static class ClaimsPrincipalExtensions
     /// <returns>The user ID if found, null otherwise.</returns>
     public static int? GetUserId(this ClaimsPrincipal user)
     {
-        if (user?.FindFirst(UserIdClaimType)?.Value is string userIdStr &&
-            int.TryParse(userIdStr, out int userId))
+        foreach (var claimType in UserIdClaimTypes)
         {
-            return userId;
+            var value = user?.FindFirst(claimType)?.Value;
+            if (!string.IsNullOrEmpty(value) && int.TryParse(value, out var id))
+            {
+                return id;
+            }
         }
 
         return null;

@@ -1,22 +1,29 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  ArrowLeft, 
-  ChevronLeft, 
-  ChevronRight, 
-  X, 
-  User, 
-  Mail, 
-  Phone, 
+import { Link } from 'react-router-dom';
+import {
+  ArrowLeft,
+  ChevronLeft,
+  ChevronRight,
+  X,
+  User,
+  Mail,
+  Phone,
   ImageIcon,
-  Send
+  Send,
+  Gavel,
+  TrendingDown,
+  Star
 } from 'lucide-react';
 import { API_BASE_URL, SITE_BASE_URL } from '../config/apiConfig';
 import * as messageService from '../api/messageService';
+import * as sellerService from '../api/sellerService';
 import { useAuth } from '../auth/AuthContext';
 import { Button } from './ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import VerifiedBadge from './VerifiedBadge';
+import ReviewModal from './ReviewModal';
 
 // Helper to get full image URL from image object
 const getImageUrl = (img) => {
@@ -36,11 +43,13 @@ const ImagePlaceholder = () => (
   </div>
 );
 
-export default function ItemDetail({ 
-  item, 
+export default function ItemDetail({
+  item,
   itemType = 'cue',
   onBack,
-  specifications = []
+  specifications = [],
+  loading = false,
+  error = null
 }) {
   const { user } = useAuth();
   const [imageIndex, setImageIndex] = useState(0);
@@ -53,12 +62,70 @@ export default function ItemDetail({
   const [sendSuccess, setSendSuccess] = useState(false);
   const [showLoginPrompt, setShowLoginPrompt] = useState(false);
 
+  // Review state
+  const [showReview, setShowReview] = useState(false);
+  const [hasReviewed, setHasReviewed] = useState(false);
+  const [isEligibleToReview, setIsEligibleToReview] = useState(false);
+
+  useEffect(() => {
+    if (user && item?.sellerId && item?.id && (item.isSold || item.is_sold) && user.id !== item.sellerId) {
+      sellerService.checkMyReview(item.sellerId, itemType, item.id)
+        .then(data => {
+          setHasReviewed(data.hasReviewed);
+          setIsEligibleToReview(data.isEligible);
+        })
+        .catch(() => {});
+    }
+  }, [user, item, itemType]);
+
+  // Bid state
+  const [showBid, setShowBid] = useState(false);
+  const [bidAmount, setBidAmount] = useState(0);
+  const [bidNote, setBidNote] = useState('');
+  const [bidSending, setBidSending] = useState(false);
+  const [bidError, setBidError] = useState('');
+  const [bidSuccess, setBidSuccess] = useState(false);
+
   useEffect(() => {
     if (item) {
       const defaultSubject = item.title ? `Inquiry about ${item.title}` : 'Message about your listing';
       setMessageSubject(defaultSubject);
+      const minBidVal = Math.ceil((item.price || 0) * 0.75 * 100) / 100;
+      setBidAmount(minBidVal);
     }
   }, [item]);
+
+  const minBid = item ? Math.ceil((item.price || 0) * 0.75 * 100) / 100 : 0;
+  const discountPct = item ? Math.round((1 - bidAmount / (item.price || 1)) * 100) : 0;
+
+  const handlePlaceBid = async () => {
+    if (!user) { setShowLoginPrompt(true); return; }
+    if (!item?.sellerId) { setBidError('Missing seller information.'); return; }
+    if (bidAmount < minBid || bidAmount > (item.price || 0)) {
+      setBidError(`Bid must be between €${minBid.toFixed(2)} and €${(item.price || 0).toFixed(2)}.`);
+      return;
+    }
+    setBidSending(true);
+    setBidError('');
+    setBidSuccess(false);
+    try {
+      await messageService.sendOffer({
+        recipientId: item.sellerId,
+        itemId: item.id,
+        bidAmount,
+        originalPrice: item.price,
+        itemTitle: `${item.brand || ''} ${item.title || ''}`.trim(),
+        personalNote: bidNote,
+      });
+      setBidSuccess(true);
+      setBidNote('');
+      setTimeout(() => { setShowBid(false); setBidSuccess(false); }, 1800);
+    } catch (err) {
+      setBidError(err?.response?.data?.message || err?.message || 'Failed to send bid. Please try again.');
+    } finally {
+      setBidSending(false);
+    }
+  };
 
   const handleSendMessage = async () => {
     if (!user) {
@@ -104,7 +171,19 @@ export default function ItemDetail({
     }
   };
 
-  if (!item) {
+  if (error) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-screen gap-4">
+        <p className="text-destructive text-lg font-medium">{error}</p>
+        <Button variant="outline" onClick={onBack} className="gap-2">
+          <ArrowLeft className="w-4 h-4" />
+          Back to Listings
+        </Button>
+      </div>
+    );
+  }
+
+  if (loading || !item) {
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -112,7 +191,10 @@ export default function ItemDetail({
     );
   }
 
-  const images = item.images && item.images.length > 0 ? item.images : [];
+  // Sort so the primary image always appears first in the carousel
+  const images = item.images && item.images.length > 0
+    ? [...item.images].sort((a, b) => (b.isPrimary ? 1 : 0) - (a.isPrimary ? 1 : 0))
+    : [];
   const hasImages = images.length > 0;
   const currentImage = hasImages ? getImageUrl(images[imageIndex]) : '';
 
@@ -139,13 +221,13 @@ export default function ItemDetail({
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 pb-8 max-w-7xl">
+      <div className="container mx-auto px-4 pb-24 md:pb-12 max-w-7xl">
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
           {/* Image Section */}
-          <div className="order-1">
+          <div className="order-1 lg:sticky lg:top-4 lg:self-start">
             <Card className="overflow-hidden">
               <CardContent className="p-0">
-                <div className="relative aspect-[4/3] bg-card">
+                <div className={`relative ${itemType === 'table' ? 'aspect-video' : 'aspect-[4/3]'} bg-card`}>
                   {hasImages ? (
                     <>
                       <img
@@ -219,6 +301,102 @@ export default function ItemDetail({
               </p>
             </div>
 
+            {/* Seller Info */}
+            <Card>
+              <CardHeader>
+                <div className="flex items-center gap-2">
+                  <User className="w-5 h-5 text-primary" />
+                  <CardTitle className="text-xl">Seller Information</CardTitle>
+                </div>
+              </CardHeader>
+              <CardContent>
+                <div className="space-y-3">
+                  {(item.sellerName || item.seller_name) && (
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <Link
+                        to={`/sellers/${item.sellerId}`}
+                        className="text-foreground hover:text-primary hover:underline font-medium flex items-center gap-1.5"
+                      >
+                        {item.sellerName || item.seller_name}
+                        <VerifiedBadge isVerified={item.sellerIsVerified} />
+                      </Link>
+                    </div>
+                  )}
+                  {(item.sellerEmail || item.seller_email) && (
+                    <div className="flex items-center gap-3">
+                      <Mail className="w-4 h-4 text-muted-foreground" />
+                      <span className="text-foreground">{item.sellerEmail || item.seller_email}</span>
+                    </div>
+                  )}
+                  {(item.sellerPhone || item.seller_phone) && (
+                    <div className="flex items-center gap-3">
+                      <Phone className="w-4 h-4 text-muted-foreground" />
+                      {(item.sellerHidePhone || item.seller_hidePhone) ? (
+                        <span className="px-3 py-1 bg-muted rounded blur-sm select-none">
+                          {item.sellerPhone || item.seller_phone}
+                        </span>
+                      ) : (
+                        <span className="text-foreground">{item.sellerPhone || item.seller_phone}</span>
+                      )}
+                    </div>
+                  )}
+                  {item.sellerId && !(item.sellerName || item.seller_name) && (
+                    <div className="flex items-center gap-3">
+                      <User className="w-4 h-4 text-muted-foreground" />
+                      <Link
+                        to={`/sellers/${item.sellerId}`}
+                        className="text-foreground hover:text-primary hover:underline font-medium flex items-center gap-1.5"
+                      >
+                        View Profile
+                        <VerifiedBadge isVerified={item.sellerIsVerified} />
+                      </Link>
+                    </div>
+                  )}
+                  {item.sellerId && (
+                    <div className="pt-3 space-y-2">
+                      <Button
+                        onClick={() => {
+                          if (!user) {
+                            setShowLoginPrompt(true);
+                          } else {
+                            setSendError('');
+                            setSendSuccess(false);
+                            setShowMessage(true);
+                          }
+                        }}
+                        className="w-full gap-2"
+                      >
+                        <Send className="w-4 h-4" />
+                        Message Seller
+                      </Button>
+                      {user && user.id !== item.sellerId && !(item.isSold || item.is_sold) && (
+                        <Button
+                          variant="outline"
+                          onClick={() => { setBidError(''); setBidSuccess(false); setShowBid(true); }}
+                          className="w-full gap-2 border-amber-500/50 text-amber-600 hover:bg-amber-500/10"
+                        >
+                          <Gavel className="w-4 h-4" />
+                          Place a Bid
+                        </Button>
+                      )}
+                      {user && user.id !== item.sellerId && (item.isSold || item.is_sold) && isEligibleToReview && (
+                        <Button
+                          variant="outline"
+                          onClick={() => setShowReview(true)}
+                          disabled={hasReviewed}
+                          className="w-full gap-2"
+                        >
+                          <Star className="w-4 h-4" />
+                          {hasReviewed ? 'Review Submitted' : 'Leave a Review'}
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
+              </CardContent>
+            </Card>
+
             {/* Specifications */}
             <Card>
               <CardHeader>
@@ -262,65 +440,6 @@ export default function ItemDetail({
                 </CardContent>
               </Card>
             )}
-
-            {/* Seller Info */}
-            <Card>
-              <CardHeader>
-                <div className="flex items-center gap-2">
-                  <User className="w-5 h-5 text-primary" />
-                  <CardTitle className="text-xl">Seller Information</CardTitle>
-                </div>
-              </CardHeader>
-              <CardContent>
-                {!(item.sellerName || item.seller_name || item.sellerEmail || item.seller_email || item.sellerPhone || item.seller_phone) ? (
-                  <p className="text-muted-foreground">Not provided</p>
-                ) : (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-3">
-                      <User className="w-4 h-4 text-muted-foreground" />
-                      <span className="text-foreground">{item.sellerName || item.seller_name || 'Name not provided'}</span>
-                    </div>
-                    {(item.sellerEmail || item.seller_email) && (
-                      <div className="flex items-center gap-3">
-                        <Mail className="w-4 h-4 text-muted-foreground" />
-                        <span className="text-foreground">{item.sellerEmail || item.seller_email}</span>
-                      </div>
-                    )}
-                    {(item.sellerPhone || item.seller_phone) && (
-                      <div className="flex items-center gap-3">
-                        <Phone className="w-4 h-4 text-muted-foreground" />
-                        {(item.sellerHidePhone || item.seller_hidePhone) ? (
-                          <span className="px-3 py-1 bg-muted rounded blur-sm select-none">
-                            {item.sellerPhone || item.seller_phone}
-                          </span>
-                        ) : (
-                          <span className="text-foreground">{item.sellerPhone || item.seller_phone}</span>
-                        )}
-                      </div>
-                    )}
-                    {item.sellerId && (
-                      <div className="pt-3">
-                        <Button 
-                          onClick={() => { 
-                            if (!user) {
-                              setShowLoginPrompt(true);
-                            } else {
-                              setSendError(''); 
-                              setSendSuccess(false); 
-                              setShowMessage(true);
-                            }
-                          }}
-                          className="w-full gap-2"
-                        >
-                          <Send className="w-4 h-4" />
-                          Message Seller
-                        </Button>
-                      </div>
-                    )}
-                  </div>
-                )}
-              </CardContent>
-            </Card>
           </div>
         </div>
       </div>
@@ -443,6 +562,118 @@ export default function ItemDetail({
           </Card>
         </div>
       )}
+
+      {/* Bid Modal */}
+      {showBid && item && (
+        <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+          <Card className="w-full max-w-md">
+            <CardHeader>
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Gavel className="w-5 h-5 text-amber-500" />
+                  <CardTitle>Place a Bid</CardTitle>
+                </div>
+                <Button variant="ghost" size="icon" onClick={() => setShowBid(false)}>
+                  <X className="w-4 h-4" />
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              {/* Price info */}
+              <div className="flex justify-between items-center p-3 rounded-lg bg-muted">
+                <div className="text-sm text-muted-foreground">Asking price</div>
+                <div className="text-lg font-bold text-foreground">€{(item.price || 0).toFixed(2)}</div>
+              </div>
+
+              {/* Bid amount */}
+              <div className="space-y-2">
+                <Label>Your bid</Label>
+                <div className="flex items-center gap-3">
+                  <span className="text-muted-foreground font-medium">€</span>
+                  <input
+                    type="number"
+                    min={minBid}
+                    max={item.price || 0}
+                    step={0.01}
+                    value={bidAmount}
+                    onChange={(e) => setBidAmount(Math.min(item.price || 0, Math.max(minBid, parseFloat(e.target.value) || minBid)))}
+                    className="flex-1 rounded-md border border-input bg-background px-3 py-2 text-lg font-bold text-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                  />
+                  {discountPct > 0 && (
+                    <span className="flex items-center gap-1 px-2 py-1 bg-amber-500/10 text-amber-600 border border-amber-500/20 rounded-md text-sm font-medium whitespace-nowrap">
+                      <TrendingDown className="w-3 h-3" />
+                      -{discountPct}%
+                    </span>
+                  )}
+                </div>
+                <input
+                  type="range"
+                  min={minBid}
+                  max={item.price || 0}
+                  step={0.5}
+                  value={bidAmount}
+                  onChange={(e) => setBidAmount(parseFloat(e.target.value))}
+                  className="w-full accent-amber-500"
+                />
+                <div className="flex justify-between text-xs text-muted-foreground">
+                  <span>Min: €{minBid.toFixed(2)} (−25%)</span>
+                  <span>Max: €{(item.price || 0).toFixed(2)}</span>
+                </div>
+              </div>
+
+              {/* Optional note */}
+              <div className="space-y-2">
+                <Label htmlFor="bid-note">Note to seller (optional)</Label>
+                <textarea
+                  id="bid-note"
+                  value={bidNote}
+                  onChange={(e) => setBidNote(e.target.value)}
+                  rows={3}
+                  placeholder="e.g. I can pick up in person..."
+                  className="flex w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
+                />
+              </div>
+
+              {bidError && (
+                <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-md">
+                  <p className="text-sm text-destructive">{bidError}</p>
+                </div>
+              )}
+              {bidSuccess && (
+                <div className="p-3 bg-green-500/10 border border-green-500/20 rounded-md">
+                  <p className="text-sm text-green-500">Bid sent! The seller will respond in your inbox.</p>
+                </div>
+              )}
+
+              <div className="flex gap-3 justify-end">
+                <Button variant="outline" onClick={() => setShowBid(false)}>Cancel</Button>
+                <Button
+                  onClick={handlePlaceBid}
+                  disabled={bidSending}
+                  className="gap-2 bg-amber-500 hover:bg-amber-600 text-white"
+                >
+                  {bidSending ? (
+                    <><div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>Sending...</>
+                  ) : (
+                    <><Gavel className="w-4 h-4" />Send Bid</>
+                  )}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
+        </div>
+      )}
+
+      {/* Review Modal */}
+      <ReviewModal
+        isOpen={showReview}
+        onClose={() => setShowReview(false)}
+        sellerId={item?.sellerId}
+        sellerName={item?.sellerName || item?.seller_name}
+        listingType={itemType}
+        listingId={item?.id}
+        onSubmitted={() => setHasReviewed(true)}
+      />
 
       {/* Login Prompt Modal */}
       {showLoginPrompt && (

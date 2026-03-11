@@ -94,6 +94,8 @@ export default function CueList({
     if (category && category !== 'all') {
       if (category === 'cues' && c.itemType !== 'cue') return false;
       if (category === 'cases' && c.itemType !== 'case') return false;
+      if (category === 'tables' && c.itemType !== 'table') return false;
+      if (category === 'accessories' && c.itemType !== 'accessory') return false;
     }
 
     // Condition filter
@@ -126,10 +128,8 @@ export default function CueList({
     filtered.sort((a, b) => (a.price || 0) - (b.price || 0));
   } else if (sortBy === 'price_desc') {
     filtered.sort((a, b) => (b.price || 0) - (a.price || 0));
-  } else {
-    // newest first (default)
-    filtered.sort((a, b) => (b.id || 0) - (a.id || 0));
   }
+  // default ('newest'): keep the shuffled order from App.js refreshListings
 
   return (
     <div className="w-full relative z-10">
@@ -156,7 +156,7 @@ export default function CueList({
       <div className="w-full py-4 sm:py-6 px-2 sm:px-4 md:px-6 relative z-10">
       {/* Grid View */}
       {viewMode === 'grid' && (
-        <div className="grid grid-cols-1 xs:grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-8">
+        <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 sm:gap-3 md:gap-4 pb-8">
           {filtered.map((c) => {
             const displayPrice = Number(c.price || 0);
             const imageUrl = getImageUrl(c.images);
@@ -183,26 +183,26 @@ export default function CueList({
                 </div>
 
                 {/* Content */}
-                <CardContent className="p-3 sm:p-3 md:p-4 space-y-2 flex-1 flex flex-col">
+                <CardContent className="p-2 sm:p-3 md:p-4 space-y-1.5 sm:space-y-2 flex-1 flex flex-col">
                   <div>
-                    <h3 className="font-semibold text-xs sm:text-base text-foreground truncate group-hover:text-primary transition-colors">
+                    <h3 className="font-semibold text-xs sm:text-sm md:text-base text-foreground truncate group-hover:text-primary transition-colors leading-tight">
                       {c.title || c.brand}
                     </h3>
-                    <p className="text-xs sm:text-sm text-muted-foreground truncate">
+                    <p className="text-xs text-muted-foreground truncate">
                       {c.brand}
                     </p>
                   </div>
 
                   {/* Location */}
-                  <div className="flex items-center gap-1 text-xs sm:text-sm text-muted-foreground">
+                  <div className="flex items-center gap-1 text-xs text-muted-foreground">
                     <span>📍</span>
                     <span className="truncate">{c.location || 'Unknown'}</span>
                   </div>
 
                   {/* Price Badge */}
-                  <div className="inline-block bg-primary text-white px-2 sm:px-3 py-1 sm:py-1.5 rounded-md font-bold">
-                    <span className="text-xs sm:text-sm">{currencySymbol}</span>
-                    <span className="text-sm sm:text-lg">{displayPrice.toFixed(0)}</span>
+                  <div className="inline-block bg-primary text-white px-2 py-1 rounded-md font-bold">
+                    <span className="text-xs">{currencySymbol}</span>
+                    <span className="text-sm sm:text-base font-bold">{displayPrice.toFixed(0)}</span>
                   </div>
                 </CardContent>
               </Card>

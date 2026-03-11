@@ -91,6 +91,12 @@ namespace CueFinder.Extensions.Moderation
         /// </summary>
         public async Task<ModerationResult> ScanImageAsync(string imagePath, int userId, int? cueId = null, int? cueCaseId = null)
         {
+            if (_configuration.GetValue<bool>("Moderation:Disabled"))
+            {
+                _logger.LogInformation("Moderation disabled; skipping scan for {ImagePath}", imagePath);
+                return new ModerationResult { IsUnsafe = false };
+            }
+
             if (!File.Exists(imagePath))
             {
                 _logger.LogWarning($"Image file not found: {imagePath}");

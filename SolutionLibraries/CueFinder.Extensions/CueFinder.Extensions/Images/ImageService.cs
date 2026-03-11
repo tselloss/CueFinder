@@ -59,12 +59,67 @@ public class ImageService : IImageService
         return $"{_settings.ImageUrlBase}/{cueId}";
     }
 
+    private string GetMiscFolderPath()
+    {
+        if (Path.IsPathRooted(_settings.StoragePath))
+            return Path.Combine(_settings.StoragePath, "misc");
+        if (!string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
+            return Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath, "misc");
+        return Path.Combine(Directory.GetCurrentDirectory(), _settings.StoragePath, "misc");
+    }
+
+    public async Task<ImageUploadResponse> UploadStandaloneAsync(IFormFile file)
+    {
+        try
+        {
+            var (isValid, errorMessage) = await ValidateImageAsync(file);
+            if (!isValid)
+                return new ImageUploadResponse { Success = false, ErrorMessage = errorMessage };
+
+            var miscFolder = GetMiscFolderPath();
+            Directory.CreateDirectory(miscFolder);
+
+            var fileName = $"{Guid.NewGuid()}{Path.GetExtension(file.FileName)}";
+            var filePath = Path.Combine(miscFolder, fileName);
+
+            await using (var stream = new FileStream(filePath, FileMode.Create))
+                await file.CopyToAsync(stream);
+
+            if (_moderationService != null)
+            {
+                var result = await _moderationService.ScanImageAsync(filePath, 0);
+                if (result.IsUnsafe)
+                {
+                    File.Delete(filePath);
+                    return new ImageUploadResponse { Success = false, ErrorMessage = "Image rejected by content moderation." };
+                }
+            }
+
+            return new ImageUploadResponse
+            {
+                Success = true,
+                ImageUrl = $"{_settings.ImageUrlBase}/misc/{fileName}",
+                FileSize = file.Length,
+                MimeType = file.ContentType,
+                UploadedAt = DateTime.UtcNow
+            };
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading standalone image");
+            return new ImageUploadResponse { Success = false, ErrorMessage = "Upload failed." };
+        }
+    }
+
     public void EnsureStorageRootExists()
     {
-        // If StoragePath is absolute, use it directly; otherwise combine with WebRootPath
-        var storageRoot = Path.IsPathRooted(_settings.StoragePath)
-            ? _settings.StoragePath
-            : Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        string storageRoot;
+        if (Path.IsPathRooted(_settings.StoragePath))
+            storageRoot = _settings.StoragePath;
+        else if (!string.IsNullOrEmpty(_webHostEnvironment.WebRootPath))
+            storageRoot = Path.Combine(_webHostEnvironment.WebRootPath, _settings.StoragePath);
+        else
+            storageRoot = Path.Combine(Directory.GetCurrentDirectory(), _settings.StoragePath);
         Directory.CreateDirectory(storageRoot);
     }
 
@@ -125,16 +180,22 @@ public class ImageService : IImageService
 
             if (moderationResult.IsUnsafe)
             {
-                _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}",
-                    filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
-
-                // Do NOT create a CueImage; retain file for admin review
-                return new ImageUploadResponse
+                // Fail-open for infrastructure errors (NudeNet down/timeout) — only block actual NSFW content
+                var isInfraError = moderationResult.FlagReason is "scan_error" or "service_error";
+                if (!isInfraError)
                 {
-                    Success = false,
-                    ErrorMessage = $"Image rejected: {moderationResult.FlagReason}. Confidence: {moderationResult.ConfidenceScore:P0}",
-                    UploadedAt = DateTime.UtcNow
-                };
+                    _logger.LogWarning("NSFW content detected in image: {FilePath}, Reason: {Reason}, Score: {Score}",
+                        filePath, moderationResult.FlagReason, moderationResult.ConfidenceScore);
+
+                    // Do NOT create a CueImage; retain file for admin review
+                    return new ImageUploadResponse
+                    {
+                        Success = false,
+                        ErrorMessage = $"Image rejected: {moderationResult.FlagReason}. Confidence: {moderationResult.ConfidenceScore:P0}",
+                        UploadedAt = DateTime.UtcNow
+                    };
+                }
+                _logger.LogWarning("Moderation service unavailable for cue {CueId} (reason: {Reason}), allowing upload", request.CueId, moderationResult.FlagReason);
             }
 
             _logger.LogInformation("Image passed NSFW check: {FilePath}", filePath);
@@ -177,6 +238,7 @@ public class ImageService : IImageService
                 Success = true,
                 ImageId = cueImage.Id,
                 ImageUrl = cueImage.ImageUrl,
+                IsPrimary = cueImage.IsPrimary,
                 FileSize = request.File.Length,
                 MimeType = contentType,
                 UploadedAt = cueImage.UploadedAt

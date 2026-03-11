@@ -30,10 +30,11 @@ public partial class CueService
             CreatedAt = cue.CreatedAt,
             UpdatedAt = cue.UpdatedAt,
             SellerId = cue.UserId,
-            SellerName = cue.User?.Name ?? string.Empty,
+            SellerName = !string.IsNullOrEmpty(cue.User?.Name) ? cue.User!.Name : (cue.User?.Username ?? string.Empty),
             SellerEmail = cue.User?.Email ?? string.Empty,
             SellerPhone = cue.User?.Phone ?? string.Empty,
             SellerHidePhone = cue.User?.HidePhone ?? false,
+            SellerIsVerified = cue.User?.IsVerified ?? false,
             Images = cue.Images?.Select(i => new CueImageDto
             {
                 Id = i.Id,
@@ -45,7 +46,9 @@ public partial class CueService
                 UploadedAt = i.UploadedAt
             }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<CueImageDto>(),
             AverageRating = (double)cue.AverageRating,
-            RatingCount = cue.RatingCount
+            RatingCount = cue.RatingCount,
+            IsHidden = cue.IsHidden,
+            HiddenAt = cue.HiddenAt
         };
     }
 }

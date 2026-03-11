@@ -149,8 +149,8 @@ public class ForumController : ControllerBase
                 Id = r.Id,
                 OwnerUserId = r.OwnerUserId,
                 OwnerName = r.OwnerName,
-                OwnerEmail = r.OwnerEmail,
-                OwnerPhone = r.OwnerPhone,
+                OwnerEmail = string.Empty,
+                OwnerPhone = string.Empty,
                 Website = r.Website,
                 SocialLink = r.SocialLink,
                 Description = r.Description,
@@ -178,7 +178,7 @@ public class ForumController : ControllerBase
                 CoOwners = r.CoOwners.Select(c => new ClubCoOwnerDto
                 {
                     Id = c.Id,
-                    Email = c.Email,
+                    Email = string.Empty,
                     Username = c.CoOwnerUsername,
                     Status = c.Status,
                     ApprovedAt = c.ApprovedAt
@@ -919,6 +919,7 @@ public class ForumController : ControllerBase
     }
 
     [HttpGet("users/search")]
+    [Authorize]
     public async Task<ActionResult<IEnumerable<object>>> SearchUsers([FromQuery] string query)
     {
         try
@@ -929,9 +930,9 @@ public class ForumController : ControllerBase
             }
 
             var users = await _dbContext.Users
-                .Where(u => u.Username.Contains(query) || u.Phone.Contains(query))
+                .Where(u => u.Username.Contains(query))
                 .Take(10)
-                .Select(u => new { u.Id, u.Username, u.Phone })
+                .Select(u => new { u.Id, u.Username })
                 .ToListAsync();
 
             return Ok(users);
@@ -1151,7 +1152,6 @@ public class ForumController : ControllerBase
                 ReplyToPostId = p.ReplyToPostId,
                 CreatedByUserId = p.CreatedByUserId,
                 CreatedByUsername = p.CreatedByUsername,
-                CreatedByUserPhone = p.CreatedByUsername, // Using username since User ID mapping not yet implemented
                 CreatedAt = p.CreatedAt,
                 LikeCount = p.LikeCount,
                 HelpfulCount = p.HelpfulCount
@@ -1449,7 +1449,6 @@ public class PostResponseDto
     public Guid? ReplyToPostId { get; set; }
     public Guid CreatedByUserId { get; set; }
     public string CreatedByUsername { get; set; } = string.Empty;
-    public string? CreatedByUserPhone { get; set; }
     public DateTime CreatedAt { get; set; }
     public int LikeCount { get; set; }
     public int HelpfulCount { get; set; }

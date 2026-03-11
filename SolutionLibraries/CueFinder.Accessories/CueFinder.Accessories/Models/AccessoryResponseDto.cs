@@ -25,6 +25,11 @@ public class AccessoryResponseDto
     public string SellerEmail { get; set; } = string.Empty;
     public string? SellerPhone { get; set; }
     public bool SellerHidePhone { get; set; }
+    public bool SellerIsVerified { get; set; }
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
+    public List<AccessoryImageDto> Images { get; set; } = new();
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

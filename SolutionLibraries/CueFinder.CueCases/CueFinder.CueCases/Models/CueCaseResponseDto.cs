@@ -32,10 +32,14 @@ public class CueCaseResponseDto
     public string? SellerEmail { get; set; }
     public string? SellerPhone { get; set; }
     public bool SellerHidePhone { get; set; }
+    public bool SellerIsVerified { get; set; }
     public int ViewCount { get; set; }
     public decimal AverageRating { get; set; }
     public int RatingCount { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<CueCaseImageDto> Images { get; set; } = new();
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

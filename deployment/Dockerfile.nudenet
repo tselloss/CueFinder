@@ -2,22 +2,24 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-ENV KERAS_BACKEND=tensorflow \
+ENV DEBIAN_FRONTEND=noninteractive \
+    KERAS_BACKEND=tensorflow \
     OPENNSFW2_HOME=/app/.opennsfw2
 
 # Install system dependencies for onnxruntime and image decoding
-RUN apt-get update && apt-get install -y \
-    gcc \
-    python3-dev \
-    libxcb1 \
-    libxkbcommon0 \
-    libglib2.0-0 \
-    libgl1 \
-    libsm6 \
-    libxext6 \
-    libxrender-dev \
-    curl \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        python3-dev \
+        libxcb1 \
+        libxkbcommon0 \
+        libglib2.0-0 \
+        libgl1 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+        curl && \
+    rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies (OpenNSFW2 + FastAPI stack)
 RUN pip install --no-cache-dir \

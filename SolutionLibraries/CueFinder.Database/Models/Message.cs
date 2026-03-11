@@ -11,14 +11,20 @@ namespace CueFinder.Database.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// ID of the user sending the message
+        /// ID of the user sending the message. Null for system/app notifications.
         /// </summary>
-        public int SenderId { get; set; }
+        public int? SenderId { get; set; }
 
         /// <summary>
         /// User sending the message (navigation property)
         /// </summary>
         public virtual User? Sender { get; set; }
+
+        /// <summary>
+        /// True when sent by the platform (raffle notifications, etc.).
+        /// Users cannot reply to system messages.
+        /// </summary>
+        public bool IsSystem { get; set; } = false;
 
         /// <summary>
         /// ID of the user receiving the message

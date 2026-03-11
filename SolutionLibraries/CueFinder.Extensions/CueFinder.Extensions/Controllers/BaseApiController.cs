@@ -16,7 +16,12 @@ public abstract class BaseApiController : ControllerBase
     /// <exception cref="UnauthorizedAccessException">Thrown if user ID claim is not found</exception>
     protected int GetCurrentUserId()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        // Check multiple claim types for .NET 8 JsonWebTokenHandler compatibility.
+        // JwtSecurityTokenHandler maps ClaimTypes.NameIdentifier → "sub" outbound,
+        // but JsonWebTokenHandler may not map it back if MapInboundClaims is off.
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("nameid")?.Value;
         
         if (string.IsNullOrEmpty(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
             throw new UnauthorizedAccessException("User ID not found in token");
@@ -49,7 +54,9 @@ public abstract class BaseApiController : ControllerBase
     /// <returns>The user ID, or -1 if not found</returns>
     protected int GetCurrentUserIdOrDefault()
     {
-        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("nameid")?.Value;
         return int.TryParse(userIdClaim, out var userId) ? userId : -1;
     }
 }

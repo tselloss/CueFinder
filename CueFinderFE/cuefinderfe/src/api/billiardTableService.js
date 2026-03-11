@@ -160,10 +160,7 @@ export async function uploadTableImages(tableId, files, onProgressCallback = nul
       `${API_BASE_URL}/billiardtables/${tableId}/images`,
       formData,
       {
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        },
+        headers: getAuthHeaders(),
         onUploadProgress: (progressEvent) => {
           if (onProgressCallback) {
             const percentCompleted = Math.round(

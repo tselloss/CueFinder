@@ -65,6 +65,10 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.Accessories", "Cu
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CueFinder.Accessories", "..\SolutionLibraries\CueFinder.Accessories\CueFinder.Accessories\CueFinder.Accessories.csproj", "{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "CueFinder.CueSets", "CueFinder.CueSets", "{A1B2C3D4-E5F6-7890-ABCD-EF1234567890}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CueFinder.CueSets", "..\SolutionLibraries\CueFinder.CueSets\CueFinder.CueSets\CueFinder.CueSets.csproj", "{B2C3D4E5-F6A7-8901-BCDE-F12345678901}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -147,6 +151,10 @@ Global
 		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -180,6 +188,8 @@ Global
 		{5FE77429-4D0D-47CE-AB95-64309547DCBD} = {95067AB8-035C-458A-B881-A8FE99323F20}
 		{C304B2A6-D2BD-483B-9769-3DCA1F54A39A} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
 		{11F46965-7CF5-41C9-8BF6-6C9348BC04FD} = {C304B2A6-D2BD-483B-9769-3DCA1F54A39A}
+		{A1B2C3D4-E5F6-7890-ABCD-EF1234567890} = {462EF015-1C9F-4D90-941B-7D5924EE23F3}
+		{B2C3D4E5-F6A7-8901-BCDE-F12345678901} = {A1B2C3D4-E5F6-7890-ABCD-EF1234567890}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {50ADDDDF-C3D8-41DA-A1C2-A83864BFC928}

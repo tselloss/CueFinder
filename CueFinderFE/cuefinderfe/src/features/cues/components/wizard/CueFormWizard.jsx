@@ -39,7 +39,7 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
     return '';
   };
 
-  const [currentStep, setCurrentStep] = useState(isEditing ? 1 : 0);
+  const [currentStep, setCurrentStep] = useState(0);
   const [productType, setProductType] = useState(getInitialProductType());
   const [formData, setFormData] = useState({
     title: '',
@@ -288,9 +288,17 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await cueService.createCue(cueData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const cueUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && cueUploadId) {
           setUploadProgress(0);
-          await cueService.uploadCueImages(savedItem.id, images, setUploadProgress);
+          try {
+            await cueService.uploadCueImages(cueUploadId, images, setUploadProgress);
+          } catch (uploadErr) {
+            console.error('Cue image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'case') {
         const caseData = {
@@ -317,9 +325,17 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await cueCaseService.createCueCase(caseData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const caseUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && caseUploadId) {
           setUploadProgress(0);
-          await cueCaseService.uploadCueCaseImages(savedItem.id, images, setUploadProgress);
+          try {
+            await cueCaseService.uploadCueCaseImages(caseUploadId, images, setUploadProgress);
+          } catch (uploadErr) {
+            console.error('Case image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'table') {
         const tableData = {
@@ -345,9 +361,17 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await billiardTableService.createTable(tableData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const tableUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && tableUploadId) {
           setUploadProgress(0);
-          await billiardTableService.uploadTableImages(savedItem.id, images, setUploadProgress);
+          try {
+            await billiardTableService.uploadTableImages(tableUploadId, images, setUploadProgress);
+          } catch (uploadErr) {
+            console.error('Table image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       } else if (productType === 'accessory') {
         const accessoryData = {
@@ -369,9 +393,17 @@ export default function CueFormWizard({ cue, onClose, onSave }) {
           savedItem = await accessoryService.createAccessory(accessoryData);
         }
 
-        if (images.length > 0 && savedItem && savedItem.id) {
+        const accessoryUploadId = isEditing ? cue.id : savedItem?.id;
+        if (images.length > 0 && accessoryUploadId) {
           setUploadProgress(0);
-          await accessoryService.uploadAccessoryImages(savedItem.id, images, setUploadProgress);
+          try {
+            await accessoryService.uploadAccessoryImages(accessoryUploadId, images, setUploadProgress);
+          } catch (uploadErr) {
+            console.error('Accessory image upload failed:', uploadErr);
+            setError(getErrorMessage(uploadErr, 'Listing saved but images failed to upload. Please edit the listing to add photos.'));
+            onSave();
+            return;
+          }
         }
       }
 

@@ -11,14 +11,19 @@ namespace CueFinder.Database.Models
         public int Id { get; set; }
 
         /// <summary>
-        /// ID of the cue being rated
+        /// ID of the cue being reviewed (nullable — use ListingType + ListingId for all listing types)
         /// </summary>
-        public int CueId { get; set; }
+        public int? CueId { get; set; }
 
         /// <summary>
-        /// Cue being rated (navigation property)
+        /// Listing type: "cue" | "case" | "table" | "accessory"
         /// </summary>
-        public virtual Cue? Cue { get; set; }
+        public string? ListingType { get; set; }
+
+        /// <summary>
+        /// ID of the listing being reviewed
+        /// </summary>
+        public int? ListingId { get; set; }
 
         /// <summary>
         /// ID of the user giving the rating

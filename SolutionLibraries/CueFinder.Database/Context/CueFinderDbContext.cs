@@ -40,6 +40,10 @@ namespace CueFinder.Database.Context
         public DbSet<FlaggedImage> FlaggedImages { get; set; } = null!;
         public DbSet<ModerationQueue> ModerationQueues { get; set; } = null!;
         public DbSet<UserReport> UserReports { get; set; } = null!;
+        public DbSet<Raffle> Raffles { get; set; } = null!;
+        public DbSet<RaffleEntry> RaffleEntries { get; set; } = null!;
+        public DbSet<CueSet> CueSets { get; set; } = null!;
+        public DbSet<CueSetImage> CueSetImages { get; set; } = null!;
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -110,9 +114,10 @@ namespace CueFinder.Database.Context
                     .OnDelete(DeleteBehavior.Cascade);
 
                 entity.HasMany(e => e.Ratings)
-                    .WithOne(r => r.Cue)
+                    .WithOne()
                     .HasForeignKey(r => r.CueId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.SetNull);
 
                 entity.HasMany(e => e.SavedByUsers)
                     .WithOne(s => s.Cue)
@@ -281,10 +286,8 @@ namespace CueFinder.Database.Context
             {
                 entity.HasKey(e => e.Id);
 
-                entity.HasOne(e => e.Cue)
-                    .WithMany(c => c.Ratings)
-                    .HasForeignKey(e => e.CueId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                entity.Property(e => e.ListingType)
+                    .HasMaxLength(20);
 
                 entity.HasOne(e => e.RatedByUser)
                     .WithMany(u => u.RatingsGiven)
@@ -308,9 +311,10 @@ namespace CueFinder.Database.Context
                 entity.Property(e => e.UpdatedAt)
                     .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
 
-                entity.HasIndex(e => new { e.CueId, e.RatedByUserId })
+                entity.HasIndex(e => new { e.RatedByUserId, e.ListingType, e.ListingId })
                     .IsUnique()
-                    .HasDatabaseName("IX_Rating_Unique_User_Cue");
+                    .HasFilter("\"ListingType\" IS NOT NULL AND \"ListingId\" IS NOT NULL")
+                    .HasDatabaseName("IX_Rating_Unique_Reviewer_Listing");
             });
 
             // Message entity configuration
@@ -824,6 +828,161 @@ namespace CueFinder.Database.Context
                 entity.HasIndex(e => new { e.UserId, e.BilliardTableId })
                     .IsUnique()
                     .HasDatabaseName("IX_SavedBilliardTable_Unique_User_Table");
+            });
+
+            // Raffle entity configuration
+            modelBuilder.Entity<Raffle>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Organizer)
+                    .WithMany()
+                    .HasForeignKey(e => e.OrganizerId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(e => e.Winner)
+                    .WithMany()
+                    .HasForeignKey(e => e.WinnerId)
+                    .OnDelete(DeleteBehavior.SetNull);
+
+                entity.HasMany(e => e.Entries)
+                    .WithOne(r => r.Raffle)
+                    .HasForeignKey(r => r.RaffleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Property(e => e.Title)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Description)
+                    .HasMaxLength(2000);
+
+                entity.Property(e => e.ItemImageUrl)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.PricePerSpot)
+                    .HasPrecision(10, 2);
+
+                entity.Property(e => e.PaymentDetails)
+                    .HasMaxLength(500);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("open");
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.OrganizerId)
+                    .HasDatabaseName("IX_Raffle_OrganizerId");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_Raffle_Status");
+
+                entity.HasIndex(e => e.EndsAt)
+                    .HasDatabaseName("IX_Raffle_EndsAt");
+            });
+
+            // RaffleEntry entity configuration
+            modelBuilder.Entity<RaffleEntry>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.HasOne(e => e.Raffle)
+                    .WithMany(r => r.Entries)
+                    .HasForeignKey(e => e.RaffleId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Property(e => e.Status)
+                    .HasMaxLength(20)
+                    .HasDefaultValue("pending");
+
+                entity.Property(e => e.PaymentMethod)
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.PaymentReference)
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                // Each spot number must be unique within a raffle
+                entity.HasIndex(e => new { e.RaffleId, e.SpotNumber })
+                    .IsUnique()
+                    .HasDatabaseName("IX_RaffleEntry_Raffle_Spot");
+
+                entity.HasIndex(e => e.UserId)
+                    .HasDatabaseName("IX_RaffleEntry_UserId");
+
+                entity.HasIndex(e => e.Status)
+                    .HasDatabaseName("IX_RaffleEntry_Status");
+            });
+
+            // CueSet entity configuration
+            modelBuilder.Entity<CueSet>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Title).IsRequired().HasMaxLength(200);
+                entity.Property(e => e.Brand).IsRequired().HasMaxLength(100);
+                entity.Property(e => e.Description).HasMaxLength(5000);
+                entity.Property(e => e.Price).HasColumnType("numeric(10,2)");
+                entity.Property(e => e.Condition).HasMaxLength(50).HasDefaultValue("good");
+                entity.Property(e => e.Location).HasMaxLength(200);
+                entity.Property(e => e.ModerationStatus).HasMaxLength(50).HasDefaultValue("approved");
+                entity.Property(e => e.FlagReason).HasMaxLength(500);
+                entity.Property(e => e.ModerationNotes).HasMaxLength(1000);
+                entity.Property(e => e.Features).HasMaxLength(1000);
+
+                entity.Property(e => e.PlayingCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.PlayingCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.BreakCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.BreakCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.JumpCueShaftMaterial).HasMaxLength(100);
+                entity.Property(e => e.JumpCueButtMaterial).HasMaxLength(100);
+                entity.Property(e => e.CaseCapacity).HasMaxLength(20);
+                entity.Property(e => e.CaseOpening).HasMaxLength(50);
+                entity.Property(e => e.CaseType).HasMaxLength(50);
+                entity.Property(e => e.CaseColor).HasMaxLength(100);
+                entity.Property(e => e.CaseMaterial).HasMaxLength(100);
+
+                entity.Property(e => e.CreatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.UpdatedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'")
+                    .ValueGeneratedOnAddOrUpdate();
+
+                entity.HasOne(e => e.User)
+                    .WithMany()
+                    .HasForeignKey(e => e.UserId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(e => e.Images)
+                    .WithOne(i => i.CueSet)
+                    .HasForeignKey(i => i.CueSetId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.HasIndex(e => e.UserId).HasDatabaseName("IX_CueSet_UserId");
+                entity.HasIndex(e => e.CreatedAt).HasDatabaseName("IX_CueSet_CreatedAt");
+                entity.HasIndex(e => e.IsSold).HasDatabaseName("IX_CueSet_IsSold");
+            });
+
+            // CueSetImage entity configuration
+            modelBuilder.Entity<CueSetImage>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.ImageUrl).IsRequired().HasMaxLength(500);
+                entity.Property(e => e.UploadedAt)
+                    .HasDefaultValueSql("NOW() AT TIME ZONE 'UTC'");
+
+                entity.HasIndex(e => e.CueSetId).HasDatabaseName("IX_CueSetImage_CueSetId");
             });
         }
     }

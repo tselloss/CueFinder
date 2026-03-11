@@ -170,5 +170,26 @@ namespace CueFinder.Database.Models
         /// Users who have saved this table
         /// </summary>
         public virtual ICollection<SavedBilliardTable>? SavedByUsers { get; set; }
+
+        // Old listing management fields
+        /// <summary>
+        /// Last time the user was prompted about this listing
+        /// </summary>
+        public DateTime? LastPromptedAt { get; set; }
+
+        /// <summary>
+        /// Last time the user responded to a prompt about this listing
+        /// </summary>
+        public DateTime? LastUserResponseAt { get; set; }
+
+        /// <summary>
+        /// Whether this listing is hidden due to inactivity
+        /// </summary>
+        public bool IsHidden { get; set; } = false;
+
+        /// <summary>
+        /// When this listing was hidden (if applicable)
+        /// </summary>
+        public DateTime? HiddenAt { get; set; }
     }
 }

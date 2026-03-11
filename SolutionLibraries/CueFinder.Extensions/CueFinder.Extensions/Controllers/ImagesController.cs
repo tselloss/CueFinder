@@ -53,7 +53,7 @@ public class ImagesController : ControllerBase
         try
         {
             var userId = GetUserIdFromClaims();
-            if (!userId.HasValue)
+            if (userId == 0)
             {
                 return Unauthorized(new { message = "Invalid user" });
             }
@@ -72,7 +72,7 @@ public class ImagesController : ControllerBase
                 IsPrimary = isPrimary
             };
 
-            var response = await _imageService.UploadImageAsync(request, userId.Value);
+            var response = await _imageService.UploadImageAsync(request, userId);
             if (!response.Success)
             {
                 return BadRequest(new { message = response.ErrorMessage });
@@ -88,6 +88,34 @@ public class ImagesController : ControllerBase
         }
     }
 
+    /// <summary>
+    /// Upload a standalone image not tied to a cue (e.g. for a raffle).
+    /// Returns the public URL of the saved image.
+    /// </summary>
+    [HttpPost("upload-standalone")]
+    [ProducesResponseType(typeof(ImageUploadResponse), StatusCodes.Status200OK)]
+    [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
+    public async Task<IActionResult> UploadStandalone([FromForm] IFormFile file)
+    {
+        try
+        {
+            if (file == null || file.Length == 0)
+                return BadRequest(new { message = "No file provided" });
+
+            var response = await _imageService.UploadStandaloneAsync(file);
+            if (!response.Success)
+                return BadRequest(new { message = response.ErrorMessage });
+
+            return Ok(response);
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error uploading standalone image");
+            return StatusCode(StatusCodes.Status500InternalServerError,
+                new { message = "An error occurred while uploading the image" });
+        }
+    }
+
     [HttpPost("upload-multiple")]
     [ProducesResponseType(typeof(List<ImageUploadResponse>), StatusCodes.Status200OK)]
     [ProducesResponseType(typeof(Microsoft.AspNetCore.Mvc.ProblemDetails), StatusCodes.Status400BadRequest)]
@@ -98,10 +126,15 @@ public class ImagesController : ControllerBase
     {
         try
         {
+            var claimsSnapshot = User?.Claims?.Select(c => $"{c.Type}={c.Value}").ToList() ?? new List<string>();
+            _logger.LogInformation("UploadMultipleImages claims: {Claims}", string.Join("|", claimsSnapshot));
+
             var userId = GetUserIdFromClaims();
-            if (!userId.HasValue)
+            if (userId == 0)
             {
-                return Unauthorized(new { message = "Invalid user" });
+                _logger.LogWarning("UploadMultipleImages invalid user. Claims seen: {Claims}", string.Join("|", claimsSnapshot));
+                _logger.LogError("Error UploadMultipleImages {userId}", userId);
+                return Unauthorized(new { message = $"Invalid user : {userId}" });
             }
 
             if (files == null || files.Count == 0)
@@ -109,7 +142,7 @@ public class ImagesController : ControllerBase
                 return BadRequest(new { message = "No files provided" });
             }
 
-            var responses = await _imageService.UploadMultipleImagesAsync(files, cueId, userId.Value);
+            var responses = await _imageService.UploadMultipleImagesAsync(files, cueId, userId);
 
             var failedUploads = responses.Where(r => !r.Success).ToList();
             if (failedUploads.Any())
@@ -191,12 +224,12 @@ public class ImagesController : ControllerBase
         try
         {
             var userId = GetUserIdFromClaims();
-            if (!userId.HasValue)
+            if (userId == 0)
             {
                 return Unauthorized(new { message = "Invalid user" });
             }
 
-            var success = await _imageService.SetPrimaryImageAsync(imageId, userId.Value);
+            var success = await _imageService.SetPrimaryImageAsync(imageId, userId);
             if (!success)
             {
                 return NotFound(new { message = "Image not found or you don't have permission" });
@@ -221,12 +254,12 @@ public class ImagesController : ControllerBase
         try
         {
             var userId = GetUserIdFromClaims();
-            if (!userId.HasValue)
+            if (userId == 0)
             {
                 return Unauthorized(new { message = "Invalid user" });
             }
 
-            var success = await _imageService.DeleteImageAsync(imageId, userId.Value);
+            var success = await _imageService.DeleteImageAsync(imageId, userId);
             if (!success)
             {
                 return NotFound(new { message = "Image not found or you don't have permission" });
@@ -251,12 +284,12 @@ public class ImagesController : ControllerBase
         try
         {
             var userId = GetUserIdFromClaims();
-            if (!userId.HasValue)
+            if (userId == 0)
             {
                 return Unauthorized(new { message = "Invalid user" });
             }
 
-            var success = await _imageService.DeleteCueImagesAsync(cueId, userId.Value);
+            var success = await _imageService.DeleteCueImagesAsync(cueId, userId);
             if (!success)
             {
                 return StatusCode(StatusCodes.Status401Unauthorized,
@@ -274,16 +307,16 @@ public class ImagesController : ControllerBase
     }
 
     /// <summary>
-    /// Helper method to extract user ID from JWT claims.
+    /// Extracts the user ID from JWT claims.
+    /// Checks multiple claim types for .NET 8 JsonWebTokenHandler compatibility.
+    /// Returns 0 if no valid user ID is found.
     /// </summary>
-    private int? GetUserIdFromClaims()
+    private int GetUserIdFromClaims()
     {
-        if (User?.FindFirst("sub")?.Value is string userIdStr &&
-            int.TryParse(userIdStr, out int userId))
-        {
-            return userId;
-        }
-        return null;
+        var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value
+            ?? User.FindFirst("sub")?.Value
+            ?? User.FindFirst("nameid")?.Value;
+        return int.TryParse(userIdClaim, out var userId) ? userId : 0;
     }
 }
 

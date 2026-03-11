@@ -13,6 +13,52 @@ namespace CueFinder.CueCases.Services;
 /// </summary>
 public partial class CueCaseService
 {
+    /// <summary>
+    /// Process old cue case listings: prompt, hide, or delete based on inactivity (new business rules).
+    /// </summary>
+    public async Task ProcessOldListingsAsync()
+    {
+        var now = DateTime.UtcNow;
+        var listings = await _context.CueCases.ToListAsync();
+        foreach (var listing in listings)
+        {
+            if (listing.IsSold)
+                continue;
+
+            // If hidden for over 6 months, delete
+            if (listing.IsHidden && listing.HiddenAt.HasValue && (now - listing.HiddenAt.Value).TotalDays > 180)
+            {
+                await _imageService.DeleteCueCaseImagesInternalAsync(listing.Id);
+                _context.CueCases.Remove(listing);
+                continue;
+            }
+
+            if (!listing.IsHidden)
+            {
+                // First prompt: 2 months after creation
+                var firstPromptDue = (now - listing.CreatedAt).TotalDays >= 60 && !listing.LastPromptedAt.HasValue;
+                // Re-prompt: 2 months after last prompt if user pressed 'active'
+                var rePromptDue = listing.LastPromptedAt.HasValue && listing.LastUserResponseAt.HasValue && listing.LastUserResponseAt >= listing.LastPromptedAt && (now - listing.LastPromptedAt.Value).TotalDays >= 60;
+
+                if (firstPromptDue || rePromptDue)
+                {
+                    // TODO: Send prompt to user (notification/email/etc.)
+                    listing.LastPromptedAt = now;
+                }
+
+                // If last prompt was over 2 months ago and no user response since, hide
+                if (listing.LastPromptedAt.HasValue &&
+                    (!listing.LastUserResponseAt.HasValue || listing.LastUserResponseAt < listing.LastPromptedAt) &&
+                    (now - listing.LastPromptedAt.Value).TotalDays >= 60)
+                {
+                    listing.IsHidden = true;
+                    listing.HiddenAt = now;
+                }
+            }
+        }
+        await _context.SaveChangesAsync();
+    }
+
     public async Task<CueCaseResponseDto> CreateCueCaseAsync(CreateCueCaseDto dto, int userId)
     {
         var user = await _context.Users.FindAsync(userId);
@@ -46,7 +92,12 @@ public partial class CueCaseService
 
         _logger.LogInformation("Created new cue case listing {CueCaseId} by user {UserId}", cueCase.Id, userId);
 
-        return MapToCueCaseResponseDto(cueCase);
+        var created = await _context.CueCases
+            .Include(c => c.Images)
+            .Include(c => c.User)
+            .FirstAsync(c => c.Id == cueCase.Id);
+
+        return MapToCueCaseResponseDto(created);
     }
 
     public async Task<CueCaseResponseDto?> UpdateCueCaseAsync(int cueCaseId, UpdateCueCaseDto dto, int userId)
@@ -90,6 +141,13 @@ public partial class CueCaseService
 
         if (dto.Color != null)
             cueCase.Color = dto.Color;
+
+        if (dto.IsHidden.HasValue)
+        {
+            cueCase.IsHidden = dto.IsHidden.Value;
+            cueCase.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+        }
+        if (dto.LastUserResponseAt.HasValue) cueCase.LastUserResponseAt = dto.LastUserResponseAt.Value;
 
         if (dto.CaseMaterial != null)
             cueCase.CaseMaterial = dto.CaseMaterial;

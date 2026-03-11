@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 export default function DesktopSidebar({
   category,
@@ -13,6 +13,8 @@ export default function DesktopSidebar({
   setShowForumCategories
 }) {
   const navigate = useNavigate();
+  const location = useLocation();
+  const isRaffles = location.pathname.startsWith('/raffles');
 
   return (
     <div 
@@ -57,6 +59,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-all"
           onClick={() => {
             setCategory('all');
+            if (location.pathname !== '/') navigate('/');
             setMobileMenuOpen(false);
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
@@ -96,6 +99,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-cues"
           onClick={() => {
             setCategory('cues');
+            if (location.pathname !== '/') navigate('/');
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
           style={{
@@ -141,6 +145,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-cases"
           onClick={() => {
             setCategory('cases');
+            if (location.pathname !== '/') navigate('/');
             setMobileMenuOpen(false);
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
@@ -180,6 +185,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-tables"
           onClick={() => {
             setCategory('tables');
+            if (location.pathname !== '/') navigate('/');
             setMobileMenuOpen(false);
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
@@ -219,6 +225,7 @@ export default function DesktopSidebar({
           data-testid="sidebar-category-accessories"
           onClick={() => {
             setCategory('accessories');
+            if (location.pathname !== '/') navigate('/');
             setMobileMenuOpen(false);
           }}
           className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
@@ -305,6 +312,45 @@ export default function DesktopSidebar({
               ▼
             </span>
           )}
+        </button>
+
+        <button
+          data-testid="sidebar-raffles"
+          onClick={() => {
+            navigate('/raffles');
+            setMobileMenuOpen(false);
+          }}
+          className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
+          style={{
+            background: isRaffles
+              ? 'linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%)'
+              : 'rgba(30, 41, 59, 0.6)',
+            color: isRaffles ? 'white' : '#cbd5e1',
+            border: isRaffles
+              ? '1px solid rgba(139, 92, 246, 0.5)'
+              : '1px solid rgba(51, 65, 85, 0.4)',
+            transform: isRaffles ? 'translateX(2px)' : 'translateX(0)',
+            boxShadow: isRaffles
+              ? '0 4px 12px rgba(139, 92, 246, 0.4), inset 0 0 15px rgba(255, 255, 255, 0.1)'
+              : 'none',
+          }}
+          onMouseEnter={(e) => {
+            if (!isRaffles) {
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.8)';
+              e.currentTarget.style.transform = 'translateX(2px)';
+            }
+          }}
+          onMouseLeave={(e) => {
+            if (!isRaffles) {
+              e.currentTarget.style.background = 'rgba(30, 41, 59, 0.6)';
+              e.currentTarget.style.transform = 'translateX(0)';
+            }
+          }}
+        >
+          <span className="text-xl leading-none">🎰</span>
+          <span className={`text-sm ${isRaffles ? 'font-semibold' : 'font-medium'}`}>
+            Raffles
+          </span>
         </button>
 
         {/* Forum Categories Sub-menu */}

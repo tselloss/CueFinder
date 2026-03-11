@@ -29,12 +29,25 @@ public partial class AccessoryService
             CreatedAt = accessory.CreatedAt,
             UpdatedAt = accessory.UpdatedAt,
             SellerId = accessory.UserId,
-            SellerName = accessory.User?.Name ?? string.Empty,
+            SellerName = !string.IsNullOrEmpty(accessory.User?.Name) ? accessory.User!.Name : (accessory.User?.Username ?? string.Empty),
             SellerEmail = accessory.User?.Email ?? string.Empty,
             SellerPhone = accessory.User?.Phone,
             SellerHidePhone = accessory.User?.HidePhone ?? false,
+            SellerIsVerified = accessory.User?.IsVerified ?? false,
             AverageRating = (double)accessory.AverageRating,
-            RatingCount = accessory.RatingCount
+            RatingCount = accessory.RatingCount,
+            Images = accessory.Images?.Select(i => new AccessoryImageDto
+            {
+                Id = i.Id,
+                AccessoryId = i.AccessoryId,
+                ImageUrl = i.ImageUrl,
+                AltText = i.AltText,
+                DisplayOrder = i.DisplayOrder,
+                IsPrimary = i.IsPrimary,
+                UploadedAt = i.UploadedAt
+            }).OrderBy(i => i.DisplayOrder).ToList() ?? new List<AccessoryImageDto>(),
+            IsHidden = accessory.IsHidden,
+            HiddenAt = accessory.HiddenAt
         };
     }
 }

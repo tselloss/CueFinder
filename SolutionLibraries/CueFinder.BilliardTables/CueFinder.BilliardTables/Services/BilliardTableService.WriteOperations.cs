@@ -9,7 +9,7 @@ namespace CueFinder.BilliardTables.Services;
 /// BilliardTableService partial: Write operations (mutations)
 /// - CreateBilliardTableAsync: Create a new billiard table listing
 /// - UpdateBilliardTableAsync: Update an existing billiard table
-/// - DeleteBilliardTableAsync: Soft-delete a billiard table by marking as sold
+/// - DeleteBilliardTableAsync: Permanently delete a billiard table and its images
 /// </summary>
 public partial class BilliardTableService
 {
@@ -47,7 +47,13 @@ public partial class BilliardTableService
 
         _logger.LogInformation("Billiard table {TableId} created by user {UserId}", table.Id, userId);
 
-        return MapToBilliardTableResponseDto(table);
+        // Reload with User navigation property so the response includes complete seller info
+        var created = await _context.BilliardTables
+            .Include(t => t.Images)
+            .Include(t => t.User)
+            .FirstAsync(t => t.Id == table.Id);
+
+        return MapToBilliardTableResponseDto(created);
     }
 
     public async Task<BilliardTableResponseDto?> UpdateBilliardTableAsync(int tableId, UpdateBilliardTableDto dto, int userId)
@@ -80,7 +86,13 @@ public partial class BilliardTableService
         if (dto.Condition != null) table.Condition = dto.Condition;
         if (dto.Location != null) table.Location = dto.Location;
         if (dto.IsSold.HasValue) table.IsSold = dto.IsSold.Value;
-        
+        if (dto.IsHidden.HasValue)
+        {
+            table.IsHidden = dto.IsHidden.Value;
+            table.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+        }
+        if (dto.LastUserResponseAt.HasValue) table.LastUserResponseAt = dto.LastUserResponseAt.Value;
+
         table.UpdatedAt = DateTime.UtcNow;
 
         await _context.SaveChangesAsync();
@@ -90,12 +102,29 @@ public partial class BilliardTableService
         return MapToBilliardTableResponseDto(table);
     }
 
+    public async Task<bool> MarkAsSoldAsync(int tableId, int userId)
+    {
+        var table = await _context.BilliardTables.FindAsync(tableId);
+        if (table == null) return false;
+        if (table.UserId != userId)
+            throw new UnauthorizedAccessException("You can only mark your own tables as sold");
+
+        table.IsSold = true;
+        table.SoldDate = DateTime.UtcNow;
+        table.UpdatedAt = DateTime.UtcNow;
+        await _context.SaveChangesAsync();
+        _logger.LogInformation("Billiard table {TableId} marked as sold by user {UserId}", tableId, userId);
+        return true;
+    }
+
     public async Task<bool> DeleteBilliardTableAsync(int tableId, int userId, bool isAdmin = false)
     {
         var table = await _context.BilliardTables.FindAsync(tableId);
-
         if (table == null)
+        {
+            _logger.LogWarning("Billiard table {TableId} not found for deletion by user {UserId}", tableId, userId);
             return false;
+        }
 
         // Check ownership or admin
         if (table.UserId != userId && !isAdmin)
@@ -104,13 +133,10 @@ public partial class BilliardTableService
         // Delete all associated images first
         await _imageService.DeleteBilliardTableImagesInternalAsync(tableId);
 
-        // Soft delete by marking as sold
-        table.IsSold = true;
-        table.SoldDate = DateTime.UtcNow;
+        _context.BilliardTables.Remove(table);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Billiard table {TableId} deleted by user {UserId}", tableId, userId);
-
         return true;
     }
 }

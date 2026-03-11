@@ -103,17 +103,14 @@ export async function uploadCueCaseImages(cueCaseId, files, onProgress) {
   try {
     const formData = new FormData();
     files.forEach((file) => {
-      formData.append('file', file);
+      formData.append('files', file);
     });
 
     const response = await axios.post(
-      `${API_BASE_URL}/ext/moderation/upload-image?cueCaseId=${cueCaseId}`,
+      `${API_BASE_URL}/cuecases/${cueCaseId}/images`,
       formData,
       {
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        },
+        headers: getAuthHeaders(),
         onUploadProgress: (event) => {
           if (!onProgress) return;
           const percent = Math.round((event.loaded * 100) / (event.total || 1));

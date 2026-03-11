@@ -31,5 +31,6 @@ public partial class CueService : ICueService
         _imageService = imageService;
         _emailService = emailService;
     }
+
 }
 

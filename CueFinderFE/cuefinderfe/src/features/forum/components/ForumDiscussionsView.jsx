@@ -7,23 +7,14 @@ import DrillDesigner from './DrillDesigner';
 
 /**
  * ForumDiscussionsView - Displays discussions for a category
- * @component
- * @param {Object} category - Selected category
- * @param {Array} discussions - Array of discussions
- * @param {Function} onDiscussionSelect - Callback when discussion is selected
- * @param {Function} onBackToCategories - Callback to go back to categories
- * @param {Function} onNewDiscussion - Callback to create new discussion
- * @param {string} searchTerm - Current search term
- * @param {Function} onSearchChange - Callback to update search
- * @param {Object} user - Current user
  */
 export default function ForumDiscussionsView({
   category,
-  discussions,
+  discussions = [],
   onDiscussionSelect,
   onBackToCategories,
   onNewDiscussion,
-  searchTerm,
+  searchTerm = '',
   onSearchChange,
   user,
   quickDrillTitle,
@@ -35,27 +26,27 @@ export default function ForumDiscussionsView({
   onQuickCreateDrill,
   quickDrillLoading,
 }) {
-  const normalizedSearch = searchTerm.toLowerCase();
-  const filteredDiscussions = discussions.filter((d) => {
+  const normalizedSearch = (searchTerm || '').toLowerCase();
+  const filteredDiscussions = (discussions || []).filter((d) => {
     const drill = parseDrillContent(d.content);
     const notes = drill?.notes || '';
     return (
-      d.title.toLowerCase().includes(normalizedSearch) ||
+      (d.title || '').toLowerCase().includes(normalizedSearch) ||
       notes.toLowerCase().includes(normalizedSearch) ||
-      d.content.toLowerCase().includes(normalizedSearch)
+      (d.content || '').toLowerCase().includes(normalizedSearch)
     );
   });
 
   const getDiscussionExcerpt = (discussion) => {
-    if (!discussion.content) return '—';
+    if (!discussion?.content) return '—';
     return discussion.content.length > 120
       ? `${discussion.content.substring(0, 120)}...`
       : discussion.content;
   };
 
   const isPracticeDrills = /practise|practice/i.test(category?.name || '');
-  const totalReplies = discussions.reduce((sum, d) => sum + (d.replyCount || 0), 0);
-  const totalViews = discussions.reduce((sum, d) => sum + (d.viewCount || 0), 0);
+  const totalReplies = (discussions || []).reduce((sum, d) => sum + (d.replyCount || 0), 0);
+  const totalViews = (discussions || []).reduce((sum, d) => sum + (d.viewCount || 0), 0);
   const drillroomHighlights = [
     {
       title: 'AI Shot Coach',
@@ -76,7 +67,7 @@ export default function ForumDiscussionsView({
       <div className="flex flex-col md:flex-row justify-between md:items-center gap-3 md:gap-6">
         <div className="flex items-center gap-3 min-w-0">
           <div className="w-1 h-6 bg-gradient-to-b from-blue-600 to-blue-700 rounded-full" />
-          <h2 className="text-xl sm:text-2xl font-bold text-blue-400 truncate">{category.name}</h2>
+          <h2 className="text-xl sm:text-2xl font-bold text-blue-400 truncate">{category?.name}</h2>
         </div>
         <div className="flex flex-wrap gap-2 items-center">
           {user && (
@@ -209,32 +200,24 @@ export default function ForumDiscussionsView({
 
       <div className="space-y-2">
         {filteredDiscussions.length > 0 ? (
-          filteredDiscussions.map((discussion) => {
-            const drill = parseDrillContent(discussion.content);
-            return (
-              <div
-                key={discussion.id}
-                onClick={() => onDiscussionSelect(discussion.id)}
-                className="cursor-pointer p-4 bg-slate-800/50 border border-blue-500/20 rounded-lg hover:border-blue-500/50 hover:bg-slate-800/70 transition-all"
-              >
-                <div className="space-y-2">
-                  <div className="flex justify-between items-start">
-                    <div className="flex-1">
-                      <h3 className="text-base font-bold text-blue-400">
-                        {discussion.title}
-                        {discussion.isPinned && <span className="ml-2">📌</span>}
-                        {discussion.isLocked && <span className="ml-2">🔒</span>}
-                      </h3>
-                      <p className="text-sm text-slate-400 mt-1 line-clamp-1">
-                        {drill ? drill.notes?.trim() || 'Drill layout διαθέσιμο.' : getDiscussionExcerpt(discussion)}
-                      </p>
-                    </div>
-                    {drill && (
-                      <span className="ml-3 px-2 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider bg-blue-500/10 text-blue-200 border border-blue-500/20">
-                        Drill
-                      </span>
-                    )}
+          filteredDiscussions.map((discussion) => (
+            <div
+              key={discussion.id}
+              onClick={() => onDiscussionSelect(discussion.id)}
+              className="cursor-pointer p-4 bg-slate-800/50 border border-blue-500/20 rounded-lg hover:border-blue-500/50 hover:bg-slate-800/70 transition-all"
+            >
+              <div className="space-y-2">
+                <div className="flex justify-between items-start">
+                  <div className="flex-1">
+                    <h3 className="text-base font-bold text-blue-400">
+                      {discussion.title}
+                      {discussion.isPinned && <span className="ml-2">📌</span>}
+                      {discussion.isLocked && <span className="ml-2">🔒</span>}
+                    </h3>
+                    <p className="text-sm text-slate-400 mt-1 line-clamp-1">{getDiscussionExcerpt(discussion)}</p>
                   </div>
+                </div>
+
                 <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-2 mt-3 text-xs">
                   <div className="flex gap-4">
                     <span className="text-slate-500 font-semibold">
@@ -249,10 +232,9 @@ export default function ForumDiscussionsView({
                     <span className="font-semibold text-slate-300">👁️ {discussion.viewCount}</span>
                   </div>
                 </div>
-                </div>
               </div>
-            );
-          })
+            </div>
+          ))
         ) : (
           <EmptyState title="No Discussions Found" message={searchTerm ? 'Try adjusting your search' : 'No discussions yet'} />
         )}

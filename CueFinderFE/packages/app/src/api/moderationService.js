@@ -114,10 +114,7 @@ export async function uploadImage(file, cueId = null, cueCaseId = null) {
 
     const response = await axios.post(`${API_BASE_URL}/ext/moderation/upload-image`, formData, {
       params,
-      headers: {
-        ...getAuthHeaders(),
-        'Content-Type': 'multipart/form-data',
-      },
+      headers: getAuthHeaders(),
     });
     return response.data;
   } catch (error) {

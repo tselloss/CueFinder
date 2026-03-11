@@ -9,7 +9,7 @@ namespace CueFinder.Cues.Services;
 /// CueService partial: Write operations (mutations)
 /// - CreateCueAsync: Create a new cue listing
 /// - UpdateCueAsync: Update an existing cue
-/// - DeleteCueAsync: Soft-delete a cue by marking as sold
+/// - DeleteCueAsync: Permanently delete a cue and its images
 /// </summary>
 public partial class CueService
 {
@@ -59,7 +59,14 @@ public partial class CueService
             // Don't throw - email failure shouldn't prevent cue creation
         }
 
-        return MapToCueResponseDto(cue);
+        var created = await _context.Cues
+            .Include(c => c.Images)
+            .Include(c => c.Ratings)
+            .Include(c => c.User)
+            .AsSplitQuery()
+            .FirstAsync(c => c.Id == cue.Id);
+
+        return MapToCueResponseDto(created);
     }
 
     /// <summary>
@@ -208,9 +215,14 @@ public partial class CueService
         if (dto.TipSize.HasValue) cue.TipSize = dto.TipSize;
         if (dto.Location != null) cue.Location = dto.Location;
         if (dto.IsSold.HasValue) cue.IsSold = dto.IsSold.Value;
+        if (dto.IsHidden.HasValue)
+        {
+            cue.IsHidden = dto.IsHidden.Value;
+            cue.HiddenAt = dto.IsHidden.Value ? (dto.HiddenAt ?? DateTime.UtcNow) : null;
+        }
+        if (dto.LastUserResponseAt.HasValue) cue.LastUserResponseAt = dto.LastUserResponseAt.Value;
 
         cue.UpdatedAt = DateTime.UtcNow;
-
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Cue {CueId} updated by user {UserId}", cueId, userId);
@@ -220,21 +232,19 @@ public partial class CueService
 
     public async Task<bool> DeleteCueAsync(int cueId, int userId, bool isAdmin = false)
     {
-        var cue = await _context.Cues.FindAsync(cueId);
+        var cue = await _context.Cues
+            .Include(c => c.Images)
+            .FirstOrDefaultAsync(c => c.Id == cueId);
 
         if (cue == null)
             return false;
 
-        // Check ownership or admin
         if (cue.UserId != userId && !isAdmin)
             throw new UnauthorizedAccessException("You can only delete your own cues");
 
-        // Delete all associated images first
         await _imageService.DeleteCueImagesInternalAsync(cueId);
 
-        // Soft delete by marking as sold
-        cue.IsSold = true;
-        cue.SoldDate = DateTime.UtcNow;
+        _context.Cues.Remove(cue);
         await _context.SaveChangesAsync();
 
         _logger.LogInformation("Cue {CueId} deleted by user {UserId}", cueId, userId);

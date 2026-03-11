@@ -71,7 +71,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Password = "Password123!",
                 Name = "Integration Test User",
                 Email = "integration@test.com",
-                Phone = "555-9999"
+                Phone = "555-9999",
+                AcceptedTerms = true
             };
 
             var registerResponse = Require(await _authService.RegisterAsync(registerRequest), "registerResponse");
@@ -141,7 +142,8 @@ namespace CueFinder.Auth.IntegrationTests
             {
                 Username = "duplicate",
                 Password = "Password123!",
-                Name = "User 1"
+                Name = "User 1",
+                AcceptedTerms = true
             };
 
             await _authService.RegisterAsync(request1);
@@ -150,7 +152,8 @@ namespace CueFinder.Auth.IntegrationTests
             {
                 Username = "duplicate",
                 Password = "Password456!",
-                Name = "User 2"
+                Name = "User 2",
+                AcceptedTerms = true
             };
 
             // Act & Assert
@@ -172,7 +175,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Username = "emailuser",
                 Password = "Password123!",
                 Name = "Email User",
-                Email = "emailtest@test.com"
+                Email = "emailtest@test.com",
+                AcceptedTerms = true
             };
 
             await _authService.RegisterAsync(registerRequest);
@@ -195,7 +199,8 @@ namespace CueFinder.Auth.IntegrationTests
             {
                 Username = "timestamptest",
                 Password = "Password123!",
-                Name = "Timestamp Test"
+                Name = "Timestamp Test",
+                AcceptedTerms = true
             };
 
             var registerResponse = Require(await _authService.RegisterAsync(registerRequest), "registerResponse");
@@ -248,7 +253,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Username = "user1",
                 Password = "Password123!",
                 Name = "User 1",
-                Email = "user1@test.com"
+                Email = "user1@test.com",
+                AcceptedTerms = true
             };
 
             var user2Request = new RegisterRequest
@@ -256,7 +262,8 @@ namespace CueFinder.Auth.IntegrationTests
                 Username = "user2",
                 Password = "Password123!",
                 Name = "User 2",
-                Email = "user2@test.com"
+                Email = "user2@test.com",
+                AcceptedTerms = true
             };
 
             await _authService.RegisterAsync(user1Request);
@@ -288,7 +295,8 @@ namespace CueFinder.Auth.IntegrationTests
             {
                 Username = "dbtest",
                 Password = "Password123!",
-                Name = "Database Test"
+                Name = "Database Test",
+                AcceptedTerms = true
             };
 
             // Act
@@ -311,7 +319,8 @@ namespace CueFinder.Auth.IntegrationTests
             {
                 Username = "hashtest",
                 Password = "MySecurePassword123!",
-                Name = "Hash Test"
+                Name = "Hash Test",
+                AcceptedTerms = true
             };
 
             // Act

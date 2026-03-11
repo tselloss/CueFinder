@@ -52,14 +52,12 @@ public partial class CueService
 
     public async Task<CueResponseDto?> GetCueByIdAsync(int cueId)
     {
-        // Query cues excluding soft-deleted ones (IsSold = true)
         var cue = await _context.Cues
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
             .AsSplitQuery()
             .Where(c => c.Id == cueId)
-            .Where(c => !c.IsSold)
             .FirstOrDefaultAsync();
 
         if (cue == null)
@@ -72,17 +70,24 @@ public partial class CueService
         return MapToCueResponseDto(cue);
     }
 
-    public async Task<List<CueResponseDto>> GetUserCuesAsync(int userId)
+    public async Task<List<CueResponseDto>> GetUserCuesAsync(int userId, bool? hidden = null)
     {
-        var cues = await _context.Cues
+        var query = _context.Cues
             .Include(c => c.Images)
             .Include(c => c.Ratings)
             .Include(c => c.User)
             .AsSplitQuery()
-            .Where(c => c.UserId == userId && !c.IsSold)
-            .OrderByDescending(c => c.CreatedAt)
-            .ToListAsync();
+            .Where(c => c.UserId == userId);
 
+        if (hidden.HasValue)
+        {
+            if (hidden.Value)
+                query = query.Where(c => c.IsHidden);
+            else
+                query = query.Where(c => !c.IsHidden);
+        }
+
+        var cues = await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
         return cues.Select(MapToCueResponseDto).ToList();
     }
 

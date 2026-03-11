@@ -42,6 +42,7 @@ namespace CueFinder.Auth.Controllers
                 HidePhone = u.HidePhone,
                 Role = u.Role,
                 IsActive = u.IsActive,
+                IsVerified = u.IsVerified,
                 Address = u.Address,
                 City = u.City,
                 State = u.State,
@@ -61,6 +62,7 @@ namespace CueFinder.Auth.Controllers
             public string? Phone { get; set; }
             public string? Role { get; set; }
             public bool? IsActive { get; set; }
+            public bool? IsVerified { get; set; }
         }
 
         /// <summary>
@@ -82,6 +84,7 @@ namespace CueFinder.Auth.Controllers
             if (!string.IsNullOrWhiteSpace(req.Phone)) user.Phone = req.Phone;
             if (!string.IsNullOrWhiteSpace(req.Role)) user.Role = req.Role;
             if (req.IsActive.HasValue) user.IsActive = req.IsActive.Value;
+            if (req.IsVerified.HasValue) user.IsVerified = req.IsVerified.Value;
 
             var updated = await _userService.UpdateUserAsync(user);
             var profile = new UserProfile
@@ -94,6 +97,7 @@ namespace CueFinder.Auth.Controllers
                 HidePhone = updated.HidePhone,
                 Role = updated.Role,
                 IsActive = updated.IsActive,
+                IsVerified = updated.IsVerified,
                 Address = updated.Address,
                 City = updated.City,
                 State = updated.State,

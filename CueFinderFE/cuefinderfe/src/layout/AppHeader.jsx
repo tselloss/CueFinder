@@ -247,6 +247,24 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 </Button>
               );
             })}
+            <div className="pt-2 border-t border-border flex gap-2">
+              <Button
+                variant={i18n.language === 'en' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => { handleLanguageChange('en'); setMobileNavOpen(false); }}
+              >
+                EN
+              </Button>
+              <Button
+                variant={i18n.language === 'gr' ? 'default' : 'outline'}
+                size="sm"
+                className="flex-1"
+                onClick={() => { handleLanguageChange('gr'); setMobileNavOpen(false); }}
+              >
+                ΕΛ
+              </Button>
+            </div>
           </div>
         </div>
       )}

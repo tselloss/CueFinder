@@ -1,4 +1,4 @@
-﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net8.0</TargetFramework>
@@ -8,6 +8,10 @@
     <DockerDefaultTargetOS>Linux</DockerDefaultTargetOS>
     <DockerfileContext>.</DockerfileContext>
   </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="**\obj\**\*.cs" />
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="8.0.7" />
@@ -25,6 +29,9 @@
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Messages\CueFinder.Messages.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Forum\CueFinder.Forum.csproj" />
     <ProjectReference Include="..\SolutionLibraries\CueFinder.Accessories\CueFinder.Accessories\CueFinder.Accessories.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.BilliardTables\CueFinder.BilliardTables\CueFinder.BilliardTables.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.Raffles\CueFinder.Raffles.csproj" />
+    <ProjectReference Include="..\SolutionLibraries\CueFinder.CueSets\CueFinder.CueSets\CueFinder.CueSets.csproj" />
   </ItemGroup>
 
 </Project>

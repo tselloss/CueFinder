@@ -1,9 +1,18 @@
 using CueFinder.Auth.Extensions;
 using CueFinder.Auth.Middleware;
 using CueFinder.CueCases.Extensions;
+using CueFinder.CueSets.Extensions;
 using CueFinder.Accessories.Extensions;
+using CueFinder.BilliardTables.Extensions;
+using CueFinder.Raffles.Extensions;
 using CueFinder.Cues.Extensions;
 using CueFinder.Database.Extensions;
+using CueFinder.Auth.Controllers;
+using CueFinder.BilliardTables.Controllers;
+using CueFinder.Cues.Controllers;
+using CueFinder.CueCases.Controllers;
+using CueFinder.CueSets.Controllers;
+using CueFinder.Accessories.Controllers;
 using CueFinder.Extensions.Caching;
 using CueFinder.Extensions.Controllers;
 using CueFinder.Extensions.Email;
@@ -21,10 +30,17 @@ AppContext.SetSwitch("Npgsql.EnableLegacyTimestampBehavior", true);
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container and load controllers from shared libraries (e.g., moderation)
+// Add services to the container and load controllers from shared libraries
 builder.Services
     .AddControllers()
     .AddApplicationPart(typeof(ModerationController).Assembly)
+    .AddApplicationPart(typeof(CueFinder.Raffles.Controllers.RafflesController).Assembly)
+    .AddApplicationPart(typeof(SellersController).Assembly)
+    .AddApplicationPart(typeof(BilliardTablesController).Assembly)
+    .AddApplicationPart(typeof(CuesController).Assembly)
+    .AddApplicationPart(typeof(CueCasesController).Assembly)
+    .AddApplicationPart(typeof(CueSetsController).Assembly)
+    .AddApplicationPart(typeof(AccessoriesController).Assembly)
     .AddJsonOptions(options =>
     {
         options.JsonSerializerOptions.NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString;
@@ -44,7 +60,10 @@ builder.Services.AddDatabaseServices(connectionString);
 builder.Services.AddAuthServices(builder.Configuration);
 builder.Services.AddCueServices();
 builder.Services.AddCueCasesServices();
+builder.Services.AddBilliardTablesServices();
 builder.Services.AddAccessoriesServices();
+builder.Services.AddRaffleServices();
+builder.Services.AddCueSetServices();
 builder.Services.AddMessageServices();
 builder.Services.AddForumServices(connectionString);
 

@@ -42,7 +42,7 @@ public partial class BilliardTablesController
     /// <summary>
     /// Update an existing billiard table (owner only)
     /// </summary>
-    [HttpPut("{id}")]
+    [HttpPut("{id:int}")]
     [Authorize]
     [ProducesResponseType(typeof(BilliardTableResponseDto), StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -77,9 +77,40 @@ public partial class BilliardTablesController
     }
 
     /// <summary>
+    /// Mark a billiard table as sold (owner only)
+    /// </summary>
+    [HttpPut("{id:int}/mark-sold")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> MarkTableAsSold(int id)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var success = await _tableService.MarkAsSoldAsync(id, userId);
+            if (!success)
+                return NotFound(new { message = "Billiard table not found" });
+            return Ok(new { message = "Table marked as sold" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized mark-sold attempt for billiard table {TableId}", id);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking billiard table {TableId} as sold", id);
+            return StatusCode(500, new { message = "Error marking table as sold", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Delete a billiard table (owner only)
     /// </summary>
-    [HttpDelete("{id}")]
+    [HttpDelete("{id:int}")]
     [Authorize]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]

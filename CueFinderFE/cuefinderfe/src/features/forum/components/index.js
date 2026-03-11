@@ -11,6 +11,4 @@ export { default as ForumDetailView } from './ForumDetailView';
 export { default as ForumPost } from './ForumPost';
 export { default as ForumNewDiscussionModal } from './ForumNewDiscussionModal';
 export { default as ForumNewPostModal } from './ForumNewPostModal';
-export { default as DrillDesigner } from './DrillDesigner';
-export { default as DrillPreview } from './DrillPreview';
-export { default as DrillTable } from './DrillTable';
+// Drill components removed in this branch

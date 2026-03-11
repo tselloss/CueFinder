@@ -154,17 +154,14 @@ export async function deleteCue(id) {
 export async function uploadCueImages(cueId, files, onProgress) {
   const formData = new FormData();
   formData.append('cueId', cueId);
-  files.forEach(file => formData.append('file', file));
+  files.forEach(file => formData.append('files', file));
   
   try {
     const response = await axios.post(
-      `${API_BASE_URL}/ext/moderation/upload-image?cueId=${cueId}`,
+      `${API_BASE_URL}/images/upload-multiple`,
       formData,
       {
-        headers: {
-          ...getAuthHeaders(),
-          'Content-Type': 'multipart/form-data'
-        },
+        headers: getAuthHeaders(),
         onUploadProgress: (event) => {
           if (!onProgress) return;
           const percent = Math.round((event.loaded * 100) / (event.total || 1));
@@ -201,7 +198,7 @@ export async function deleteImage(imageId) {
 // Set primary image (requires auth + ownership)
 export async function setPrimaryImage(imageId) {
   try {
-    await axios.put(`${API_BASE_URL}/images/${imageId}/primary`, {}, {
+    await axios.put(`${API_BASE_URL}/images/${imageId}/set-primary`, {}, {
       headers: getAuthHeaders()
     });
     return { success: true };

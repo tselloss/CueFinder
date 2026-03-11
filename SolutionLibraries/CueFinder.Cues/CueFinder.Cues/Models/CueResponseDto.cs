@@ -28,6 +28,7 @@ public class CueResponseDto
     public string? SellerEmail { get; set; }
     public string? SellerPhone { get; set; }
     public bool SellerHidePhone { get; set; }
+    public bool SellerIsVerified { get; set; }
     
     // Images
     public List<CueImageDto> Images { get; set; } = new();
@@ -35,4 +36,7 @@ public class CueResponseDto
     // Ratings
     public double AverageRating { get; set; }
     public int RatingCount { get; set; }
+    // Hidden status
+    public bool IsHidden { get; set; }
+    public DateTime? HiddenAt { get; set; }
 }

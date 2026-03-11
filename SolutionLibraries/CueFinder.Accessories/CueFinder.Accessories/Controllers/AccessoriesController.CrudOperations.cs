@@ -77,6 +77,37 @@ public partial class AccessoriesController
     }
 
     /// <summary>
+    /// Mark an accessory as sold (owner only)
+    /// </summary>
+    [HttpPut("{id}/mark-sold")]
+    [Authorize]
+    [ProducesResponseType(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status403Forbidden)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    public async Task<ActionResult> MarkAccessoryAsSold(int id)
+    {
+        try
+        {
+            var userId = GetCurrentUserId();
+            var success = await _accessoryService.MarkAsSoldAsync(id, userId);
+            if (!success)
+                return NotFound(new { message = "Accessory not found" });
+            return Ok(new { message = "Accessory marked as sold" });
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Unauthorized mark-sold attempt for accessory {AccessoryId}", id);
+            return Forbid();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error marking accessory {AccessoryId} as sold", id);
+            return StatusCode(500, new { message = "Error marking accessory as sold", error = ex.Message });
+        }
+    }
+
+    /// <summary>
     /// Delete an accessory (owner only)
     /// </summary>
     [HttpDelete("{id}")]

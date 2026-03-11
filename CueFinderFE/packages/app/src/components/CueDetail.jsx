@@ -6,11 +6,22 @@ import ItemDetail from './ItemDetail.jsx';
 export default function CueDetail({ onBack }) {
   const { id } = useParams();
   const [cue, setCue] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     async function load() {
-      const data = await cueService.getCueById(id);
-      setCue(data);
+      try {
+        setLoading(true);
+        setError(null);
+        const data = await cueService.getCueById(id);
+        setCue(data);
+      } catch (err) {
+        console.error('Error loading cue:', err);
+        setError('Failed to load listing details. Please try again.');
+      } finally {
+        setLoading(false);
+      }
     }
     load();
   }, [id]);
@@ -37,6 +48,8 @@ export default function CueDetail({ onBack }) {
       itemType="cue"
       onBack={onBack}
       specifications={specifications}
+      loading={loading}
+      error={error}
     />
   );
 }

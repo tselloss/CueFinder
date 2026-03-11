@@ -1,6 +1,4 @@
-import React, { useMemo, useState } from 'react';
-import DrillTable from './DrillTable';
-import { createDefaultDrill, ensureBallSet, getBallLabel, getBallStyle } from '../utils/drillUtils';
+import React from 'react';
 
 export default function DrillDesigner({ drill, onChange }) {
   const [selectedBallId, setSelectedBallId] = useState(1);

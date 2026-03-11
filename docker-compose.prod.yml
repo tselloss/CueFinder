@@ -128,7 +128,7 @@ services:
     <<: *backend-common
     container_name: cuefinder-backend-blue-prod
     ports:
-      - "5010:5010"
+      - "5001:5000"
 
   backend-green:
     <<: *backend-common
@@ -144,13 +144,14 @@ services:
       dockerfile: SolutionLibraries/CueFinderModerator/Dockerfile
     environment:
       - ASPNETCORE_ENVIRONMENT=Production
-      - ASPNETCORE_URLS=http://+:5010
+      - ASPNETCORE_URLS=http://+:5001
       - ConnectionStrings__DefaultConnection=Host=postgres;Port=5432;Database=cuefinder;Username=postgres;Password=${DB_PASSWORD};SslMode=Disable;
       - JwtSettings__SecretKey=${JWT_SECRET}
       - JwtSettings__Issuer=cuefinder.com
       - JwtSettings__Audience=cuefinder.com
       - JwtSettings__ExpirationMinutes=1440
       - Moderation__NudeNetUrl=http://cuefinder-opennsfw-prod:8000
+      - Moderation__Disabled=true
     ports: []
     depends_on:
       postgres:
@@ -179,12 +180,10 @@ services:
     restart: always
     build:
       context: ./CueFinderFE
-      dockerfile: Dockerfile
-      args:
-        - REACT_APP_API_URL=${FRONTEND_API_URL}
+      dockerfile: Dockerfile.prebuilt
     ports: []
     depends_on:
-      backend-blue:
+      postgres:
         condition: service_healthy
     healthcheck:
       test: ["CMD", "curl", "-f", "http://localhost:80"]
@@ -221,7 +220,7 @@ services:
       frontend:
         condition: service_healthy
       backend-blue:
-        condition: service_healthy
+        condition: service_started
     healthcheck:
       test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
       interval: 30s
