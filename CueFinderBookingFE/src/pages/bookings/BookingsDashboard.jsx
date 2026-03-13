@@ -5,11 +5,120 @@ import { useTranslation } from 'react-i18next';
 
 const toIso = (value) => (value ? new Date(value).toISOString() : null);
 
+function BookingCard({ booking, statusOptions, onStatusChange, onDelete, loading, t }) {
+  const [editing, setEditing] = useState(false);
+  const [editStatus, setEditStatus] = useState(booking.status);
+  const [editNotes, setEditNotes] = useState(booking.notes || '');
+  const [deleteConfirm, setDeleteConfirm] = useState(false);
+
+  const status = (booking.status || '').toLowerCase();
+
+  const handleSave = () => {
+    onStatusChange(booking.id, { status: editStatus, notes: editNotes });
+    setEditing(false);
+  };
+
+  const handleQuickStatus = (newStatus) => {
+    onStatusChange(booking.id, { status: newStatus, notes: booking.notes || '' });
+  };
+
+  return (
+    <div className="list-item">
+      <div className="list-meta">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+          <strong style={{ color: '#f1f5f9' }}>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
+          <span className={`status-pill status-${status}`}>
+            {t(`status.${booking.status}`, { defaultValue: booking.status })}
+          </span>
+        </div>
+        <div className="booking-time-range">{booking.startLabel} → {booking.endLabel}</div>
+        <div className="booking-who">
+          {t('bookings.customerLabel')}: <strong style={{ color: '#cbd5e1' }}>{booking.customerName || 'N/A'}</strong>
+          {booking.customerEmail && <span> · {booking.customerEmail}</span>}
+          {booking.customerPhone && <span> · {booking.customerPhone}</span>}
+        </div>
+        {booking.notes && <div className="muted" style={{ fontSize: '0.82rem', fontStyle: 'italic', borderLeft: '2px solid #1f2937', paddingLeft: '8px' }}>{booking.notes}</div>}
+      </div>
+
+      <div className="list-actions">
+        {!editing && !deleteConfirm && (
+          <>
+            <div className="btn-row">
+              {status === 'pending' && (
+                <button className="quick-confirm" disabled={loading} onClick={() => handleQuickStatus('confirmed')}>
+                  {t('bookings.confirmAction')}
+                </button>
+              )}
+              {status === 'confirmed' && (
+                <button className="quick-complete" disabled={loading} onClick={() => handleQuickStatus('completed')}>
+                  {t('bookings.completeAction')}
+                </button>
+              )}
+              {(status === 'pending' || status === 'confirmed') && (
+                <button className="quick-reject" disabled={loading} onClick={() => handleQuickStatus('cancelled')}>
+                  {t('bookings.rejectAction')}
+                </button>
+              )}
+            </div>
+            <div className="btn-row" style={{ marginTop: '4px' }}>
+              <button className="secondary" disabled={loading} onClick={() => setEditing(true)}>
+                {t('common.edit')}
+              </button>
+              <button className="danger" disabled={loading} onClick={() => setDeleteConfirm(true)}>
+                {t('common.delete')}
+              </button>
+            </div>
+          </>
+        )}
+
+        {deleteConfirm && (
+          <div className="confirm-inline">
+            <span className="muted" style={{ fontSize: '0.9rem' }}>{t('bookings.deleteConfirm')}</span>
+            <button className="danger" disabled={loading} onClick={() => onDelete(booking.id)}>
+              {t('bookings.deleteConfirmYes')}
+            </button>
+            <button className="secondary" disabled={loading} onClick={() => setDeleteConfirm(false)}>
+              {t('common.cancel')}
+            </button>
+          </div>
+        )}
+
+        {editing && (
+          <div className="edit-grid">
+            <select
+              value={editStatus}
+              onChange={(e) => setEditStatus(e.target.value)}
+            >
+              {statusOptions.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+            <input
+              placeholder={t('book.notes')}
+              value={editNotes}
+              onChange={(e) => setEditNotes(e.target.value)}
+            />
+            <div className="btn-row">
+              <button className="secondary" disabled={loading} onClick={handleSave}>
+                {t('common.update')}
+              </button>
+              <button className="danger" disabled={loading} onClick={() => setEditing(false)}>
+                {t('common.cancel')}
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
 export default function BookingsDashboard() {
   const { t } = useTranslation();
   const [bookings, setBookings] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [showAddForm, setShowAddForm] = useState(false);
   const [form, setForm] = useState({
     tableId: '',
     customerName: '',
@@ -20,7 +129,6 @@ export default function BookingsDashboard() {
     status: 'pending',
     notes: ''
   });
-  const [edits, setEdits] = useState({});
   const [tableOptions, setTableOptions] = useState([]);
 
   const statusOptions = useMemo(() => [
@@ -69,7 +177,6 @@ export default function BookingsDashboard() {
       setError(t('bookings.requiredFields'));
       return;
     }
-
     try {
       setLoading(true);
       setError('');
@@ -83,16 +190,8 @@ export default function BookingsDashboard() {
         status: form.status,
         notes: form.notes
       });
-      setForm({
-        tableId: '',
-        customerName: '',
-        customerEmail: '',
-        customerPhone: '',
-        startTime: '',
-        endTime: '',
-        status: 'pending',
-        notes: ''
-      });
+      setForm({ tableId: '', customerName: '', customerEmail: '', customerPhone: '', startTime: '', endTime: '', status: 'pending', notes: '' });
+      setShowAddForm(false);
       await loadBookings();
     } catch (err) {
       setError(err?.message || t('bookings.error.create'));
@@ -101,17 +200,11 @@ export default function BookingsDashboard() {
     }
   };
 
-  const handleUpdate = async (id) => {
-    const edit = edits[id];
-    if (!edit) return;
-
+  const handleStatusChange = async (id, payload) => {
     try {
       setLoading(true);
       setError('');
-      await updateBooking(id, {
-        status: edit.status,
-        notes: edit.notes
-      });
+      await updateBooking(id, payload);
       await loadBookings();
     } catch (err) {
       setError(err?.message || t('bookings.error.update'));
@@ -139,31 +232,38 @@ export default function BookingsDashboard() {
     endLabel: new Date(booking.endTime).toLocaleString()
   })), [bookings]);
 
-  const now = useMemo(() => new Date(), [bookings]);
   const pendingBookings = useMemo(
     () => formatted
-      .filter((booking) => (booking.status || '').toLowerCase() === 'pending')
+      .filter((b) => (b.status || '').toLowerCase() === 'pending')
       .sort((a, b) => new Date(a.startTime) - new Date(b.startTime)),
     [formatted]
   );
   const upcomingBookings = useMemo(
-    () => formatted
-      .filter((booking) => {
-        const status = (booking.status || '').toLowerCase();
-        return status === 'confirmed' && new Date(booking.startTime) >= now;
-      })
-      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime)),
-    [formatted, now]
+    () => {
+      const now = new Date();
+      return formatted
+        .filter((b) => {
+          const s = (b.status || '').toLowerCase();
+          return s === 'confirmed' && new Date(b.startTime) >= now;
+        })
+        .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+    },
+    [formatted]
   );
   const completedBookings = useMemo(
-    () => formatted
-      .filter((booking) => {
-        const status = (booking.status || '').toLowerCase();
-        return status === 'completed' || status === 'cancelled' || new Date(booking.endTime) < now;
-      })
-      .sort((a, b) => new Date(b.endTime) - new Date(a.endTime)),
-    [formatted, now]
+    () => {
+      const now = new Date();
+      return formatted
+        .filter((b) => {
+          const s = (b.status || '').toLowerCase();
+          return s === 'completed' || s === 'cancelled' || (s === 'confirmed' && new Date(b.endTime) < now);
+        })
+        .sort((a, b) => new Date(b.endTime) - new Date(a.endTime));
+    },
+    [formatted]
   );
+
+  const cardProps = { statusOptions, onStatusChange: handleStatusChange, onDelete: handleDelete, loading, t };
 
   return (
     <section className="card">
@@ -174,151 +274,117 @@ export default function BookingsDashboard() {
 
       {error && <p className="error">{error}</p>}
 
-      <div className="section-card">
-        <div className="section-header">
-          <h2 className="section-title">{t('bookings.addBooking')}</h2>
+      {/* Stats */}
+      <div className="stats-grid">
+        <div className="stat-card">
+          <span className="stat-label">{t('bookings.totalLabel')}</span>
+          <strong>{formatted.length}</strong>
         </div>
-        <div className="form-grid">
-        {tableOptions.length > 0 ? (
-          <select
-            value={form.tableId}
-            onChange={(event) => setForm((prev) => ({ ...prev, tableId: event.target.value }))}
+        <div className="stat-card">
+          <span className="stat-label">{t('bookings.pendingLabel')}</span>
+          <strong style={{ color: pendingBookings.length > 0 ? '#facc15' : undefined }}>{pendingBookings.length}</strong>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">{t('bookings.upcomingLabel')}</span>
+          <strong>{upcomingBookings.length}</strong>
+        </div>
+        <div className="stat-card">
+          <span className="stat-label">{t('bookings.completedLabel')}</span>
+          <strong>{completedBookings.length}</strong>
+        </div>
+      </div>
+
+      {/* Add booking (collapsible) */}
+      <div className="section-card">
+        <div className="add-form-toggle" onClick={() => setShowAddForm((v) => !v)}>
+          <h2 className="section-title">{t('bookings.addBookingToggle')}</h2>
+          <svg
+            className={`toggle-icon ${showAddForm ? 'open' : ''}`}
+            width="20" height="20" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"
           >
-            <option value="">{t('book.selectTable')}</option>
-            {tableOptions.map((option) => (
-              <option key={option.id} value={option.id}>{option.label}</option>
-            ))}
-          </select>
-        ) : (
-          <input
-            placeholder={t('book.tableId')}
-            value={form.tableId}
-            onChange={(event) => setForm((prev) => ({ ...prev, tableId: event.target.value }))}
-          />
+            <polyline points="6 9 12 15 18 9" />
+          </svg>
+        </div>
+        {showAddForm && (
+          <div className="form-grid">
+            {tableOptions.length > 0 ? (
+              <select
+                value={form.tableId}
+                onChange={(e) => setForm((prev) => ({ ...prev, tableId: e.target.value }))}
+              >
+                <option value="">{t('book.selectTable')}</option>
+                {tableOptions.map((option) => (
+                  <option key={option.id} value={option.id}>{option.label}</option>
+                ))}
+              </select>
+            ) : (
+              <input
+                placeholder={t('book.tableId')}
+                value={form.tableId}
+                onChange={(e) => setForm((prev) => ({ ...prev, tableId: e.target.value }))}
+              />
+            )}
+            <input
+              placeholder={t('book.customerName')}
+              value={form.customerName}
+              onChange={(e) => setForm((prev) => ({ ...prev, customerName: e.target.value }))}
+            />
+            <input
+              placeholder={t('book.customerEmail')}
+              value={form.customerEmail}
+              onChange={(e) => setForm((prev) => ({ ...prev, customerEmail: e.target.value }))}
+            />
+            <input
+              placeholder={t('book.customerPhone')}
+              value={form.customerPhone}
+              onChange={(e) => setForm((prev) => ({ ...prev, customerPhone: e.target.value }))}
+            />
+            <select
+              value={form.status}
+              onChange={(e) => setForm((prev) => ({ ...prev, status: e.target.value }))}
+            >
+              {statusOptions.map((s) => (
+                <option key={s.value} value={s.value}>{s.label}</option>
+              ))}
+            </select>
+            <input
+              type="datetime-local"
+              value={form.startTime}
+              onChange={(e) => setForm((prev) => ({ ...prev, startTime: e.target.value }))}
+            />
+            <input
+              type="datetime-local"
+              value={form.endTime}
+              onChange={(e) => setForm((prev) => ({ ...prev, endTime: e.target.value }))}
+            />
+            <input
+              placeholder={t('book.notes')}
+              value={form.notes}
+              onChange={(e) => setForm((prev) => ({ ...prev, notes: e.target.value }))}
+            />
+            <button className="primary" disabled={loading} onClick={handleCreate}>
+              {t('bookings.addBooking')}
+            </button>
+          </div>
         )}
-        <input
-          placeholder={t('book.customerName')}
-          value={form.customerName}
-          onChange={(event) => setForm((prev) => ({ ...prev, customerName: event.target.value }))}
-        />
-        <input
-          placeholder={t('book.customerEmail')}
-          value={form.customerEmail}
-          onChange={(event) => setForm((prev) => ({ ...prev, customerEmail: event.target.value }))}
-        />
-        <input
-          placeholder={t('book.customerPhone')}
-          value={form.customerPhone}
-          onChange={(event) => setForm((prev) => ({ ...prev, customerPhone: event.target.value }))}
-        />
-        <select
-          value={form.status}
-          onChange={(event) => setForm((prev) => ({ ...prev, status: event.target.value }))}
-        >
-          {statusOptions.map((status) => (
-            <option key={status.value} value={status.value}>{status.label}</option>
-          ))}
-        </select>
-        <input
-          type="datetime-local"
-          value={form.startTime}
-          onChange={(event) => setForm((prev) => ({ ...prev, startTime: event.target.value }))}
-        />
-        <input
-          type="datetime-local"
-          value={form.endTime}
-          onChange={(event) => setForm((prev) => ({ ...prev, endTime: event.target.value }))}
-        />
-        <input
-          placeholder={t('book.notes')}
-          value={form.notes}
-          onChange={(event) => setForm((prev) => ({ ...prev, notes: event.target.value }))}
-        />
-        <button className="primary" disabled={loading} onClick={handleCreate}>
-          {t('bookings.addBooking')}
-        </button>
-        </div>
       </div>
 
-      <div className="section-card">
-        <div className="section-header">
-          <h2 className="section-title">{t('bookings.statsTitle')}</h2>
-        </div>
-        <div className="stats-grid">
-          <div className="stat-card">
-            <span className="muted">{t('bookings.totalLabel')}</span>
-            <strong>{formatted.length}</strong>
-          </div>
-          <div className="stat-card">
-            <span className="muted">{t('bookings.pendingLabel')}</span>
-            <strong>{pendingBookings.length}</strong>
-          </div>
-          <div className="stat-card">
-            <span className="muted">{t('bookings.upcomingLabel')}</span>
-            <strong>{upcomingBookings.length}</strong>
-          </div>
-          <div className="stat-card">
-            <span className="muted">{t('bookings.completedLabel')}</span>
-            <strong>{completedBookings.length}</strong>
-          </div>
-        </div>
-      </div>
-
-      <div className="section-card">
+      {/* Pending */}
+      <div className={`section-card${pendingBookings.length > 0 ? ' section-pending' : ''}`}>
         <div className="section-header">
           <h2 className="section-title">{t('bookings.pendingTitle')}</h2>
-          <span className="muted">{pendingBookings.length}</span>
+          {pendingBookings.length > 0 && <span className="tab-badge">{pendingBookings.length}</span>}
         </div>
         <div className="list">
           {pendingBookings.length === 0 && !loading && <p className="muted">{t('bookings.noBookings')}</p>}
-          {pendingBookings.map((booking) => {
-            const edit = edits[booking.id] || { status: booking.status, notes: booking.notes };
-            return (
-              <div key={booking.id} className="list-item">
-                <div className="list-meta">
-                  <strong>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
-                  <div className="muted">{booking.startLabel} → {booking.endLabel}</div>
-                  <div className="muted">{t('bookings.customerLabel')}: {booking.customerName || 'N/A'}</div>
-                  <div className="status-row">
-                    <span className="muted">{t('bookings.statusLabel')}:</span>
-                    <span className={`status-pill status-${(booking.status || 'pending').toLowerCase()}`}>
-                      {t(`status.${booking.status}`, { defaultValue: booking.status })}
-                    </span>
-                  </div>
-                </div>
-                <div className="list-actions">
-                  <select
-                    value={edit.status}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, status: event.target.value }
-                    }))}
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder={t('book.notes')}
-                    value={edit.notes || ''}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, notes: event.target.value }
-                    }))}
-                  />
-                  <button className="secondary" disabled={loading} onClick={() => handleUpdate(booking.id)}>
-                    {t('common.update')}
-                  </button>
-                  <button className="danger" disabled={loading} onClick={() => handleDelete(booking.id)}>
-                    {t('common.delete')}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {pendingBookings.map((booking) => (
+            <BookingCard key={booking.id} booking={booking} {...cardProps} />
+          ))}
         </div>
       </div>
 
+      {/* Upcoming */}
       <div className="section-card">
         <div className="section-header">
           <h2 className="section-title">{t('bookings.upcomingTitle')}</h2>
@@ -326,54 +392,13 @@ export default function BookingsDashboard() {
         </div>
         <div className="list">
           {upcomingBookings.length === 0 && !loading && <p className="muted">{t('bookings.noBookings')}</p>}
-          {upcomingBookings.map((booking) => {
-            const edit = edits[booking.id] || { status: booking.status, notes: booking.notes };
-            return (
-              <div key={booking.id} className="list-item">
-                <div className="list-meta">
-                  <strong>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
-                  <div className="muted">{booking.startLabel} → {booking.endLabel}</div>
-                  <div className="muted">{t('bookings.customerLabel')}: {booking.customerName || 'N/A'}</div>
-                  <div className="status-row">
-                    <span className="muted">{t('bookings.statusLabel')}:</span>
-                    <span className={`status-pill status-${(booking.status || 'pending').toLowerCase()}`}>
-                      {t(`status.${booking.status}`, { defaultValue: booking.status })}
-                    </span>
-                  </div>
-                </div>
-                <div className="list-actions">
-                  <select
-                    value={edit.status}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, status: event.target.value }
-                    }))}
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder={t('book.notes')}
-                    value={edit.notes || ''}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, notes: event.target.value }
-                    }))}
-                  />
-                  <button className="secondary" disabled={loading} onClick={() => handleUpdate(booking.id)}>
-                    {t('common.update')}
-                  </button>
-                  <button className="danger" disabled={loading} onClick={() => handleDelete(booking.id)}>
-                    {t('common.delete')}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {upcomingBookings.map((booking) => (
+            <BookingCard key={booking.id} booking={booking} {...cardProps} />
+          ))}
         </div>
       </div>
 
+      {/* Completed / Cancelled */}
       <div className="section-card">
         <div className="section-header">
           <h2 className="section-title">{t('bookings.completedTitle')}</h2>
@@ -381,51 +406,9 @@ export default function BookingsDashboard() {
         </div>
         <div className="list">
           {completedBookings.length === 0 && !loading && <p className="muted">{t('bookings.noBookings')}</p>}
-          {completedBookings.map((booking) => {
-            const edit = edits[booking.id] || { status: booking.status, notes: booking.notes };
-            return (
-              <div key={booking.id} className="list-item">
-                <div className="list-meta">
-                  <strong>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
-                  <div className="muted">{booking.startLabel} → {booking.endLabel}</div>
-                  <div className="muted">{t('bookings.customerLabel')}: {booking.customerName || 'N/A'}</div>
-                  <div className="status-row">
-                    <span className="muted">{t('bookings.statusLabel')}:</span>
-                    <span className={`status-pill status-${(booking.status || 'pending').toLowerCase()}`}>
-                      {t(`status.${booking.status}`, { defaultValue: booking.status })}
-                    </span>
-                  </div>
-                </div>
-                <div className="list-actions">
-                  <select
-                    value={edit.status}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, status: event.target.value }
-                    }))}
-                  >
-                    {statusOptions.map((status) => (
-                      <option key={status.value} value={status.value}>{status.label}</option>
-                    ))}
-                  </select>
-                  <input
-                    placeholder={t('book.notes')}
-                    value={edit.notes || ''}
-                    onChange={(event) => setEdits((prev) => ({
-                      ...prev,
-                      [booking.id]: { ...edit, notes: event.target.value }
-                    }))}
-                  />
-                  <button className="secondary" disabled={loading} onClick={() => handleUpdate(booking.id)}>
-                    {t('common.update')}
-                  </button>
-                  <button className="danger" disabled={loading} onClick={() => handleDelete(booking.id)}>
-                    {t('common.delete')}
-                  </button>
-                </div>
-              </div>
-            );
-          })}
+          {completedBookings.map((booking) => (
+            <BookingCard key={booking.id} booking={booking} {...cardProps} />
+          ))}
         </div>
       </div>
     </section>

@@ -8,6 +8,8 @@ import BookingsDashboard from './pages/bookings/BookingsDashboard.jsx';
 import MyBookings from './pages/bookings/MyBookings.jsx';
 import Clubs from './pages/Clubs.jsx';
 import OwnerDashboard from './pages/OwnerDashboard.jsx';
+import FindBuddy from './pages/FindBuddy.jsx';
+import LiveTables from './pages/LiveTables.jsx';
 import { useAuth } from './auth/AuthContext.jsx';
 import { useTranslation } from 'react-i18next';
 
@@ -44,6 +46,7 @@ export default function App() {
         <Route path="/login" element={<AuthPage />} />
         <Route path="/register" element={<AuthPage />} />
         <Route path="/book" element={<BookTable />} />
+        <Route path="/find-buddy" element={<FindBuddy />} />
         <Route
           path="/dashboard"
           element={
@@ -77,6 +80,18 @@ export default function App() {
               <Navigate to="/login" replace />
             ) : isAdmin || isOwner ? (
               <BookingsDashboard />
+            ) : (
+              <Navigate to="/dashboard" replace />
+            )
+          }
+        />
+        <Route
+          path="/live-tables"
+          element={
+            !user ? (
+              <Navigate to="/login" replace />
+            ) : isAdmin || isOwner ? (
+              <LiveTables />
             ) : (
               <Navigate to="/dashboard" replace />
             )

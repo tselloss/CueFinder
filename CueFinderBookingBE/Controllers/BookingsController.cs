@@ -526,6 +526,48 @@ public class BookingsController : ControllerBase
         }
     }
 
+    [HttpPost("mine/{id}/cancel")]
+    [Authorize]
+    public async Task<ActionResult> CancelMyBooking(Guid id)
+    {
+        try
+        {
+            var booking = await _context.BilliardClubBookings.FirstOrDefaultAsync(b => b.Id == id);
+            if (booking == null)
+            {
+                return NotFound();
+            }
+
+            var userId = GetUserIdFromClaims();
+            if (userId == Guid.Empty)
+            {
+                return Unauthorized("User authentication failed");
+            }
+
+            if (booking.CreatedByUserId != userId)
+            {
+                return Forbid();
+            }
+
+            var status = (booking.Status ?? string.Empty).ToLower();
+            if (status == "completed" || status == "cancelled")
+            {
+                return BadRequest($"Cannot cancel a booking that is already {status}");
+            }
+
+            booking.Status = "cancelled";
+            booking.UpdatedAt = DateTime.UtcNow;
+            await _context.SaveChangesAsync();
+
+            return Ok();
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Error cancelling booking {Id}", id);
+            return StatusCode(500, "Error cancelling booking");
+        }
+    }
+
     [HttpDelete("{id}")]
     [Authorize(Roles = "admin,club_owner,clubowner,club owner,owner")]
     public async Task<ActionResult> DeleteBooking(Guid id)

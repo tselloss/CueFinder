@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
-import { getMyBookings, updateMyBooking } from '../../api/bookingService';
+import { cancelMyBooking, getMyBookings, updateMyBooking } from '../../api/bookingService';
 import { useTranslation } from 'react-i18next';
 
 const toIso = (value) => (value ? new Date(value).toISOString() : null);
@@ -18,6 +18,7 @@ export default function MyBookings() {
   const [loading, setLoading] = useState(false);
   const [edits, setEdits] = useState({});
   const [editingId, setEditingId] = useState('');
+  const [cancelConfirmId, setCancelConfirmId] = useState('');
 
   const loadBookings = async () => {
     try {
@@ -42,8 +43,29 @@ export default function MyBookings() {
     endLabel: new Date(booking.endTime).toLocaleString()
   })), [bookings]);
 
+  const upcomingBookings = useMemo(() => {
+    const now = new Date();
+    return formatted
+      .filter((b) => {
+        const s = (b.status || '').toLowerCase();
+        return s !== 'completed' && s !== 'cancelled' && new Date(b.endTime) >= now;
+      })
+      .sort((a, b) => new Date(a.startTime) - new Date(b.startTime));
+  }, [formatted]);
+
+  const pastBookings = useMemo(() => {
+    const now = new Date();
+    return formatted
+      .filter((b) => {
+        const s = (b.status || '').toLowerCase();
+        return s === 'completed' || s === 'cancelled' || new Date(b.endTime) < now;
+      })
+      .sort((a, b) => new Date(b.startTime) - new Date(a.startTime));
+  }, [formatted]);
+
   const handleEditStart = (booking) => {
     setEditingId(booking.id);
+    setCancelConfirmId('');
     setEdits((prev) => ({
       ...prev,
       [booking.id]: {
@@ -54,9 +76,7 @@ export default function MyBookings() {
     }));
   };
 
-  const handleEditCancel = () => {
-    setEditingId('');
-  };
+  const handleEditCancel = () => setEditingId('');
 
   const handleEditChange = (bookingId, field, value) => {
     setEdits((prev) => ({
@@ -68,7 +88,6 @@ export default function MyBookings() {
   const handleUpdate = async (bookingId) => {
     const edit = edits[bookingId];
     if (!edit) return;
-
     try {
       setLoading(true);
       setError('');
@@ -86,6 +105,102 @@ export default function MyBookings() {
     }
   };
 
+  const handleCancel = async (bookingId) => {
+    try {
+      setLoading(true);
+      setError('');
+      await cancelMyBooking(bookingId);
+      setCancelConfirmId('');
+      await loadBookings();
+    } catch (err) {
+      setError(err?.message || t('myBookings.cancelError'));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const renderBooking = (booking) => {
+    const status = (booking.status || '').toLowerCase();
+    const canEdit = status !== 'completed' && status !== 'cancelled';
+    const canCancel = status === 'pending' || status === 'confirmed';
+
+    return (
+      <div key={booking.id} className="list-item">
+        <div className="list-meta">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexWrap: 'wrap' }}>
+            <strong style={{ color: '#f1f5f9' }}>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
+            <span className={`status-pill status-${status}`}>
+              {t(`status.${booking.status}`, { defaultValue: booking.status })}
+            </span>
+          </div>
+          <div className="booking-time-range">{booking.startLabel} → {booking.endLabel}</div>
+          {editingId === booking.id && (
+            <p className="muted edit-note">{t('myBookings.editNote')}</p>
+          )}
+        </div>
+
+        <div className="list-actions">
+          {!canEdit && (
+            <span className="muted">{t('myBookings.editDisabled')}</span>
+          )}
+
+          {canEdit && editingId !== booking.id && cancelConfirmId !== booking.id && (
+            <div className="btn-row">
+              <button className="secondary" disabled={loading} onClick={() => handleEditStart(booking)}>
+                {t('common.edit')}
+              </button>
+              {canCancel && (
+                <button className="quick-reject" disabled={loading} onClick={() => setCancelConfirmId(booking.id)}>
+                  {t('myBookings.cancelBooking')}
+                </button>
+              )}
+            </div>
+          )}
+
+          {cancelConfirmId === booking.id && (
+            <div className="confirm-inline">
+              <span className="muted" style={{ fontSize: '0.9rem' }}>{t('myBookings.cancelConfirm')}</span>
+              <button className="danger" disabled={loading} onClick={() => handleCancel(booking.id)}>
+                {t('myBookings.cancelConfirmYes')}
+              </button>
+              <button className="secondary" disabled={loading} onClick={() => setCancelConfirmId('')}>
+                {t('common.cancel')}
+              </button>
+            </div>
+          )}
+
+          {editingId === booking.id && (
+            <div className="edit-grid">
+              <input
+                type="datetime-local"
+                value={edits[booking.id]?.startTime || ''}
+                onChange={(event) => handleEditChange(booking.id, 'startTime', event.target.value)}
+              />
+              <input
+                type="datetime-local"
+                value={edits[booking.id]?.endTime || ''}
+                onChange={(event) => handleEditChange(booking.id, 'endTime', event.target.value)}
+              />
+              <input
+                placeholder={t('book.notes')}
+                value={edits[booking.id]?.notes || ''}
+                onChange={(event) => handleEditChange(booking.id, 'notes', event.target.value)}
+              />
+              <div className="btn-row">
+                <button className="secondary" disabled={loading} onClick={() => handleUpdate(booking.id)}>
+                  {t('common.update')}
+                </button>
+                <button className="danger" disabled={loading} onClick={handleEditCancel}>
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    );
+  };
+
   return (
     <section className="card">
       <div className="section-header">
@@ -96,74 +211,35 @@ export default function MyBookings() {
       {error && <p className="error">{error}</p>}
       {loading && <p className="muted">{t('common.loading')}</p>}
 
-      <div className="section-card">
-        <div className="list">
-          {formatted.length === 0 && !loading && <p className="muted">{t('myBookings.noBookings')}</p>}
-          {formatted.map((booking) => (
-            <div key={booking.id} className="list-item">
-              <div className="list-meta">
-                <strong>{booking.locationName || t('bookings.locationFallback')} · {booking.tableName || t('bookings.tableFallback')}</strong>
-                <div className="muted">{booking.startLabel} → {booking.endLabel}</div>
-                <div className="status-row">
-                  <span className="muted">{t('bookings.statusLabel')}:</span>
-                  <span className={`status-pill status-${(booking.status || 'pending').toLowerCase()}`}
-                    title={t(`status.${booking.status}`, { defaultValue: booking.status })}
-                  >
-                    {t(`status.${booking.status}`, { defaultValue: booking.status })}
-                  </span>
-                </div>
-                {editingId === booking.id && (
-                  <p className="muted edit-note">{t('myBookings.editNote')}</p>
-                )}
-              </div>
-              <div className="list-actions">
-                {(() => {
-                  const status = (booking.status || '').toLowerCase();
-                  const canEdit = status !== 'completed' && status !== 'cancelled';
-                  if (!canEdit) {
-                    return <span className="muted">{t('myBookings.editDisabled')}</span>;
-                  }
-
-                  if (editingId === booking.id) {
-                    const edit = edits[booking.id] || {};
-                    return (
-                      <div className="edit-grid">
-                        <input
-                          type="datetime-local"
-                          value={edit.startTime || ''}
-                          onChange={(event) => handleEditChange(booking.id, 'startTime', event.target.value)}
-                        />
-                        <input
-                          type="datetime-local"
-                          value={edit.endTime || ''}
-                          onChange={(event) => handleEditChange(booking.id, 'endTime', event.target.value)}
-                        />
-                        <input
-                          placeholder={t('book.notes')}
-                          value={edit.notes || ''}
-                          onChange={(event) => handleEditChange(booking.id, 'notes', event.target.value)}
-                        />
-                        <button className="secondary" disabled={loading} onClick={() => handleUpdate(booking.id)}>
-                          {t('common.update')}
-                        </button>
-                        <button className="danger" disabled={loading} onClick={handleEditCancel}>
-                          {t('common.cancel')}
-                        </button>
-                      </div>
-                    );
-                  }
-
-                  return (
-                    <button className="secondary" disabled={loading} onClick={() => handleEditStart(booking)}>
-                      {t('common.edit')}
-                    </button>
-                  );
-                })()}
-              </div>
-            </div>
-          ))}
+      {formatted.length === 0 && !loading && (
+        <div className="section-card" style={{ textAlign: 'center', padding: '40px 20px' }}>
+          <p className="muted" style={{ margin: 0 }}>{t('myBookings.noBookings')}</p>
         </div>
-      </div>
+      )}
+
+      {upcomingBookings.length > 0 && (
+        <div className="section-card">
+          <div className="section-header">
+            <h2 className="section-title">{t('myBookings.upcomingTitle')}</h2>
+            <span className="muted">{upcomingBookings.length}</span>
+          </div>
+          <div className="list">
+            {upcomingBookings.map(renderBooking)}
+          </div>
+        </div>
+      )}
+
+      {pastBookings.length > 0 && (
+        <div className="section-card">
+          <div className="section-header">
+            <h2 className="section-title">{t('myBookings.pastTitle')}</h2>
+            <span className="muted">{pastBookings.length}</span>
+          </div>
+          <div className="list">
+            {pastBookings.map(renderBooking)}
+          </div>
+        </div>
+      )}
     </section>
   );
 }

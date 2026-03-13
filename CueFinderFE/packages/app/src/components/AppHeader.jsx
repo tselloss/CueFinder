@@ -2,8 +2,9 @@ import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from './ui/button.jsx';
 import { Badge } from './ui/badge.jsx';
-import { Mail, LogOut, User as UserIcon, Shield, Globe } from 'lucide-react';
+import { Mail, LogOut, User as UserIcon, Shield, Globe, CalendarDays } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuLabel, DropdownMenuSeparator, DropdownMenuTrigger } from './ui/dropdown-menu.jsx';
+import { BOOKING_SITE_URL } from '../config/bookingConfig.js';
 
 export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, onNavigate, onLogout, currentPath = '/' }) {
   const { i18n, t } = useTranslation();
@@ -66,6 +67,12 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 </Button>
               );
             })}
+            <a href={BOOKING_SITE_URL} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }}>
+              <Button variant="outline" size="sm" className="gap-1.5 border-teal-500/50 text-teal-400 hover:bg-teal-500/10 hover:border-teal-400 transition-colors">
+                <CalendarDays className="h-3.5 w-3.5" />
+                Book a Table
+              </Button>
+            </a>
           </nav>
         </div>
 
@@ -243,6 +250,13 @@ export default function AppHeader({ title = 'CueFinder', user, unreadCount = 0, 
                 </Button>
               );
             })}
+            {/* Book a Table */}
+            <a href={BOOKING_SITE_URL} target="_blank" rel="noreferrer" style={{ textDecoration: 'none' }} onClick={() => setMobileNavOpen(false)}>
+              <Button variant="outline" size="sm" className="w-full justify-start gap-2 border-teal-500/50 text-teal-400 hover:bg-teal-500/10">
+                <CalendarDays className="h-4 w-4" />
+                Book a Table
+              </Button>
+            </a>
             {/* Mobile Language Switcher */}
             <div className="pt-2 border-t border-border flex gap-2">
               <Button

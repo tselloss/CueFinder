@@ -1,5 +1,6 @@
 import React from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import { BOOKING_SITE_URL } from '../config/bookingConfig.js';
 
 export default function DesktopSidebar({
   category,
@@ -573,6 +574,44 @@ export default function DesktopSidebar({
           </button>
         </div>
       )}
+
+      {/* Book a Table */}
+      <div className="mt-auto pt-3 border-t border-blue-500/20">
+        <a
+          href={BOOKING_SITE_URL}
+          target="_blank"
+          rel="noreferrer"
+          style={{ textDecoration: 'none' }}
+          onClick={() => setMobileMenuOpen(false)}
+        >
+          <div
+            className="w-full flex flex-row gap-3 items-center justify-start text-left p-3 rounded-lg transition-all duration-200"
+            style={{
+              background: 'linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%)',
+              color: '#2dd4bf',
+              border: '1px solid rgba(20, 184, 166, 0.35)',
+              cursor: 'pointer',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(20, 184, 166, 0.25) 0%, rgba(13, 148, 136, 0.25) 100%)';
+              e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.6)';
+              e.currentTarget.style.transform = 'translateX(2px)';
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = 'linear-gradient(135deg, rgba(20, 184, 166, 0.15) 0%, rgba(13, 148, 136, 0.15) 100%)';
+              e.currentTarget.style.borderColor = 'rgba(20, 184, 166, 0.35)';
+              e.currentTarget.style.transform = 'translateX(0)';
+            }}
+          >
+            <span className="text-xl leading-none">📅</span>
+            <div className="flex flex-col">
+              <span className="text-sm font-semibold">Book a Table</span>
+              <span className="text-xs leading-none" style={{ color: '#5eead4', opacity: 0.85 }}>Reserve at a billiard club</span>
+            </div>
+            <span className="ml-auto text-xs" style={{ color: '#5eead4', opacity: 0.7 }}>↗</span>
+          </div>
+        </a>
+      </div>
 
     </div>
   );

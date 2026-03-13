@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext.jsx';
 import * as clubService from '../api/clubService.js';
+import * as buddyService from '../api/buddyService.js';
 
 const OWNER_ROLES = ['club_owner', 'clubowner', 'club owner', 'owner'];
 
@@ -14,6 +15,7 @@ const createEmptyRecord = (user) => ({
   website: '',
   logoUrl: '',
   description: '',
+  defaultHourlyRate: '',
   coOwners: [],
   locations: [
     {
@@ -27,7 +29,7 @@ const createEmptyRecord = (user) => ({
       specialNotes: '',
       latitude: '',
       longitude: '',
-      tables: [{ id: '', name: '', notes: '' }]
+      tables: [{ id: '', name: '', notes: '', hourlyRate: '' }]
     }
   ]
 });
@@ -40,6 +42,7 @@ const mapRecordToForm = (record, user) => ({
   website: record.website || '',
   logoUrl: record.logoUrl || record.socialLink || '',
   description: record.description || '',
+  defaultHourlyRate: record.defaultHourlyRate != null ? String(record.defaultHourlyRate) : '',
   coOwners: record.coOwners || [],
   locations: (record.locations || []).map((loc) => ({
     id: loc.id,
@@ -55,13 +58,171 @@ const mapRecordToForm = (record, user) => ({
     tables: (loc.tables || []).map((table) => ({
       id: table.id,
       name: table.name || '',
-      notes: table.notes || ''
+      notes: table.notes || '',
+      hourlyRate: table.hourlyRate != null ? String(table.hourlyRate) : ''
     }))
   }))
 });
 
 const isGuid = (value) =>
   /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(value || '');
+
+const SKILL_LEVELS = ['beginner', 'intermediate', 'advanced', 'expert'];
+
+function ClubBuddySection({ locationName, user, t }) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [expanded, setExpanded] = useState(false);
+  const [showForm, setShowForm] = useState(false);
+  const [form, setForm] = useState({ playDate: '', startTime: '', skillLevel: 'beginner', notes: '' });
+  const [posting, setPosting] = useState(false);
+  const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
+
+  useEffect(() => {
+    if (!expanded) return;
+    let cancelled = false;
+    setLoading(true);
+    buddyService.getPosts(null, locationName)
+      .then((data) => { if (!cancelled) setPosts(Array.isArray(data) ? data : []); })
+      .catch(() => { if (!cancelled) setPosts([]); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [expanded, locationName]);
+
+  const handlePost = async () => {
+    if (!form.playDate || !form.startTime || !form.skillLevel) {
+      setError(t('buddy.requiredFields'));
+      return;
+    }
+    try {
+      setPosting(true);
+      setError('');
+      await buddyService.createPost({ ...form, locationName });
+      setSuccess(t('clubs.postCreated'));
+      setShowForm(false);
+      setForm({ playDate: '', startTime: '', skillLevel: 'beginner', notes: '' });
+      const data = await buddyService.getPosts(null, locationName);
+      setPosts(Array.isArray(data) ? data : []);
+    } catch (e) {
+      setError(e?.message || t('buddy.error.create'));
+    } finally {
+      setPosting(false);
+    }
+  };
+
+  return (
+    <div className="club-buddy-section">
+      <button
+        type="button"
+        className="club-buddy-toggle"
+        onClick={() => { setExpanded((v) => !v); setSuccess(''); }}
+      >
+        <span>{t('clubs.playersLooking')}</span>
+        {!expanded && posts.length === 0 && <span className="club-buddy-chevron">›</span>}
+        {expanded && <span className="club-buddy-chevron open">›</span>}
+        {posts.length > 0 && (
+          <span className="club-buddy-count">{posts.length}</span>
+        )}
+      </button>
+
+      {expanded && (
+        <div className="club-buddy-body">
+          {loading && <p className="muted" style={{ fontSize: '0.8rem', margin: '4px 0' }}>{t('common.loading')}</p>}
+
+          {!loading && posts.length === 0 && (
+            <p className="muted" style={{ fontSize: '0.82rem', margin: '6px 0' }}>{t('clubs.noOneLooking')}</p>
+          )}
+
+          {posts.map((post) => (
+            <div key={post.id} className="club-buddy-post">
+              <strong style={{ color: '#f1f5f9' }}>{post.userName}</strong>
+              <span className="muted" style={{ fontSize: '0.78rem' }}>
+                {new Date(post.playDate).toLocaleDateString()} · {post.startTime}
+              </span>
+              <span className={`status-pill status-${post.skillLevel}`} style={{ fontSize: '0.72rem' }}>
+                {t(`buddy.levels.${post.skillLevel}`, { defaultValue: post.skillLevel })}
+              </span>
+              {post.notes && (
+                <span className="muted" style={{ fontSize: '0.78rem', fontStyle: 'italic' }}>{post.notes}</span>
+              )}
+            </div>
+          ))}
+
+          {success && <p style={{ color: '#4ade80', fontSize: '0.82rem', margin: '4px 0' }}>{success}</p>}
+
+          {!showForm && !success && (
+            user ? (
+              <button
+                type="button"
+                className="secondary"
+                style={{ fontSize: '0.78rem', padding: '4px 10px', marginTop: '6px' }}
+                onClick={() => { setShowForm(true); setError(''); }}
+              >
+                {t('clubs.wantToPlayHere')}
+              </button>
+            ) : (
+              <p className="muted" style={{ fontSize: '0.78rem', margin: '6px 0' }}>{t('clubs.loginToPlayHere')}</p>
+            )
+          )}
+
+          {showForm && (
+            <div className="form-grid" style={{ marginTop: '10px' }}>
+              <div className="form-group">
+                <label className="form-label">{t('buddy.playDate')}</label>
+                <input
+                  type="date"
+                  value={form.playDate}
+                  onChange={(e) => setForm((p) => ({ ...p, playDate: e.target.value }))}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('buddy.startTime')}</label>
+                <input
+                  type="time"
+                  value={form.startTime}
+                  onChange={(e) => setForm((p) => ({ ...p, startTime: e.target.value }))}
+                />
+              </div>
+              <div className="form-group">
+                <label className="form-label">{t('buddy.level')}</label>
+                <select
+                  value={form.skillLevel}
+                  onChange={(e) => setForm((p) => ({ ...p, skillLevel: e.target.value }))}
+                >
+                  {SKILL_LEVELS.map((lvl) => (
+                    <option key={lvl} value={lvl}>{t(`buddy.levels.${lvl}`)}</option>
+                  ))}
+                </select>
+              </div>
+              <div className="form-group" style={{ gridColumn: '1 / -1' }}>
+                <label className="form-label">{t('buddy.notes')}</label>
+                <input
+                  placeholder={t('buddy.notes')}
+                  value={form.notes}
+                  onChange={(e) => setForm((p) => ({ ...p, notes: e.target.value }))}
+                />
+              </div>
+              {error && <p className="error" style={{ gridColumn: '1 / -1', margin: 0 }}>{error}</p>}
+              <div className="btn-row" style={{ gridColumn: '1 / -1' }}>
+                <button className="primary" style={{ marginTop: 0 }} disabled={posting} onClick={handlePost}>
+                  {t('buddy.createPost')}
+                </button>
+                <button
+                  className="secondary"
+                  disabled={posting}
+                  onClick={() => { setShowForm(false); setError(''); }}
+                >
+                  {t('common.cancel')}
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function Clubs() {
   const { user } = useAuth();
@@ -73,6 +234,9 @@ export default function Clubs() {
   const [form, setForm] = useState(() => createEmptyRecord(user));
   const [pendingCoOwnerEmail, setPendingCoOwnerEmail] = useState('');
   const [status, setStatus] = useState({ message: '', type: '' });
+  const [expandedMaps, setExpandedMaps] = useState({});
+
+  const toggleMap = (key) => setExpandedMaps((prev) => ({ ...prev, [key]: !prev[key] }));
 
   const role = (user?.role || '').toLowerCase();
   const isAdmin = role === 'admin';
@@ -222,7 +386,7 @@ export default function Clubs() {
           specialNotes: '',
           latitude: '',
           longitude: '',
-          tables: [{ id: '', name: '', notes: '' }]
+          tables: [{ id: '', name: '', notes: '', hourlyRate: '' }]
         }
       ]
     }));
@@ -233,7 +397,7 @@ export default function Clubs() {
       const updated = [...prev.locations];
       updated[locationIndex] = {
         ...updated[locationIndex],
-        tables: [...updated[locationIndex].tables, { id: '', name: '', notes: '' }]
+        tables: [...updated[locationIndex].tables, { id: '', name: '', notes: '', hourlyRate: prev.defaultHourlyRate || '' }]
       };
       return { ...prev, locations: updated };
     });
@@ -250,8 +414,9 @@ export default function Clubs() {
         website: form.website,
         logoUrl: form.logoUrl,
         description: form.description,
+        defaultHourlyRate: form.defaultHourlyRate ? parseFloat(form.defaultHourlyRate) : null,
         locations: form.locations.map((loc) => ({
-          id: loc.id,
+          id: isGuid(loc.id) ? loc.id : null,
           name: loc.name,
           address: loc.address,
           city: loc.city,
@@ -262,9 +427,10 @@ export default function Clubs() {
           latitude: loc.latitude,
           longitude: loc.longitude,
           tables: loc.tables.map((table) => ({
-            id: table.id,
+            id: isGuid(table.id) ? table.id : null,
             name: table.name,
-            notes: table.notes
+            notes: table.notes,
+            hourlyRate: table.hourlyRate ? parseFloat(table.hourlyRate) : null
           }))
         }))
       };
@@ -333,82 +499,131 @@ export default function Clubs() {
 
       {status.message && <p className={status.type === 'error' ? 'error' : 'muted'}>{status.message}</p>}
 
-      <div className="section-card">
-        <div className="section-header">
-          <h2 className="section-title">{t('common.search')}</h2>
-        </div>
-        <div className="form-grid">
-        <input
-          placeholder={t('clubs.searchPlaceholder')}
-          value={search}
-          onChange={(event) => setSearch(event.target.value)}
-        />
-        </div>
-      </div>
+      <input
+        className="clubs-search"
+        placeholder={t('clubs.searchPlaceholder')}
+        value={search}
+        onChange={(event) => setSearch(event.target.value)}
+      />
 
-      <div className="section-card">
-        <div className="list">
-        {loading && <p className="muted">{t('clubs.loading')}</p>}
-        {filteredRecords.length === 0 && !loading && <p className="muted">{t('clubs.noClubs')}</p>}
+      {loading && <p className="muted">{t('clubs.loading')}</p>}
+      {filteredRecords.length === 0 && !loading && <p className="muted" style={{ marginTop: '12px' }}>{t('clubs.noClubs')}</p>}
+
+      <div className="clubs-list">
         {filteredRecords.map((record) => (
-          <div key={record.id} className="list-item">
-            <div>
-              <strong>{record.ownerName}</strong>
-              <div className="muted">{t('clubs.updated', { date: new Date(record.updatedAt).toLocaleDateString() })}</div>
-              <p className="muted">{record.description || t('clubs.noDescription')}</p>
-              {(record.locations || []).map((club) => {
-                const addressParts = [club.address, club.city, club.region, club.country].filter(Boolean);
-                const addressText = addressParts.join(', ');
-                const mapQuery = club.latitude && club.longitude
-                  ? `${club.latitude},${club.longitude}`
-                  : addressText;
-                const mapUrl = mapQuery
-                  ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
-                  : null;
-                const mapEmbed = mapQuery
-                  ? `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
-                  : null;
-                return (
-                  <div key={club.id} style={{ marginTop: '12px' }}>
-                    <strong>{club.name || t('clubs.locationFallback')}</strong>
-                    <div className="muted">
-                      {addressText}
-                      {mapUrl && (
-                        <span className="muted"> · <a href={mapUrl} target="_blank" rel="noreferrer">{t('clubs.viewMap')}</a></span>
+          <div key={record.id} className="club-record">
+            <div className="club-record-header">
+              {record.logoUrl && (
+                <img className="club-logo" src={record.logoUrl} alt={record.ownerName} />
+              )}
+              <div className="club-record-info">
+                <strong>{record.ownerName}</strong>
+                <div className="club-record-meta">
+                  {record.website && (
+                    <a
+                      className="club-website-link"
+                      href={record.website}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      {record.website.replace(/^https?:\/\/(www\.)?/, '')}
+                    </a>
+                  )}
+                  {record.ownerPhone && (
+                    <span className="muted" style={{ fontSize: '0.78rem' }}>{record.ownerPhone}</span>
+                  )}
+                  <span className="muted" style={{ fontSize: '0.75rem' }}>
+                    {t('clubs.updated', { date: new Date(record.updatedAt).toLocaleDateString() })}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            {record.description && (
+              <p className="club-record-desc">{record.description}</p>
+            )}
+
+            {(record.locations || []).map((club) => {
+              const addressParts = [club.address, club.city, club.region, club.country].filter(Boolean);
+              const addressText = addressParts.join(', ');
+              const mapQuery = club.latitude && club.longitude
+                ? `${club.latitude},${club.longitude}`
+                : addressText;
+              const mapUrl = mapQuery
+                ? `https://www.google.com/maps?q=${encodeURIComponent(mapQuery)}`
+                : null;
+              const mapEmbed = mapQuery
+                ? `https://maps.google.com/maps?q=${encodeURIComponent(mapQuery)}&output=embed`
+                : null;
+              return (
+                <div key={club.id} className="club-location">
+                  <div className="club-location-name">{club.name || t('clubs.locationFallback')}</div>
+                  <div className="club-location-meta">
+                    {addressText && (
+                      <span>
+                        {addressText}
+                        {mapUrl && (
+                          <> · <a href={mapUrl} target="_blank" rel="noreferrer" style={{ color: '#93c5fd' }}>{t('clubs.viewMap')}</a></>
+                        )}
+                      </span>
+                    )}
+                    <span>{t('clubs.openingLabel')}: {club.openingHours || '12:00-23:00'}</span>
+                  </div>
+
+                  {mapEmbed && (
+                    <div>
+                      <button
+                        type="button"
+                        className="secondary"
+                        style={{ fontSize: '0.8rem', padding: '5px 10px' }}
+                        onClick={() => toggleMap(`${record.id}-${club.id}`)}
+                      >
+                        {expandedMaps[`${record.id}-${club.id}`] ? t('clubs.hideMap') : t('clubs.showMap')}
+                      </button>
+                      {expandedMaps[`${record.id}-${club.id}`] && (
+                        <div className="map-embed" style={{ marginTop: '8px' }}>
+                          <iframe
+                            title={`${club.name || t('clubs.locationFallback')} map`}
+                            src={mapEmbed}
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                            allowFullScreen
+                          />
+                        </div>
                       )}
                     </div>
-                    {mapEmbed && (
-                      <div className="map-embed">
-                        <iframe
-                          title={`${club.name || t('clubs.locationFallback')} map`}
-                          src={mapEmbed}
-                          loading="lazy"
-                          referrerPolicy="no-referrer-when-downgrade"
-                          allowFullScreen
-                        />
-                      </div>
-                    )}
-                    <div className="muted">{t('clubs.openingLabel')}: {club.openingHours || '12:00-23:00'}</div>
-                    <div style={{ marginTop: '8px' }}>
-                      {(club.tables || []).map((table) => (
-                        <div key={table.id} className="list-actions" style={{ marginBottom: '8px' }}>
-                          <span>{table.name || t('bookings.tableFallback')}</span>
-                          <button
-                            className="primary"
-                            onClick={() => navigate(`/book?tableId=${table.id}&openingHours=${encodeURIComponent(club.openingHours || '12:00-23:00')}&locationName=${encodeURIComponent(club.name || '')}&address=${encodeURIComponent(addressText)}`)}
-                          >
-                            {t('clubs.bookNow')}
-                          </button>
-                        </div>
-                      ))}
+                  )}
+
+                  {(club.tables || []).length > 0 && (
+                    <div className="club-table-list">
+                      {(club.tables || []).map((table) => {
+                        const displayRate = table.hourlyRate ?? record.defaultHourlyRate;
+                        return (
+                          <div key={table.id} className="club-table-row">
+                            <span className="club-table-name">{table.name || t('bookings.tableFallback')}</span>
+                            {displayRate != null && (
+                              <span className="club-table-rate">€{Number(displayRate).toFixed(2)}/h</span>
+                            )}
+                            <button
+                              className="primary"
+                              style={{ marginTop: 0, padding: '7px 14px', fontSize: '0.875rem' }}
+                              onClick={() => navigate(`/book?tableId=${table.id}&openingHours=${encodeURIComponent(club.openingHours || '12:00-23:00')}&locationName=${encodeURIComponent(club.name || '')}&address=${encodeURIComponent(addressText)}`)}
+                            >
+                              {t('clubs.bookNow')}
+                            </button>
+                          </div>
+                        );
+                      })}
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  )}
+
+                  <ClubBuddySection locationName={club.name || ''} user={user} t={t} />
+                </div>
+              );
+            })}
           </div>
         ))}
-        </div>
       </div>
 
       {user && (isAdmin || isOwnerRole) && (
@@ -450,6 +665,26 @@ export default function Clubs() {
             />
           </div>
 
+          <div className="pricing-default-section">
+            <div className="pricing-default-header">
+              <strong>{t('clubs.defaultHourlyRate')}</strong>
+              <span className="muted" style={{ fontSize: '0.82rem' }}>{t('clubs.defaultHourlyRateHint')}</span>
+            </div>
+            <div className="pricing-default-input">
+              <span className="pricing-currency">€</span>
+              <input
+                type="number"
+                min="0"
+                step="0.5"
+                placeholder="0.00"
+                value={form.defaultHourlyRate}
+                onChange={(event) => setForm((prev) => ({ ...prev, defaultHourlyRate: event.target.value }))}
+                style={{ width: '110px' }}
+              />
+              <span className="muted" style={{ fontSize: '0.9rem' }}>/h</span>
+            </div>
+          </div>
+
           {form.locations.map((location, locationIndex) => (
             <div key={locationIndex} className="section-card">
               <div className="section-header">
@@ -487,17 +722,39 @@ export default function Clubs() {
 
               <div className="list">
                 {(location.tables || []).map((table, tableIndex) => (
-                  <div key={tableIndex} className="form-grid">
-                    <input
-                      placeholder={t('clubs.tableName')}
-                      value={table.name}
-                      onChange={(event) => handleTableChange(locationIndex, tableIndex, 'name', event.target.value)}
-                    />
-                    <input
-                      placeholder={t('clubs.tableNotes')}
-                      value={table.notes}
-                      onChange={(event) => handleTableChange(locationIndex, tableIndex, 'notes', event.target.value)}
-                    />
+                  <div key={tableIndex} className="table-form-row">
+                    <div className="form-grid" style={{ flex: 1 }}>
+                      <input
+                        placeholder={t('clubs.tableName')}
+                        value={table.name}
+                        onChange={(event) => handleTableChange(locationIndex, tableIndex, 'name', event.target.value)}
+                      />
+                      <input
+                        placeholder={t('clubs.tableNotes')}
+                        value={table.notes}
+                        onChange={(event) => handleTableChange(locationIndex, tableIndex, 'notes', event.target.value)}
+                      />
+                    </div>
+                    <div className="table-rate-field">
+                      <div className="pricing-default-input">
+                        <span className="pricing-currency">€</span>
+                        <input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          placeholder={form.defaultHourlyRate || '0.00'}
+                          value={table.hourlyRate}
+                          onChange={(event) => handleTableChange(locationIndex, tableIndex, 'hourlyRate', event.target.value)}
+                          style={{ width: '90px' }}
+                        />
+                        <span className="muted" style={{ fontSize: '0.85rem' }}>/h</span>
+                      </div>
+                      {!table.hourlyRate && form.defaultHourlyRate && (
+                        <span className="table-uses-default">
+                          {t('clubs.tableUsesDefault', { rate: form.defaultHourlyRate })}
+                        </span>
+                      )}
+                    </div>
                   </div>
                 ))}
                 <button className="secondary" onClick={() => addTable(locationIndex)}>

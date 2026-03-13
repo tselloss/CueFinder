@@ -174,6 +174,7 @@ public class ClubsController : ControllerBase
                 SocialLink = r.SocialLink,
                 LogoUrl = r.SocialLink,
                 Description = r.Description,
+                DefaultHourlyRate = r.DefaultHourlyRate,
                 CreatedAt = r.CreatedAt,
                 UpdatedAt = r.UpdatedAt,
                 Locations = r.Locations.Select(l => new ClubLocationDto
@@ -248,6 +249,7 @@ public class ClubsController : ControllerBase
                 Website = dto.Website ?? string.Empty,
                 SocialLink = dto.LogoUrl ?? dto.SocialLink ?? string.Empty,
                 Description = dto.Description ?? string.Empty,
+                DefaultHourlyRate = dto.DefaultHourlyRate,
                 CreatedAt = DateTime.UtcNow,
                 UpdatedAt = DateTime.UtcNow,
                 Locations = dto.Locations.Select(l => new BilliardClubLocation
@@ -269,6 +271,7 @@ public class ClubsController : ControllerBase
                         Id = Guid.NewGuid(),
                         Name = t.Name ?? string.Empty,
                         Notes = t.Notes ?? string.Empty,
+                        HourlyRate = t.HourlyRate,
                         CreatedAt = DateTime.UtcNow
                     }).ToList()
                 }).ToList()
@@ -327,6 +330,7 @@ public class ClubsController : ControllerBase
             record.Website = dto.Website ?? string.Empty;
             record.SocialLink = dto.LogoUrl ?? dto.SocialLink ?? string.Empty;
             record.Description = dto.Description ?? string.Empty;
+            record.DefaultHourlyRate = dto.DefaultHourlyRate;
             record.UpdatedAt = DateTime.UtcNow;
 
             var dtoLocations = dto.Locations ?? new List<ClubLocationDto>();
@@ -402,6 +406,7 @@ public class ClubsController : ControllerBase
                                 LocationId = location.Id,
                                 Name = dtoTable.Name ?? string.Empty,
                                 Notes = dtoTable.Notes ?? string.Empty,
+                                HourlyRate = dtoTable.HourlyRate,
                                 CreatedAt = DateTime.UtcNow
                             });
                         }
@@ -409,6 +414,7 @@ public class ClubsController : ControllerBase
                         {
                             table.Name = dtoTable.Name ?? string.Empty;
                             table.Notes = dtoTable.Notes ?? string.Empty;
+                            table.HourlyRate = dtoTable.HourlyRate;
                         }
                     }
 
@@ -619,6 +625,7 @@ public class ClubsController : ControllerBase
             SocialLink = record.SocialLink,
             LogoUrl = record.SocialLink,
             Description = record.Description,
+            DefaultHourlyRate = record.DefaultHourlyRate,
             CreatedAt = record.CreatedAt,
             UpdatedAt = record.UpdatedAt,
             Locations = record.Locations.Select(l => new ClubLocationDto
@@ -633,7 +640,8 @@ public class ClubsController : ControllerBase
                 {
                     Id = t.Id,
                     Name = t.Name,
-                    Notes = t.Notes
+                    Notes = t.Notes,
+                    HourlyRate = t.HourlyRate
                 }).ToList(),
                 OpeningHours = l.OpeningHours,
                 SpecialNotes = l.SpecialNotes,
@@ -661,6 +669,7 @@ public class ClubRecordUpsertDto
     public string? SocialLink { get; set; }
     public string? LogoUrl { get; set; }
     public string? Description { get; set; }
+    public decimal? DefaultHourlyRate { get; set; }
     public List<ClubLocationDto> Locations { get; set; } = new();
 }
 
@@ -675,6 +684,7 @@ public class ClubRecordResponseDto
     public string SocialLink { get; set; } = string.Empty;
     public string LogoUrl { get; set; } = string.Empty;
     public string Description { get; set; } = string.Empty;
+    public decimal? DefaultHourlyRate { get; set; }
     public DateTime CreatedAt { get; set; }
     public DateTime UpdatedAt { get; set; }
     public List<ClubLocationDto> Locations { get; set; } = new();
@@ -701,6 +711,7 @@ public class ClubTableDto
     public Guid? Id { get; set; }
     public string? Name { get; set; }
     public string? Notes { get; set; }
+    public decimal? HourlyRate { get; set; }
 }
 
 public class ClubCoOwnerDto

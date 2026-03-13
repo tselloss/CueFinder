@@ -12,6 +12,9 @@ public class BookingDbContext : DbContext
     public DbSet<BilliardClubCoOwner> BilliardClubCoOwners { get; set; } = null!;
     public DbSet<BilliardClubTable> BilliardClubTables { get; set; } = null!;
     public DbSet<BilliardClubBooking> BilliardClubBookings { get; set; } = null!;
+    public DbSet<BuddyPost> BuddyPosts { get; set; } = null!;
+    public DbSet<BuddyRequest> BuddyRequests { get; set; } = null!;
+    public DbSet<TableSession> TableSessions { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -21,6 +24,7 @@ public class BookingDbContext : DbContext
         {
             entity.HasKey(e => e.Id);
             entity.Property(e => e.OwnerName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.DefaultHourlyRate).HasPrecision(10, 2);
             entity.Property(e => e.OwnerEmail).HasMaxLength(200);
             entity.Property(e => e.OwnerPhone).HasMaxLength(50);
             entity.Property(e => e.Website).HasMaxLength(500);
@@ -88,6 +92,48 @@ public class BookingDbContext : DbContext
             entity.Property(e => e.CoOwnerUsername).HasMaxLength(120);
             entity.Property(e => e.Status).HasMaxLength(30);
             entity.HasIndex(e => new { e.RecordId, e.Email }).IsUnique();
+        });
+
+        modelBuilder.Entity<BuddyPost>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.UserName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.LocationName).HasMaxLength(300);
+            entity.Property(e => e.StartTime).HasMaxLength(10);
+            entity.Property(e => e.SkillLevel).HasMaxLength(30);
+            entity.Property(e => e.Notes).HasMaxLength(1000);
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.HasIndex(e => e.UserId);
+            entity.HasIndex(e => e.Status);
+            entity.HasMany(e => e.Requests).WithOne(r => r.BuddyPost).HasForeignKey(r => r.BuddyPostId).OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<BuddyRequest>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.RequesterName).IsRequired().HasMaxLength(200);
+            entity.Property(e => e.SkillLevel).HasMaxLength(30);
+            entity.Property(e => e.Message).HasMaxLength(500);
+            entity.Property(e => e.Status).HasMaxLength(20);
+            entity.Property(e => e.ReviewNote).HasMaxLength(500);
+            entity.HasIndex(e => e.BuddyPostId);
+            entity.HasIndex(e => e.RequesterId);
+        });
+
+        modelBuilder.Entity<TableSession>(entity =>
+        {
+            entity.HasKey(e => e.Id);
+            entity.Property(e => e.CustomerName).HasMaxLength(200);
+            entity.Property(e => e.HourlyRate).HasPrecision(10, 2);
+            entity.Property(e => e.TotalCost).HasPrecision(10, 2);
+            entity.HasIndex(e => e.TableId);
+            entity.HasIndex(e => e.RecordId);
+            entity.HasIndex(e => e.StartedAt);
+            entity.HasIndex(e => e.EndedAt);
+            entity.HasOne(e => e.Table)
+                .WithMany(t => t.Sessions)
+                .HasForeignKey(e => e.TableId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 }

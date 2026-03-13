@@ -1,6 +1,20 @@
 const API_BASE_URL = import.meta.env.VITE_BOOKING_API_BASE_URL || 'http://localhost:5202';
 const getToken = () => localStorage.getItem('authToken');
 
+const parseErrorMessage = async (response) => {
+  const text = await response.text();
+  try {
+    const data = JSON.parse(text);
+    if (data.errors) {
+      const details = Object.values(data.errors).flat();
+      if (details.length) return details[0];
+    }
+    return data.title || data.message || data.detail || text || `Error ${response.status}`;
+  } catch {
+    return text || `Error ${response.status}`;
+  }
+};
+
 const request = async (path, options = {}) => {
   const response = await fetch(`${API_BASE_URL}${path}`, {
     headers: {
@@ -13,8 +27,7 @@ const request = async (path, options = {}) => {
   });
 
   if (!response.ok) {
-    const message = await response.text();
-    throw new Error(message || 'Request failed');
+    throw new Error(await parseErrorMessage(response));
   }
 
   if (response.status === 204) return null;

@@ -1,4 +1,4 @@
-import { Link, useNavigate } from 'react-router-dom';
+import { NavLink, useNavigate } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { useAuth } from '../auth/AuthContext.jsx';
 import { CUEFINDER_SITE_URL } from '../config/siteConfig.js';
@@ -29,22 +29,28 @@ export default function Layout({ children }) {
   return (
     <div className="app-shell">
       <header className="app-header">
-        <div className="brand">BookBilliard</div>
+        <div className="header-brand">
+          <div className="brand">BookBilliard</div>
+          <a href={CUEFINDER_SITE_URL} className="brand-back-link">
+            ← BilliardsCueFinder
+          </a>
+        </div>
         <nav className="nav-links">
-          <Link to="/">{t('nav.home')}</Link>
-          <Link to="/clubs">{t('nav.clubs')}</Link>
-          {user && (isAdmin || isOwner) && <Link to="/dashboard">{t('nav.dashboard')}</Link>}
-          {isUser && <Link to="/my-bookings">{t('nav.myBookings')}</Link>}
-          {!user && <Link to="/login">{t('nav.login')}</Link>}
+          <NavLink to="/" end>{t('nav.home')}</NavLink>
+          <NavLink to="/clubs">{t('nav.clubs')}</NavLink>
+          {user && <NavLink to="/find-buddy">{t('nav.findBuddy')}</NavLink>}
+          {user && (isAdmin || isOwner) && <NavLink to="/dashboard">{t('nav.dashboard')}</NavLink>}
+          {user && (isAdmin || isOwner) && <NavLink to="/live-tables">{t('nav.liveTables')}</NavLink>}
+          {isUser && <NavLink to="/my-bookings">{t('nav.myBookings')}</NavLink>}
+          {!user && <NavLink to="/login">{t('nav.login')}</NavLink>}
           {user && (
-            <button type="button" className="secondary" onClick={handleLogout}>
+            <button type="button" className="secondary nav-logout" onClick={handleLogout}>
               {t('nav.logout')}
             </button>
           )}
           <div className="lang-switch">
             <button
               type="button"
-              className="secondary"
               onClick={() => handleLanguageChange('en')}
               aria-pressed={i18n.language === 'en'}
             >
@@ -52,7 +58,6 @@ export default function Layout({ children }) {
             </button>
             <button
               type="button"
-              className="secondary"
               onClick={() => handleLanguageChange('gr')}
               aria-pressed={i18n.language === 'gr'}
             >
@@ -63,9 +68,14 @@ export default function Layout({ children }) {
       </header>
       <main className="app-main">{children}</main>
       <footer className="app-footer">
-        <a href={`${CUEFINDER_SITE_URL}/terms-en.html`} target="_blank" rel="noreferrer">
-          {t('auth.termsLink')}
-        </a>
+        <span className="footer-copy">© {new Date().getFullYear()} BookBilliard</span>
+        <div className="footer-links">
+          <a href={CUEFINDER_SITE_URL} target="_blank" rel="noreferrer">BilliardsCueFinder</a>
+          <span className="footer-sep">·</span>
+          <a href={`${CUEFINDER_SITE_URL}/terms-en.html`} target="_blank" rel="noreferrer">
+            {t('auth.termsLink')}
+          </a>
+        </div>
       </footer>
     </div>
   );

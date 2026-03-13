@@ -1,4 +1,5 @@
 import { useEffect, useMemo, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { useTranslation } from 'react-i18next';
 import { getClubRecords } from '../api/clubService.js';
 import { CUEFINDER_SITE_URL } from '../config/siteConfig.js';
@@ -29,9 +30,18 @@ export default function Home() {
 
   return (
     <section className="card">
-      <h1>{t('home.title')}</h1>
-      <p>{t('home.tagline')}</p>
-      <p className="muted">{t('home.ownerNote')}</p>
+      <div className="home-hero">
+        <h1>{t('home.title')}</h1>
+        <p className="home-hero-tagline">{t('home.tagline')}</p>
+        <p className="home-hero-note">{t('home.ownerNote')}</p>
+        <div className="home-cta-row">
+          <Link to="/clubs" style={{ textDecoration: 'none' }}>
+            <button className="primary" style={{ marginTop: 0 }}>
+              {t('home.browseClubs')} →
+            </button>
+          </Link>
+        </div>
+      </div>
 
       <div className="logo-carousel">
         <h2>{t('home.featuredClubs')}</h2>
@@ -48,13 +58,13 @@ export default function Home() {
         )}
       </div>
 
-      <div className="cuefinder-promo">
-        <h3>{t('home.promoTitle')}</h3>
-        <p className="muted">{t('home.promoText')}</p>
-        <a href={CUEFINDER_SITE_URL} target="_blank" rel="noreferrer">
-          {t('home.promoCta')}
-        </a>
-      </div>
+      <a href={CUEFINDER_SITE_URL} target="_blank" rel="noreferrer" className="cuefinder-promo">
+        <div className="cuefinder-promo-text">
+          <strong style={{ fontSize: '0.95rem', color: '#e2e8f0' }}>🎯 {t('home.promoTitle')}</strong>
+          <span className="muted" style={{ fontSize: '0.85rem' }}>{t('home.promoText')}</span>
+        </div>
+        <span className="cuefinder-promo-cta">{t('home.promoCta')}</span>
+      </a>
     </section>
   );
 }
