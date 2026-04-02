@@ -330,7 +330,7 @@ export default function LoginPage() {
                   onClick={() => navigate('/forgot-password')}
                   className="text-sm text-muted-foreground hover:text-primary hover:underline font-medium"
                 >
-                  Forgot your password?
+                  {t('auth.forgotPassword', 'Forgot your password?')}
                 </button>
               </div>
             )}

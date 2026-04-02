@@ -9,6 +9,8 @@ import AccessoryDetail from './components/AccessoryDetail.jsx';
 import CueSetDetail from './components/CueSetDetail.jsx';
 import AdminPage from './components/AdminPage.jsx';
 import LoginPage from './components/LoginPage.jsx';
+import ForgotPassword from './components/ForgotPassword.jsx';
+import ResetPassword from './components/ResetPassword.jsx';
 import UserProfile from './components/UserProfile.jsx';
 import OAuthCallback from './components/OAuthCallback';
 import Inbox from './components/Inbox.jsx';
@@ -502,6 +504,14 @@ function AppInner() {
               
               <Route path="/register" element={
                 user ? <Navigate to="/" /> : <LoginPage />
+              } />
+              
+              <Route path="/forgot-password" element={
+                user ? <Navigate to="/" /> : <ForgotPassword />
+              } />
+              
+              <Route path="/reset-password" element={
+                user ? <Navigate to="/" /> : <ResetPassword />
               } />
               
               <Route path="/oauth-callback" element={<OAuthCallback />} />
