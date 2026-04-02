@@ -125,6 +125,17 @@ export default function RaffleDetail({ onBack }) {
       setDrawing(false);
     }
   }
+  
+  async function handleDelete() {
+    if (!window.confirm('Are you sure you want to delete this raffle? This action cannot be undone.')) return;
+    try {
+      await raffleService.deleteRaffle(raffle.id);
+      navigate('/raffles');
+    } catch (err) {
+      const errorMsg = err?.response?.data?.message || 'Failed to delete raffle.';
+      alert(errorMsg);
+    }
+  }
 
   async function handleVerify(entryId) {
     try {
@@ -390,6 +401,16 @@ export default function RaffleDetail({ onBack }) {
 
           {isOrganizer && isOpen && raffle.totalPaid === 0 && (
             <p className="mt-3 text-gray-500 text-sm text-center">{t('raffle.detail.verifyFirst')}</p>
+          )}
+          
+          {/* Organizer delete button */}
+          {isOrganizer && isOpen && (
+            <button
+              onClick={handleDelete}
+              className="mt-3 w-full py-2 rounded-lg bg-red-500/10 hover:bg-red-500/20 border border-red-500/30 text-red-400 font-medium transition"
+            >
+              Delete Raffle
+            </button>
           )}
         </div>
 

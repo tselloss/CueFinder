@@ -20,6 +20,8 @@ public class CreateRaffleDto
     public decimal PricePerSpot { get; set; }
 
     public DateTime EndsAt { get; set; }
+    
+    public bool AutoEndWhenFull { get; set; } = false;
 
     // Payment methods
     public bool AcceptPayPal { get; set; }

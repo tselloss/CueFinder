@@ -26,6 +26,7 @@ export default function RaffleCreateForm({ onBack }) {
     totalSpots: 50,
     pricePerSpot: 10,
     endsAt: '',
+    autoEndWhenFull: false,
     acceptPayPal: false,
     acceptRevolut: false,
     acceptBankTransfer: false,
@@ -109,6 +110,7 @@ export default function RaffleCreateForm({ onBack }) {
         totalSpots: Number(form.totalSpots),
         pricePerSpot: Number(form.pricePerSpot),
         endsAt: new Date(form.endsAt).toISOString(),
+        autoEndWhenFull: form.autoEndWhenFull,
       });
       navigate(`/raffles/${created.id}`);
     } catch (err) {
@@ -262,6 +264,18 @@ export default function RaffleCreateForm({ onBack }) {
               className="w-full bg-black/30 border border-white/10 rounded-lg px-3 py-2.5 text-white text-sm focus:outline-none focus:border-primary transition"
             />
           </div>
+          
+          <label className="flex items-center gap-2 cursor-pointer select-none">
+            <input
+              type="checkbox"
+              checked={form.autoEndWhenFull}
+              onChange={e => set('autoEndWhenFull', e.target.checked)}
+              className="accent-primary"
+            />
+            <span className="text-sm text-gray-300">
+              Auto-close raffle when all spots are filled
+            </span>
+          </label>
         </div>
 
         {/* ── Payment ──────────────────────────────────────────── */}
