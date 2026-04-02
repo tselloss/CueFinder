@@ -25,6 +25,12 @@ namespace CueFinder.Database.Models
         public string PasswordHash { get; set; } = string.Empty;
 
         /// <summary>
+        /// Password hash algorithm version (1=SHA256-legacy, 2=BCrypt)
+        /// Used for lazy migration from weak to strong hashing
+        /// </summary>
+        public int PasswordHashVersion { get; set; } = 1;
+
+        /// <summary>
         /// User's display name
         /// </summary>
         public string Name { get; set; } = string.Empty;

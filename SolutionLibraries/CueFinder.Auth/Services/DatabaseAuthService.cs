@@ -52,8 +52,9 @@ namespace CueFinder.Auth.Services
                     throw new UnauthorizedAccessException("Invalid username or password");
                 }
 
-                // Verify password
-                if (!VerifyPassword(password, user.PasswordHash))
+                // Verify password (supports both legacy SHA-256 and BCrypt)
+                bool passwordValid = VerifyPassword(password, user.PasswordHash, user.PasswordHashVersion);
+                if (!passwordValid)
                 {
                     _logger.LogWarning("Login failed: Invalid password for user {UserId}", user.Id);
                     throw new UnauthorizedAccessException("Invalid username or password");
@@ -64,6 +65,15 @@ namespace CueFinder.Auth.Services
                 {
                     _logger.LogWarning("Login failed: Account inactive for user {UserId}", user.Id);
                     throw new UnauthorizedAccessException("Account is disabled");
+                }
+
+                // LAZY MIGRATION: Upgrade legacy SHA-256 hashes to BCrypt on successful login
+                if (user.PasswordHashVersion == 1)
+                {
+                    _logger.LogInformation("Upgrading password hash for user {UserId} from SHA-256 to BCrypt", user.Id);
+                    user.PasswordHash = HashPasswordBCrypt(password);
+                    user.PasswordHashVersion = 2;
+                    _logger.LogInformation("Password hash upgraded successfully for user {UserId}", user.Id);
                 }
 
                 // Update last login timestamp
@@ -156,6 +166,7 @@ namespace CueFinder.Auth.Services
             {
                 Username = request.Username,
                 PasswordHash = passwordHash,
+                PasswordHashVersion = 2, // BCrypt for new users
                 Name = request.Name,
                 Email = request.Email ?? string.Empty,
                 Phone = request.Phone ?? string.Empty,
@@ -407,9 +418,33 @@ namespace CueFinder.Auth.Services
         }
 
         /// <summary>
-        /// Hash password using PBKDF2
+        /// Hash password using BCrypt (current recommended method)
         /// </summary>
         private string HashPassword(string password)
+        {
+            return HashPasswordBCrypt(password);
+        }
+
+        /// <summary>
+        /// Hash password using BCrypt with work factor 12
+        /// </summary>
+        private string HashPasswordBCrypt(string password)
+        {
+            try
+            {
+                return BCrypt.Net.BCrypt.HashPassword(password, workFactor: 12);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Error hashing password with BCrypt");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Legacy SHA-256 password hashing (DEPRECATED - only for verification during migration)
+        /// </summary>
+        private string HashPasswordSHA256(string password)
         {
             try
             {
@@ -421,28 +456,42 @@ namespace CueFinder.Auth.Services
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error hashing password");
+                _logger.LogError(ex, "Error hashing password with SHA-256");
                 throw;
             }
         }
 
         /// <summary>
-        /// Verify password against hash
+        /// Verify password against hash (supports both SHA-256 legacy and BCrypt)
         /// </summary>
-        private bool VerifyPassword(string password, string hash)
+        private bool VerifyPassword(string password, string hash, int hashVersion)
         {
             try
             {
-                using (var sha256 = SHA256.Create())
+                if (hashVersion == 1)
                 {
-                    var hashOfInput = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                    var hashString = Convert.ToBase64String(hashOfInput);
-                    return hashString == hash;
+                    // Legacy SHA-256 verification
+                    using (var sha256 = SHA256.Create())
+                    {
+                        var hashOfInput = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
+                        var hashString = Convert.ToBase64String(hashOfInput);
+                        return hashString == hash;
+                    }
+                }
+                else if (hashVersion == 2)
+                {
+                    // BCrypt verification
+                    return BCrypt.Net.BCrypt.Verify(password, hash);
+                }
+                else
+                {
+                    _logger.LogWarning("Unknown password hash version: {Version}", hashVersion);
+                    return false;
                 }
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Error verifying password");
+                _logger.LogError(ex, "Error verifying password (version {Version})", hashVersion);
                 return false;
             }
         }
