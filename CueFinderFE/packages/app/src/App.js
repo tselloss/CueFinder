@@ -22,6 +22,7 @@ import MobileBottomNav from './components/MobileBottomNav.jsx';
 import RaffleList from './components/RaffleList.jsx';
 import RaffleDetail from './components/RaffleDetail.jsx';
 import RaffleCreateForm from './components/RaffleCreateForm.jsx';
+import RaffleEditForm from './components/RaffleEditForm.jsx';
 import SellerProfile from './components/SellerProfile.jsx';
 import { AuthProvider, useAuth } from './auth/AuthContext';
 import * as cueService from './api/cueService';
@@ -552,6 +553,9 @@ function AppInner() {
               } />
               <Route path="/raffles/create" element={
                 user ? <RaffleCreateForm onBack={handleBack} /> : <Navigate to="/login" />
+              } />
+              <Route path="/raffles/:id/edit" element={
+                user ? <RaffleEditForm onBack={handleBack} /> : <Navigate to="/login" />
               } />
               <Route path="/raffles/:id" element={
                 user ? <RaffleDetail onBack={handleBack} /> : <Navigate to="/login" />

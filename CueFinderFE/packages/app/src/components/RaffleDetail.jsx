@@ -126,6 +126,11 @@ export default function RaffleDetail({ onBack }) {
     }
   }
   
+  function handleEdit() {
+    // Navigate to edit page with raffle ID
+    navigate(`/raffles/${raffle.id}/edit`);
+  }
+  
   async function handleDelete() {
     if (!window.confirm('Are you sure you want to delete this raffle? This action cannot be undone.')) return;
     try {
@@ -401,6 +406,16 @@ export default function RaffleDetail({ onBack }) {
 
           {isOrganizer && isOpen && raffle.totalPaid === 0 && (
             <p className="mt-3 text-gray-500 text-sm text-center">{t('raffle.detail.verifyFirst')}</p>
+          )}
+          
+          {/* Organizer edit button */}
+          {isOrganizer && isOpen && (
+            <button
+              onClick={handleEdit}
+              className="mt-3 w-full py-2 rounded-lg bg-blue-500/10 hover:bg-blue-500/20 border border-blue-500/30 text-blue-400 font-medium transition"
+            >
+              Edit Raffle
+            </button>
           )}
           
           {/* Organizer delete button */}
