@@ -21,6 +21,7 @@ namespace CueFinder.Database.Models
         public int TotalSpots { get; set; }
         public decimal PricePerSpot { get; set; }
         public DateTime EndsAt { get; set; }
+        public bool AutoEndWhenFull { get; set; } = false;
 
         // Accepted payment methods (European / GR friendly)
         public bool AcceptPayPal { get; set; } = false;

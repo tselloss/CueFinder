@@ -21,6 +21,7 @@ public partial class RaffleService
             TotalSpots = dto.TotalSpots,
             PricePerSpot = dto.PricePerSpot,
             EndsAt = dto.EndsAt,
+            AutoEndWhenFull = dto.AutoEndWhenFull,
             AcceptPayPal = dto.AcceptPayPal,
             AcceptRevolut = dto.AcceptRevolut,
             AcceptBankTransfer = dto.AcceptBankTransfer,
@@ -42,7 +43,9 @@ public partial class RaffleService
 
     public async Task<RaffleResponseDto?> UpdateRaffleAsync(int raffleId, CreateRaffleDto dto, int requestingUserId)
     {
-        var raffle = await _context.Raffles.FindAsync(raffleId);
+        var raffle = await _context.Raffles
+            .Include(r => r.Entries)
+            .FirstOrDefaultAsync(r => r.Id == raffleId);
         if (raffle == null) return null;
 
         if (raffle.OrganizerId != requestingUserId)
@@ -50,6 +53,11 @@ public partial class RaffleService
 
         if (raffle.Status != "open")
             throw new InvalidOperationException("Only open raffles can be edited");
+        
+        // Check if there are any active bookings (pending or paid)
+        var hasActiveBookings = raffle.Entries.Any(e => e.Status == "pending" || e.Status == "paid");
+        if (hasActiveBookings)
+            throw new InvalidOperationException("Cannot edit raffle with active bookings. Please cancel all bookings first.");
 
         raffle.Title = dto.Title;
         raffle.Description = dto.Description;
@@ -57,6 +65,7 @@ public partial class RaffleService
         raffle.TotalSpots = dto.TotalSpots;
         raffle.PricePerSpot = dto.PricePerSpot;
         raffle.EndsAt = dto.EndsAt;
+        raffle.AutoEndWhenFull = dto.AutoEndWhenFull;
         raffle.AcceptPayPal = dto.AcceptPayPal;
         raffle.AcceptRevolut = dto.AcceptRevolut;
         raffle.AcceptBankTransfer = dto.AcceptBankTransfer;
@@ -71,11 +80,18 @@ public partial class RaffleService
 
     public async Task<bool> DeleteRaffleAsync(int raffleId, int requestingUserId, bool isAdmin)
     {
-        var raffle = await _context.Raffles.FindAsync(raffleId);
+        var raffle = await _context.Raffles
+            .Include(r => r.Entries)
+            .FirstOrDefaultAsync(r => r.Id == raffleId);
         if (raffle == null) return false;
 
         if (raffle.OrganizerId != requestingUserId && !isAdmin)
             throw new UnauthorizedAccessException("Only the organizer or an admin can delete this raffle");
+        
+        // Check if there are any active bookings (pending or paid)
+        var hasActiveBookings = raffle.Entries.Any(e => e.Status == "pending" || e.Status == "paid");
+        if (hasActiveBookings)
+            throw new InvalidOperationException("Cannot delete raffle with active bookings. Please cancel all bookings first.");
 
         raffle.Status = "cancelled";
         await _context.SaveChangesAsync();
@@ -151,13 +167,41 @@ public partial class RaffleService
         {
             _logger.LogWarning(ex, "Failed to notify organizer {OrganizerId} of spot claim", raffle.OrganizerId);
         }
+        
+        // Check if auto-end is enabled and all spots are now claimed
+        if (raffle.AutoEndWhenFull)
+        {
+            var activeEntries = raffle.Entries.Count(e => e.Status == "pending" || e.Status == "paid");
+            if (activeEntries >= raffle.TotalSpots)
+            {
+                raffle.Status = "closed";
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Raffle {RaffleId} auto-closed - all spots filled", raffleId);
+                
+                // Notify organizer that raffle is full
+                try
+                {
+                    await _messages.SendSystemNotificationAsync(
+                        raffle.OrganizerId,
+                        $"Raffle Full — {raffle.Title}",
+                        $"🎉 All {raffle.TotalSpots} spots in your raffle \"{raffle.Title}\" have been claimed!\n\nThe raffle has been automatically closed. You can now draw the winner when ready."
+                    );
+                }
+                catch (Exception ex)
+                {
+                    _logger.LogWarning(ex, "Failed to notify organizer {OrganizerId} of raffle full", raffle.OrganizerId);
+                }
+            }
+        }
 
         return MapEntryToDto(entry);
     }
 
     public async Task<RaffleEntryResponseDto?> VerifyEntryAsync(int raffleId, int entryId, VerifyEntryDto dto, int requestingUserId)
     {
-        var raffle = await _context.Raffles.FindAsync(raffleId);
+        var raffle = await _context.Raffles
+            .Include(r => r.Entries)
+            .FirstOrDefaultAsync(r => r.Id == raffleId);
         if (raffle == null) return null;
 
         if (raffle.OrganizerId != requestingUserId)
@@ -190,6 +234,32 @@ public partial class RaffleService
         catch (Exception ex)
         {
             _logger.LogWarning(ex, "Failed to notify buyer {UserId} of payment confirmation", entry.UserId);
+        }
+        
+        // Check if auto-end is enabled and all spots are now paid
+        if (raffle.AutoEndWhenFull && raffle.Status == "open")
+        {
+            var paidEntries = raffle.Entries.Count(e => e.Status == "paid");
+            if (paidEntries >= raffle.TotalSpots)
+            {
+                raffle.Status = "closed";
+                await _context.SaveChangesAsync();
+                _logger.LogInformation("Raffle {RaffleId} auto-closed - all spots paid", raffleId);
+                
+                // Notify organizer that raffle is full and ready for draw
+                try
+                {
+                    await _messages.SendSystemNotificationAsync(
+                        raffle.OrganizerId,
+                        $"Raffle Ready to Draw — {raffle.Title}",
+                        $"🎉 All {raffle.TotalSpots} spots in your raffle \"{raffle.Title}\" have been paid!\n\nThe raffle has been automatically closed. You can now draw the winner!"
+                    );
+                }
+                catch (Exception ex2)
+                {
+                    _logger.LogWarning(ex2, "Failed to notify organizer {OrganizerId} of raffle ready", raffle.OrganizerId);
+                }
+            }
         }
 
         return MapEntryToDto(entry);
