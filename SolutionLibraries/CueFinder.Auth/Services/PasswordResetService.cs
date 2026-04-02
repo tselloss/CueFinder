@@ -189,14 +189,15 @@ namespace CueFinder.Auth.Services
                 resetToken.IsUsed = true;
                 resetToken.UsedAt = DateTime.UtcNow;
 
-                // Update user password
-                var passwordHash = HashPassword(newPassword);
+                // Update user password with BCrypt (new secure method)
+                var passwordHash = BCrypt.Net.BCrypt.HashPassword(newPassword, workFactor: 12);
                 user.PasswordHash = passwordHash;
+                user.PasswordHashVersion = 2; // BCrypt
                 user.UpdatedAt = DateTime.UtcNow;
 
                 await _dbContext.SaveChangesAsync();
 
-                _logger.LogInformation("Password reset successful for user {UserId}", userId);
+                _logger.LogInformation("Password reset successful for user {UserId} - upgraded to BCrypt", userId);
 
                 return true;
             }
@@ -298,26 +299,6 @@ namespace CueFinder.Auth.Services
             {
                 byte[] hashBytes = sha256.ComputeHash(Encoding.UTF8.GetBytes(combined));
                 return Convert.ToHexString(hashBytes).ToLower();
-            }
-        }
-
-        /// <summary>
-        /// Hash password using SHA-256
-        /// </summary>
-        private string HashPassword(string password)
-        {
-            try
-            {
-                using (var sha256 = SHA256.Create())
-                {
-                    var hashedBuffer = sha256.ComputeHash(Encoding.UTF8.GetBytes(password));
-                    return Convert.ToBase64String(hashedBuffer);
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError(ex, "Error hashing password");
-                throw;
             }
         }
     }
