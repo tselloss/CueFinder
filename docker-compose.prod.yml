@@ -32,6 +32,7 @@ x-backend-common: &backend-common
     - GmailApi__ClientSecret=${GMAIL_CLIENT_SECRET}
     - GmailApi__ProjectId=${GMAIL_PROJECT_ID}
     - GmailApi__FromEmail=${EMAIL_FROM:-cuefinderinfo@gmail.com}
+    - GmailApi__Enabled=false
     - GoogleOAuth__ClientId=${GMAIL_CLIENT_ID}
     - GoogleOAuth__ClientSecret=${GMAIL_CLIENT_SECRET}
     - GoogleOAuth__RedirectUri=https://billiardscuefinder.com/oauth-callback
