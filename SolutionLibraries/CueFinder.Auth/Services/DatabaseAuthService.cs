@@ -67,6 +67,13 @@ namespace CueFinder.Auth.Services
                     throw new UnauthorizedAccessException("Account is disabled");
                 }
 
+                // Check if account is banned
+                if (user.IsBanned)
+                {
+                    _logger.LogWarning("Login failed: Account banned for user {UserId}", user.Id);
+                    throw new UnauthorizedAccessException("Account has been banned");
+                }
+
                 // LAZY MIGRATION: Upgrade legacy SHA-256 hashes to BCrypt on successful login
                 if (user.PasswordHashVersion == 1)
                 {
@@ -513,6 +520,21 @@ namespace CueFinder.Auth.Services
 
                 // Try to find existing user by email
                 User? user = await _userService.GetByEmailAsync(request.Email);
+
+                if (user != null)
+                {
+                    // Check if existing account is active and not banned
+                    if (!user.IsActive)
+                    {
+                        _logger.LogWarning("External login failed: Account inactive for user {UserId}", user.Id);
+                        throw new UnauthorizedAccessException("Account is disabled");
+                    }
+                    if (user.IsBanned)
+                    {
+                        _logger.LogWarning("External login failed: Account banned for user {UserId}", user.Id);
+                        throw new UnauthorizedAccessException("Account has been banned");
+                    }
+                }
 
                 if (user == null)
                 {

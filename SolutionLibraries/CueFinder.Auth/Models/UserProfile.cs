@@ -50,6 +50,11 @@ namespace CueFinder.Auth.Models
         /// </summary>
         public bool IsVerified { get; set; } = false;
 
+        public bool IsBanned { get; set; } = false;
+        public string? BanReason { get; set; }
+        public DateTime? BannedAt { get; set; }
+        public string? ExternalProvider { get; set; }
+
         /// <summary>
         /// User's location (city/general area)
         /// </summary>

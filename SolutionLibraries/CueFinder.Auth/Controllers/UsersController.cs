@@ -43,6 +43,10 @@ namespace CueFinder.Auth.Controllers
                 Role = u.Role,
                 IsActive = u.IsActive,
                 IsVerified = u.IsVerified,
+                IsBanned = u.IsBanned,
+                BanReason = u.BanReason,
+                BannedAt = u.BannedAt,
+                ExternalProvider = u.ExternalProvider,
                 Address = u.Address,
                 City = u.City,
                 State = u.State,
@@ -63,6 +67,8 @@ namespace CueFinder.Auth.Controllers
             public string? Role { get; set; }
             public bool? IsActive { get; set; }
             public bool? IsVerified { get; set; }
+            public bool? IsBanned { get; set; }
+            public string? BanReason { get; set; }
         }
 
         /// <summary>
@@ -85,6 +91,20 @@ namespace CueFinder.Auth.Controllers
             if (!string.IsNullOrWhiteSpace(req.Role)) user.Role = req.Role;
             if (req.IsActive.HasValue) user.IsActive = req.IsActive.Value;
             if (req.IsVerified.HasValue) user.IsVerified = req.IsVerified.Value;
+            if (req.IsBanned.HasValue)
+            {
+                user.IsBanned = req.IsBanned.Value;
+                if (req.IsBanned.Value)
+                {
+                    user.BanReason = req.BanReason;
+                    user.BannedAt = DateTime.UtcNow;
+                }
+                else
+                {
+                    user.BanReason = null;
+                    user.BannedAt = null;
+                }
+            }
 
             var updated = await _userService.UpdateUserAsync(user);
             var profile = new UserProfile
@@ -98,6 +118,10 @@ namespace CueFinder.Auth.Controllers
                 Role = updated.Role,
                 IsActive = updated.IsActive,
                 IsVerified = updated.IsVerified,
+                IsBanned = updated.IsBanned,
+                BanReason = updated.BanReason,
+                BannedAt = updated.BannedAt,
+                ExternalProvider = updated.ExternalProvider,
                 Address = updated.Address,
                 City = updated.City,
                 State = updated.State,
