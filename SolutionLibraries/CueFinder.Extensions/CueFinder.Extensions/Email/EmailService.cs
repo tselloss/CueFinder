@@ -34,6 +34,8 @@ namespace CueFinder.Extensions.Email
             {
                 using (var client = new SmtpClient(_settings.SmtpServer, _settings.SmtpPort))
                 {
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    client.UseDefaultCredentials = false;
                     client.EnableSsl = _settings.EnableSsl;
                     client.Credentials = new NetworkCredential(_settings.FromEmail, _settings.SmtpPassword);
 
@@ -73,6 +75,8 @@ namespace CueFinder.Extensions.Email
             {
                 using (var client = new SmtpClient(_settings.SmtpServer, _settings.SmtpPort))
                 {
+                    client.DeliveryMethod = SmtpDeliveryMethod.Network;
+                    client.UseDefaultCredentials = false;
                     client.EnableSsl = _settings.EnableSsl;
                     client.Credentials = new NetworkCredential(_settings.FromEmail, _settings.SmtpPassword);
 
