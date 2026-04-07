@@ -86,7 +86,7 @@
           
           var oauthData = {
             type: 'oauth-success',
-            provider: 'google',
+            provider: 'Google',
             idToken: idToken,
             accessToken: accessToken || '',
             email: payload.email,
@@ -111,7 +111,7 @@
           if (error) {
             console.error('OAuth error:', error);
             if (window.opener && !window.opener.closed) {
-              window.opener.postMessage({ type: 'oauth-error', provider: 'google', error: error }, window.location.origin);
+              window.opener.postMessage({ type: 'oauth-error', provider: 'Google', error: error }, window.location.origin);
               setTimeout(function() { window.close(); }, 300);
             } else {
               sessionStorage.setItem('oauth_error', error);
@@ -126,7 +126,7 @@
         console.error('OAuth callback error:', err);
         document.querySelector('p').textContent = 'Error: ' + err.message;
         if (window.opener && !window.opener.closed) {
-          window.opener.postMessage({ type: 'oauth-error', provider: 'google', error: err.message }, window.location.origin);
+          window.opener.postMessage({ type: 'oauth-error', provider: 'Google', error: err.message }, window.location.origin);
           setTimeout(function() { window.close(); }, 1000);
         }
       }
