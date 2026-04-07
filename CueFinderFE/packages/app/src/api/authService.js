@@ -92,8 +92,10 @@ export async function register(username, password, name, phone, email, addressOb
  */
 export async function externalLogin(provider, idToken, email, name, pictureUrl) {
   try {
+    // Backend enum: Google=0, Apple=1
+    const providerMap = { 'Google': 0, 'Apple': 1 };
     const data = await post(API_ENDPOINTS.AUTH.EXTERNAL_LOGIN, {
-      provider: provider, // 'Google' or 'Apple'
+      provider: providerMap[provider] ?? 0,
       idToken: idToken,
       email: email,
       name: name,

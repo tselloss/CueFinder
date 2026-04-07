@@ -75,7 +75,7 @@ export default function LoginPage() {
       // Verify origin for security
       if (event.origin !== window.location.origin) return;
 
-      if (event.data.type === 'oauth-success' && event.data.provider === 'google') {
+      if (event.data.type === 'oauth-success' && (event.data.provider === 'Google' || event.data.provider === 'google')) {
         try {
           setGoogleLoading(true);
           await externalLogin(
