@@ -377,6 +377,9 @@ FodyWeavers.xsd
 .env.*.local
 .env.*
 
+# Sensitive development configuration files
+**/appsettings.Development.json
+
 # Test files with real credentials
 test-register.json
 test-*.json

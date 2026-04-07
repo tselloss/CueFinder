@@ -95,7 +95,7 @@ export default function ForgotPassword() {
           <CardContent className="space-y-4">
             <div className="p-4 rounded-md bg-primary/10 border border-primary/20">
               <p className="text-sm text-primary">
-                {t('auth.forgotPassword.success', { email: <strong>{submittedIdentifier}</strong> })}
+                {t('auth.forgotPassword.success', { email: submittedIdentifier })}
               </p>
             </div>
             <div className="p-4 rounded-md bg-muted/50 border border-border">
