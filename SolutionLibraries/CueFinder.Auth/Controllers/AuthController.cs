@@ -379,43 +379,120 @@ namespace CueFinder.Auth.Controllers
 
         private static string BuildPasswordResetEmailBody(string displayName, string resetLink, string ipAddress, string userAgent)
         {
-            var safeName = string.IsNullOrWhiteSpace(displayName) ? "CueFinder user" : displayName;
+            var safeName = System.Security.SecurityElement.Escape(
+                string.IsNullOrWhiteSpace(displayName) ? "CueFinder user" : displayName);
+            var safeIp = System.Security.SecurityElement.Escape(ipAddress ?? "Unknown");
+            var safeBrowser = System.Security.SecurityElement.Escape(userAgent ?? "Unknown");
 
-            return @"
+            return $@"
 <!DOCTYPE html>
-<html>
+<html lang=""en"">
 <head>
     <meta charset=""utf-8"" />
-    <style>
-        body { font-family: Arial, sans-serif; color: #333; line-height: 1.6; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #1a5f3b; color: white; padding: 20px; border-radius: 6px; }
-        .content { background-color: #f9f9f9; padding: 20px; border-radius: 6px; margin-top: 16px; }
-        .button { display: inline-block; margin-top: 16px; background-color: #1a5f3b; color: white; padding: 10px 18px; text-decoration: none; border-radius: 4px; }
-        .footer { margin-top: 20px; font-size: 12px; color: #666; }
-        .meta { margin-top: 12px; font-size: 13px; color: #555; }
-    </style>
+    <meta name=""viewport"" content=""width=device-width, initial-scale=1.0"" />
+    <title>Reset Your Password</title>
 </head>
-<body>
-    <div class=""container"">
-        <div class=""header"">
-            <h2>Reset your CueFinder password</h2>
-        </div>
-        <div class=""content"">
-            <p>Hi " + safeName + @",</p>
-            <p>We received a request to reset your CueFinder password. If you didn't make this request, you can safely ignore this email.</p>
-            <p><a class=""button"" href=""" + resetLink + @""">Reset Password</a></p>
-            <div class=""meta"">
-                <div><strong>Request details</strong></div>
-                <div>IP Address: " + ipAddress + @"</div>
-                <div>Browser: " + userAgent + @"</div>
-            </div>
-            <p>This link expires in 30 minutes for your security.</p>
-        </div>
-        <div class=""footer"">
-            <p>If you did not request a password reset, no further action is required.</p>
-        </div>
-    </div>
+<body style=""margin:0;padding:0;background-color:#f0f2f5;font-family:'Segoe UI',Roboto,Helvetica,Arial,sans-serif;"">
+    <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background-color:#f0f2f5;padding:40px 20px;"">
+        <tr>
+            <td align=""center"">
+                <table role=""presentation"" width=""560"" cellpadding=""0"" cellspacing=""0"" style=""max-width:560px;width:100%;"">
+                    <!-- Logo / Brand -->
+                    <tr>
+                        <td align=""center"" style=""padding-bottom:24px;"">
+                            <table role=""presentation"" cellpadding=""0"" cellspacing=""0"">
+                                <tr>
+                                    <td style=""background-color:#1a5f3b;border-radius:12px;padding:12px 24px;"">
+                                        <span style=""font-size:24px;font-weight:700;color:#ffffff;letter-spacing:0.5px;"">🎱 CueFinder</span>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Main Card -->
+                    <tr>
+                        <td style=""background-color:#ffffff;border-radius:12px;box-shadow:0 2px 8px rgba(0,0,0,0.08);overflow:hidden;"">
+                            <!-- Green accent bar -->
+                            <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"">
+                                <tr><td style=""height:4px;background:linear-gradient(90deg,#1a5f3b,#2d8f5e);""></td></tr>
+                            </table>
+                            <!-- Content -->
+                            <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"">
+                                <tr>
+                                    <td style=""padding:40px 40px 0 40px;"">
+                                        <!-- Icon -->
+                                        <table role=""presentation"" cellpadding=""0"" cellspacing=""0"" style=""margin:0 auto 24px auto;"">
+                                            <tr>
+                                                <td align=""center"" style=""width:64px;height:64px;background-color:#e8f5ee;border-radius:50%;text-align:center;line-height:64px;"">
+                                                    <span style=""font-size:28px;"">🔑</span>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                        <h1 style=""margin:0 0 8px 0;font-size:22px;font-weight:600;color:#1a1a1a;text-align:center;"">Password Reset Request</h1>
+                                        <p style=""margin:0 0 24px 0;font-size:15px;color:#666;text-align:center;"">We received a request to reset your password</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style=""padding:0 40px;"">
+                                        <p style=""margin:0 0 16px 0;font-size:15px;color:#333;line-height:1.6;"">Hi <strong>{safeName}</strong>,</p>
+                                        <p style=""margin:0 0 28px 0;font-size:15px;color:#333;line-height:1.6;"">Click the button below to reset your CueFinder password. This link will expire in <strong>30 minutes</strong> for your security.</p>
+                                    </td>
+                                </tr>
+                                <!-- Button -->
+                                <tr>
+                                    <td align=""center"" style=""padding:0 40px 32px 40px;"">
+                                        <table role=""presentation"" cellpadding=""0"" cellspacing=""0"">
+                                            <tr>
+                                                <td style=""background-color:#1a5f3b;border-radius:8px;"">
+                                                    <a href=""{resetLink}"" target=""_blank"" style=""display:inline-block;padding:14px 40px;font-size:16px;font-weight:600;color:#ffffff;text-decoration:none;letter-spacing:0.3px;"">Reset My Password</a>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Fallback link -->
+                                <tr>
+                                    <td style=""padding:0 40px;"">
+                                        <p style=""margin:0 0 24px 0;font-size:13px;color:#888;line-height:1.5;text-align:center;"">If the button doesn't work, copy and paste this link into your browser:<br/>
+                                        <a href=""{resetLink}"" style=""color:#1a5f3b;word-break:break-all;"">{resetLink}</a></p>
+                                    </td>
+                                </tr>
+                                <!-- Divider -->
+                                <tr>
+                                    <td style=""padding:0 40px;"">
+                                        <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"">
+                                            <tr><td style=""border-top:1px solid #eee;height:1px;""></td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <!-- Request details -->
+                                <tr>
+                                    <td style=""padding:20px 40px 32px 40px;"">
+                                        <p style=""margin:0 0 8px 0;font-size:12px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.5px;"">Request Details</p>
+                                        <table role=""presentation"" width=""100%"" cellpadding=""0"" cellspacing=""0"" style=""background-color:#f8f9fa;border-radius:8px;padding:12px 16px;"">
+                                            <tr>
+                                                <td style=""padding:8px 16px;font-size:13px;color:#666;"">
+                                                    <strong>IP Address:</strong> {safeIp}<br/>
+                                                    <strong>Browser:</strong> {safeBrowser}
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+                    <!-- Footer -->
+                    <tr>
+                        <td style=""padding:24px 20px;text-align:center;"">
+                            <p style=""margin:0 0 8px 0;font-size:13px;color:#999;line-height:1.5;"">If you didn't request this password reset, you can safely ignore this email.<br/>Your password will remain unchanged.</p>
+                            <p style=""margin:16px 0 0 0;font-size:12px;color:#bbb;"">© {DateTime.UtcNow.Year} CueFinder — Find your perfect cue</p>
+                        </td>
+                    </tr>
+                </table>
+            </td>
+        </tr>
+    </table>
 </body>
 </html>";
         }
