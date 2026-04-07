@@ -66,6 +66,8 @@
   "auth.orContinueWith": "Ή συνεχίστε με",
   "auth.googleLogin": "Συνέχεια με Google",
   "auth.googleLoginError": "Η σύνδεση με Google απέτυχε. Παρακαλώ δοκιμάστε ξανά.",
+  "auth.googleTermsDisclaimer": "Συνδεόμενοι με το Google, αποδέχεστε τους Όρους και τις Προϋποθέσεις μας",
+  "auth.popupBlocked": "Το αναδυόμενο παράθυρο μπλοκαρίστηκε. Παρακαλώ επιτρέψτε τα αναδυόμενα παράθυρα για αυτόν τον ιστότοπο.",
   "auth.forgotPassword.title": "Επαναφορά Κωδικού",
   "auth.forgotPassword.subtitle": "Εισάγετε το email ή το όνομα χρήστη σας και θα σας στείλουμε έναν σύνδεσμο επαναφοράς",
   "auth.forgotPassword.emailOrUsername": "Email ή Όνομα Χρήστη",

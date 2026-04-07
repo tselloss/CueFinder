@@ -528,6 +528,8 @@ namespace CueFinder.Auth.Services
                         Role = "user",
                         IsActive = true,
                         IsVerified = true, // Auto-verify OAuth users
+                        AcceptedTerms = true, // Auto-accept terms for OAuth users
+                        AcceptedTermsAt = DateTime.UtcNow,
                         CreatedAt = DateTime.UtcNow,
                         LastLoginAt = DateTime.UtcNow,
                         ExternalProvider = request.Provider.ToString(),

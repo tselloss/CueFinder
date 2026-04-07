@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>CueFinder - Processing Login...</title>
+  <style>
+    body { display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; font-family: system-ui, sans-serif; background: #f5f5f5; }
+    .loader { text-align: center; }
+    .spinner { width: 40px; height: 40px; margin: 0 auto 16px; border: 4px solid #e0e0e0; border-top: 4px solid #4285F4; border-radius: 50%; animation: spin 1s linear infinite; }
+    @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+    p { color: #666; font-size: 14px; }
+  </style>
+</head>
+<body>
+  <div class="loader">
+    <div class="spinner"></div>
+    <p>Processing Google Sign-In...</p>
+  </div>
+  <script>
+    (function() {
+      try {
+        // Extract tokens from wherever Google put them
+        var fullUrl = window.location.href;
+        var hash = window.location.hash;
+        var search = window.location.search;
+        var pathname = window.location.pathname;
+        
+        console.log('=== OAUTH CALLBACK (Static HTML) ===');
+        console.log('Full URL:', fullUrl);
+        
+        var tokenString = '';
+        
+        if (hash && hash.length > 1) {
+          // Standard: tokens in hash fragment #access_token=...
+          tokenString = hash.substring(1);
+        } else if (search && search.length > 1) {
+          // Fallback: tokens in query string ?access_token=...
+          tokenString = search.substring(1);
+        }
+        
+        // If no tokens found in hash/search, try to extract from full URL
+        // Google sometimes puts tokens after the redirect_uri like:
+        // /oauth-callback/iss=...&access_token=...&id_token=...
+        if (!tokenString || tokenString.indexOf('id_token') === -1) {
+          var idTokenMatch = fullUrl.match(/[#&?/]id_token=([^&]+)/);
+          var accessTokenMatch = fullUrl.match(/[#&?/]access_token=([^&]+)/);
+          
+          if (idTokenMatch) {
+            // Rebuild token string from URL
+            var parts = fullUrl.split(/[#?]/);
+            if (parts.length > 1) {
+              tokenString = parts.slice(1).join('&');
+            } else {
+              // Tokens might be in pathname - extract everything after oauth-callback
+              var callbackIdx = fullUrl.indexOf('/oauth-callback');
+              if (callbackIdx !== -1) {
+                tokenString = fullUrl.substring(callbackIdx + '/oauth-callback'.length);
+                if (tokenString.charAt(0) === '/') tokenString = tokenString.substring(1);
+              } else {
+                // Last resort: extract from the full path
+                var pathStr = pathname.substring(1); // remove leading /
+                tokenString = pathStr;
+              }
+            }
+          }
+        }
+        
+        console.log('Token string length:', tokenString ? tokenString.length : 0);
+        
+        var params = new URLSearchParams(tokenString);
+        var idToken = params.get('id_token');
+        var accessToken = params.get('access_token');
+        
+        console.log('ID Token found:', !!idToken);
+        console.log('Access Token found:', !!accessToken);
+        
+        if (idToken) {
+          // Decode JWT payload
+          var payloadBase64 = idToken.split('.')[1];
+          // Fix base64 padding
+          payloadBase64 = payloadBase64.replace(/-/g, '+').replace(/_/g, '/');
+          while (payloadBase64.length % 4) payloadBase64 += '=';
+          var payload = JSON.parse(atob(payloadBase64));
+          
+          console.log('Email:', payload.email);
+          console.log('Name:', payload.name);
+          
+          var oauthData = {
+            type: 'oauth-success',
+            provider: 'google',
+            idToken: idToken,
+            accessToken: accessToken || '',
+            email: payload.email,
+            name: payload.name,
+            picture: payload.picture || ''
+          };
+          
+          if (window.opener && !window.opener.closed) {
+            // We're in a popup - send data to parent window
+            console.log('Sending postMessage to opener...');
+            window.opener.postMessage(oauthData, window.location.origin);
+            setTimeout(function() { window.close(); }, 300);
+          } else {
+            // We're in the main window - store and redirect
+            console.log('Main window mode - storing in sessionStorage...');
+            sessionStorage.setItem('oauth_success', JSON.stringify(oauthData));
+            window.location.href = '/login';
+          }
+        } else {
+          // Check for error
+          var error = params.get('error');
+          if (error) {
+            console.error('OAuth error:', error);
+            if (window.opener && !window.opener.closed) {
+              window.opener.postMessage({ type: 'oauth-error', provider: 'google', error: error }, window.location.origin);
+              setTimeout(function() { window.close(); }, 300);
+            } else {
+              sessionStorage.setItem('oauth_error', error);
+              window.location.href = '/login';
+            }
+          } else {
+            console.error('No tokens found in URL');
+            document.querySelector('p').textContent = 'Sign-in failed. Please try again.';
+          }
+        }
+      } catch (err) {
+        console.error('OAuth callback error:', err);
+        document.querySelector('p').textContent = 'Error: ' + err.message;
+        if (window.opener && !window.opener.closed) {
+          window.opener.postMessage({ type: 'oauth-error', provider: 'google', error: err.message }, window.location.origin);
+          setTimeout(function() { window.close(); }, 1000);
+        }
+      }
+    })();
+  </script>
+</body>
+</html>

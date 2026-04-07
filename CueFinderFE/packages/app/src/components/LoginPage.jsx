@@ -34,6 +34,43 @@ export default function LoginPage() {
 
   // Handle Google OAuth callback
   useEffect(() => {
+    // Check for OAuth data in sessionStorage (when redirect happened in main window)
+    const oauthData = sessionStorage.getItem('oauth_success');
+    
+    if (oauthData) {
+      sessionStorage.removeItem('oauth_success');
+      const data = JSON.parse(oauthData);
+      
+      const processOAuth = async () => {
+        try {
+          setGoogleLoading(true);
+          await externalLogin(
+            data.provider || 'Google',
+            data.idToken,
+            data.email,
+            data.name,
+            data.picture || ''
+          );
+          const from = location.state?.from?.pathname || '/';
+          navigate(from, { replace: true });
+        } catch (err) {
+          console.error('Google login error:', err);
+          setError(getErrorMessage(err));
+        } finally {
+          setGoogleLoading(false);
+        }
+      };
+      
+      processOAuth();
+    }
+    
+    // Check for OAuth error in sessionStorage
+    const oauthError = sessionStorage.getItem('oauth_error');
+    if (oauthError) {
+      sessionStorage.removeItem('oauth_error');
+      setError(t('auth.googleLoginError', 'Google sign-in failed. Please try again.'));
+    }
+    
     const handleOAuthMessage = async (event) => {
       // Verify origin for security
       if (event.origin !== window.location.origin) return;
@@ -46,7 +83,7 @@ export default function LoginPage() {
             event.data.idToken,
             event.data.email,
             event.data.name,
-            event.data.picture
+            event.data.picture || ''
           );
           const from = location.state?.from?.pathname || '/';
           navigate(from, { replace: true });
@@ -71,17 +108,19 @@ export default function LoginPage() {
     setGoogleLoading(true);
     
     // Google OAuth configuration
-    const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '1076743346952-f7c3p0j2nqfmgu8jhebmjsv06haqfk9g.apps.googleusercontent.com';
+    const GOOGLE_CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '390019490259-o1bkohlkn9endfcomlk7t5ao0car57uh.apps.googleusercontent.com';
     const REDIRECT_URI = `${window.location.origin}/oauth-callback`;
     const SCOPE = 'openid email profile';
     
-    // Build Google OAuth URL
+    // Build Google OAuth URL with prompt=consent to force popup
     const googleAuthUrl = `https://accounts.google.com/o/oauth2/v2/auth?` +
       `client_id=${encodeURIComponent(GOOGLE_CLIENT_ID)}` +
       `&redirect_uri=${encodeURIComponent(REDIRECT_URI)}` +
       `&response_type=id_token token` +
+      `&response_mode=fragment` +
       `&scope=${encodeURIComponent(SCOPE)}` +
-      `&nonce=${Date.now()}`;
+      `&nonce=${Date.now()}` +
+      `&prompt=select_account`;
     
     // Open popup window
     const width = 500;
@@ -89,11 +128,16 @@ export default function LoginPage() {
     const left = window.screen.width / 2 - width / 2;
     const top = window.screen.height / 2 - height / 2;
     
-    window.open(
+    const popup = window.open(
       googleAuthUrl,
       'Google Sign In',
       `width=${width},height=${height},left=${left},top=${top}`
     );
+    
+    if (!popup || popup.closed || typeof popup.closed == 'undefined') {
+      setError(t('auth.popupBlocked', 'Popup blocked. Please allow popups for this site.'));
+      setGoogleLoading(false);
+    }
   };
 
   const submit = async (e) => {
@@ -408,6 +452,11 @@ export default function LoginPage() {
                     </span>
                   )}
                 </Button>
+                
+                {/* Google Sign-In Terms Disclaimer */}
+                <p className="text-xs text-center text-muted-foreground mt-2">
+                  {t('auth.googleTermsDisclaimer', 'By signing in with Google, you agree to our Terms and Conditions')}
+                </p>
               </>
             )}
 

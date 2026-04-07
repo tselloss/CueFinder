@@ -1,9 +1,11 @@
 FROM node:18-bullseye AS build
 WORKDIR /app
 
-# Accept API URL as build argument
+# Accept API URL and Google Client ID as build arguments
 ARG REACT_APP_API_URL
+ARG REACT_APP_GOOGLE_CLIENT_ID
 ENV REACT_APP_API_URL=$REACT_APP_API_URL
+ENV REACT_APP_GOOGLE_CLIENT_ID=$REACT_APP_GOOGLE_CLIENT_ID
 
 # Install pnpm via corepack (avoids npm install -g runc issues in CI)
 RUN corepack enable && corepack prepare pnpm@10 --activate

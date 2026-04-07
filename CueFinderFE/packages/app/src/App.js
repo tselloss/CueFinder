@@ -115,12 +115,6 @@ function AppInner() {
     return () => window.removeEventListener('resize', handleResize);
   }, []);
 
-  // Debug logging
-  useEffect(() => {
-    console.log('Current path:', location.pathname);
-    console.log('Is home page:', isHomePage);
-  }, [location.pathname, isHomePage]);
-
   // Reset cueType filter when switching away from cues category
   useEffect(() => {
     if (category !== 'cues' && category !== 'all') {

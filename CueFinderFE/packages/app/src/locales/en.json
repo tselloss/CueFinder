@@ -66,6 +66,8 @@
   "auth.orContinueWith": "Or continue with",
   "auth.googleLogin": "Continue with Google",
   "auth.googleLoginError": "Google sign-in failed. Please try again.",
+  "auth.googleTermsDisclaimer": "By signing in with Google, you agree to our Terms and Conditions",
+  "auth.popupBlocked": "Popup blocked. Please allow popups for this site.",
   "auth.forgotPassword.title": "Reset Your Password",
   "auth.forgotPassword.subtitle": "Enter your email or username and we'll send you a reset link",
   "auth.forgotPassword.emailOrUsername": "Email or Username",
