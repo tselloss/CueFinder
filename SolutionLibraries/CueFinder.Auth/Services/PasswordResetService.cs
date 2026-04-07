@@ -120,8 +120,7 @@ namespace CueFinder.Auth.Services
                 }
 
                 // Hash the provided token
-                string serverPepper = _configuration["PasswordReset:ServerPepper"] ?? "CueFinder-DefaultPepper";
-                string tokenHash = HashToken(token, serverPepper);
+                string tokenHash = HashToken(token, _serverPepper);
 
                 // Find matching token in database
                 var resetToken = await _dbContext.PasswordResetTokens
