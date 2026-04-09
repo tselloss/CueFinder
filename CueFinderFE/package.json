@@ -6,6 +6,9 @@
   "scripts": {
     "start": "pnpm --filter @cuefinder/app start",
     "build": "pnpm --filter @cuefinder/app build",
+    "mobile:start": "pnpm --filter @cuefinder/mobile start",
+    "mobile:android": "pnpm --filter @cuefinder/mobile android",
+    "mobile:ios": "pnpm --filter @cuefinder/mobile ios",
     "test": "pnpm --filter @cuefinder/app test",
     "test:e2e": "pnpm --filter @cuefinder/app test:e2e",
     "test:e2e:ui": "pnpm --filter @cuefinder/app test:e2e:ui",

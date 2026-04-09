@@ -1,16 +1,8 @@
 import axios from 'axios';
 import { API_BASE } from '../../config/apiConfig';
+import { getAuthHeaders } from '../../utils/httpClient';
 
 const API_BASE_URL = API_BASE;
-
-const getAuthToken = () => {
-  return localStorage.getItem('authToken');
-};
-
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
 
 export async function getCueCases() {
   try {

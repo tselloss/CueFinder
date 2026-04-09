@@ -1,0 +1,13 @@
+{
+  "name": "@cuefinder/storage",
+  "version": "1.0.0",
+  "description": "Shared storage abstractions for web and mobile runtimes",
+  "private": true,
+  "main": "src/index.js",
+  "exports": {
+    ".": "./src/index.js"
+  },
+  "files": [
+    "src"
+  ]
+}

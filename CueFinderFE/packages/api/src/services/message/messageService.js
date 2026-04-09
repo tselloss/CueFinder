@@ -1,11 +1,6 @@
 import axios from 'axios';
 import { API_ENDPOINTS } from '../../config/apiConfig';
-
-const getAuthToken = () => localStorage.getItem('authToken');
-const getAuthHeaders = () => {
-  const token = getAuthToken();
-  return token ? { Authorization: `Bearer ${token}` } : {};
-};
+import { getAuthHeaders } from '../../utils/httpClient';
 
 export async function sendMessage({ recipientId, cueId, subject, content, messageType = 'message' }) {
   const headers = {

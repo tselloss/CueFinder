@@ -1,0 +1,19 @@
+{
+  "expo": {
+    "name": "CueFinder",
+    "slug": "cuefinder-mobile",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "scheme": "cuefinder",
+    "userInterfaceStyle": "light",
+    "ios": {
+      "bundleIdentifier": "com.cuefinder.mobile"
+    },
+    "android": {
+      "package": "com.cuefinder.mobile"
+    },
+    "plugins": [
+      "expo-secure-store"
+    ]
+  }
+}

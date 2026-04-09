@@ -1,29 +1,59 @@
 import { API_ENDPOINTS } from '../../config/apiConfig';
 import { post, get, put, setToken, getToken, clearAuth } from '../../utils/httpClient';
+import {
+  AUTH_USER_STORAGE_KEY,
+  getStoredValue,
+  setStoredValue,
+} from '@cuefinder/storage';
 
 export { getToken, clearAuth };
 
 let currentUser = null;
 
+function buildCurrentUser(data) {
+  return {
+    id: data.userId ?? data.id,
+    username: data.username,
+    name: data.name,
+    email: data.email,
+    phone: data.phone,
+    hidePhone: data.hidePhone,
+    role: data.role,
+    address: data.address,
+    city: data.city,
+    state: data.state,
+    zipCode: data.zipCode,
+    country: data.country,
+    externalProvider: data.externalProvider,
+    externalProviderId: data.externalProviderId,
+  };
+}
+
+function persistCurrentUser(user) {
+  currentUser = user;
+  void setStoredValue(AUTH_USER_STORAGE_KEY, JSON.stringify(user));
+  return currentUser;
+}
+
+function restoreStoredUser() {
+  const storedUser = getStoredValue(AUTH_USER_STORAGE_KEY);
+  if (!storedUser) {
+    return null;
+  }
+
+  try {
+    currentUser = JSON.parse(storedUser);
+    return currentUser;
+  } catch {
+    return null;
+  }
+}
+
 export async function login(username, password) {
   try {
     const data = await post(API_ENDPOINTS.AUTH.LOGIN, { username, password });
     setToken(data.accessToken);
-    currentUser = {
-      id: data.userId,
-      username: data.username,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      hidePhone: data.hidePhone,
-      role: data.role,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode,
-      country: data.country,
-    };
-    return currentUser;
+    return persistCurrentUser(buildCurrentUser(data));
   } catch (error) {
     currentUser = null;
     clearAuth();
@@ -47,21 +77,7 @@ export async function register(username, password, name, phone, email, addressOb
       acceptedTerms,
     });
     setToken(data.accessToken);
-    currentUser = {
-      id: data.userId,
-      username: data.username,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      hidePhone: data.hidePhone,
-      role: data.role,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode,
-      country: data.country,
-    };
-    return currentUser;
+    return persistCurrentUser(buildCurrentUser(data));
   } catch (error) {
     currentUser = null;
     clearAuth();
@@ -79,23 +95,7 @@ export async function externalLogin(provider, idToken, email, name, pictureUrl) 
       pictureUrl
     });
     setToken(data.accessToken);
-    currentUser = {
-      id: data.userId,
-      username: data.username,
-      name: data.name,
-      email: data.email,
-      phone: data.phone,
-      hidePhone: data.hidePhone,
-      role: data.role,
-      address: data.address,
-      city: data.city,
-      state: data.state,
-      zipCode: data.zipCode,
-      country: data.country,
-      externalProvider: data.externalProvider,
-      externalProviderId: data.externalProviderId,
-    };
-    return currentUser;
+    return persistCurrentUser(buildCurrentUser(data));
   } catch (error) {
     currentUser = null;
     clearAuth();
@@ -113,6 +113,10 @@ export function getCurrent() {
   if (currentUser) {
     return currentUser;
   }
+  const storedUser = restoreStoredUser();
+  if (storedUser) {
+    return storedUser;
+  }
   const token = getToken();
   if (token) {
     return null;
@@ -123,7 +127,7 @@ export function getCurrent() {
 export async function getCurrentProfile() {
   try {
     const data = await get(API_ENDPOINTS.AUTH.CURRENT_USER);
-    return data;
+    return persistCurrentUser(buildCurrentUser(data));
   } catch (error) {
     throw new Error('Failed to fetch user profile');
   }
@@ -142,7 +146,7 @@ export async function updateUserProfile(userId, profileData) {
   try {
     const data = await put(API_ENDPOINTS.AUTH.UPDATE_PROFILE, profileData);
     if (currentUser && currentUser.id === userId) {
-      currentUser = { 
+      currentUser = {
         ...currentUser, 
         name: data.name,
         email: data.email,
@@ -155,6 +159,7 @@ export async function updateUserProfile(userId, profileData) {
         zipCode: data.zipCode,
         country: data.country,
       };
+      persistCurrentUser(currentUser);
     }
     return data;
   } catch (error) {

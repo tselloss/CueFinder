@@ -16,6 +16,7 @@
     "react": "^19.0.0"
   },
   "dependencies": {
+    "@cuefinder/storage": "workspace:*",
     "axios": "^1.13.2"
   },
   "files": [
