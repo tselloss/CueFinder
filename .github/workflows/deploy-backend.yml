@@ -21,10 +21,14 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       backend: ${{ steps.detect.outputs.backend }}
       has-changes: ${{ steps.detect.outputs.has-changes }}
@@ -49,6 +53,7 @@ jobs:
   test-backend:
     name: Test Backend
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: detect-changes
     # Always run tests on push to release, skip if only manual dispatch with no changes
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.backend == 'true'
@@ -77,6 +82,7 @@ jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, test-backend]
     # Always deploy on push, only deploy on manual if changes detected
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.has-changes == 'true'

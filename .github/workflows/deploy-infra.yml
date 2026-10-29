@@ -20,10 +20,14 @@ on:
         type: boolean
         default: false
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: false
 jobs:
   detect-changes:
     name: Detect Changes
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     outputs:
       infra: ${{ steps.detect.outputs.infra }}
       database: ${{ steps.detect.outputs.database }}
@@ -61,6 +65,7 @@ jobs:
   test-migrations:
     name: Test Database Migrations
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: detect-changes
     # Always run tests on push to release, skip if only manual dispatch with no changes
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.database == 'true'
@@ -107,6 +112,7 @@ jobs:
   deploy:
     name: Deploy to Production
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: [detect-changes, test-migrations]
     # Always deploy on push, only deploy on manual if changes detected
     if: github.event_name == 'push' || github.event_name == 'workflow_dispatch' || needs.detect-changes.outputs.has-changes == 'true'

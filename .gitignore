@@ -395,3 +395,6 @@ deployment/*-secrets.sh
 # User uploaded files (production data)
 uploads/
 CueFinderBE/wwwroot/uploads/.env.production
+# Claude (personal, not shared)
+.claude/settings.local.json
+CLAUDE.local.md

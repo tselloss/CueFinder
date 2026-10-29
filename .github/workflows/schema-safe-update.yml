@@ -3,10 +3,14 @@ name: Schema Safe Update
 on:
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   schema-update:
     name: Schema verification and safe apply
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     environment: staging
     steps:
       - uses: actions/checkout@v4
@@ -84,6 +88,7 @@ jobs:
   validate-constraints:
     name: Validate constraints (manual approval required)
     runs-on: ubuntu-latest
+    timeout-minutes: 30
     needs: schema-update
     environment: production
     steps:
