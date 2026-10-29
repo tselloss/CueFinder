@@ -30,6 +30,7 @@ jobs:
       - name: Upload DB dump artifact
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 5
           name: db-dump
           path: cuefinder_backup_*.dump
 
@@ -46,6 +47,7 @@ jobs:
       - name: Upload verification log
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 5
           name: verification-log
           path: verification.out
 
@@ -82,6 +84,7 @@ jobs:
       - name: Upload verification status
         uses: actions/upload-artifact@v4
         with:
+          retention-days: 5
           name: verification-status
           path: verification_status.txt
 

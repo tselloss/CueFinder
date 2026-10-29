@@ -2,6 +2,7 @@ name: Deploy to Production (Orchestrator)
 
 on:
   push:
+    paths-ignore: ['**/*.md', 'docs/**', '.claude/**', '.vscode/**', 'LICENSE']
     branches:
       - release
   workflow_dispatch:
